@@ -5,6 +5,11 @@ Compare native paths, not isolated engine speed; all preparation is excluded.
 """
 import argparse, concurrent.futures, decimal, hashlib, http.client, json, os, pathlib, statistics, threading, time, urllib.parse
 
+class SourceDecimal(decimal.Decimal):
+ """Retain the original JSON token as well as its exact decimal value."""
+ def __new__(cls,token):
+  value=super().__new__(cls,token);value.json_token=token;return value
+
 class Rpc:
  def __init__(self,url):
   p=urllib.parse.urlsplit(url)
@@ -16,12 +21,13 @@ class Rpc:
   c.request('POST','/',data,{'Content-Type':'application/json'})
   r=c.getresponse(); b=r.read(32*1024*1024+1)
   if r.status!=200 or len(b)>32*1024*1024: raise ValueError('rpc_transport_or_size')
-  x=json.loads(b,parse_float=decimal.Decimal)
+  x=json.loads(b,parse_float=SourceDecimal)
   if x.get('error') or x.get('id')!=1: raise ValueError('rpc_error')
   return x['result']
 
 def lossless(x):
  if isinstance(x,bool) or x is None or isinstance(x,str): return x
+ if isinstance(x,SourceDecimal): return x.json_token
  if isinstance(x,(int,decimal.Decimal)): return str(x)
  if isinstance(x,list): return [lossless(i) for i in x]
  if isinstance(x,dict): return {k:lossless(v) for k,v in x.items()}

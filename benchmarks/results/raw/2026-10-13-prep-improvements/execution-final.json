@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-13T15:27:38.506758+00:00",
+  "base_commit": "138f174f327bc08cc4c0968f542b367921ddd8e7",
+  "binary_sha256": {
+    "prep-before": "6b9158d696e96f12ba225a2a80c143f726fd6e5aef068d038c8861a9d0150132",
+    "prep-development": "8cf5551fff9ff3bca7a15ddeb94123f5a3e400c56ea844558d1ce1c18a84c1f0",
+    "prep-final": "07e9e917fa3990072ef2997846f5892d47c52cfc8ed6544fa241eb718f060157"
+  },
+  "source_files_sha256": {
+    "Cargo.lock": "59fba1c36b4b6cfcdc7c2eaaee1bc1ccc574a1429064677e2f0628cdb1e47d53",
+    "Cargo.toml": "09fb4bd8e9e91abca8ff6a8407a010952364b610e392e8e384650b3cd8db4f41",
+    "benchmarks/prep/full/compare.py": "6fd5650d6c60b06e97951a076e30386050248307c8876d12ba6cf3cd2bc1fcb2",
+    "benchmarks/prep/full/live_smoke.py": "f94e67c695ee40c1cbd98f3a3226eaacf29336001cddede00792cf204be4d915",
+    "benchmarks/prep/full/test_compare.py": "df134dcb67821ab5ce7493f8892dad01c3b4cb20aec17452f3c51d009cc10e22",
+    "benchmarks/prep/full/verify.py": "3068d6704f25260f34231761ca6e74d618d2fc977b73357eb5f04831028eb55e",
+    "benchmarks/prep/full/zebra-regtest.toml": "52f3cddb6498a8920ffa324fbab5b9b34eea26433b90a3367970d417a2e6dcd5",
+    "crates/prep/Cargo.toml": "fd04e667ec115eacf97b31ac7c2bf2fce8a587fb546f88b29ab983cd743cad76",
+    "crates/prep/src/follower.rs": "4fc62fd71ac1d132ea5df1e210928e4f8ac06561ed152949655849f80a9d91f5",
+    "crates/prep/src/full_source.rs": "22cfb74bb77eda224e5dc15be5ccfbfa571a451a5dbfc92469f2c995f57e5f3d",
+    "crates/prep/src/http.rs": "c8170574b7adada617d698e112617be718803e1255e139cbcfe494cf64941912",
+    "crates/prep/src/importer.rs": "be31d7bf71a8e0b422b3ff3bdcf94a69a4803d22050bc3513578be33c16c86e9",
+    "crates/prep/src/lib.rs": "1ef7e949e2a6f9bb4b44bc59ce289721d82a675faf6c625196531716c2561cd6",
+    "crates/prep/src/main.rs": "bb59fb1c80d889f06e7daa91d6fa4621f103eca701ff24cffbd51233ea460602",
+    "crates/prep/src/query.rs": "0a76dae843244e0112be882e502a3028b651a8cabfea12a7ff415ca00a1eb54e",
+    "crates/prep/src/server.rs": "a416f3ef53a6d7ea7ce8c2c1a01d7d2c0963504fe03227d9a06579cd92405c0d",
+    "crates/prep/tests/integration.rs": "00edd9e86e467ee13fe0a3a0c4a31fd86450eb551f0fee2a29d1574f6d24f175",
+    "crates/prep-proto/Cargo.toml": "02448ca4f41c2a8562911014c15ded6722b413f8fa708a728ecb144aa1c4a28f",
+    "crates/prep-proto/build.rs": "0ac7651a5bff98e3334d800537b521e79a9ad9f163dcca1bc206968c3b4242d0",
+    "crates/prep-proto/proto/compact_formats.proto": "d8d0c8aaa5ceec7d5dcc188ef25b04011df2ec0254901620fce982fc13aeb32d",
+    "crates/prep-proto/proto/prep.proto": "99a2fd7bbb1ae1a265d0ffb367871421186d1f98e95dbdfa1585315adba954ab",
+    "crates/prep-proto/proto/service.proto": "6fbfa974081fb02366a3118a25764af289bdbb86688978f5ff2bae661dfa346a",
+    "crates/prep-proto/src/lib.rs": "c11b48f9181d9003c2fb6e01281eb76ac13cb6d874c01e7e647a3c2a90031f26",
+    "crates/prep-store/Cargo.toml": "fe91ee07f219e5bc95f7f7f4f44e7dac52d47f32cad5b67a4133a6298114a085",
+    "crates/prep-store/src/archive.rs": "90456984108f99984db478ab13bf0b0812700d230a581629ae39a823171d7c4d",
+    "crates/prep-store/src/lib.rs": "aee26fe666f9651a5cbbc49fbc3f7d977be8f27b19a375cd2f213736b12cf2e9",
+    "rust-toolchain.toml": "2ad6f15416572b4836585087f1d4abc53b8fa2dbd616f8dacfaa587ed6714228"
+  },
+  "rust_tests_passed": 73,
+  "sdk_tests_passed": 13,
+  "benchmark_oracle_tests_passed": 4,
+  "full_node_oracle": {
+    "status": "PASS",
+    "blocks": 4096,
+    "transactions": 50283,
+    "source_head": {
+      "height": 6764,
+      "hash": "0000000160e11c9403141d7c2a16b07a2459919fc774795da3f687628c5ece54"
+    },
+    "ranges": [
+      {
+        "from": 1000,
+        "to_exclusive": 1512
+      },
+      {
+        "from": 1512,
+        "to_exclusive": 2024
+      },
+      {
+        "from": 2024,
+        "to_exclusive": 2536
+      },
+      {
+        "from": 2536,
+        "to_exclusive": 3048
+      },
+      {
+        "from": 3048,
+        "to_exclusive": 3560
+      },
+      {
+        "from": 3560,
+        "to_exclusive": 4072
+      },
+      {
+        "from": 4072,
+        "to_exclusive": 4584
+      },
+      {
+        "from": 4584,
+        "to_exclusive": 5096
+      }
+    ],
+    "report_sha256": {
+      "oracle-final-1000/full-roundtrip.json": "6b607587ebf60f87a3f681f0e4b1c71502ead00d1179a4c167a1225973005b2d",
+      "oracle-final-1512/full-roundtrip.json": "e6dc27f941acf33babbccfdd5ed65b69613a2eab8d7a311ee5782895ec9902cc",
+      "oracle-final-2024/full-roundtrip.json": "9741bee4fa0b42b281807d753a1aea3499a5ecd3fae28cb9b520421bf5d07c7e",
+      "oracle-final-2536/full-roundtrip.json": "3bd926ad726a8d6da02ca2d34a9bb1edb5f09ae2e203b917b5bc77be5c61253f",
+      "oracle-final-3048/full-roundtrip.json": "f3f9932b4ede98de8a79077e8c00772a22e966be687a4ebc1873d10fe14bc995",
+      "oracle-final-3560/full-roundtrip.json": "eabb883725bbbf7c7cddb7b3116e7cc462b5a44cd7af5428eab219bb887a995f",
+      "oracle-final-4072/full-roundtrip.json": "3daf5f641fb196ef497cd9e63b62afeba276bd73c3e329227dc6422248cf3f23",
+      "oracle-final-4584/full-roundtrip.json": "07044b157aa83bc08d564d4d70cf8cedf7a8199ea4bcba1e4f2486a7d9c36a39"
+    }
+  },
+  "sequential_vs_concurrent_ingestion": {
+    "status": "PASS",
+    "blocks": 256,
+    "description": "First two128-block segment.bin files byte-identical between baseline sequential ingest and concurrent ingest. No ingestion timing claim.",
+    "segment_sha256": {
+      "1000": "86cc811efd5056ed8a1e90021d78990cc7f86797641af0c5e00f21e3fa9f4725",
+      "1128": "1cfc70017c68831c50d111d75848cfd5ea22bc8c468cab569443e5fadbf009ee"
+    }
+  },
+  "archive_bytes": 350789255,
+  "new_experiment_bytes": 408517943,
+  "limits": {
+    "build": "3CPU/4GiB with all experimental source/query services stopped",
+    "ingest": "source1CPU/2GiB plus importer2CPU/2GiB",
+    "comparison": "before1CPU/1GiB plus final1CPU/1GiB plus Python1CPU/2GiB; source stopped",
+    "source_verification": "source1CPU/2GiB plus final1CPU/1GiB plus Python1CPU/2GiB",
+    "total_authorized": "3CPU/8GiB/40GiB additional operationaldisk; sharedVPS"
+  },
+  "images": {
+    "rust": "rust@sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+    "python": "python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+    "node": "zakuracore/zakura@sha256:17894f48b51ee4249a6555692a07881a305085f25b5c7b0bed5887a73e2ad85a"
+  },
+  "existing_services": {
+    "commitpass-api": "active",
+    "nabungfi-api": "active",
+    "nabungfi-keeper": "active",
+    "rocket-arena": "active",
+    "nginx": "active"
+  },
+  "notes": [
+    "No public ports, spending, package publication, infrastructure purchase or modifications to unrelated applications.",
+    "73tests, fmt, clippy and releasebuild recorded in validation-final.txt.",
+    "Initial cargo-fmt component missing; next temporary build installed rustfmt/clippy. No project dependency change.",
+    "First ingestion attempt found node RPC not ready; restart continued safely after source startup. Source-outage retry policy remains futurework.",
+    "Prepared earlymainnet reads, not modern shielded-production or millionblock proof.",
+    "Development comparison retained; finalcomparison uses corrected page-release timing and finalbinary.",
+    "The4096-block ingest used developmentbinary. Finalbinary differs only in query sizing and queries the same archive; sourcecode unchanged.",
+    "Initial Python oracle normalized the source1e-6 into0.000001 atblock2909. SourceDecimal fix retains sourceJSON tokens; all8ranges rerun with strict equality."
+  ],
+  "running_experiment_containers": []
+}

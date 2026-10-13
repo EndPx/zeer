@@ -33,6 +33,12 @@ before publication. The full node remains the consensus authority; Prep does
 not independently verify proofs, scripts, Merkle roots or modern transaction
 IDs. Decoded values such as confirmations describe the time of capture.
 
+Raw and decoded RPC requests for one resolved block hash run concurrently.
+Either request failure cancels its unfinished companion. Each retains its own
+response-size and timeout limits; the follower still processes one block at a
+time. Two responses may now be in memory together, so this is bounded overlap,
+not an unbounded block prefetch queue.
+
 Zebra 6.2.3 can label Regtest as `test`; the adapter disambiguates only by the
 known Regtest genesis hash. A failed genesis lookup fails closed rather than
 choosing a network by difficulty or activation schedule.
@@ -76,6 +82,15 @@ strings; raw consensus bytes are available for independent decoding.
 Header-only requests use verified cached height/hash/parent/time metadata.
 Full/raw transaction requests still read payloads. The optional legacy full
 manifest without indexed time falls back to checked payload reading.
+
+Payload queries keep a sequential archive range reader for the page, reusing
+the open segment file across adjacent blocks. Projection sizing uses a bounded
+counting writer rather than allocating JSON buffers just to measure them.
+Large decoded fields and raw hex are budgeted before their output copies are
+created; a block that cannot fit is deferred to the next page or rejected with
+HTTP 413 when it cannot fit in an empty page. The stored envelope and node JSON
+are still decoded first; this does not establish a peak-memory cap equal to the
+serialized response limit.
 
 The unpublished `packages/prep-client` exposes `getHeight()`, `get()`, and finite
 `stream()` with cancellation, deadlines, bounds and explicit reorg errors. It
@@ -132,6 +147,12 @@ for full mainnet-range validation, isolated real-node follow, failure tests,
 SDK verification and a narrowly defined native-read comparison. The
 [first compact-snapshot report](../benchmarks/results/reports/2026-10-13-prep.md)
 remains historical evidence.
+
+The [improvement report](../benchmarks/results/reports/2026-10-13-prep-improvements.md)
+records 4,096-block / 50,283-transaction independent verification and six
+before/after workloads for sequential reads, bounded sizing and concurrent source
+requests. It also records a scientific-notation correction in the independent
+Python oracle; strict output equality is retained.
 
 Large-scale public operation, millions-of-block latency, complete network
 upgrade interoperability and modern full shielded-payload production workloads

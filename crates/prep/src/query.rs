@@ -1,6 +1,7 @@
 //! Bounded historical full-block queries. All nested node-JSON numbers are strings.
 use std::{
     collections::HashSet,
+    io::{self, Write},
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc,
@@ -11,7 +12,7 @@ use std::{
 use prep_proto::prep::FullBlock;
 use prep_store::{Archive, BlockHeader, BlockRecord};
 use prost::Message;
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeMap, ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use serde_json::{json, Map, Value};
 use sha2::{Digest, Sha256};
 
@@ -19,6 +20,7 @@ pub const MAX_RESPONSE_BYTES: usize = 32 * 1024 * 1024;
 pub const MAX_SCAN_BLOCKS: u32 = 1000;
 pub const MAX_CURSOR_BYTES: usize = 2048;
 const RESPONSE_OVERHEAD: usize = 4096;
+const EMPTY_DATA_BYTES: usize = br#"{"blocks":[],"transactions":[]}"#.len();
 const BLOCK_FIELDS: &[&str] = &["height", "hash", "previous_hash", "time", "raw", "decoded"];
 const TX_FIELDS: &[&str] = &[
     "txid",
@@ -123,6 +125,16 @@ pub struct QueryMeta {
 pub trait QueryArchive {
     fn query_meta(&self) -> QueryMeta;
     fn query_block(&self, height: u64) -> Result<BlockRecord, QueryError>;
+    /// Inclusive range; production archives reuse a segment handle across blocks.
+    fn query_range(
+        &self,
+        start: u64,
+        end: u64,
+    ) -> Result<Box<dyn Iterator<Item = Result<BlockRecord, QueryError>> + '_>, QueryError> {
+        Ok(Box::new(
+            (start..=end).map(|height| self.query_block(height)),
+        ))
+    }
     fn query_header(&self, height: u64) -> Result<BlockHeader, QueryError> {
         let record = self.query_block(height)?;
         let block = FullBlock::decode(record.payload.as_slice())
@@ -160,6 +172,18 @@ impl QueryArchive for Archive {
     fn query_header(&self, height: u64) -> Result<BlockHeader, QueryError> {
         self.read_header(height)
             .map_err(|_| QueryError::new(503, "ARCHIVE_READ_FAILED"))
+    }
+    fn query_range(
+        &self,
+        start: u64,
+        end: u64,
+    ) -> Result<Box<dyn Iterator<Item = Result<BlockRecord, QueryError>> + '_>, QueryError> {
+        let reader = self
+            .read_range(start, end)
+            .map_err(|_| QueryError::new(503, "ARCHIVE_READ_FAILED"))?;
+        Ok(Box::new(reader.map(|record| {
+            record.map_err(|_| QueryError::new(503, "ARCHIVE_READ_FAILED"))
+        })))
     }
 }
 
@@ -202,6 +226,174 @@ impl QueryControl {
             Ok(())
         }
     }
+}
+
+/// Count the exact JSON wire size without allocating a second response buffer.
+/// A hard limit also stops traversal of a large rejected projection early.
+fn encoded_size<T: Serialize + ?Sized>(
+    value: &T,
+    limit: usize,
+    control: &QueryControl,
+) -> Result<Option<usize>, QueryError> {
+    struct Counter<'a> {
+        bytes: usize,
+        next_check: usize,
+        limit: usize,
+        exceeded: bool,
+        control: &'a QueryControl,
+    }
+    impl Write for Counter<'_> {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            if self.bytes.saturating_add(bytes.len()) >= self.next_check {
+                self.control.check().map_err(io::Error::other)?;
+                self.next_check = self.bytes.saturating_add(bytes.len()).saturating_add(65536);
+            }
+            if bytes.len() > self.limit - self.bytes {
+                self.exceeded = true;
+                return Err(io::Error::other("JSON size limit exceeded"));
+            }
+            self.bytes += bytes.len();
+            Ok(bytes.len())
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+    let mut counter = Counter {
+        bytes: 0,
+        next_check: 0,
+        limit,
+        exceeded: false,
+        control,
+    };
+    let result = serde_json::to_writer(&mut counter, value);
+    control.check()?;
+    if counter.exceeded {
+        Ok(None)
+    } else {
+        result.map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?;
+        Ok(Some(counter.bytes))
+    }
+}
+
+/// Borrowed equivalent of lossless_node_json for sizing before copying a subtree.
+struct LosslessNode<'a>(&'a Value);
+impl Serialize for LosslessNode<'_> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        match self.0 {
+            Value::Number(number) => serializer.serialize_str(&number.to_string()),
+            Value::Array(values) => {
+                let mut sequence = serializer.serialize_seq(Some(values.len()))?;
+                for value in values {
+                    sequence.serialize_element(&LosslessNode(value))?;
+                }
+                sequence.end()
+            }
+            Value::Object(values) => {
+                let mut map = serializer.serialize_map(Some(values.len()))?;
+                for (key, value) in values {
+                    map.serialize_entry(key, &LosslessNode(value))?;
+                }
+                map.end()
+            }
+            value => value.serialize(serializer),
+        }
+    }
+}
+
+enum ProjectedValue<'a> {
+    Owned(Value),
+    Node(&'a Value),
+    RawBytes(&'a [u8]),
+    HexText(&'a str),
+}
+
+const BLOCK_TOO_LARGE: &str = "BLOCK_RESPONSE_TOO_LARGE_USE_FIELD_SELECTION";
+fn block_too_large() -> QueryError {
+    QueryError::new(413, BLOCK_TOO_LARGE)
+}
+
+/// Exact size of the per-block QueryData wrapper, including both array commas.
+/// Keep the existing page accounting (a wrapper per block) intentionally intact.
+struct ProjectionBudget<'a> {
+    bytes: usize,
+    limit: usize,
+    control: &'a QueryControl,
+}
+impl<'a> ProjectionBudget<'a> {
+    fn new(limit: usize, control: &'a QueryControl) -> Result<Self, QueryError> {
+        let bytes = EMPTY_DATA_BYTES;
+        if bytes > limit {
+            return Err(block_too_large());
+        }
+        Ok(Self {
+            bytes,
+            limit,
+            control,
+        })
+    }
+    fn reserve(&mut self, bytes: usize) -> Result<(), QueryError> {
+        if bytes > self.limit - self.bytes {
+            return Err(block_too_large());
+        }
+        self.bytes += bytes;
+        Ok(())
+    }
+    fn object(&mut self, preceding_items: bool) -> Result<(), QueryError> {
+        self.reserve(2 + usize::from(preceding_items))
+    }
+    fn insert(
+        &mut self,
+        selected: &mut Map<String, Value>,
+        field: &str,
+        value: ProjectedValue<'_>,
+    ) -> Result<(), QueryError> {
+        // Validated field names contain only ASCII letters and underscores.
+        self.reserve(field.len() + 3 + usize::from(!selected.is_empty()))?;
+        let remaining = self.limit - self.bytes;
+        let size = match &value {
+            ProjectedValue::Owned(value) => encoded_size(value, remaining, self.control)?,
+            ProjectedValue::Node(value) => {
+                encoded_size(&LosslessNode(value), remaining, self.control)?
+            }
+            ProjectedValue::RawBytes(bytes) => {
+                bytes.len().checked_mul(2).and_then(|n| n.checked_add(2))
+            }
+            ProjectedValue::HexText(text) => text.len().checked_add(2),
+        }
+        .ok_or_else(block_too_large)?;
+        self.reserve(size)?;
+        let value = match value {
+            ProjectedValue::Owned(value) => value,
+            ProjectedValue::Node(value) => lossless_node_json(value),
+            ProjectedValue::RawBytes(bytes) => Value::String(hex::encode(bytes)),
+            ProjectedValue::HexText(text) => Value::String(text.to_ascii_lowercase()),
+        };
+        selected.insert(field.into(), value);
+        Ok(())
+    }
+}
+
+/// The per-block size includes an empty QueryData wrapper. When combining pages,
+/// only the array contents and a comma between nonempty groups are added.
+fn appended_data_bytes(
+    current: &QueryData,
+    selected: &QueryData,
+    selected_bytes: usize,
+) -> Result<usize, QueryError> {
+    selected_bytes
+        .checked_sub(EMPTY_DATA_BYTES)
+        .and_then(|bytes| {
+            bytes.checked_add(usize::from(
+                !current.blocks.is_empty() && !selected.blocks.is_empty(),
+            ))
+        })
+        .and_then(|bytes| {
+            bytes.checked_add(usize::from(
+                !current.transactions.is_empty() && !selected.transactions.is_empty(),
+            ))
+        })
+        .ok_or_else(|| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -331,6 +523,13 @@ fn node_u32(tx: &Value, key: &str) -> Result<u32, QueryError> {
         .ok_or_else(|| QueryError::new(503, "INVALID_STORED_TRANSACTION"))
 }
 fn hex_field(value: &Value, key: &str, exact_bytes: Option<usize>) -> Result<String, QueryError> {
+    Ok(valid_hex_field(value, key, exact_bytes)?.to_ascii_lowercase())
+}
+fn valid_hex_field<'a>(
+    value: &'a Value,
+    key: &str,
+    exact_bytes: Option<usize>,
+) -> Result<&'a str, QueryError> {
     let text = value
         .get(key)
         .and_then(Value::as_str)
@@ -342,7 +541,7 @@ fn hex_field(value: &Value, key: &str, exact_bytes: Option<usize>) -> Result<Str
     {
         return Err(QueryError::new(503, "INVALID_STORED_TRANSACTION"));
     }
-    Ok(text.to_ascii_lowercase())
+    Ok(text)
 }
 fn has_array(value: Option<&Value>) -> Result<bool, QueryError> {
     match value {
@@ -408,7 +607,8 @@ fn project_block(
     record: BlockRecord,
     request: &QueryRequest,
     control: &QueryControl,
-) -> Result<QueryData, QueryError> {
+    max_bytes: usize,
+) -> Result<(QueryData, usize), QueryError> {
     control.check()?;
     let block = FullBlock::decode(record.payload.as_slice())
         .map_err(|_| QueryError::new(503, "INVALID_STORED_BLOCK"))?;
@@ -429,23 +629,25 @@ fn project_block(
         blocks: vec![],
         transactions: vec![],
     };
+    let mut budget = ProjectionBudget::new(max_bytes, control)?;
     if !request.field_selection.block.is_empty() {
+        budget.object(false)?;
         let mut selected = Map::new();
         for field in &request.field_selection.block {
             let value = match field.as_str() {
-                "height" => json!(block.height),
-                "hash" => json!(hex::encode(
+                "height" => ProjectedValue::Owned(json!(block.height)),
+                "hash" => ProjectedValue::Owned(json!(hex::encode(
                     block.hash.iter().rev().copied().collect::<Vec<_>>()
-                )),
-                "previous_hash" => json!(hex::encode(
+                ))),
+                "previous_hash" => ProjectedValue::Owned(json!(hex::encode(
                     block.prev_hash.iter().rev().copied().collect::<Vec<_>>()
-                )),
-                "time" => json!(block.time),
-                "raw" => json!(hex::encode(&block.raw_block)),
-                "decoded" => lossless_node_json(&decoded),
+                ))),
+                "time" => ProjectedValue::Owned(json!(block.time)),
+                "raw" => ProjectedValue::RawBytes(&block.raw_block),
+                "decoded" => ProjectedValue::Node(&decoded),
                 _ => unreachable!("validated selection"),
             };
-            selected.insert(field.clone(), value);
+            budget.insert(&mut selected, field, value)?;
         }
         data.blocks.push(Value::Object(selected));
     }
@@ -458,15 +660,16 @@ fn project_block(
             if !matches_tx(tx, &request.transaction_filter)? {
                 continue;
             }
+            budget.object(!data.transactions.is_empty())?;
             let mut selected = Map::new();
             for field in &request.field_selection.transaction {
                 let value = match field.as_str() {
-                    "txid" => json!(hex_field(tx, "txid", Some(32))?),
-                    "block_height" => json!(block.height),
-                    "index" => json!(index),
-                    "version" => json!(node_u32(tx, "version")?),
-                    "locktime" => json!(node_u32(tx, "locktime")?),
-                    "raw" => json!(hex_field(tx, "hex", None)?),
+                    "txid" => ProjectedValue::HexText(valid_hex_field(tx, "txid", Some(32))?),
+                    "block_height" => ProjectedValue::Owned(json!(block.height)),
+                    "index" => ProjectedValue::Owned(json!(index)),
+                    "version" => ProjectedValue::Owned(json!(node_u32(tx, "version")?)),
+                    "locktime" => ProjectedValue::Owned(json!(node_u32(tx, "locktime")?)),
+                    "raw" => ProjectedValue::HexText(valid_hex_field(tx, "hex", None)?),
                     "vin" | "vout" | "decoded" => {
                         let value = if field == "decoded" {
                             tx
@@ -479,16 +682,16 @@ fn project_block(
                             }
                             value
                         };
-                        lossless_node_json(value)
+                        ProjectedValue::Node(value)
                     }
                     _ => unreachable!("validated selection"),
                 };
-                selected.insert(field.clone(), value);
+                budget.insert(&mut selected, field, value)?;
             }
             data.transactions.push(Value::Object(selected));
         }
     }
-    Ok(data)
+    Ok((data, budget.bytes))
 }
 
 fn project_header(header: BlockHeader, fields: &[String]) -> Result<QueryData, QueryError> {
@@ -604,33 +807,57 @@ pub fn execute_query<A: QueryArchive>(
         transactions: vec![],
     };
     let mut encoded_bytes = RESPONSE_OVERHEAD;
+    let mut data_content_bytes = 0usize;
     let header_only = request.field_selection.transaction.is_empty()
         && !request
             .field_selection
             .block
             .iter()
             .any(|field| field == "raw" || field == "decoded");
+    let mut records = if !header_only && next < stop {
+        Some(archive.query_range(next, stop - 1)?)
+    } else {
+        None
+    };
     while next < stop {
         control.check()?;
-        let mut selected = if header_only {
-            project_header(archive.query_header(next)?, &request.field_selection.block)?
-        } else {
-            project_block(archive.query_block(next)?, request, control)?
-        };
-        let size = serde_json::to_vec(&selected)
-            .map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?
-            .len();
-        // This deliberately overcounts tiny object wrappers, leaving room for cursor metadata.
-        if size > control.max_response_bytes - encoded_bytes {
-            if next == page_start {
-                return Err(QueryError::new(
-                    413,
-                    "BLOCK_RESPONSE_TOO_LARGE_USE_FIELD_SELECTION",
-                ));
+        let remaining = control.max_response_bytes - encoded_bytes;
+        let projection = if header_only {
+            let selected =
+                project_header(archive.query_header(next)?, &request.field_selection.block)?;
+            // At most four fixed header fields (two 64-character hashes and two
+            // integers). This tiny buffer is bounded independently of the page;
+            // avoid a checked writer and deadline reads for each small field.
+            let size = serde_json::to_vec(&selected)
+                .map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?
+                .len();
+            if size <= remaining {
+                Ok((selected, size))
+            } else {
+                Err(block_too_large())
             }
-            break;
-        }
+        } else {
+            let record = records
+                .as_mut()
+                .and_then(|reader| reader.next())
+                .ok_or_else(|| QueryError::new(503, "ARCHIVE_READ_FAILED"))??;
+            if record.height != next {
+                return Err(QueryError::new(503, "INVALID_STORED_BLOCK"));
+            }
+            project_block(record, request, control, remaining)
+        };
+        let (mut selected, size) = match projection {
+            Ok(projection) => projection,
+            Err(error) if error.code == BLOCK_TOO_LARGE && next != page_start => {
+                break;
+            }
+            Err(error) => return Err(error),
+        };
+        // A QueryData wrapper per block deliberately leaves room for metadata.
         encoded_bytes += size;
+        data_content_bytes = data_content_bytes
+            .checked_add(appended_data_bytes(&data, &selected, size)?)
+            .ok_or_else(|| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?;
         data.blocks.append(&mut selected.blocks);
         data.transactions.append(&mut selected.transactions);
         next += 1;
@@ -653,7 +880,7 @@ pub fn execute_query<A: QueryArchive>(
     } else {
         None
     };
-    let response = QueryResponse {
+    let mut response = QueryResponse {
         archive_height: meta.head,
         network: meta.network,
         epoch: meta.epoch.to_string(),
@@ -663,18 +890,23 @@ pub fn execute_query<A: QueryArchive>(
         next_block: next,
         cursor,
         canonicality: "historical_snapshot_not_independently_consensus_validated".into(),
-        data,
+        data: QueryData {
+            blocks: vec![],
+            transactions: vec![],
+        },
     };
-    if serde_json::to_vec(&response)
-        .map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?
-        .len()
-        > control.max_response_bytes
-    {
+    // Only serialize the small metadata wrapper here. The exact data wire size
+    // was already counted during projection; do not traverse the large payload
+    // again solely to measure it before HTTP serialization.
+    let total_bytes = encoded_size(&response, control.max_response_bytes, control)?
+        .and_then(|metadata_bytes| metadata_bytes.checked_add(data_content_bytes));
+    if total_bytes.is_none_or(|bytes| bytes > control.max_response_bytes) {
         return Err(QueryError::new(
             413,
             "RESPONSE_TOO_LARGE_USE_FIELD_SELECTION",
         ));
     }
+    response.data = data;
     Ok(response)
 }
 
@@ -971,5 +1203,287 @@ mod tests {
             returned["tx"][0]["vout"][0]["value"],
             "0.123456789123456789"
         );
+    }
+
+    #[test]
+    fn counting_writer_matches_wire_bytes_and_checks_limits_and_cancellation() {
+        let value: Value = serde_json::from_str(
+            r#"{"escaped":"\"\\\n\t\u0000","unicode":"Zcash 雪","nested":[0.123456789123456789,18446744073709551615,true,null]}"#,
+        )
+        .unwrap();
+        let control = QueryControl::default();
+        let expected = serde_json::to_vec(&lossless_node_json(&value)).unwrap();
+        assert_eq!(serde_json::to_vec(&LosslessNode(&value)).unwrap(), expected);
+        assert_eq!(
+            encoded_size(&LosslessNode(&value), expected.len(), &control).unwrap(),
+            Some(expected.len())
+        );
+        assert_eq!(
+            encoded_size(&LosslessNode(&value), expected.len() - 1, &control).unwrap(),
+            None
+        );
+        assert_eq!(encoded_size(&value, 0, &control).unwrap(), None);
+        control.cancelled.store(true, Ordering::Release);
+        assert_eq!(encoded_size(&value, 0, &control).unwrap_err().status, 408);
+    }
+
+    #[test]
+    fn incremental_projection_budget_matches_every_field_and_exact_block_boundary() {
+        let mut archive = fixture(1500);
+        let record = archive.blocks.get_mut(&10).unwrap();
+        let mut full = FullBlock::decode(record.payload.as_slice()).unwrap();
+        let mut decoded: Value = serde_json::from_str(&full.decoded_json).unwrap();
+        let mut tx = decoded["tx"][0].clone();
+        tx["hex"] = json!("ABCDEF");
+        tx["extra"] = json!({"escaped":"\"\\\n\t\0", "unicode":"雪"});
+        decoded["tx"].as_array_mut().unwrap().push(tx);
+        full.decoded_json = decoded.to_string();
+        record.payload = full.encode_to_vec();
+        let control = QueryControl::default();
+        let mut request = request();
+        request.field_selection.block = BLOCK_FIELDS.iter().map(|field| (*field).into()).collect();
+        request.field_selection.transaction =
+            TX_FIELDS.iter().map(|field| (*field).into()).collect();
+        let (projected, counted) =
+            project_block(record.clone(), &request, &control, MAX_RESPONSE_BYTES).unwrap();
+        let encoded = serde_json::to_vec(&projected).unwrap();
+        assert_eq!(counted, encoded.len());
+        assert_eq!(projected.transactions[1]["raw"], "abcdef");
+        assert_eq!(
+            projected.transactions[1]["decoded"]["vout"][0]["value"],
+            "0.123456789123456789"
+        );
+        assert_eq!(
+            project_block(record.clone(), &request, &control, counted).unwrap(),
+            (projected, counted)
+        );
+        assert_eq!(
+            project_block(record.clone(), &request, &control, counted - 1)
+                .unwrap_err()
+                .code,
+            BLOCK_TOO_LARGE
+        );
+    }
+
+    #[test]
+    fn budget_pagination_retains_identical_whole_blocks_and_transactions() {
+        let archive = fixture(800);
+        let mut request = request();
+        request.limit = 100;
+        request.field_selection.block = vec!["height".into(), "raw".into(), "decoded".into()];
+        request.field_selection.transaction = vec!["decoded".into(), "vout".into()];
+        let control = QueryControl::default();
+        let expected = execute_query(&archive, &request, &control).unwrap();
+        let (_, first_block_size) = project_block(
+            archive.query_block(10).unwrap(),
+            &request,
+            &control,
+            MAX_RESPONSE_BYTES,
+        )
+        .unwrap();
+        let bounded = QueryControl {
+            max_response_bytes: RESPONSE_OVERHEAD + first_block_size,
+            ..Default::default()
+        };
+        let mut actual = QueryData {
+            blocks: vec![],
+            transactions: vec![],
+        };
+        for height in 10..13 {
+            let page = execute_query(&archive, &request, &bounded).unwrap();
+            assert_eq!(page.next_block, height + 1);
+            assert_eq!(page.data.blocks.len(), 1);
+            assert!(serde_json::to_vec(&page).unwrap().len() <= bounded.max_response_bytes);
+            actual.blocks.extend(page.data.blocks);
+            actual.transactions.extend(page.data.transactions);
+            request.cursor = page.cursor;
+        }
+        assert!(request.cursor.is_none());
+        assert_eq!(actual, expected.data);
+    }
+
+    #[test]
+    fn oversized_decoded_field_is_rejected_before_materializing_its_projection() {
+        let value = json!({"huge": "a".repeat(1024 * 1024)});
+        let control = QueryControl::default();
+        let mut budget = ProjectionBudget::new(256, &control).unwrap();
+        budget.object(false).unwrap();
+        let mut selected = Map::new();
+        assert_eq!(
+            budget
+                .insert(&mut selected, "decoded", ProjectedValue::Node(&value))
+                .unwrap_err()
+                .code,
+            BLOCK_TOO_LARGE
+        );
+        assert!(selected.is_empty());
+
+        let mut budget = ProjectionBudget::new(256, &control).unwrap();
+        budget.object(false).unwrap();
+        assert_eq!(
+            budget
+                .insert(&mut selected, "raw", ProjectedValue::RawBytes(&[0; 1024]))
+                .unwrap_err()
+                .code,
+            BLOCK_TOO_LARGE
+        );
+        assert!(selected.is_empty());
+    }
+
+    #[test]
+    fn full_query_uses_one_lazy_range_per_page_and_checks_record_order() {
+        use std::cell::Cell;
+        struct RangeOnly {
+            fixture: Fixture,
+            ranges: Cell<usize>,
+            reads: Cell<usize>,
+            wrong_height: bool,
+        }
+        impl QueryArchive for RangeOnly {
+            fn query_meta(&self) -> QueryMeta {
+                self.fixture.query_meta()
+            }
+            fn query_block(&self, _: u64) -> Result<BlockRecord, QueryError> {
+                panic!("full query opened a per-block reader")
+            }
+            fn query_header(&self, height: u64) -> Result<BlockHeader, QueryError> {
+                self.fixture.query_header(height)
+            }
+            fn query_range(
+                &self,
+                start: u64,
+                end: u64,
+            ) -> Result<Box<dyn Iterator<Item = Result<BlockRecord, QueryError>> + '_>, QueryError>
+            {
+                self.ranges.set(self.ranges.get() + 1);
+                Ok(Box::new((start..=end).map(|height| {
+                    self.reads.set(self.reads.get() + 1);
+                    let mut record = self.fixture.query_block(height)?;
+                    if self.wrong_height {
+                        record.height += 1;
+                    }
+                    Ok(record)
+                })))
+            }
+        }
+        let mut archive = RangeOnly {
+            fixture: fixture(10),
+            ranges: Cell::new(0),
+            reads: Cell::new(0),
+            wrong_height: false,
+        };
+        let mut request = request();
+        let first = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+        assert_eq!((archive.ranges.get(), archive.reads.get()), (1, 2));
+        request.cursor = first.cursor;
+        let second = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+        assert_eq!((archive.ranges.get(), archive.reads.get()), (2, 3));
+        assert!(second.cursor.is_none());
+        request.cursor = None;
+        archive.wrong_height = true;
+        assert_eq!(
+            execute_query(&archive, &request, &QueryControl::default())
+                .unwrap_err()
+                .code,
+            "INVALID_STORED_BLOCK"
+        );
+    }
+
+    #[test]
+    fn aggregate_data_size_matches_json_across_empty_and_nonempty_groups() {
+        let precise: Value = serde_json::from_str(
+            r#"{"amount":0.123456789123456789,"large":18446744073709551615,"escaped":"\n\"\\","unicode":"雪"}"#,
+        )
+        .unwrap();
+        let precise = lossless_node_json(&precise);
+        let groups = [
+            QueryData {
+                blocks: vec![],
+                transactions: vec![],
+            },
+            QueryData {
+                blocks: vec![json!({"height":0}), json!({"height":10})],
+                transactions: vec![],
+            },
+            QueryData {
+                blocks: vec![],
+                transactions: vec![],
+            },
+            QueryData {
+                blocks: vec![],
+                transactions: vec![precise.clone(), json!({"index":9})],
+            },
+            QueryData {
+                blocks: vec![json!({"height":u32::MAX})],
+                transactions: vec![precise.clone()],
+            },
+            QueryData {
+                blocks: vec![],
+                transactions: vec![json!({"index":10})],
+            },
+            QueryData {
+                blocks: vec![json!({"height":11})],
+                transactions: vec![],
+            },
+            QueryData {
+                blocks: vec![],
+                transactions: vec![],
+            },
+        ];
+        let mut merged = QueryData {
+            blocks: vec![],
+            transactions: vec![],
+        };
+        let mut content_bytes = 0;
+        assert_eq!(serde_json::to_vec(&merged).unwrap().len(), EMPTY_DATA_BYTES);
+        for selected in groups {
+            let selected_bytes = serde_json::to_vec(&selected).unwrap().len();
+            content_bytes += appended_data_bytes(&merged, &selected, selected_bytes).unwrap();
+            merged.blocks.extend(selected.blocks);
+            merged.transactions.extend(selected.transactions);
+            assert_eq!(
+                serde_json::to_vec(&merged).unwrap().len(),
+                EMPTY_DATA_BYTES + content_bytes
+            );
+        }
+        assert_eq!(
+            appended_data_bytes(&merged, &merged, EMPTY_DATA_BYTES - 1)
+                .unwrap_err()
+                .code,
+            "RESPONSE_ENCODING_FAILED"
+        );
+    }
+
+    #[test]
+    fn final_metadata_plus_data_size_enforces_exact_response_byte_limit() {
+        // A deliberately long fixture network makes metadata exceed the normal
+        // conservative reservation, so the independent final guard is exercised.
+        let mut archive = fixture(10);
+        archive.meta.network = "regtest\n\"\\".repeat(600);
+        for (limit, to_block) in [(1, None), (100, None), (1, Some(10))] {
+            let mut request = request();
+            request.limit = limit;
+            request.to_block = to_block;
+            request.field_selection.block = vec!["height".into(), "decoded".into()];
+            request.field_selection.transaction = vec!["decoded".into(), "vout".into()];
+            let expected = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+            let wire = serde_json::to_vec(&expected).unwrap();
+            assert!(wire.len() > RESPONSE_OVERHEAD);
+            let exact = QueryControl {
+                max_response_bytes: wire.len(),
+                ..Default::default()
+            };
+            let actual = execute_query(&archive, &request, &exact).unwrap();
+            assert_eq!(serde_json::to_vec(&actual).unwrap(), wire);
+            let one_short = QueryControl {
+                max_response_bytes: wire.len() - 1,
+                ..Default::default()
+            };
+            let error = execute_query(&archive, &request, &one_short).unwrap_err();
+            assert_eq!(
+                (error.status, error.code),
+                (413, "RESPONSE_TOO_LARGE_USE_FIELD_SELECTION")
+            );
+        }
     }
 }

@@ -19,6 +19,8 @@ A second [historical transaction-lookup experiment](benchmarks/results/reports/2
 
 The [full-data report](benchmarks/results/reports/2026-10-13-prep-full.md) verifies 1,024 complete mainnet blocks and 13,817 transactions, real isolated-Regtest following, 64 Rust tests and 13 SDK tests. A narrow header-query comparison is published with its source/preparation boundaries; it is not a millions-of-block or general indexing-speed claim.
 
+The [first improvement report](benchmarks/results/reports/2026-10-13-prep-improvements.md) expands verification to **4,096 blocks / 50,283 transactions**, adds sequential range reads and bounded projection sizing, and overlaps raw/decoded source requests. It records 73 Rust tests, 13 SDK tests, four oracle tests and six before/after read workloads, with every run and the shared-host limitations retained.
+
 The earlier [compact snapshot experiment](benchmarks/results/reports/2026-10-13-prep.md) remains supported separately. Neither path decrypts private notes or independently validates consensus.
 
 This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).

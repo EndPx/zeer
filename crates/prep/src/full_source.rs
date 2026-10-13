@@ -265,16 +265,25 @@ impl NodeRpc {
 
     pub async fn full_block_by_hash(&self, height: u64, expected_hash: &str) -> Result<FullBlock> {
         check_hash(expected_hash)?;
-        let raw_result = self.call("getblock", json!([expected_hash, 0])).await?;
-        let raw_hex = raw_result
-            .as_str()
-            .ok_or_else(|| anyhow!("rpc_missing_raw_block"))?;
-        ensure!(
-            raw_hex.len() <= MAX_RAW_BLOCK_BYTES * 2,
-            "raw_block_too_large"
-        );
-        let raw = hex::decode(raw_hex).map_err(|_| anyhow!("rpc_invalid_raw_block_hex"))?;
-        let decoded = self.call("getblock", json!([expected_hash, 2])).await?;
+        // Both representations address the same immutable hash. Fetch them
+        // together while keeping per-response limits and request deadlines;
+        // try_join drops the sibling request if either RPC fails. The follower
+        // still processes one block at a time and verifies the source anchors.
+        let raw_request = async {
+            let raw_result = self.call("getblock", json!([expected_hash, 0])).await?;
+            let raw_hex = raw_result
+                .as_str()
+                .ok_or_else(|| anyhow!("rpc_missing_raw_block"))?;
+            ensure!(
+                raw_hex.len() <= MAX_RAW_BLOCK_BYTES * 2,
+                "raw_block_too_large"
+            );
+            hex::decode(raw_hex).map_err(|_| anyhow!("rpc_invalid_raw_block_hex"))
+        };
+        let (raw, decoded) = tokio::try_join!(
+            raw_request,
+            self.call("getblock", json!([expected_hash, 2])),
+        )?;
         validate_full_block(height, expected_hash, raw, decoded)
     }
 }
@@ -508,6 +517,140 @@ pub(crate) mod tests {
         assert!(compact_size(&[254, 255, 255, 0, 0], &mut 0).is_err());
         assert!(compact_size(&[255, 1], &mut 0).is_err());
         assert_eq!(compact_size(&[253, 253, 0], &mut 0).unwrap(), 253);
+    }
+
+    #[tokio::test]
+    async fn full_rpc_requests_overlap_and_preserve_validated_content() {
+        use axum::{extract::State, routing::post, Json, Router};
+        use tokio::{net::TcpListener, sync::Barrier};
+
+        #[derive(Clone)]
+        struct Reply {
+            hash: String,
+            raw: String,
+            decoded: Value,
+            arrivals: Arc<AtomicU64>,
+            both_requests: Arc<Barrier>,
+        }
+        async fn handler(State(state): State<Reply>, Json(request): Json<Value>) -> Json<Value> {
+            assert_eq!(request["method"], "getblock");
+            assert_eq!(request["params"][0], state.hash);
+            let result = match request["params"][1].as_u64().unwrap() {
+                0 => {
+                    state.arrivals.fetch_or(1, Ordering::SeqCst);
+                    json!(state.raw)
+                }
+                2 => {
+                    state.arrivals.fetch_or(2, Ordering::SeqCst);
+                    state.decoded
+                }
+                _ => panic!("unexpected block verbosity"),
+            };
+            // Neither response can finish until both requests reached the
+            // server. This proves overlap without comparing elapsed timings.
+            state.both_requests.wait().await;
+            Json(json!({"id": request["id"], "result": result, "error": null}))
+        }
+
+        for corrupt_raw in [false, true] {
+            let (hash, raw, mut decoded) = fixture(10, &[9; 32], 1);
+            decoded["futurePreciseAmount"] =
+                serde_json::from_str("0.12345678901234567890123456789").unwrap();
+            let mut served_raw = raw.clone();
+            if corrupt_raw {
+                *served_raw.last_mut().unwrap() ^= 1;
+            }
+            let arrivals = Arc::new(AtomicU64::new(0));
+            let app = Router::new().route("/", post(handler)).with_state(Reply {
+                hash: hash.clone(),
+                raw: hex::encode(served_raw),
+                decoded: decoded.clone(),
+                arrivals: arrivals.clone(),
+                both_requests: Arc::new(Barrier::new(2)),
+            });
+            let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let source = format!("http://{}", listener.local_addr().unwrap());
+            let server = tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+            let client = NodeRpc::with_auth(&source, false, None).await.unwrap();
+            // A sequential implementation deadlocks at the barrier; this is a
+            // bounded test guard rather than a throughput expectation.
+            let result =
+                tokio::time::timeout(Duration::from_secs(3), client.full_block_by_hash(10, &hash))
+                    .await;
+            server.abort();
+            let _ = server.await;
+            assert_eq!(arrivals.load(Ordering::SeqCst), 3);
+            let result = result.expect("both RPC requests must reach the barrier");
+            if corrupt_raw {
+                assert_eq!(
+                    result.unwrap_err().to_string(),
+                    "raw_transaction_bytes_mismatch"
+                );
+            } else {
+                assert_eq!(
+                    result.unwrap(),
+                    validate_full_block(10, &hash, raw, decoded).unwrap()
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn failed_full_rpc_does_not_wait_for_pending_sibling() {
+        use axum::{extract::State, routing::post, Json, Router};
+        use tokio::{net::TcpListener, sync::Barrier};
+
+        #[derive(Clone)]
+        struct Reply {
+            failed_verbosity: u64,
+            failed_result: Option<Value>,
+            both_requests: Arc<Barrier>,
+        }
+        async fn handler(State(state): State<Reply>, Json(request): Json<Value>) -> Json<Value> {
+            state.both_requests.wait().await;
+            if request["params"][1].as_u64() != Some(state.failed_verbosity) {
+                // The companion request never supplies a response. try_join
+                // must return the other request's error without waiting for it.
+                std::future::pending::<()>().await;
+            }
+            match state.failed_result {
+                Some(result) => Json(json!({"id": request["id"], "result": result, "error": null})),
+                None => Json(json!({
+                    "id": request["id"], "result": null,
+                    "error": {"code": -8, "message": "unavailable"}
+                })),
+            }
+        }
+        for (failed_verbosity, failed_result, expected_error) in [
+            (0, None, "rpc_response_error"),
+            (2, None, "rpc_response_error"),
+            (0, Some(json!("zz")), "rpc_invalid_raw_block_hex"),
+            (0, Some(json!({})), "rpc_missing_raw_block"),
+        ] {
+            let app = Router::new().route("/", post(handler)).with_state(Reply {
+                failed_verbosity,
+                failed_result,
+                both_requests: Arc::new(Barrier::new(2)),
+            });
+            let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let source = format!("http://{}", listener.local_addr().unwrap());
+            let server = tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+            let client = NodeRpc::with_auth(&source, false, None).await.unwrap();
+            let result = tokio::time::timeout(
+                Duration::from_secs(3),
+                client.full_block_by_hash(10, &"11".repeat(32)),
+            )
+            .await;
+            server.abort();
+            let _ = server.await;
+            assert_eq!(
+                result
+                    .expect("RPC failure must cancel the pending sibling")
+                    .unwrap_err()
+                    .to_string(),
+                expected_error
+            );
+        }
     }
 
     #[tokio::test]

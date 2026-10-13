@@ -63,3 +63,9 @@ copying, license equivalence, or a requirement to use native bindings in Prep.
 ## Executed evidence
 
 [Full-data report](../benchmarks/results/reports/2026-10-13-prep-full.md): 64 Rust tests, 13 client tests, a packed-client real-server read, 1,024 complete mainnet blocks / 13,817 transactions, real isolated-Regtest source growth, and a workload-specific header comparison. Checked boxes describe this bounded functional delivery; they do not certify production readiness or complete HyperSync performance parity.
+
+[Improvement report](../benchmarks/results/reports/2026-10-13-prep-improvements.md):
+73 Rust tests, 13 client tests, four oracle tests, independent equality for 4,096
+blocks / 50,283 transactions, and six measured before/after read workloads. This
+extends early-mainnet evidence; modern shielded coverage, sustained follow and
+real-node reorg recovery remain separate gates.
