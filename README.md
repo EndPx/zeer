@@ -5,13 +5,19 @@
 Zeer is an open-source project for Zcash data tooling, with two product layers:
 
 - **Zeer Prep** prepares and supplies complete Zcash blocks and transactions through a Rust archive, a range/filter HTTP API, and a typed client. Backfill, restart, source following and bounded reorg recovery are implemented.
-- **Zeer Chef** turns chain observations and authorized shielded receipts into application entities through TypeScript handlers, developer-owned PostgreSQL and GraphQL. This is the later framework phase.
+- **Zeer Chef** processes public Prep data through TypeScript handlers into developer-owned PostgreSQL entities and authenticated GraphQL. The public-data prototype is implemented; authorized private scanning remains deferred.
 
 Prep supplies the ingredients; Chef applies the developer's recipe. Applications may use Prep directly without Chef.
 
 ## Status
 
-**Prep's full-data prototype is implemented and tested. Chef, public production hosting and npm publication remain out of scope.**
+**Prep's full-data MVP and Chef's first public-data prototype are implemented and tested. Public production hosting, viewing-key scanning and npm publication remain out of scope.**
+
+The [Chef report](benchmarks/results/reports/2026-10-14-chef.md) records 31 tests
+with real PostgreSQL, a live CLI/GraphQL round trip, and five fresh indexing runs
+for each of Prep and direct RPC: 2,048 blocks / 16,962 transactions, every entity
+verified independently. Whole-chain indexing was not run; source retrieval,
+application indexing and supplemental external-provider lookups are kept separate.
 
 The first external-provider experiment ran lightwalletd and Zaino on an isolated synthetic regtest chain. See [the harness](benchmarks/README.md) and [measured results](benchmarks/results/reports/2026-10-13.md). This is compact-block/header serving evidence, not shielded decryption or application-ingestion performance.
 
@@ -27,13 +33,13 @@ The earlier [compact snapshot experiment](benchmarks/results/reports/2026-10-13-
 
 This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
-## Planned Chef developer experience
+## Chef public developer experience
 
-- One user-facing npm package with a CLI and TypeScript SDK.
-- Self-hosted operation with developer-owned PostgreSQL and local scanner state.
+- One local unpublished package with CLI, TypeScript handlers and generated types.
+- Self-hosted operation with developer-owned PostgreSQL.
 - Historical processing followed by live block tracking.
-- Public chain facts and shielded receipts for accounts the operator is authorized to read.
-- Typed entity operations, authenticated GraphQL, and optional signed webhooks.
+- Public chain facts from Prep; viewing-key scanning and webhooks are deferred.
+- Typed entity operations and authenticated read-only GraphQL.
 - Explicit checkpoint, replay and reorg behavior.
 
 Zeer does not require spending keys. Viewing keys and decoded private data remain sensitive and belong in the operator's protected environment. Shielded receipt discovery does not reveal every sender or private transaction in the network.
@@ -45,13 +51,16 @@ crates/prep/              Rust full-node source, follower, HTTP queries, compact
 crates/prep-store/        Immutable segments, atomic archive catalog, header index
 crates/prep-proto/        Pinned upstream protocol and experimental Prep API
 packages/prep-client/     Typed native-fetch client; unpublished local npm package
+packages/chef/            Public TS handlers, PostgreSQL runtime, GraphQL and CLI
 examples/prep-client/     Runnable client example
+examples/chef-public/     Runnable public-data application schema and handlers
 benchmarks/prep/          Independent reference capture and round-trip verifier
 ```
 
 ## Earlier Chef layout proposal
 
-The following is the earlier framework layout proposal. It is separate from the implemented Prep slice; folders will be introduced as their components are implemented:
+The following is the earlier full framework proposal. The active public-only
+slice is consolidated in `packages/chef`; these additional modules remain planned:
 
 ```text
 crates/zeer-scanner/        Rust Zcash integration and scanning
@@ -73,6 +82,8 @@ Internal modules do not imply separate npm publications. The initial target is o
 - [Prep engine contract and commands](docs/PREP_ENGINE.md)
 - [28 October delivery scope](docs/PREP_DELIVERY.md)
 - [Query and SDK contract](docs/PREP_QUERY.md)
+- [Chef public-data contract](docs/CHEF_PUBLIC_MVP.md)
+- [Chef example and commands](examples/chef-public/README.md)
 - [Implementation plan and acceptance gates](.omc/plans/zeer-v0.1.md)
 - [Benchmark methodology](docs/BENCHMARK_SPEC.md)
 - [Envio / HyperIndex architecture research](docs/ENVIO_HYPERINDEX_RESEARCH.md)
@@ -91,7 +102,7 @@ target/release/prep --help
 node --test packages/prep-client/test/*.test.js
 ```
 
-Use `sync`, `archive-inspect` and `serve-http` for full data, with `--follow` for source tracking. See [the engine commands](docs/PREP_ENGINE.md#commands). `import`, `inspect` and `serve` retain the earlier compact snapshot workflow. HTTP defaults to loopback; non-loopback access requires explicit opt-in and a deployment token. This is not an audited public-service deployment. Chef commands remain design examples.
+Use `sync`, `archive-inspect` and `serve-http` for full data, with `--follow` for source tracking. See [the engine commands](docs/PREP_ENGINE.md#commands). `import`, `inspect` and `serve` retain the earlier compact snapshot workflow. HTTP defaults to loopback; non-loopback access requires explicit opt-in and a deployment token. This is not an audited public-service deployment. Chef commands are available through the local package; see [the public example](examples/chef-public/README.md).
 
 The tested target is Linux x86_64; Windows development uses WSL2. Snapshot writes require Unix filesystem durability operations. Dependency versions are recorded in `Cargo.lock`.
 

@@ -1,0 +1,16 @@
+type PublicTransaction {
+  id: ID!
+  minedHeight: Int!
+  version: Int!
+  locktime: BigInt!
+  sizeBytes: Int!
+  transparentInputCount: Int!
+  transparentOutputCount: Int!
+}
+
+type Block {
+  id: ID!
+  hash: String!
+  time: BigInt!
+  transactionCount: Int!
+}

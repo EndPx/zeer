@@ -1,0 +1,133 @@
+{
+  "format": "cipherscan-native-bounded-ingestion-v1",
+  "status": "FAIL",
+  "started_at": "2026-10-13T19:17:30.175Z",
+  "candidate": "CipherScan native explorer backfill (unmodified binary)",
+  "runner_sha256": "34b6df247e72dbba1b84863dfe698548a18b88a604b36f8481fe3741999207eb",
+  "workload": {
+    "from_height": 1,
+    "to_height": 2048,
+    "source_height": 6764,
+    "source_hash": "0000000160e11c9403141d7c2a16b07a2459919fc774795da3f687628c5ece54",
+    "expected_transactions": 16962,
+    "binary_sha256": "67932d9a4a2cf545ddeefefa785a007cc925b09884b8f18b703cb89598b2a735",
+    "schema_sha256": "0ce2295cd2382625216f86eff848dea8743e11dadcb38e6e695a01b29545861a",
+    "oracle_sha256": "a0fcedd1cb6c4d467810448d484677a813de3d1b5729fe86659c9d06ba6e150a",
+    "source_revision": "15d7f528f07a84d796ed89029de21bfb26a24d23"
+  },
+  "deployment": {
+    "network": "zeer-chef-cs",
+    "postgres_container": "zeer-chef-pg",
+    "runtime_image": "zeer-benchmark/native-runtime:20261013",
+    "runtime_image_id": "sha256:4691bacba5865b6fba75fb4215764196f12f3fd17bc843ef2844e198884f3a3a",
+    "native_cpu_limit": 1.75,
+    "native_memory_limit_bytes": 4294967296
+  },
+  "runs": [
+    {
+      "repetition": 1,
+      "database": "chef_cs_d7fe3e1c784539e7_1",
+      "container": "zeer-chef-cs-d7fe3e1c784539e7-1",
+      "status": "FAIL",
+      "started_at": "2026-10-13T19:17:30.339Z",
+      "resource_samples": [
+        {
+          "at": "2026-10-13T19:17:33.289Z",
+          "BlockIO": "8.19kB / 0B",
+          "CPUPerc": "32.92%",
+          "Container": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "ID": "09765668ce45",
+          "MemPerc": "0.20%",
+          "MemUsage": "8.262MiB / 4GiB",
+          "Name": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "NetIO": "749kB / 2.8MB",
+          "PIDs": "5"
+        },
+        {
+          "at": "2026-10-13T19:17:35.294Z",
+          "BlockIO": "8.19kB / 0B",
+          "CPUPerc": "28.62%",
+          "Container": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "ID": "09765668ce45",
+          "MemPerc": "0.34%",
+          "MemUsage": "14.08MiB / 4GiB",
+          "Name": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "NetIO": "1.85MB / 8.7MB",
+          "PIDs": "5"
+        },
+        {
+          "at": "2026-10-13T19:17:37.345Z",
+          "BlockIO": "8.19kB / 0B",
+          "CPUPerc": "21.16%",
+          "Container": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "ID": "09765668ce45",
+          "MemPerc": "0.54%",
+          "MemUsage": "21.94MiB / 4GiB",
+          "Name": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "NetIO": "3.07MB / 16.4MB",
+          "PIDs": "5"
+        },
+        {
+          "at": "2026-10-13T19:17:39.349Z",
+          "BlockIO": "8.19kB / 0B",
+          "CPUPerc": "22.15%",
+          "Container": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "ID": "09765668ce45",
+          "MemPerc": "0.57%",
+          "MemUsage": "23.51MiB / 4GiB",
+          "Name": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "NetIO": "4.67MB / 26.8MB",
+          "PIDs": "5"
+        },
+        {
+          "at": "2026-10-13T19:17:41.356Z",
+          "BlockIO": "8.19kB / 0B",
+          "CPUPerc": "20.01%",
+          "Container": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "ID": "09765668ce45",
+          "MemPerc": "0.60%",
+          "MemUsage": "24.76MiB / 4GiB",
+          "Name": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "NetIO": "6.05MB / 35.8MB",
+          "PIDs": "5"
+        },
+        {
+          "at": "2026-10-13T19:17:42.744Z",
+          "BlockIO": "0B / 0B",
+          "CPUPerc": "0.00%",
+          "Container": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "ID": "09765668ce45",
+          "MemPerc": "0.00%",
+          "MemUsage": "0B / 0B",
+          "Name": "zeer-chef-cs-d7fe3e1c784539e7-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "0"
+        }
+      ],
+      "cpu_user_ms": null,
+      "cpu_system_ms": null,
+      "native_peak_rss_bytes": null,
+      "schema_initialization_ms": 803.0526090000001,
+      "process_elapsed_ms": 11386.892582,
+      "exit_code": 137,
+      "exit_signal": null,
+      "stdout_file": "/opt/zeer-chef/20261014/results/cipherscan-timeout.json.run1.stdout.log",
+      "stderr_file": "/opt/zeer-chef/20261014/results/cipherscan-timeout.json.run1.stderr.log",
+      "native_reported_backfill_seconds": null,
+      "failure_code": "NATIVE_BACKFILL_TIMEOUT",
+      "checkpoint_after_failure": "1500",
+      "finished_at": "2026-10-13T19:17:43.043Z"
+    }
+  ],
+  "limitations": [
+    "Native explorer ingestion writes additional inputs, outputs, addresses, flows and indexes. Its work differs from Chef Block/PublicTransaction handlers; results are separate observations, not a pure framework ranking.",
+    "Common complete public transaction projection and block identities are verified against the independently captured Chef oracle; extra explorer entities are counted but their complete semantics are not independently verified here.",
+    "Prepared read-only RocksDB state is shared; node synchronization/source preparation is excluded. Every PostgreSQL database is fresh.",
+    "Primary wall time includes docker startup, native process initialization, RocksDB secondary open, parsing, entity writes/checkpoints and process shutdown; schema setup and independent verification are timed separately.",
+    "Native-reported backfill elapsed is printed to 0.1 seconds and excludes process/source/connection initialization; it is secondary to measured complete process wall time.",
+    "Native CPU user/system and precise peak RSS are null unless captured separately. Docker stats samples are retained as sampled cgroup observations, not process peak RSS.",
+    "Frozen input covers historical public legacy v1/v2 transactions, not complete current mainnet or decrypted shielded data. Containers/databases are preserved; no drop command is used."
+  ],
+  "failure_code": "NATIVE_BACKFILL_TIMEOUT",
+  "finished_at": "2026-10-13T19:17:43.047Z"
+}

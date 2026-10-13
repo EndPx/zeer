@@ -1,9 +1,15 @@
 # Zeer benchmark harness
 
-This directory contains external-provider baselines and Zeer Prep correctness experiments.
+This directory contains external-provider baselines, Zeer Prep retrieval experiments,
+and Zeer Chef application-indexing benchmarks.
 The first measured scenario is **compact-block serving and normalized header verification on a frozen synthetic regtest chain**. It does not measure fresh database ingestion, wallet scanning, shielded decryption, GraphQL, or a Zeer engine.
 
 ## Current evidence
+
+- [Chef public indexing](results/reports/2026-10-14-chef.md): five fresh PostgreSQL
+  runs each over Prep and RPC, all-row verification, native CipherScan ingestion
+  as a separate workload, and supplementary prepared lookup. See the
+  [reproduction and metric boundaries](../docs/CHEF_BENCHMARK_PREFLIGHT.md).
 
 - [Prep full-data prototype](results/reports/2026-10-13-prep-full.md): full-node ingestion, 1,024 blocks / 13,817 transactions, real Regtest follow, local SDK and a specifically bounded header-retrieval comparison.
 

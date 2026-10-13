@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "captured_at_utc": "2026-10-13T18:39:36.279098+00:00",
+  "base_commit": "2cff362f3a5a1d2a7eeffdb0e96c22863a181150",
+  "source_files_sha256": {
+    "benchmarks/chef/indexing.mjs": "f4ac71c94bf3a2ba4c55eb552e276438e311a1714e3f9872b59295384c5ab217",
+    "benchmarks/chef/lookup.py": "103afae21f628533d4bf2fdb7714425f204807b768b7daee17a86038615dd168",
+    "benchmarks/chef/preflight.py": "73cbae9c5e0af599e810690554424087e4fb9dd7418eeaced72293d7c6863453",
+    "benchmarks/chef/rpc_source.mjs": "44f811d9d3f58fe4ecb56bc3a7d720bd1bde44358205f6190eb724a6b6494ece",
+    "benchmarks/chef/rpc_source.test.mjs": "03024ca1926fe4a7d321ba910b663c1c19088c3fb748c3928428dd70348c19be",
+    "benchmarks/chef/serve.mjs": "6c5cce45ebf4b779ee2bc9736d5b4621764238716c6c1077cfefb112db11368e",
+    "benchmarks/chef/test_lookup.py": "2b06562d36fd9660d266e88722ef124b1ba57d855fd53f84d01dd37408402053",
+    "benchmarks/transactions/__init__.py": "67668ef69767b29ed0daa7c47363b5c2a3b3b72a60e94b2ef0e35ffec25f1217",
+    "benchmarks/transactions/benchmark.py": "3f3c48576f188feb54495673ded16cb1c70643b766be4cf856ef361f1101bf52",
+    "benchmarks/transactions/test_transactions.py": "ed68893f8b51a4c8e706761eacb23bc769a5eb84f33fb606f2ede4d3bb613f0e",
+    "examples/chef-public/chef.config.ts": "d635cf86047a4cf85a54366aa252b16187df3e2ada98d5d2f96f746dba4de519",
+    "examples/chef-public/chef.generated.ts": "48f510a089e3f4c7cf5ab2aaeba0175645deb1dc937225a7b1d68e19b091f77e",
+    "examples/chef-public/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8",
+    "examples/chef-public/schema.graphql": "a85d205b7228107e0b7c025353b7d01cf514fd01660f99dcdab01fdf3bd38cce",
+    "package-lock.json": "f02af601f777c5c233a987de6d830b3796495ce5a31d7ec2ebc428fa1f08fee0",
+    "package.json": "f13f1fe79ad3ad0f6605753427898202f191ac623c68c57e8b3f33611f17efdf",
+    "packages/chef/package.json": "cba5eea924da2a6a4ee9058f4de8889a66f4af59bbe81ed47b28821cdfafee85",
+    "packages/chef/src/cli.ts": "c501bddd84c6b50519bb368cb5a9ac83723c568c419875fca50664080b351894",
+    "packages/chef/src/graphql.ts": "55bfc51d2b1cc0ba97bde1af6f518207466e2870a10e03df5805de55e82bd8e4",
+    "packages/chef/src/index.ts": "bbc623d2c03d8412211a3e22583b8854e1788b88de773a40e179f716f34fbdd2",
+    "packages/chef/src/runtime.ts": "405cab2695c6c2408d8d44cb0255259fca09ff50c9cb83f66ab38528489493b8",
+    "packages/chef/src/schema.ts": "c03ced49ff9265d1028c8090422052983635fca48314895b011de9844660f31e",
+    "packages/chef/src/store.ts": "b92bd42db8940516183cda78c6cce014fcad52cd427b984976e8a2fbfb4b652c",
+    "packages/chef/src/types.ts": "1d2c5f7fac4617ce9eb0a2f1c4c84d87176cf0b45257f8d61b2022ed13e63518",
+    "packages/chef/test/cli.test.mjs": "beb48b73b66b3da46598ef98f69f1bc9ee48417ab70fe6f12438c41093d2a4d3",
+    "packages/chef/test/graphql.test.mjs": "f6334475fcec1b0b8a2d30954108d03c89ebee25b9cb0dfa8c6c034910875809",
+    "packages/chef/test/runtime.integration.test.mjs": "af0408a25a9dae0707276c98415dd352f8c9c1455e121a1d70dc2d48682607c4",
+    "packages/chef/test/runtime.test.mjs": "068c6466fb0d5147820cdf333180ab10700dd8dd83f4152db4e01fd82a9e9cdf",
+    "packages/chef/test/schema.test.mjs": "9b07bc5022adb068d4fcf9ef3d90c5502388c254a0783e8a3c2f4a8d824fb5c5",
+    "packages/chef/test/store.integration.test.mjs": "d1e5b5a0fe2e2b2be602c6ca7d1f7bb29492ef17fc2880679f3b16c01dd742af",
+    "packages/chef/tsconfig.json": "1b4ee2295fef62835e3e3646724fe4e025f79e2a77bab0069836449144ca716a",
+    "packages/prep-client/package.json": "b2f680187ed897ab88852e4c7cd2b5161a95da6f46f791d75fce6bfa419f633e",
+    "packages/prep-client/src/index.d.ts": "fb31a2c388cb30d3d2bdd46cd395d336c912dda336993f9eee90dfe57555eb98",
+    "packages/prep-client/src/index.js": "9088f6e10c8c931198734e5ea775286b9d8411eb9c406c6d89495e9af28b5d17"
+  },
+  "prep_binary_sha256": "c14324f40f2e3982efcdf413193d5c5a5c7055b282a52315ba71e69277d02391",
+  "runtime": {
+    "node": "v24.14.0",
+    "npm": "11.11.0"
+  },
+  "checks": {
+    "chef_tests_passed": 31,
+    "chef_tests_skipped": 0,
+    "postgresql_integration": true,
+    "typescript_build": "PASS",
+    "cli_live": "PASS"
+  },
+  "indexing_comparison": {
+    "chef_prep": {
+      "repetitions": 5,
+      "elapsed_ms_min": 51032.844868000015,
+      "elapsed_ms_median": 55715.240220999985,
+      "elapsed_ms_max": 59640.11930400001,
+      "blocks": 2048,
+      "transactions": 16962,
+      "committed_transactions_per_second_median": 304.4409381117008,
+      "median_fetch_ms": 1970.5494230004551,
+      "median_handler_including_entity_io_ms": 43695.63328400013,
+      "median_transaction_overhead_ms": 9741.312798000727,
+      "sampled_peak_rss_bytes_max": 354152448,
+      "median_cpu_user_ms": 11414.243,
+      "median_cpu_system_ms": 7069.89
+    },
+    "chef_rpc": {
+      "repetitions": 5,
+      "elapsed_ms_min": 51141.285416,
+      "elapsed_ms_median": 60186.67919099999,
+      "elapsed_ms_max": 66568.33652499999,
+      "blocks": 2048,
+      "transactions": 16962,
+      "committed_transactions_per_second_median": 281.8231580142805,
+      "median_fetch_ms": 7966.62029400008,
+      "median_handler_including_entity_io_ms": 41881.36899400002,
+      "median_transaction_overhead_ms": 10353.653018001089,
+      "sampled_peak_rss_bytes_max": 346140672,
+      "median_cpu_user_ms": 13763.802,
+      "median_cpu_system_ms": 7377.535
+    }
+  },
+  "secondary_prepared_lookup": {
+    "chef-lookup-ready": {
+      "eligible_for_comparison": true,
+      "max_lookup_normalize_ns": 634386031,
+      "median_lookup_normalize_ns": 520849316,
+      "min_lookup_normalize_ns": 371821590,
+      "status": "PASS",
+      "successful_runs": 5
+    },
+    "lightwalletd-lookup": {
+      "eligible_for_comparison": true,
+      "max_lookup_normalize_ns": 245543239,
+      "median_lookup_normalize_ns": 193850787,
+      "min_lookup_normalize_ns": 189288656,
+      "status": "PASS",
+      "successful_runs": 5
+    }
+  },
+  "oracle": {
+    "shared_uncompressed_sha256": "a0fcedd1cb6c4d467810448d484677a813de3d1b5729fe86659c9d06ba6e150a",
+    "gzip_file": "indexing-oracle.json.gz",
+    "gzip_sha256": "fd230e62f1f4909f394c3a2c21f6cc9f0e651bc707bc05e924701a8a82a7cc73"
+  },
+  "whole_chain": {
+    "status": "NOT_RUN",
+    "duration_seconds": null,
+    "requested_from": 0,
+    "observed_tip": 3516619,
+    "reason": "Current Prep starts1; local source only6764; observed external node disk263GiB exceeds40GiB increment and80GiB hostfree. No extrapolation."
+  },
+  "comparison_limits": [
+    "SameChef+two data sources, not an external application-framework ranking.",
+    "Prepared lookup against lightwalletd is secondary serving evidence only.",
+    "AllPrep runs then allRPC runs; sharedhost/warm source, fresh projectnamespaces, overlapping timingranges.",
+    "Primary indexing excludes source preparation/migration/oracle and result verification; handlers include entityIO.",
+    "CPU/RSS numbers are Nodeprocess only; container quotas recorded separately."
+  ],
+  "profiles": {
+    "indexing": "source0.75CPU/2GiB +Prep0.5CPU/1GiB +PG0.75CPU/1GiB +Node1CPU/3GiB",
+    "chef_lookup": "source0.75CPU +PG0.75CPU +API0.5CPU +client1CPU",
+    "lightwalletd_lookup": "source1CPU/2GiB +lightwalletd1CPU/4GiB +client1CPU/512MiB",
+    "envelope": "3CPU/8GiB/40GiB incremental disk"
+  },
+  "database": {
+    "version": "14.24 (Debian 14.24-1.pgdg13+2)",
+    "fsync": "on",
+    "synchronous_commit": "on",
+    "full_page_writes": "on"
+  },
+  "containers": {
+    "zeer-chef-pg": {
+      "image": "postgres@sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+      "running": false,
+      "cpus": 0.75,
+      "memory_bytes": 1073741824
+    },
+    "zeer-chef-prep-http": {
+      "image": "rust@sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+      "running": false,
+      "cpus": 0.5,
+      "memory_bytes": 1073741824
+    },
+    "zeer-bench-four-frozen": {
+      "image": "zakuracore/zakura@sha256:17894f48b51ee4249a6555692a07881a305085f25b5c7b0bed5887a73e2ad85a",
+      "running": false,
+      "cpus": 1.0,
+      "memory_bytes": 2147483648
+    },
+    "zeer-bench-four-lightwalletd": {
+      "image": "electriccoinco/lightwalletd@sha256:483a361483531f9fa7b13c67ca69d69e394179ea31746cc0022fbe3af65ab5e0",
+      "running": false,
+      "cpus": 1.0,
+      "memory_bytes": 4294967296
+    }
+  },
+  "existing_services": {
+    "commitpass-api": "active",
+    "nabungfi-api": "active",
+    "nabungfi-keeper": "active",
+    "rocket-arena": "active",
+    "nginx": "active"
+  },
+  "new_experiment_bytes": 548174669,
+  "proof_sha256": {
+    "indexing-prep-v2.json": "e20b8d64298fff09a4ff51668bfd379e36320113d9bbacb2ff8a880dea8e98e0",
+    "indexing-rpc.json": "3478029bc642cb906c092ff6df7a91789f59fde41cc87b3d334372bdcb0c2355",
+    "chef-lookup-ready.json": "693f67329c5b8c493a1478afd38c403b7a692fd69c47c5f9a4b816bb099fcc5b",
+    "lightwalletd-lookup.json": "408c989c549bebeb31fc68a342d7ad5524df3be4998631f044a82124d18b9f37",
+    "cli-live.json": "37099f088d873823335c48780468e8c356758d0f841bd8c90ca3cbe21ebf59f1",
+    "tests-ready.txt": "33934f585a485ec3fd3f02e89b80dbf7d2d7aa0d9aff8f884784247c865f997d",
+    "database-settings.json": "ac23e1dd5e4bb255c95e397fe999af18c778c0faae3451c1c3b8119158ad3c16"
+  }
+}

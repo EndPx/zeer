@@ -1,0 +1,7 @@
+{
+  "name": "zeer-workspace",
+  "private": true,
+  "workspaces": ["packages/prep-client", "packages/chef"],
+  "scripts": {"build:chef": "npm run build -w @zeer/chef", "test:chef": "npm test -w @zeer/chef"},
+  "engines": {"node": ">=24.14.0"}
+}

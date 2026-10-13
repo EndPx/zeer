@@ -1,0 +1,12 @@
+test_all_seven_fields_match_reference (benchmarks.chef.test_lookup.AdmissionTests.test_all_seven_fields_match_reference) ... ok
+test_invalid_locktime_or_wrong_id_fails (benchmarks.chef.test_lookup.AdmissionTests.test_invalid_locktime_or_wrong_id_fails) ... ok
+test_source_and_app_heights_are_distinct (benchmarks.chef.test_lookup.AdmissionTests.test_source_and_app_heights_are_distinct) ... ok
+test_wrong_app_boundary_and_not_ready_fail (benchmarks.chef.test_lookup.AdmissionTests.test_wrong_app_boundary_and_not_ready_fail) ... ok
+test_wrong_source_head_fails (benchmarks.chef.test_lookup.AdmissionTests.test_wrong_source_head_fails) ... ok
+test_persistent_connection_and_bearer_header (benchmarks.chef.test_lookup.TransportTests.test_persistent_connection_and_bearer_header) ... ok
+test_rejects_credentials_queries_and_fragments (benchmarks.chef.test_lookup.TransportTests.test_rejects_credentials_queries_and_fragments) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.505s
+
+OK

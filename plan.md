@@ -1,13 +1,15 @@
 # Zeer planning entry point
 
-Updated: 2026-10-13 (Asia/Jakarta).
+Updated: 2026-10-14 (Asia/Jakarta).
 
-**Status: Prep full-data prototype, measured read improvements, and bounded modern-data/outage/reorg proofs completed on 2026-10-13. Target 28 October scope and evidence are recorded in the delivery contract. Chef remains deferred.**
+**Status: Prep held at its tested MVP. Chef's first public-data slice is implemented and verified: 31 tests with real PostgreSQL, live CLI/GraphQL, and five fresh indexing runs each over Prep and RPC. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Scope: [CHEF_PUBLIC_MVP.md](docs/CHEF_PUBLIC_MVP.md); evidence: [Chef report](benchmarks/results/reports/2026-10-14-chef.md).**
 
 Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**, the Zcash data preparation and delivery engine prioritized first, and **Zeer Chef**, the later application-indexing framework. Accepted names, responsibilities and planning precedence are recorded in [the canonical plan](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
 ## Authoritative documents
 
+- [Active Chef public-data contract](docs/CHEF_PUBLIC_MVP.md): public Prep source, TypeScript handlers, developer PostgreSQL, GraphQL, recovery and separate indexing/retrieval benchmarks.
+- [Chef indexing benchmark and validation](benchmarks/results/reports/2026-10-14-chef.md): identical handlers/schema over Prep and direct RPC, independent all-row verification, native CipherScan ingestion with different explorer outputs, and supplementary external-provider lookup.
 - [Implementation plan and architecture](.omc/plans/zeer-v0.1.md): accepted product decisions, proposed technical contracts, scope, risks, gates, and acceptance criteria.
 - [Prep engine contract](docs/PREP_ENGINE.md): implemented first slice, limits, commands and next engine gates; [execution evidence](benchmarks/results/reports/2026-10-13-prep.md).
 - [Active 28 October delivery contract](docs/PREP_DELIVERY.md): full blocks/transactions required by the user, completed capabilities and exclusions; [full-data execution report](benchmarks/results/reports/2026-10-13-prep-full.md).
@@ -30,7 +32,7 @@ Technical contracts live in the implementation plan. Benchmark methodology lives
 - Repository direction accepted on 2026-10-13: one core monorepo under the user's personal GitHub account, rather than separate repositories for the engine, SDK and CLI.
 - Implementation priority clarified: engine, correctness/recovery tests and early benchmarks first; polished public SDK/CLI packaging follows.
 - Workspace inspected on 2026-10-12: logo asset only before these planning documents; no application source or Git repository.
-- Benchmark-first work and later Prep engine implementation were authorized on 2026-10-13. The user subsequently required complete blocks/transactions, following, queries and a client. A typed client package exists locally; no registry publication or Chef framework exists.
+- Benchmark-first work and later Prep engine implementation were authorized on 2026-10-13. The user subsequently required complete blocks/transactions, following, queries and a client. A typed Prep client and the first public Chef framework now exist locally; neither package is published to a registry.
 - The first Prep slice passed 24 Linux Rust tests and round-tripped 256 real mainnet compact blocks, including 417 Sapling outputs and 81 Orchard actions, against a separately captured provider reference. This does not prove shielded decryption, consensus or performance superiority.
 - lightwalletd and Zaino both passed five measured reads in each of two separately reported resource profiles. This proves the declared synthetic compact header/projection case, not nonempty shielded scanning or application indexing.
 - The public-mainnet follow-up includes Zinder and CipherScan as well: all four passed five runs of 128 transaction lookups. Workload/transport differences and the historical-source health policy are documented; this does not complete the broader scanning/ingestion benchmark requirements.
@@ -75,6 +77,6 @@ Use disposable copies of the frozen Regtest state and the existing 3 CPU / 8 GiB
 / 40 GiB experiment envelope. No private viewing keys or public-chain writes are
 needed for these proofs.
 
-A full public-mainnet deployment, broader performance claims and production readiness require additional evidence. Chef remains deferred. This iteration does not publish npm packages or public endpoints.
+A full public-mainnet deployment, broader performance claims and production readiness require additional evidence. Chef's public-only slice is now implemented under its separate contract; private scanning remains deferred. No npm package or public endpoint was published.
 
 The plan does not authorize purchasing infrastructure, publishing packages, submitting the hackathon entry, or accessing third-party private wallet data. It records work to perform when implementation is requested.

@@ -1,0 +1,51 @@
+{
+  "captured_at": "2026-10-13T18:31:23.361Z",
+  "settings": {
+    "version": "14.24 (Debian 14.24-1.pgdg13+2)",
+    "fsync": "on",
+    "synchronous_commit": "on",
+    "full_page_writes": "on"
+  },
+  "namespaces": [
+    {
+      "namespace": "chef_bench_48d7ba47ee1ba7e7_1",
+      "relation_bytes": "15917056"
+    },
+    {
+      "namespace": "chef_bench_48d7ba47ee1ba7e7_2",
+      "relation_bytes": "15564800"
+    },
+    {
+      "namespace": "chef_bench_48d7ba47ee1ba7e7_3",
+      "relation_bytes": "15106048"
+    },
+    {
+      "namespace": "chef_bench_48d7ba47ee1ba7e7_4",
+      "relation_bytes": "14409728"
+    },
+    {
+      "namespace": "chef_bench_48d7ba47ee1ba7e7_5",
+      "relation_bytes": "13688832"
+    },
+    {
+      "namespace": "chef_bench_ba44bd6d7da1251e_1",
+      "relation_bytes": "16293888"
+    },
+    {
+      "namespace": "chef_bench_ba44bd6d7da1251e_2",
+      "relation_bytes": "16556032"
+    },
+    {
+      "namespace": "chef_bench_ba44bd6d7da1251e_3",
+      "relation_bytes": "16678912"
+    },
+    {
+      "namespace": "chef_bench_ba44bd6d7da1251e_4",
+      "relation_bytes": "16744448"
+    },
+    {
+      "namespace": "chef_bench_ba44bd6d7da1251e_5",
+      "relation_bytes": "16736256"
+    }
+  ]
+}

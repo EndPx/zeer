@@ -1,0 +1,37 @@
+
+> @zeer/chef@0.1.0 test
+> node --test test/*.test.mjs
+
+✔ CLI help succeeds without config, source or database (529.981436ms)
+✔ CLI rejects invalid, duplicate, missing and conflicting flags before loading config (1617.590162ms)
+✔ CLI range and port validation precedes database access (1909.591308ms)
+✔ config import and PostgreSQL errors never echo credentials or third-party messages (714.948037ms)
+✔ codegen loads the native TypeScript example without env and produces useful checked entity types (765.236315ms)
+✔ GraphQL shares one read view, returns exact integers and stable ID pagination (76.672831ms)
+✔ equality filters use exact BigInt decimal operands (58.31759ms)
+✔ auth and restricted GraphQL surface reject requests before database access (41.600309ms)
+✔ argument/body limits, unavailable state and database errors are bounded and sanitized (61.84427ms)
+✔ two active store reads occupy capacity until completion (13.269969ms)
+✔ PostgreSQL readiness errors thrown before the read callback return sanitized 503 (11.078267ms)
+✔ response ceiling rejects oversized successful results (28.696951ms)
+✔ short server tokens are rejected before listening (0.941484ms)
+✔ schema fingerprints ignore formatting and declaration order (3.251455ms)
+✔ schema rejects unsupported constructs and unsafe/colliding names (3.690285ms)
+✔ entity exact integers round trip without number conversion (1.752835ms)
+✔ entity shape, field types and UTF-8 storage limits are enforced (0.960623ms)
+✔ PostgreSQL: atomic block failure, exact BigInt, restart and retained duplicate (253.143461ms)
+✔ PostgreSQL: first before-image, delete undo, reconciling gate and genesis anchor (194.997979ms)
+✔ PostgreSQL: bounded undo retains ancestor boundary and rejects deep rollback (260.839676ms)
+✔ PostgreSQL: single writer, identity mismatch and independent projects (335.267955ms)
+✔ PostgreSQL: snapshot reads, ordered pagination and parameterized equality filters (181.466698ms)
+✔ PostgreSQL: discarded entity promises still finish or roll back the whole block (106.491608ms)
+✔ PostgreSQL: undo pagination restores more than one hundred before-images (698.201172ms)
+✔ PostgreSQL: existing unmarked namespace is refused without touching its tables (37.276943ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8511.08102

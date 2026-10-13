@@ -1,0 +1,102 @@
+{
+  "candidate": {
+    "endpoint": "http://127.0.0.1:39370",
+    "name": "Zeer Chef",
+    "source_version": "Zakura1.5.0",
+    "version": "0.1.0"
+  },
+  "chef_adapter_sha256": "103afae21f628533d4bf2fdb7714425f204807b768b7daee17a86038615dd168",
+  "code_identity": {
+    "files": {
+      "__init__.py": "67668ef69767b29ed0daa7c47363b5c2a3b3b72a60e94b2ef0e35ffec25f1217",
+      "benchmark.py": "3f3c48576f188feb54495673ded16cb1c70643b766be4cf856ef361f1101bf52",
+      "test_transactions.py": "ed68893f8b51a4c8e706761eacb23bc769a5eb84f33fb606f2ede4d3bb613f0e"
+    },
+    "sha256": "85b18ddad3c1111d5d5e635d380f73ac01656f2243701f068451a06d494fe394"
+  },
+  "dataset": {
+    "end_hash": "0000000160e11c9403141d7c2a16b07a2459919fc774795da3f687628c5ece54",
+    "end_height": 6764,
+    "genesis_hash": "00040fe8ec8471911baa1db1266ea15dd06b4a8a5c453883c000b031973dce08",
+    "network": "mainnet",
+    "records_sha256": "1de1adf7bc3a623b4657b54e2ad3fcdf980e1e03631e25f5638817f9c2ec5891",
+    "selection_end_height": 2048
+  },
+  "finished_at": "2026-10-13T18:28:42.502011+00:00",
+  "limitations": [
+    "Serving/read benchmark, not fresh indexing or database-ingestion speed.",
+    "gRPC returns raw bytes then client decodes; PostgreSQL returns indexed fields. Equivalent final fields do not make transport/backend work identical.",
+    "Genesis is indirectly anchored by the independently validated frozen canonical head; pre-Sapling gRPC block reads are not assumed available.",
+    "All selected transactions are pre-Overwinter v1 within heights 1..2048; no later protocol or shielded workload coverage.",
+    "One verified warmup precedes five default sequential runs; server cache and shared-VPS noise require separate environment evidence.",
+    "Chef serves previously committed PostgreSQL entities through GraphQL; ingestion time is recorded separately.",
+    "Chef indexed boundary is selection_end_height, while the preserved source stays at end_height.",
+    "Compare with fresh local candidate runs separately from earlier dated measurements."
+  ],
+  "manifest_sha256": "27931877b11b01ce48fc448a97ad7201ba18342279b0db6a888e3d676d9290ad",
+  "postflight": {
+    "status": "NOT_RUN"
+  },
+  "preflight": {
+    "elapsed_ns": 4394782,
+    "error_type": "ConnectionRefusedError",
+    "status": "FAIL"
+  },
+  "profile": "shared-vps-native-lookup-20261014",
+  "projection": [
+    "txid",
+    "mined_height",
+    "version",
+    "locktime",
+    "size_bytes",
+    "transparent_input_count",
+    "transparent_output_count"
+  ],
+  "record_count": 128,
+  "repetitions": 5,
+  "response_bytes_including_warmup_and_anchors": 0,
+  "runs": [
+    {
+      "eligible": false,
+      "run": 1,
+      "status": "NOT_RUN"
+    },
+    {
+      "eligible": false,
+      "run": 2,
+      "status": "NOT_RUN"
+    },
+    {
+      "eligible": false,
+      "run": 3,
+      "status": "NOT_RUN"
+    },
+    {
+      "eligible": false,
+      "run": 4,
+      "status": "NOT_RUN"
+    },
+    {
+      "eligible": false,
+      "run": 5,
+      "status": "NOT_RUN"
+    }
+  ],
+  "scenario": "transaction-lookup-preoverwinter-v1",
+  "schema_version": 1,
+  "source_observations": [],
+  "stage_timeout_s": 120.0,
+  "started_at": "2026-10-13T18:28:42.495450+00:00",
+  "summary": {
+    "eligible_for_comparison": false,
+    "max_lookup_normalize_ns": null,
+    "median_lookup_normalize_ns": null,
+    "min_lookup_normalize_ns": null,
+    "status": "FAIL",
+    "successful_runs": 0
+  },
+  "timing_boundary": "sequential per-transaction lookup + client normalization into memory on one reused connection; verification and source-anchor checks excluded",
+  "warmup": {
+    "status": "NOT_RUN"
+  }
+}

@@ -1,0 +1,14 @@
+✔ native JSON token context preserves decimals, exponent notation and unsafe integers (1.264502ms)
+✔ RPC pages preserve every decoded numeric token and use sequential block verbosity 2 (1.164101ms)
+✔ header query uses verbosity 1 and emits no transaction rows (1.540329ms)
+✔ frozen source rejects changed head and benchmark range excludes genesis (0.680424ms)
+✔ exact raw length rejects conflicting RPC size rather than repairing provider output (0.538681ms)
+✔ legacy v2 public transactions retain JoinSplit numeric tokens and runtime locktime (0.55758ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 76.696067

@@ -1,11 +1,16 @@
 # Zeer v0.1 implementation plan
 
 Date: 2026-10-12 (Asia/Jakarta).
-Last planning update: 2026-10-13 (Asia/Jakarta), accepted Zeer Prep / Zeer Chef names and data-engine-first direction.
-Status: **Prep full-data prototype implemented under [its engine contract](../../docs/PREP_ENGINE.md) and [28 October delivery scope](../../docs/PREP_DELIVERY.md). Chef remains deferred.** This document authorizes no additional execution by itself.
+Last planning update: 2026-10-14 (Asia/Jakarta), Chef public-data first slice authorized.
+Status: **Prep is held at its tested MVP. The user authorized Chef public-data work under [CHEF_PUBLIC_MVP.md](../../docs/CHEF_PUBLIC_MVP.md); viewing-key scanning remains deferred.** This older framework proposal does not authorize additional execution by itself.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
 ## 0. Accepted product names and planning order
+
+The 2026-10-14 public-only Chef decision supersedes the scanner-first sequence
+below for the active slice. Historical G1/two-store/outbox requirements are not
+claimed complete by public PostgreSQL indexing. Benchmark Chef's durable handler
+pipeline separately from Prep retrieval and supplementary prepared lookups.
 
 The user accepted **Zeer Prep** and **Zeer Chef** on 2026-10-13. **Zeer** remains the umbrella brand and existing monorepo name.
 
@@ -357,7 +362,7 @@ Zaino/lightwalletd/Zinder are generally provider variants for this framework, no
 
 ## 9. Implementation gates
 
-Every gate produces a short evidence record with commands, exact versions, result, failure cases and remaining limitations. Check source diffs and workspace state after each bounded task. Commit/push only after a repository exists and the corresponding workflow is requested. G0 has partial benchmark preflight evidence in [the first report](../../benchmarks/results/reports/2026-10-13.md); no implementation gate is complete. Zeer engine work remains not started.
+Every gate produces a short evidence record with commands, exact versions, result, failure cases and remaining limitations. Check source diffs and workspace state after each bounded task. G0 initially had partial benchmark preflight evidence in [the first report](../../benchmarks/results/reports/2026-10-13.md). The older shielded/two-store gates below remain a proposal; executed Prep work and the superseding public-only Chef slice are tracked in their contracts and [current project plan](../../plan.md).
 
 Engine-first sequencing clarified on 2026-10-13: implement scanner and transactional runtime through internal runners before polishing the public SDK/CLI. Freeze basic wire/handler contracts early; collect scanner and persistence benchmark baselines as soon as correctness allows. G2 is the minimal runtime/query integration needed to prove the engine, G4 measures the connected pipeline, and G5 completes developer-facing packaging. Re-run affected end-to-end measurements after packaging changes. Repository setup is administrative preparation, not completion of any implementation gate.
 
