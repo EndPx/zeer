@@ -12,6 +12,7 @@ Zeer is an open-source, self-hosted indexing framework for Zcash applications. D
 - [Benchmark specification](docs/BENCHMARK_SPEC.md): comparison eligibility, scenarios, metrics, fixtures, and publication rules.
 - [Envio / HyperIndex package research](docs/ENVIO_HYPERINDEX_RESEARCH.md): pinned npm/source findings and the ReScript/Rust boundary; recommendations do not override the implementation plan.
 - [Benchmark harness](benchmarks/README.md) and [first measured results](benchmarks/results/reports/2026-10-13.md): two external providers tested on a frozen synthetic regtest fixture before engine implementation.
+- [Four-candidate measured follow-up](benchmarks/results/reports/2026-10-13-four.md): all four completed the same historical transaction-lookup projection under a disclosed expanded resource profile.
 - [Selected logo concept](assets/brand/zeer-logo-concept-v2.png): approved raster concept sheet, not an SVG asset pack.
 
 Technical contracts live in the implementation plan. Benchmark methodology lives in the benchmark specification; do not maintain competing copies.
@@ -26,6 +27,7 @@ Technical contracts live in the implementation plan. Benchmark methodology lives
 - Workspace inspected on 2026-10-12: logo asset only before these planning documents; no application source or Git repository.
 - Benchmark-first implementation authorized on 2026-10-13. The harness and a limited provider-serving comparison now exist; Zeer engine, developer SDK/CLI and package publication do not.
 - lightwalletd and Zaino both passed five measured reads in each of two separately reported resource profiles. This proves the declared synthetic compact header/projection case, not nonempty shielded scanning or application indexing.
+- The public-mainnet follow-up includes Zinder and CipherScan as well: all four passed five runs of 128 transaction lookups. Workload/transport differences and the historical-source health policy are documented; this does not complete the broader scanning/ingestion benchmark requirements.
 
 ## Next implementation step
 

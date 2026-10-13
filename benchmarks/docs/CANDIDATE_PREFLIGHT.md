@@ -2,6 +2,8 @@
 
 Checked 2026-10-13. This document records upstream source/artifact inspection, not successful startup or measured performance. Machine-readable pins are in [candidates.json](../manifests/candidates.json). Runtime image IDs, versions, config hashes, resource limits, and result files belong in each run's evidence.
 
+**Follow-up runtime evidence:** [all four passed the new early-mainnet transaction-lookup scenario](../results/reports/2026-10-13-four.md). The deferred labels in this document are historical findings for the smaller regtest scenario and original resource cap.
+
 ## Initial comparison
 
 Use **lightwalletd v0.5.5** and **Zaino 0.10.1** against the same frozen, generated Zebra regtest chain. Compare `CompactTxStreamer` reads and normalize common semantic fields before checking results. This is a small synthetic source-service workload. It does not benchmark real shielded wallet scanning, memo decryption, GraphQL, application persistence, or public-chain ingestion. Empty/coinbase-only fixtures must be labelled accordingly.

@@ -1,0 +1,25 @@
+# Serve the validated prefix without discovering more peers. Use an internal
+# Docker network as an additional egress boundary after initial sync completes.
+[network]
+network = "Mainnet"
+p2p_stack = "legacy"
+listen_addr = "127.0.0.1:8233"
+cache_dir = false
+initial_mainnet_peers = []
+initial_testnet_peers = []
+
+[state]
+cache_dir = "/data"
+delete_old_database = false
+
+[rpc]
+listen_addr = "0.0.0.0:8232"
+enable_cookie_auth = false
+
+# Disclosed historical-fixture readiness policy. This does not claim current
+# mainnet synchronization; the node's own unconfigurable sync gate still applies.
+[health]
+listen_addr = "0.0.0.0:18233"
+min_connected_peers = 0
+ready_max_blocks_behind = 4000000
+ready_max_tip_age = "2h"

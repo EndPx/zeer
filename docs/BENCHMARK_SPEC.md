@@ -1,7 +1,7 @@
 # Zeer benchmark specification v0.1
 
 Date: 2026-10-12 (Asia/Jakarta).
-Status: **broad specification; first limited provider-serving experiment completed on 2026-10-13**. See [harness](../benchmarks/README.md) and [results](../benchmarks/results/reports/2026-10-13.md). Most scenarios below remain planned.
+Status: **broad specification; two limited serving experiments completed on 2026-10-13**. See the [harness](../benchmarks/README.md), [two-provider compact-block results](../benchmarks/results/reports/2026-10-13.md), and [four-provider historical transaction lookup results](../benchmarks/results/reports/2026-10-13-four.md). Their workloads differ and their times must not be combined into one ranking. Most scenarios below remain planned.
 Product and event semantics: [Zeer implementation plan](../.omc/plans/zeer-v0.1.md).
 
 ## 1. Questions the benchmark must answer
@@ -199,7 +199,19 @@ CI runs small deterministic correctness/fault fixtures per change. The complete 
 - No absolute latency/throughput target is a release promise before the first baseline. The first frozen baseline becomes the reference for later regression budgets.
 - Publish supported capabilities separately from measured performance. Unsupported GraphQL is not evidence another chain-data server is slow.
 
-## 10. References
+## 10. Public results presentation
+
+User-selected reference: [Envio's benchmark page](https://docs.envio.dev/docs/HyperIndex/benchmarks), inspected on 2026-10-13. Use a short workload explanation followed by a compact table, one scenario per section. This is a documentation/presentation requirement; a benchmark website has not been implemented.
+
+Preferred columns: **Tool | Data source / native path | Throughput | vs fastest | Correctness**. Use alternating row backgrounds when rendering the future website, aligned numeric columns, and descending throughput within each eligible comparison group. Include tool versions and links to methodology, raw results and reproduction instructions near the table.
+
+- Name the measured unit explicitly: lookups/s for transaction serving, blocks/s for block processing, notes/s for shielded scanning, and committed records/s for durable ingestion. Events/s is only appropriate when events are the actual workload unit.
+- For a fixed-size workload, throughput is record count divided by median measured duration; calculate ratios from unrounded numbers. Show date, dataset, warmup/repetitions, machine limits, and measured timer boundary.
+- Populate `vs fastest` only within a declared compatible group. Use `fastest throughput / row throughput`, with the leader labelled Fastest. Failed/incomplete/unsupported runs receive a status rather than a speed rank.
+- The current four-provider report combines three gRPC raw-byte/decode paths and one SQL materialized-field path. Show native paths prominently; any shared-task ratio must say it compares these deployed lookup paths, not indexer-engine performance. Prefer separate groups for the public leaderboard until ingestion work is comparable.
+- Zeer remains Not measured until its engine exists and passes the same frozen workload. Never pre-populate a winning Zeer result.
+
+## 11. References
 
 - **B1:** [Envio Open Indexer Benchmark](https://github.com/enviodev/open-indexer-benchmark) and [methodology](https://github.com/enviodev/open-indexer-benchmark/blob/main/METHODOLOGY.md). Reference structure; project-maintained benchmark, not an independent certification of Envio.
 - **B2:** [CipherScan Rust](https://github.com/Kenbak/cipherscan-rust) and [deployment architecture](https://github.com/Kenbak/cipherscan/blob/main/DEPLOYMENT.md). Capabilities and native source path require local verification.

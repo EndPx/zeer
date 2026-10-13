@@ -10,6 +10,8 @@ Zeer is a planned open-source indexing framework for Zcash. Developers will defi
 
 The first external-provider experiment ran lightwalletd and Zaino on an isolated synthetic regtest chain. See [the harness](benchmarks/README.md) and [measured results](benchmarks/results/reports/2026-10-13.md). This is compact-block/header serving evidence, not shielded decryption or application-ingestion performance.
 
+A second [historical transaction-lookup experiment](benchmarks/results/reports/2026-10-13-four.md) successfully included lightwalletd, Zaino, Zinder and CipherScan on the same 128 public mainnet transactions. It compares disclosed native read paths, not isolated engine or ingestion speed.
+
 This is the core Zeer monorepo. Implementation proceeds engine-first: prove scanning and persistence, test recovery, establish benchmarks, then finish the developer-facing SDK and CLI. Minimal handler contracts and internal runners are defined early to support that work.
 
 ## Planned developer experience

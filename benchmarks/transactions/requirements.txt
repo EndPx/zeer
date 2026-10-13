@@ -1,0 +1,2 @@
+# Adds the native PostgreSQL path; gRPC pins remain in ../requirements-grpc.txt.
+psycopg[binary]==3.3.6

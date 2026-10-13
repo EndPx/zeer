@@ -5,12 +5,15 @@ The first measured scenario is **compact-block serving and normalized header ver
 
 ## Current evidence
 
+**Follow-up:** [all four services now have a common measured transaction-lookup case](results/reports/2026-10-13-four.md) on a frozen early-mainnet prefix. This uses a separately authorized 3 CPU / 8 GiB / 40 GiB envelope. The original regtest results below remain separate.
+
 - Two real services run sequentially: lightwalletd v0.5.5 and Zaino 0.10.1.
 - One independent Zebra 6.2.3 source and frozen 1,024-block dataset.
 - Typed gRPC calls through the pinned upstream protocol; no fake candidate implementations.
 - A verified warmup followed by five repetitions per candidate/profile.
 - Full normalized output comparison, separate verification timer and failure evidence.
 - [First measured results](results/reports/2026-10-13.md).
+- [Four-provider transaction runner](transactions/README.md) and [four-provider results](results/reports/2026-10-13-four.md).
 - [Candidate preflight](docs/CANDIDATE_PREFLIGHT.md) and [pins](manifests/candidates.json).
 - [Full methodology](../docs/BENCHMARK_SPEC.md) includes later, broader scenarios that are **not implemented or measured yet**.
 

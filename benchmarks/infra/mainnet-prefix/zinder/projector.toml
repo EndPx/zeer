@@ -1,0 +1,56 @@
+# Frozen historical source: uses the actual node readiness endpoint.
+[network]
+name = "zcash-mainnet"
+[node]
+json_rpc_addr = "http://zebra:8232"
+request_timeout_secs = 30
+max_response_bytes = 16777216
+[node.health]
+addr = "http://zebra:18233/ready"
+poll_interval_ms = 1000
+
+[node.auth]
+method = "none"
+[storage]
+canonical_path = "/var/lib/zinder/canonical"
+canonical_secondary_path = "/var/lib/zinder/projector/canonical-secondary"
+raw_blob_policy = "transactions"
+[storage.canonical.rocksdb]
+block_cache_bytes = 33554432
+max_wal_bytes = 33554432
+max_open_files = 128
+write_buffer_bytes = 8388608
+max_write_buffer_count = 2
+max_background_jobs = 2
+memtable_budget_bytes = 33554432
+[wallet]
+path = "/var/lib/zinder/wallet"
+[wallet.rocksdb]
+block_cache_bytes = 67108864
+max_wal_bytes = 67108864
+max_open_files = 128
+write_buffer_bytes = 8388608
+max_write_buffer_count = 2
+max_background_jobs = 2
+memtable_budget_bytes = 67108864
+[projector]
+reorg_window_blocks = 100
+lease_duration_seconds = 14400
+build_owner_hex = "0000000000000000000000000000ee01"
+[projector.build]
+max_outpoint_sort_memory_bytes = 134217728
+max_secondary_sort_memory_bytes_per_sorter = 67108864
+max_temporary_file_bytes_per_sorter = 2147483648
+sst_target_logical_bytes = 33554432
+max_accounted_reorg_undo_bytes = 67108864
+[projector.follow]
+max_transition_logical_bytes = 67108864
+[ingest_control]
+addr = "http://127.0.0.1:9100"
+bearer_token_path = "/run/zeer-zinder/ingest.token"
+[projector_control]
+listen_addr = "127.0.0.1:9101"
+bearer_token_path = "/run/zeer-zinder/checkpoint.token"
+checkpoint_staging_root = "/var/lib/zinder/checkpoints"
+[ops]
+listen_addr = "127.0.0.1:9110"

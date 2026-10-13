@@ -15,7 +15,7 @@
       "compressedBytes": 44162384,
       "protocol": "cash.z.wallet.sdk.rpc.CompactTxStreamer",
       "backend": "Zebra JSON-RPC",
-      "preflightStatus": "artifact-discovered-runtime-pending",
+      "preflightStatus": "runtime-verified-public-transaction-lookup",
       "evidence": [
         "https://api.github.com/repos/zcash/lightwalletd/commits/v0.5.5",
         "https://github.com/zcash/lightwalletd/blob/d16d48124e9ad4157ebc2324b5090c6ba201470c/.github/workflows/CI.yaml",
@@ -26,6 +26,14 @@
         "status": "PASS",
         "scenario": "synthetic regtest compact block/header serving; 1024 blocks; no shielded notes",
         "report": "../results/reports/2026-10-13.md"
+      },
+      "historicalPreflightStatus": "artifact-discovered-runtime-pending",
+      "runtimeEvidenceFour": {
+        "date": "2026-10-13",
+        "status": "PASS",
+        "scenario": "128 sequential early-mainnet v1 transaction lookups; five verified runs",
+        "source": "Zakura 1.5.0 frozen at height 6764",
+        "report": "../results/reports/2026-10-13-four.md"
       }
     },
     {
@@ -39,7 +47,7 @@
       "compressedBytes": 46319125,
       "protocol": "cash.z.wallet.sdk.rpc.CompactTxStreamer",
       "backend": "Zebra JSON-RPC with persistent finalised state",
-      "preflightStatus": "artifact-discovered-runtime-pending",
+      "preflightStatus": "runtime-verified-public-transaction-lookup",
       "sourceImageCorrespondence": "OCI org.opencontainers.image.revision observed on the running image matches sourceCommit; gRPC gitCommit is empty. Not a reproducible-build attestation.",
       "evidence": [
         "https://api.github.com/repos/zingolabs/zaino/commits/0.10.1",
@@ -51,6 +59,14 @@
         "status": "PASS",
         "scenario": "synthetic regtest compact block/header serving; 1024 blocks; no shielded notes",
         "report": "../results/reports/2026-10-13.md"
+      },
+      "historicalPreflightStatus": "artifact-discovered-runtime-pending",
+      "runtimeEvidenceFour": {
+        "date": "2026-10-13",
+        "status": "PASS",
+        "scenario": "128 sequential early-mainnet v1 transaction lookups; five verified runs",
+        "source": "Zakura 1.5.0 frozen at height 6764",
+        "report": "../results/reports/2026-10-13-four.md"
       }
     },
     {
@@ -68,8 +84,8 @@
         "zinder-compat-lightwalletd"
       ],
       "protocol": "cash.z.wallet.sdk.rpc.CompactTxStreamer via compat service",
-      "preflightStatus": "deferred-resource-fit",
-      "reason": "Upstream regtest serving topology declares aggregate 6 GiB process memory ceilings before Zebra; fitting it into the shared VPS total 4 GiB budget needs a separate validated configuration.",
+      "preflightStatus": "runtime-verified-public-transaction-lookup",
+      "reason": "Original regtest/default-topology resource fit was deferred. The follow-up ran four native release processes in one4GiB cgroup, with disclosed genuine-node historical health policy.",
       "requirements": [
         "x86-64-v3",
         "glibc >= 2.34",
@@ -80,16 +96,24 @@
         "https://api.github.com/repos/ZcashFoundation/zinder/releases/tags/v0.6.0",
         "https://github.com/ZcashFoundation/zinder/blob/9b9e7040453f66e847302f186f95d95b297e6705/deploy/.env.regtest",
         "https://github.com/ZcashFoundation/zinder/blob/9b9e7040453f66e847302f186f95d95b297e6705/docs/runbooks/deploying-on-a-vm.md"
-      ]
+      ],
+      "historicalPreflightStatus": "deferred-resource-fit",
+      "runtimeEvidenceFour": {
+        "date": "2026-10-13",
+        "status": "PASS",
+        "scenario": "128 sequential early-mainnet v1 transaction lookups; five verified runs",
+        "source": "Zakura 1.5.0 frozen at height 6764",
+        "report": "../results/reports/2026-10-13-four.md"
+      }
     },
     {
       "id": "cipherscan-rust",
-      "repository": "https://github.com/Kenbak/cipherscan-rust",
+      "repository": "https://github.com/Kenbak/zecblock-rust",
       "tag": null,
       "sourceCommit": "15d7f528f07a84d796ed89029de21bfb26a24d23",
       "protocol": "PostgreSQL application entities; not CompactTxStreamer",
-      "preflightStatus": "deferred-workload-mismatch",
-      "reason": "Direct compatible Zebra/Zakura RocksDB snapshot and PostgreSQL required. Network enum supports only mainnet/testnet; regtest silently falls through to mainnet. Do not benchmark unmodified on this regtest fixture.",
+      "preflightStatus": "runtime-verified-public-transaction-lookup",
+      "reason": "Regtest compact serving remains incompatible. Follow-up successfully indexed matching Zakura1.5 mainnet statev29 and served the shared transaction projection through PostgreSQL.",
       "requirements": [
         "Rust 1.97.1 build",
         "PostgreSQL >= 14",
@@ -99,7 +123,21 @@
       "evidence": [
         "https://github.com/Kenbak/cipherscan-rust/blob/15d7f528f07a84d796ed89029de21bfb26a24d23/src/config.rs",
         "https://github.com/Kenbak/cipherscan-rust/blob/15d7f528f07a84d796ed89029de21bfb26a24d23/README.md"
-      ]
+      ],
+      "historicalPreflightStatus": "deferred-workload-mismatch",
+      "runtimeEvidenceFour": {
+        "date": "2026-10-13",
+        "status": "PASS",
+        "scenario": "128 sequential early-mainnet v1 transaction lookups; five verified runs",
+        "source": "Zakura 1.5.0 frozen at height 6764",
+        "report": "../results/reports/2026-10-13-four.md"
+      },
+      "ciArtifact": {
+        "runId": 38329349273,
+        "artifactId": 11782029111,
+        "binarySha256": "67932d9a4a2cf545ddeefefa785a007cc925b09884b8f18b703cb89598b2a735",
+        "retentionCaveat": "Upstream CI artifact may expire; rebuild exact pinned source/toolchain if unavailable."
+      }
     }
   ]
 }

@@ -1,0 +1,17 @@
+# Bounded public-chain source for the four-provider transaction-lookup profile.
+# Reproduction target is the measured frozen head 6764. The initial experiment
+# intended 2048 but missed CONFIG_FILE_PATH and was stopped manually at 6764.
+[network]
+network = "Mainnet"
+p2p_stack = "legacy"
+listen_addr = "127.0.0.1:8233"
+cache_dir = false
+
+[state]
+cache_dir = "/data"
+debug_stop_at_height = 6764
+delete_old_database = false
+
+[rpc]
+listen_addr = "0.0.0.0:8232"
+enable_cookie_auth = false

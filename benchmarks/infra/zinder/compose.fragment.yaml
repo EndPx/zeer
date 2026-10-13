@@ -1,0 +1,47 @@
+# Merge AFTER benchmarks/infra/compose.yaml. Paths resolve relative to that file.
+# Operator must stop other provider profiles first and separately verify the
+# approved aggregate cap for node + this provider + client + build activity.
+services:
+  zinder:
+    profiles: [zinder]
+    image: zeer-benchmark/zinder-native:0.6.0
+    build:
+      context: ./zinder
+      args:
+        BASE_IMAGE: ${ZEER_BENCH_DEBIAN_IMAGE:?pin Debian 12 image by digest}
+    cpus: 1.5
+    mem_limit: 4g
+    memswap_limit: 4g
+    pids_limit: 256
+    init: true
+    restart: "no"
+    stop_grace_period: 30s
+    read_only: true
+    environment:
+      ZINDER_NETWORK__NAME: zcash-regtest
+      ZINDER_NODE__JSON_RPC_ADDR: http://zebra:18232
+      ZINDER_NODE__AUTH__METHOD: none
+      ZEER_ZINDER_READY_TIMEOUT: "600"
+      TOKIO_WORKER_THREADS: "2"
+      RAYON_NUM_THREADS: "2"
+    volumes:
+      - ${ZEER_BENCH_STATE:?set isolated benchmark directory}/zinder:/var/lib/zinder
+    tmpfs:
+      - /run/zeer-zinder:size=1m,mode=0750
+      - /tmp:size=64m,mode=1777
+    ports:
+      - "127.0.0.1:39267:9067"
+    ulimits:
+      nofile: {soft: 8192, hard: 8192}
+    labels:
+      zeer.benchmark: "20261013"
+      zeer.benchmark.packaging: "custom-native-four-process"
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: "2"}
+    healthcheck:
+      test: ["CMD", "python3", "/opt/zeer-zinder/supervisor.py", "health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10m
+      retries: 2
