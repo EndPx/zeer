@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "node": "v24.18.0",
+  "package": "@zeer/prep-client@0.1.0",
+  "installed_from": "local npm pack tarball, no registry publication",
+  "transport": "SSH tunnel to private VPS HTTP service",
+  "blocks": 1024,
+  "transactions": 13817,
+  "pages": 16,
+  "decoded_block_numbers": "exact strings",
+  "source_height": 6764,
+  "indexed_height": 2023,
+  "epoch": "0",
+  "revision": "8"
+}

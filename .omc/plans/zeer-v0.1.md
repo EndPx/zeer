@@ -2,7 +2,7 @@
 
 Date: 2026-10-12 (Asia/Jakarta).
 Last planning update: 2026-10-13 (Asia/Jakarta), accepted Zeer Prep / Zeer Chef names and data-engine-first direction.
-Status: **Prep implementation authorized on 2026-10-13; first snapshot engine implemented under [its contract](../../docs/PREP_ENGINE.md). Chef remains a later framework proposal.** This document authorizes no additional execution by itself.
+Status: **Prep full-data prototype implemented under [its engine contract](../../docs/PREP_ENGINE.md) and [28 October delivery scope](../../docs/PREP_DELIVERY.md). Chef remains deferred.** This document authorizes no additional execution by itself.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
 ## 0. Accepted product names and planning order

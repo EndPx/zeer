@@ -1,5 +1,9 @@
 //! Experimental immutable compact-block snapshots; not a live wallet service.
+pub mod follower;
+pub mod full_source;
+pub mod http;
 pub mod importer;
+pub mod query;
 pub mod server;
 
 pub const MAX_BLOCK_BYTES: usize = 4 * 1024 * 1024;

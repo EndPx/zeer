@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-13T12:26:19.884585+00:00",
+  "base_commit": "ddb4d5b6818ad4795554722a5b804173f4e72c4e",
+  "rust": "1.99.0",
+  "build_profile": "release optimized",
+  "build_image": "rust@sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+  "source_files_sha256": {
+    "Cargo.toml": "09fb4bd8e9e91abca8ff6a8407a010952364b610e392e8e384650b3cd8db4f41",
+    "Cargo.lock": "59fba1c36b4b6cfcdc7c2eaaee1bc1ccc574a1429064677e2f0628cdb1e47d53",
+    "rust-toolchain.toml": "2ad6f15416572b4836585087f1d4abc53b8fa2dbd616f8dacfaa587ed6714228",
+    "crates/prep/Cargo.toml": "fd04e667ec115eacf97b31ac7c2bf2fce8a587fb546f88b29ab983cd743cad76",
+    "crates/prep/src/follower.rs": "4fc62fd71ac1d132ea5df1e210928e4f8ac06561ed152949655849f80a9d91f5",
+    "crates/prep/src/full_source.rs": "c2c7bc979f67256f6e28a49ceb6d26f777f4eaf276d9e8bc3af6856e137971af",
+    "crates/prep/src/http.rs": "c8170574b7adada617d698e112617be718803e1255e139cbcfe494cf64941912",
+    "crates/prep/src/importer.rs": "be31d7bf71a8e0b422b3ff3bdcf94a69a4803d22050bc3513578be33c16c86e9",
+    "crates/prep/src/lib.rs": "1ef7e949e2a6f9bb4b44bc59ce289721d82a675faf6c625196531716c2561cd6",
+    "crates/prep/src/main.rs": "bb59fb1c80d889f06e7daa91d6fa4621f103eca701ff24cffbd51233ea460602",
+    "crates/prep/src/query.rs": "e09a8981dd7f3813fa8b25c9cfd3accd59ea8c7c1a8d62d91b8596f8210b4178",
+    "crates/prep/src/server.rs": "a416f3ef53a6d7ea7ce8c2c1a01d7d2c0963504fe03227d9a06579cd92405c0d",
+    "crates/prep/tests/integration.rs": "00edd9e86e467ee13fe0a3a0c4a31fd86450eb551f0fee2a29d1574f6d24f175",
+    "crates/prep-proto/Cargo.toml": "02448ca4f41c2a8562911014c15ded6722b413f8fa708a728ecb144aa1c4a28f",
+    "crates/prep-proto/build.rs": "0ac7651a5bff98e3334d800537b521e79a9ad9f163dcca1bc206968c3b4242d0",
+    "crates/prep-proto/proto/compact_formats.proto": "d8d0c8aaa5ceec7d5dcc188ef25b04011df2ec0254901620fce982fc13aeb32d",
+    "crates/prep-proto/proto/prep.proto": "99a2fd7bbb1ae1a265d0ffb367871421186d1f98e95dbdfa1585315adba954ab",
+    "crates/prep-proto/proto/service.proto": "6fbfa974081fb02366a3118a25764af289bdbb86688978f5ff2bae661dfa346a",
+    "crates/prep-proto/src/lib.rs": "c11b48f9181d9003c2fb6e01281eb76ac13cb6d874c01e7e647a3c2a90031f26",
+    "crates/prep-store/Cargo.toml": "fe91ee07f219e5bc95f7f7f4f44e7dac52d47f32cad5b67a4133a6298114a085",
+    "crates/prep-store/src/archive.rs": "90456984108f99984db478ab13bf0b0812700d230a581629ae39a823171d7c4d",
+    "crates/prep-store/src/lib.rs": "aee26fe666f9651a5cbbc49fbc3f7d977be8f27b19a375cd2f213736b12cf2e9"
+  },
+  "verifier_sha256": "822d9a3d4767ea7c2422b588ff2a722e26c1bff4f2cffef347da70c30e365725",
+  "live_verifier_sha256": "299daf475a4cd8dc7e6a08b59b78f2602595c7e6def1e39c9154453ab8becdd9",
+  "binary_sha256": "6b9158d696e96f12ba225a2a80c143f726fd6e5aef068d038c8861a9d0150132",
+  "validation": {
+    "rust_tests_passed": 64,
+    "rustfmt": "PASS",
+    "clippy_D_warnings": "PASS",
+    "release_build": "PASS"
+  },
+  "containers": [
+    {
+      "name": "zeer-prep-http-indexed",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false,
+      "cpus": 1.0,
+      "memory_bytes": 1073741824,
+      "ports": {},
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa"
+    },
+    {
+      "name": "zeer-prep-http",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false,
+      "cpus": 1.0,
+      "memory_bytes": 1073741824,
+      "ports": {},
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa"
+    },
+    {
+      "name": "zeer-prep-live-follow",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false,
+      "cpus": 0.75,
+      "memory_bytes": 2147483648,
+      "ports": {},
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa"
+    },
+    {
+      "name": "zeer-prep-live-http",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false,
+      "cpus": 1.0,
+      "memory_bytes": 1073741824,
+      "ports": {},
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa"
+    },
+    {
+      "name": "zeer-prep-regtest-source",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false,
+      "cpus": 0.75,
+      "memory_bytes": 2147483648,
+      "ports": {},
+      "image_id": "sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2"
+    },
+    {
+      "name": "zeer-prep-regtest-node",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false,
+      "cpus": 0.75,
+      "memory_bytes": 2147483648,
+      "ports": {},
+      "image_id": "sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2"
+    },
+    {
+      "name": "zeer-bench-four-frozen",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false,
+      "cpus": 1.0,
+      "memory_bytes": 2147483648,
+      "ports": {
+        "8232/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "39432"
+          }
+        ]
+      },
+      "image_id": "sha256:17894f48b51ee4249a6555692a07881a305085f25b5c7b0bed5887a73e2ad85a"
+    }
+  ],
+  "source_image": "zakuracore/zakura@sha256:17894f48b51ee4249a6555692a07881a305085f25b5c7b0bed5887a73e2ad85a",
+  "regtest_image": "zfnd/zebra@sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2",
+  "new_directory_bytes": 150021855,
+  "all_prep_directories_bytes": 1844537145,
+  "free_disk_bytes": 85436182528,
+  "limits": {
+    "build": "3CPU/4GiB, source services stopped",
+    "mainnet_ingest": "source1CPU/2GiB +Prep2CPU/2GiB",
+    "final_read_comparison": "source1CPU/2GiB +Prep1CPU/1GiB +client1CPU/2GiB",
+    "regtest_live": "source0.75CPU/2GiB +follower0.75CPU/2GiB +HTTP1CPU/1GiB +client0.5CPU/512MiB"
+  },
+  "notes": [
+    "Resource limits are configuration, not per-sample consumption measurements.",
+    "Regtest mining used a copy of the original frozen benchmark state.",
+    "Existing application services were checked active; no public Prep ports or registry publication.",
+    "Live verifier raw execution hash includes a Windows final CRLF; canonical_lf hash identifies the published LF-normalized script with identical code."
+  ],
+  "live_verifier_canonical_lf_sha256": "f94e67c695ee40c1cbd98f3a3226eaacf29336001cddede00792cf204be4d915",
+  "sdk": {
+    "node": "24.18.0",
+    "tests_passed": 13,
+    "typescript": "7.0.2",
+    "strict_consumer_typecheck": "PASS",
+    "packed_package_install": "PASS",
+    "npm_published": false,
+    "tarball_sha256": "972ce431c6335a6dc77a97aa9838d79dcedb28cbbbfc3d745ba9b509773229cf"
+  }
+}

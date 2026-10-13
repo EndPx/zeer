@@ -28,3 +28,15 @@ message BlockBatch {
   // Encoded CompactBlock messages from the pinned upstream schema.
   repeated bytes compact_blocks = 4;
 }
+
+// Full serialized consensus block, plus the full-node's decoded projection.
+// Raw bytes preserve every transaction, including encrypted shielded payloads.
+// Hash bytes use the same internal protocol order as CompactBlock.
+message FullBlock {
+  uint64 height = 1;
+  bytes hash = 2;
+  bytes prev_hash = 3;
+  uint64 time = 4;
+  bytes raw_block = 5;
+  string decoded_json = 6;
+}

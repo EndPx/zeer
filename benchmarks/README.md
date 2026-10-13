@@ -5,6 +5,8 @@ The first measured scenario is **compact-block serving and normalized header ver
 
 ## Current evidence
 
+- [Prep full-data prototype](results/reports/2026-10-13-prep-full.md): full-node ingestion, 1,024 blocks / 13,817 transactions, real Regtest follow, local SDK and a specifically bounded header-retrieval comparison.
+
 - [First Prep engine round-trip](results/reports/2026-10-13-prep.md): 256 public mainnet compact blocks, nonempty Sapling/Orchard fields, immutable local storage and native gRPC serving. Correctness evidence, not a performance ranking.
 
 **Follow-up:** [all four services now have a common measured transaction-lookup case](results/reports/2026-10-13-four.md) on a frozen early-mainnet prefix. This uses a separately authorized 3 CPU / 8 GiB / 40 GiB envelope. The original regtest results below remain separate.

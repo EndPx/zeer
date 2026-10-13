@@ -1,116 +1,138 @@
-# Zeer Prep: bounded historical range engine
+# Zeer Prep engine
 
-Implementation authorization: user requested work toward Zeer Prep on 2026-10-13.
-This document owns Prep's first engine contract. The earlier TypeScript/GraphQL
-proposal belongs to Zeer Chef and is not this engine's architecture.
+Updated 2026-10-13. The user requires complete blocks and transactions for the
+28 October delivery. [Delivery contract](PREP_DELIVERY.md) owns the active scope;
+[query contract](PREP_QUERY.md) owns the HTTP and SDK semantics. Chef is deferred.
 
-## First vertical slice
+## Implemented data paths
 
-1. Read a specified historical range through a lightwalletd-compatible source.
-2. Check network, predecessor and an explicitly expected terminal block hash.
-3. Store the pinned-schema compact-block representation as a sequential segment.
-4. Publish the manifest only after every block and terminal anchor passes.
-5. Serve requested subranges through the experimental `zeer.prep.v1.Prep` gRPC
-   service, with bounded batches and a required dataset identity.
+```text
+Zebra-compatible full-node JSON-RPC
+    -> Rust full-block source + follower
+    -> immutable segments + atomic archive catalog
+    -> HTTP range/filter/field-selection API
+    -> typed native-fetch client or another application
+```
 
-Rust is the implementation language. Storage is separated from transport so a
-future HTTP/binary experiment can reuse the engine. gRPC is the initial test
-transport, not a claimed source of superior speed. No HTTP, Arrow or Cap'n Proto
-implementation is implied by the comparison with HyperSync.
+The earlier compact-block workflow remains separate: lightwalletd-compatible
+source -> one compact snapshot -> native gRPC range service. Full archives are
+not mislabeled as compact snapshots and cannot be served by that legacy API.
 
-## Storage and consistency
+## Full data and source validation
 
-- One immutable snapshot directory contains a length-prefixed segment and a
-  manifest with range, anchors, offsets and integrity checksums.
-- Import accepts ascending, contiguous heights with matching parent hashes.
-  Explicit bounds constrain block count, individual payload and total bytes.
-- Validation failures before publication never publish a manifest. After the
-  atomic publication step, an I/O failure during directory sync or cleanup has
-  an ambiguous outcome: inspect/reopen the existing snapshot before retrying.
-  Existing output is not overwritten. An incomplete directory is retained for
-  diagnosis; retry in a new directory. Ingestion restart from an incomplete
-  snapshot is not implemented.
-- Store opening verifies the committed data before serving. Segment integrity
-  and source anchor agreement establish consistency with the chosen provider;
-  they do not establish independent full-node consensus or proof verification.
-- Every range request binds its start/end to a dataset ID. Clients resume at
-  `next_height` only against the same dataset. The server rejects other dataset
-  IDs and out-of-bounds requests.
-- No automatic live following or reorg rollback is implemented in this slice.
-  An old snapshot remains a historical capture and can become stale. Consumers
-  must revalidate canonical anchors before treating historical data as current.
-- Local store ownership is trusted. The operator must not mutate a served
-  snapshot. Checksums do not authenticate a malicious store owner or provider.
+The source reads `getblockchaininfo`, `getblockhash`, and `getblock` verbosity 0
+and 2. It stores the complete serialized block and node-decoded JSON, including
+all transaction objects and their raw hex. Unknown decoded source fields are
+retained. Shielded ciphertext remains ciphertext; no viewing or spending keys,
+private memo reading, transaction signing or broadcast are implemented.
 
-## Data and privacy
+The importer checks SHA256d of the serialized header, parent/time agreement,
+canonical CompactSize counts, and exact concatenation of every returned raw
+transaction into the full block. It rechecks source network and range anchors
+before publication. The full node remains the consensus authority; Prep does
+not independently verify proofs, scripts, Merkle roots or modern transaction
+IDs. Decoded values such as confirmations describe the time of capture.
 
-The preserved projection is the pinned upstream CompactBlock schema, including
-its represented Sapling/Orchard/other declared fields. Protobuf decoding does not
-promise preservation of future unknown fields. The prototype does not advertise
-universal protocol-upgrade compatibility, arbitrary field filtering, a full
-transaction archive, transparent-address history or wallet compatibility.
+Zebra 6.2.3 can label Regtest as `test`; the adapter disambiguates only by the
+known Regtest genesis hash. A failed genesis lookup fails closed rather than
+choosing a network by difficulty or activation schedule.
 
-No viewing/spending key is accepted. Prep does not trial-decrypt notes, read
-private memos or construct wallet state. A successful payload round-trip is not
-proof that a wallet can sync or spend using this service.
+## Archive, restart and follow
 
-## Resource and deployment boundaries
+- Segment payload kinds are `full-v1` and legacy `compact-v1`; one archive never
+  mixes them. Full payloads use the original `FullBlock` protobuf envelope.
+- A process holds an exclusive archive-writer lock and reuses its verified
+  segment metadata plus HTTP connection pool across sync steps.
+- A completed segment is admitted through an atomic catalog revision. The
+  catalog advances only after complete records, hashes and source anchors pass.
+- Restart resumes from the last committed segment. Incomplete/orphan segments
+  are ignored by readers but retained and counted against disk capacity.
+- Appending preserves the epoch. Removing history increments the epoch and
+  invalidates old cursors. Readers retain a coherent catalog snapshot.
+- Reorg recovery checks the existing head and searches a bounded predecessor
+  window. It removes catalog references to whole overlapping segments before
+  rebuilding. Excessive reorg depth marks the source not ready and stops sync.
+- Validated historical data remains readable during ordinary append. Catalog
+  and source-status mismatch temporarily fails closed during publication.
+- Follow mode polls the source and exposes observed source height, indexed
+  height and lag. A source observation is not proof that the source is at the
+  public network tip. Historical mode remains readable after sync exits;
+  following-mode status expires after 120 seconds without an update.
+- Post-publication filesystem errors can have an ambiguous outcome. Inspect
+  the existing catalog/snapshot before retrying; never assume it is absent.
 
-Initial supported write/test target: Linux. Read-only local gRPC serving is a
-development profile, with explicit opt-in for non-loopback binding. It is not a
-public authenticated production deployment. Source HTTPS must verify its
-certificate; plaintext remote sources require explicit opt-in.
+## Query and client
 
-Keep existing shared-VPS applications untouched. The previously authorized
-aggregate experimental envelope remains 3 CPU / 8 GiB RAM / 40 GiB incremental
-disk, including source, build, server and client work. Run build and measurements
-separately if their combined limits would exceed that envelope. No paid hosting
-upgrade or public port exposure is needed.
+`GET /height`, `/health`, `/ready`, and `POST /query` serve the full archive.
+Queries support a bounded scanned-block limit, field selection, transaction IDs,
+versions, public Sapling/Orchard activity flags, and transparent output addresses.
+They do not resolve transparent input ownership or search shielded recipients.
 
-## Acceptance and evidence
+A cursor binds network, archive start, query, epoch and the captured terminal
+hash. It survives ordinary append but rejects incompatible replacement history.
+Nested numbers in decoded block/transaction fields and vin/vout are exact
+strings; raw consensus bytes are available for independent decoding.
 
-- Durable close/reopen and exact subrange reconstruction.
-- Reject missing, duplicate, out-of-order, broken-parent, truncated and corrupted
-  data; never expose a partially written snapshot.
-- Real gRPC round-trip, invalid dataset/range rejection and bounded batching.
-- Import failure tests with a controlled upstream, clearly identified as test
-  fixtures rather than chain evidence.
-- A bounded real-chain capture, when available, including source/version, range,
-  block anchors, payload counts and correctness results. Public-provider trust
-  is disclosed separately from locally validated-node evidence.
-- Any serving benchmark must return equivalent output and identify preparation
-  costs, cache state, transport, client implementation and network placement.
-  A remote source versus local cache is not an isolated engine-speed comparison.
+Header-only requests use verified cached height/hash/parent/time metadata.
+Full/raw transaction requests still read payloads. The optional legacy full
+manifest without indexed time falls back to checked payload reading.
 
-## Next engine gates
+The unpublished `packages/prep-client` exposes `getHeight()`, `get()`, and finite
+`stream()` with cancellation, deadlines, bounds and explicit reorg errors. It
+uses native fetch rather than a Rust native addon. HTTP/binary, Arrow, Parquet,
+SSE, automatic client rollback and npm publication are not implemented.
 
-After the first slice, measure modern shielded bulk retrieval against existing
-services on equivalent outputs; profile disk, encoding, transfer and client
-decoding separately. Use results to decide batching, compression or storage
-changes. Live following, reorg-aware dataset publication, scalable query indexes,
-public-service authentication and polished SDK/CLI packaging need separate
-implementation and evidence. Chef remains the later application layer.
+## Limits and deployment
 
-## Developer commands
+- Linux/Unix writes; tested Linux x86_64 with Rust 1.99.0 and Cargo.lock.
+- Consensus raw block <=2,000,000 bytes; RPC JSON <=32 MiB; full envelope <=64 MiB;
+  compact payload <=4 MiB. Oversized data is rejected rather than omitted.
+- Segment <=256 MiB; follower buffers up to 252 MiB of encoded records with metadata
+  reserve; configurable disk allowance counts old/incomplete files too.
+- At most 10,000 referenced segments; configured segment range 1..1000 blocks;
+  archive begins at height 1 or later. No entire-mainnet archive was deployed.
+- Query <=1000 scanned blocks and 32 MiB serialized response; 2 active queries.
+  These are serialization/concurrency bounds, not a 32 MiB peak-memory claim.
+- Source HTTPS verifies certificates. Source Basic credentials come only from
+  PREP_SOURCE_USER/PREP_SOURCE_PASSWORD. Plaintext non-loopback sources require
+  explicit opt-in and private/local addresses.
+- HTTP defaults to loopback. Non-loopback serving requires explicit opt-in plus
+  PREP_API_TOKEN with at least 16 bytes. Use a TLS proxy for network deployments;
+  the private prototype is not an audited public service.
+- Shared-VPS experiments stay within 3 aggregate CPU / 8 GiB / 40 GiB, without paid
+  upgrades or changes to existing applications.
 
-Use Linux or WSL with the pinned Rust toolchain; protobuf compiler binaries are
-provided by the build dependency. This internal executable is not a published
-npm package or polished product CLI.
+## Commands
 
 ```sh
 cargo test --workspace --locked
-cargo build -p prep --locked
+cargo build --release -p prep --locked
 
-# First obtain the terminal hash through an independent read of the chosen source.
-# The directory's parent must exist; the output leaf must not already exist.
-target/debug/prep import --source https://zec.rocks:443 --network mainnet \
-  --start 2700000 --end 2700255 \
-  --expected-end-hash 000000000102414eebc037d5bd2b7ac5dba0edd03a4102f69c9ac462e66c7b52 \
-  --out /path/to/new-snapshot
-target/debug/prep inspect --dataset /path/to/new-snapshot
-target/debug/prep serve --dataset /path/to/new-snapshot
+# Parent directory must exist; the archive is created or safely resumed.
+target/release/prep sync --source http://127.0.0.1:8232 --network mainnet \
+  --archive ./data/mainnet --from 1000 --to 2023 --segment-blocks 128
+
+target/release/prep archive-inspect --archive ./data/mainnet
+target/release/prep serve-http --archive ./data/mainnet
+
+# Follow mode has no fixed --to. Use the archive's original --from when resuming.
+target/release/prep sync --source http://127.0.0.1:8232 --network mainnet \
+  --archive ./data/mainnet --from 1000 --follow --confirmations 10
+
+node examples/prep-client/query.mjs
 ```
 
-The sample anchor identifies a historical capture, not the current mainnet tip.
-Source verification, endpoint status and canonicality must be checked for each
-new use. See [reference capture and verification](../benchmarks/prep/README.md).
+The internal CLI also retains `import`, `inspect`, and `serve` for compact
+snapshots. Existing public compact APIs and full-node APIs are distinct sources.
+
+## Evidence and remaining limits
+
+See the [full-archive report](../benchmarks/results/reports/2026-10-13-prep-full.md)
+for full mainnet-range validation, isolated real-node follow, failure tests,
+SDK verification and a narrowly defined native-read comparison. The
+[first compact-snapshot report](../benchmarks/results/reports/2026-10-13-prep.md)
+remains historical evidence.
+
+Large-scale public operation, millions-of-block latency, complete network
+upgrade interoperability and modern full shielded-payload production workloads
+remain unproven. No universal HyperSync parity or speedup is claimed.

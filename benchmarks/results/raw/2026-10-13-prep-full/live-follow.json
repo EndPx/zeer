@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "network": "isolated-regtest",
+  "initial_head": 1024,
+  "generated_blocks": [
+    "d7a5da6e042bca77abc19d1dd796b1bcfab897d6ede7b9e27042c86aec69d7a1",
+    "62aa5db0201c1980fec400570fddd5857c685e8fb6ffb39bd67ec7c7dc22b6dc"
+  ],
+  "final_source_height": 1026,
+  "final_indexed_height": 1026,
+  "lag_blocks": 0,
+  "append_preserved_cursor_epoch": true,
+  "old_cursor_captured_to": 1025,
+  "new_full_blocks": 2,
+  "new_full_transactions": 2,
+  "transaction_versions": [
+    6
+  ],
+  "limits": "Real Zebra regtest growth; no real funds, public-network live-follow proof or real-node reorg claim"
+}

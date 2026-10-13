@@ -17,13 +17,34 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use thiserror::Error;
 
+mod archive;
+pub use archive::{Archive, ArchiveRangeReader, ArchiveWriter, Catalog, SegmentReference};
+
 pub const MAX_BLOCK_BYTES: u64 = 4 * 1024 * 1024;
+pub const MAX_FULL_BLOCK_BYTES: u64 = 64 * 1024 * 1024;
 pub const MAX_SEGMENT_BYTES: u64 = 256 * 1024 * 1024;
 pub const MAX_BLOCKS: u64 = 100_000;
 pub const MAX_MANIFEST_BYTES: u64 = 64 * 1024 * 1024;
 const SEGMENT_NAME: &str = "segment.bin";
 const MANIFEST_NAME: &str = "manifest.json";
 const PENDING_NAME: &str = "manifest.pending";
+pub const COMPACT_KIND: &str = "compact-v1";
+pub const FULL_KIND: &str = "full-v1";
+
+fn default_payload_kind() -> String {
+    COMPACT_KIND.to_owned()
+}
+
+fn is_compact_kind(kind: &str) -> bool {
+    kind == COMPACT_KIND
+}
+
+fn check_payload_kind(kind: &str) -> Result<()> {
+    if !matches!(kind, COMPACT_KIND | FULL_KIND) {
+        return Err(Error::Invalid("unsupported payload kind"));
+    }
+    Ok(())
+}
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -71,7 +92,7 @@ impl Default for StoreLimits {
 impl StoreLimits {
     fn validate(self) -> Result<Self> {
         for (value, ceiling) in [
-            (self.max_block_bytes, MAX_BLOCK_BYTES),
+            (self.max_block_bytes, MAX_FULL_BLOCK_BYTES),
             (self.max_segment_bytes, MAX_SEGMENT_BYTES),
             (self.max_blocks, MAX_BLOCKS),
             (self.max_manifest_bytes, MAX_MANIFEST_BYTES),
@@ -97,6 +118,15 @@ pub struct BlockRecord {
     pub payload: Vec<u8>,
 }
 
+/// Header metadata validated against the immutable encoded payload on admission.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BlockHeader {
+    pub height: u64,
+    pub hash: Vec<u8>,
+    pub prev_hash: Vec<u8>,
+    pub time: u64,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct BlockIndex {
@@ -108,12 +138,21 @@ pub struct BlockIndex {
     /// Conventional RPC display order, reversed from protocol bytes.
     pub hash: String,
     pub prev_hash: String,
+    /// Present on newly written full-v1 segments. Legacy and compact metadata
+    /// omit it so their manifest serialization remains unchanged.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Manifest {
     pub schema_version: u32,
+    #[serde(
+        default = "default_payload_kind",
+        skip_serializing_if = "is_compact_kind"
+    )]
+    pub payload_kind: String,
     pub dataset_id: String,
     pub network: String,
     pub start_height: u64,
@@ -129,8 +168,14 @@ pub struct Manifest {
 /// Derive identity from the network, frozen bounds/anchors and exact segment.
 /// The serialized tuple is a versioned JSON array, not map-order-dependent JSON.
 pub fn dataset_id(manifest: &Manifest) -> Result<String> {
+    check_payload_kind(&manifest.payload_kind)?;
+    let marker = if manifest.payload_kind == FULL_KIND {
+        "zeer-prep-full-snapshot-v1"
+    } else {
+        "zeer-prep-snapshot-v1"
+    };
     let bytes = serde_json::to_vec(&(
-        "zeer-prep-snapshot-v1",
+        marker,
         &manifest.network,
         manifest.start_height,
         manifest.end_height,
@@ -189,23 +234,61 @@ fn check_network(network: &str) -> Result<()> {
     Ok(())
 }
 
-fn check_record(record: &BlockRecord, max_bytes: u64) -> Result<()> {
+fn check_record(record: &BlockRecord, max_bytes: u64, kind: &str) -> Result<Option<u64>> {
+    let max_bytes = max_bytes.min(if kind == FULL_KIND {
+        MAX_FULL_BLOCK_BYTES
+    } else {
+        MAX_BLOCK_BYTES
+    });
     if record.payload.is_empty() || record.payload.len() as u64 > max_bytes {
         return Err(Error::Limit("block payload bytes"));
     }
     if record.hash.len() != 32 || record.prev_hash.len() != 32 {
         return Err(Error::Invalid("record hashes must contain 32 bytes"));
     }
-    let block = CompactBlock::decode(record.payload.as_slice())?;
-    if block.height != record.height
-        || block.hash != record.hash
-        || block.prev_hash != record.prev_hash
-    {
-        return Err(Error::Invalid(
-            "record metadata differs from decoded payload",
-        ));
-    }
-    Ok(())
+    let indexed_time = match kind {
+        COMPACT_KIND => {
+            let block = CompactBlock::decode(record.payload.as_slice())?;
+            if block.height != record.height
+                || block.hash != record.hash
+                || block.prev_hash != record.prev_hash
+            {
+                return Err(Error::Invalid(
+                    "record metadata differs from decoded payload",
+                ));
+            }
+            None
+        }
+        FULL_KIND => {
+            let block = prep_proto::prep::FullBlock::decode(record.payload.as_slice())?;
+            if block.height != record.height
+                || block.hash != record.hash
+                || block.prev_hash != record.prev_hash
+            {
+                return Err(Error::Invalid(
+                    "full record metadata differs from decoded payload",
+                ));
+            }
+            if block.raw_block.is_empty() || block.decoded_json.is_empty() {
+                return Err(Error::Invalid(
+                    "full record requires raw block and decoded JSON",
+                ));
+            }
+            if !block.decoded_json.trim_start().starts_with('{') {
+                return Err(Error::Invalid("full decoded JSON must be an object"));
+            }
+            // Validate JSON without allocating a second complete JSON value tree.
+            let _: serde::de::IgnoredAny = serde_json::from_str(&block.decoded_json)?;
+            if block.time > u64::from(u32::MAX) {
+                return Err(Error::Invalid(
+                    "full block time exceeds serialized header u32 range",
+                ));
+            }
+            Some(block.time)
+        }
+        _ => return Err(Error::Invalid("unsupported payload kind")),
+    };
+    Ok(indexed_time)
 }
 
 #[cfg(unix)]
@@ -274,6 +357,72 @@ impl StoreWriter {
         end_hash_hex: &str,
         limits: StoreLimits,
     ) -> Result<Self> {
+        Self::create_for_kind(
+            path,
+            network,
+            start,
+            end,
+            predecessor_hex,
+            end_hash_hex,
+            limits,
+            COMPACT_KIND,
+        )
+    }
+
+    pub fn create_full(
+        path: impl AsRef<Path>,
+        network: &str,
+        start: u64,
+        end: u64,
+        predecessor_hex: &str,
+        end_hash_hex: &str,
+    ) -> Result<Self> {
+        Self::create_full_with_limits(
+            path,
+            network,
+            start,
+            end,
+            predecessor_hex,
+            end_hash_hex,
+            StoreLimits {
+                max_block_bytes: MAX_FULL_BLOCK_BYTES,
+                ..StoreLimits::default()
+            },
+        )
+    }
+
+    pub fn create_full_with_limits(
+        path: impl AsRef<Path>,
+        network: &str,
+        start: u64,
+        end: u64,
+        predecessor_hex: &str,
+        end_hash_hex: &str,
+        limits: StoreLimits,
+    ) -> Result<Self> {
+        Self::create_for_kind(
+            path,
+            network,
+            start,
+            end,
+            predecessor_hex,
+            end_hash_hex,
+            limits,
+            FULL_KIND,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn create_for_kind(
+        path: impl AsRef<Path>,
+        network: &str,
+        start: u64,
+        end: u64,
+        predecessor_hex: &str,
+        end_hash_hex: &str,
+        limits: StoreLimits,
+        kind: &str,
+    ) -> Result<Self> {
         if !cfg!(unix) {
             return Err(Error::UnsupportedWritePlatform);
         }
@@ -302,6 +451,7 @@ impl StoreWriter {
             poisoned: false,
             manifest: Manifest {
                 schema_version: 1,
+                payload_kind: kind.to_owned(),
                 dataset_id: String::new(),
                 network: network.to_owned(),
                 start_height: start,
@@ -328,7 +478,11 @@ impl StoreWriter {
     }
 
     fn push_checked(&mut self, record: BlockRecord) -> Result<()> {
-        check_record(&record, self.limits.max_block_bytes)?;
+        let indexed_time = check_record(
+            &record,
+            self.limits.max_block_bytes,
+            &self.manifest.payload_kind,
+        )?;
         let index = self.manifest.blocks.len() as u64;
         if index >= self.manifest.block_count {
             return Err(Error::Invalid("more records than frozen range"));
@@ -366,6 +520,7 @@ impl StoreWriter {
             payload_sha256: sha256(&record.payload),
             hash: display_hash(&record.hash)?,
             prev_hash: display_hash(&record.prev_hash)?,
+            time: indexed_time,
         });
         self.next_parent = record.hash;
         self.manifest.segment_bytes = next_offset;
@@ -424,11 +579,15 @@ pub struct Store {
 
 impl Store {
     pub fn open(path: impl AsRef<Path>) -> Result<Self> {
-        Self::open_with_limits(path, StoreLimits::default())
+        Self::open_internal(path, StoreLimits::default(), true)
     }
 
     pub fn open_with_limits(path: impl AsRef<Path>, limits: StoreLimits) -> Result<Self> {
-        let limits = limits.validate()?;
+        Self::open_internal(path, limits, false)
+    }
+
+    fn open_internal(path: impl AsRef<Path>, limits: StoreLimits, auto_kind: bool) -> Result<Self> {
+        let mut limits = limits.validate()?;
         let path = path.as_ref().to_path_buf();
         if !fs::symlink_metadata(&path)?.file_type().is_dir() {
             return Err(Error::Invalid(
@@ -447,6 +606,9 @@ impl Store {
             return Err(Error::Limit("manifest grew while reading"));
         }
         let manifest: Manifest = serde_json::from_slice(&json)?;
+        if auto_kind && manifest.payload_kind == FULL_KIND {
+            limits.max_block_bytes = MAX_FULL_BLOCK_BYTES;
+        }
         validate_manifest_structure(&manifest, limits)?;
         let mut segment = regular_file(&path.join(SEGMENT_NAME))?;
         if segment.metadata()?.len() != manifest.segment_bytes {
@@ -454,7 +616,12 @@ impl Store {
         }
         let mut digest = Sha256::new();
         for index in &manifest.blocks {
-            let record = read_record(&mut segment, index, limits.max_block_bytes)?;
+            let record = read_record(
+                &mut segment,
+                index,
+                limits.max_block_bytes,
+                &manifest.payload_kind,
+            )?;
             digest.update(index.length.to_le_bytes());
             digest.update(&record.payload);
         }
@@ -505,6 +672,43 @@ impl Store {
             .next()
             .ok_or(Error::Invalid("missing block"))?
     }
+
+    fn block_index(&self, height: u64) -> Result<&BlockIndex> {
+        if height < self.manifest.start_height || height > self.manifest.end_height {
+            return Err(Error::Invalid("requested height is outside snapshot"));
+        }
+        self.manifest
+            .blocks
+            .get((height - self.manifest.start_height) as usize)
+            .ok_or(Error::Invalid("missing block index"))
+    }
+
+    /// Uses the verified immutable index without reading the encoded payload.
+    pub fn block_hash(&self, height: u64) -> Result<String> {
+        Ok(self.block_index(height)?.hash.clone())
+    }
+
+    /// Newly indexed full-v1 headers avoid disk reads and payload decoding.
+    /// Old full/compact segments without indexed time use the checked slow path.
+    pub fn read_header(&self, height: u64) -> Result<BlockHeader> {
+        let entry = self.block_index(height)?;
+        let time = if let Some(time) = entry.time {
+            time
+        } else {
+            let record = self.read_block(height)?;
+            if self.manifest.payload_kind == FULL_KIND {
+                prep_proto::prep::FullBlock::decode(record.payload.as_slice())?.time
+            } else {
+                u64::from(CompactBlock::decode(record.payload.as_slice())?.time)
+            }
+        };
+        Ok(BlockHeader {
+            height,
+            hash: parse_hex_hash(&entry.hash)?,
+            prev_hash: parse_hex_hash(&entry.prev_hash)?,
+            time,
+        })
+    }
 }
 
 fn validate_manifest_structure(manifest: &Manifest, limits: StoreLimits) -> Result<()> {
@@ -512,6 +716,7 @@ fn validate_manifest_structure(manifest: &Manifest, limits: StoreLimits) -> Resu
         return Err(Error::Invalid("unsupported manifest version"));
     }
     check_network(&manifest.network)?;
+    check_payload_kind(&manifest.payload_kind)?;
     let expected_count = count(
         manifest.start_height,
         manifest.end_height,
@@ -535,12 +740,22 @@ fn validate_manifest_structure(manifest: &Manifest, limits: StoreLimits) -> Resu
         if entry.height != manifest.start_height + position as u64 || entry.offset != offset {
             return Err(Error::Invalid("noncontiguous manifest height or offset"));
         }
-        if entry.length == 0 || u64::from(entry.length) > limits.max_block_bytes {
+        let kind_ceiling = if manifest.payload_kind == FULL_KIND {
+            MAX_FULL_BLOCK_BYTES
+        } else {
+            MAX_BLOCK_BYTES
+        };
+        if entry.length == 0 || u64::from(entry.length) > limits.max_block_bytes.min(kind_ceiling) {
             return Err(Error::Limit("manifest block length"));
         }
         parse_hex_hash(&entry.hash)?;
         parse_hex_hash(&entry.prev_hash)?;
         parse_hex_hash(&entry.payload_sha256)?;
+        if entry.time.is_some_and(|time| time > u64::from(u32::MAX))
+            || (entry.time.is_some() && manifest.payload_kind != FULL_KIND)
+        {
+            return Err(Error::Invalid("invalid indexed header time"));
+        }
         if entry.prev_hash != parent {
             return Err(Error::Invalid("manifest parent mismatch"));
         }
@@ -555,7 +770,12 @@ fn validate_manifest_structure(manifest: &Manifest, limits: StoreLimits) -> Resu
     Ok(())
 }
 
-fn read_record(file: &mut File, entry: &BlockIndex, max_bytes: u64) -> Result<BlockRecord> {
+fn read_record(
+    file: &mut File,
+    entry: &BlockIndex,
+    max_bytes: u64,
+    kind: &str,
+) -> Result<BlockRecord> {
     file.seek(SeekFrom::Start(entry.offset))?;
     let mut prefix = [0_u8; 4];
     file.read_exact(&mut prefix)?;
@@ -574,7 +794,12 @@ fn read_record(file: &mut File, entry: &BlockIndex, max_bytes: u64) -> Result<Bl
         prev_hash: parse_hex_hash(&entry.prev_hash)?,
         payload,
     };
-    check_record(&record, max_bytes)?;
+    let decoded_time = check_record(&record, max_bytes, kind)?;
+    if entry.time.is_some() && entry.time != decoded_time {
+        return Err(Error::Invalid(
+            "indexed header time differs from decoded payload",
+        ));
+    }
     Ok(record)
 }
 
@@ -600,6 +825,7 @@ impl Iterator for RangeReader {
             &mut self.file,
             &self.manifest.blocks[self.next],
             self.max_block_bytes,
+            &self.manifest.payload_kind,
         );
         self.next += 1;
         if record.is_err() {
@@ -952,5 +1178,178 @@ mod tests {
         let mut changed = manifest.clone();
         changed.predecessor_hash = display_hash(&hash(1000)).unwrap();
         assert_ne!(dataset_id(&changed).unwrap(), manifest.dataset_id);
+    }
+
+    #[test]
+    fn compact_manifest_defaults_preserve_legacy_identity_and_serialization() {
+        let (_root, _, manifest) = snapshot();
+        let json = serde_json::to_value(&manifest).unwrap();
+        assert!(json.get("payload_kind").is_none());
+        assert!(json["blocks"][0].get("time").is_none());
+        let restored: Manifest = serde_json::from_value(json).unwrap();
+        assert_eq!(restored.payload_kind, COMPACT_KIND);
+        let legacy_bytes = serde_json::to_vec(&(
+            "zeer-prep-snapshot-v1",
+            &manifest.network,
+            manifest.start_height,
+            manifest.end_height,
+            &manifest.predecessor_hash,
+            &manifest.end_hash,
+            &manifest.segment_sha256,
+        ))
+        .unwrap();
+        assert_eq!(manifest.dataset_id, sha256(&legacy_bytes));
+        let mut changed = manifest.clone();
+        changed.payload_kind = FULL_KIND.into();
+        assert_ne!(dataset_id(&changed).unwrap(), manifest.dataset_id);
+    }
+
+    fn full_record(decoded_json: String, raw_block: Vec<u8>) -> BlockRecord {
+        let block = prep_proto::prep::FullBlock {
+            height: 1,
+            hash: hash(1),
+            prev_hash: hash(0),
+            time: 1,
+            raw_block,
+            decoded_json,
+        };
+        BlockRecord {
+            height: 1,
+            hash: hash(1),
+            prev_hash: hash(0),
+            payload: block.encode_to_vec(),
+        }
+    }
+
+    #[test]
+    fn full_payload_larger_than_compact_limit_reopens_with_full_profile() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("full");
+        let json = format!(
+            "{{\"padding\":\"{}\"}}",
+            "x".repeat(MAX_BLOCK_BYTES as usize)
+        );
+        let record = full_record(json, vec![1, 2, 3]);
+        assert!(record.payload.len() as u64 > MAX_BLOCK_BYTES);
+        let mut writer = StoreWriter::create_full(
+            &path,
+            "regtest",
+            1,
+            1,
+            &display_hash(&hash(0)).unwrap(),
+            &display_hash(&hash(1)).unwrap(),
+        )
+        .unwrap();
+        writer.push(record.clone()).unwrap();
+        let manifest = writer.finish().unwrap();
+        assert_eq!(manifest.payload_kind, FULL_KIND);
+        assert_eq!(Store::open(&path).unwrap().read_block(1).unwrap(), record);
+        assert!(Store::open_with_limits(&path, StoreLimits::default()).is_err());
+    }
+
+    #[test]
+    fn full_payload_requires_raw_bytes_and_valid_object_json() {
+        let root = tempfile::tempdir().unwrap();
+        for (index, (json, raw)) in [
+            ("{}", vec![]),
+            ("", vec![1]),
+            ("[]", vec![1]),
+            ("{invalid", vec![1]),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let path = root.path().join(format!("full-{index}"));
+            let mut writer = StoreWriter::create_full(
+                &path,
+                "regtest",
+                1,
+                1,
+                &display_hash(&hash(0)).unwrap(),
+                &display_hash(&hash(1)).unwrap(),
+            )
+            .unwrap();
+            assert!(writer.push(full_record(json.into(), raw)).is_err());
+            assert!(writer.finish().is_err());
+            assert!(!path.join(MANIFEST_NAME).exists());
+        }
+    }
+
+    fn full_snapshot() -> (TempDir, PathBuf, Manifest) {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("full");
+        let mut writer = StoreWriter::create_full(
+            &path,
+            "regtest",
+            1,
+            1,
+            &display_hash(&hash(0)).unwrap(),
+            &display_hash(&hash(1)).unwrap(),
+        )
+        .unwrap();
+        writer
+            .push(full_record("{\"synthetic\":true}".into(), vec![1, 2, 3]))
+            .unwrap();
+        let manifest = writer.finish().unwrap();
+        (root, path, manifest)
+    }
+
+    #[test]
+    fn indexed_full_header_matches_payload_without_payload_io() {
+        let (_root, path, manifest) = full_snapshot();
+        assert_eq!(manifest.blocks[0].time, Some(1));
+        let store = Store::open(&path).unwrap();
+        let record = store.read_block(1).unwrap();
+        let decoded = prep_proto::prep::FullBlock::decode(record.payload.as_slice()).unwrap();
+        let expected = BlockHeader {
+            height: decoded.height,
+            hash: decoded.hash,
+            prev_hash: decoded.prev_hash,
+            time: decoded.time,
+        };
+        // Synthetic test only: remove access to the payload after its complete
+        // admission check to prove this header path uses cached metadata.
+        fs::rename(path.join(SEGMENT_NAME), path.join("segment.saved")).unwrap();
+        assert_eq!(store.read_header(1).unwrap(), expected);
+        assert_eq!(
+            store.block_hash(1).unwrap(),
+            display_hash(&hash(1)).unwrap()
+        );
+        assert!(store.read_block(1).is_err());
+        assert!(store.read_header(2).is_err());
+    }
+
+    #[test]
+    fn corrupt_indexed_time_is_rejected_during_open() {
+        let (_root, path, mut manifest) = full_snapshot();
+        manifest.blocks[0].time = Some(2);
+        modify(
+            &path.join(MANIFEST_NAME),
+            &serde_json::to_vec(&manifest).unwrap(),
+        );
+        assert!(matches!(
+            Store::open(path),
+            Err(Error::Invalid(
+                "indexed header time differs from decoded payload"
+            ))
+        ));
+    }
+
+    #[test]
+    fn legacy_full_header_without_time_uses_checked_payload_fallback() {
+        let (_root, path, mut manifest) = full_snapshot();
+        manifest.blocks[0].time = None;
+        let serialized = serde_json::to_value(&manifest).unwrap();
+        assert!(serialized["blocks"][0].get("time").is_none());
+        modify(
+            &path.join(MANIFEST_NAME),
+            &serde_json::to_vec(&manifest).unwrap(),
+        );
+        let store = Store::open(&path).unwrap();
+        assert_eq!(store.read_header(1).unwrap().time, 1);
+        let mut segment = fs::read(path.join(SEGMENT_NAME)).unwrap();
+        segment[8] ^= 1;
+        modify(&path.join(SEGMENT_NAME), &segment);
+        assert!(store.read_header(1).is_err());
     }
 }

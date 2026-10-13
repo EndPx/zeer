@@ -57,6 +57,10 @@ pub struct PrepService {
 impl PrepService {
     pub fn new(store: Store, shutdown: watch::Receiver<bool>) -> Result<Self> {
         let manifest = store.manifest();
+        ensure!(
+            manifest.payload_kind == prep_store::COMPACT_KIND,
+            "compact_grpc_requires_compact_snapshot_use_full_archive_http"
+        );
         let info = DatasetInfo {
             dataset_id: manifest.dataset_id.clone(),
             network: manifest.network.clone(),

@@ -1,0 +1,13 @@
+{
+  "name": "@zeer/prep-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Experimental native-fetch client for Zeer Prep historical full-block queries",
+  "engines": { "node": ">=22.18.0" },
+  "exports": { ".": { "types": "./src/index.d.ts", "import": "./src/index.js" } },
+  "types": "./src/index.d.ts",
+  "files": ["src", "README.md"],
+  "scripts": { "test": "node --test test/*.test.js" },
+  "license": "MIT"
+}
