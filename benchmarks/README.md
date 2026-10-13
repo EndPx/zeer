@@ -6,6 +6,10 @@ The first measured scenario is **compact-block serving and normalized header ver
 
 ## Current evidence
 
+- [Five-candidate same-session lookup](results/reports/2026-10-14-lookup-session.md):
+  Chef, CipherScan, Zinder, Zaino and lightwalletd; equal aggregate source/candidate/client
+  ceilings, five rotated rounds and all-field output verification.
+
 - [Chef public indexing](results/reports/2026-10-14-chef.md): five fresh PostgreSQL
   runs each over Prep and RPC, all-row verification, native CipherScan ingestion
   as a separate workload, and supplementary prepared lookup. See the

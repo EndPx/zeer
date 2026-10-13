@@ -1,0 +1,1 @@
+{"candidate": "zaino", "round": 2, "status": "PASS", "eligible_for_comparison": false, "successful_runs": 1, "median_lookup_normalize_ns": 1812271658, "min_lookup_normalize_ns": 1812271658, "max_lookup_normalize_ns": 1812271658}

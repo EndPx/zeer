@@ -1,0 +1,1 @@
+{"candidate": "cipherscan", "round": 1, "status": "PASS", "eligible_for_comparison": false, "successful_runs": 1, "median_lookup_normalize_ns": 19913103, "min_lookup_normalize_ns": 19913103, "max_lookup_normalize_ns": 19913103}

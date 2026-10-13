@@ -8,6 +8,7 @@ Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**,
 
 ## Authoritative documents
 
+- [Five-candidate lookup session](benchmarks/results/reports/2026-10-14-lookup-session.md): 25 verified visits with rotated order and equal aggregate resource ceilings. This is prepared serving, separate from fresh ingestion.
 - [Active Chef public-data contract](docs/CHEF_PUBLIC_MVP.md): public Prep source, TypeScript handlers, developer PostgreSQL, GraphQL, recovery and separate indexing/retrieval benchmarks.
 - [Chef indexing benchmark and validation](benchmarks/results/reports/2026-10-14-chef.md): identical handlers/schema over Prep and direct RPC, independent all-row verification, native CipherScan ingestion with different explorer outputs, and supplementary external-provider lookup.
 - [Implementation plan and architecture](.omc/plans/zeer-v0.1.md): accepted product decisions, proposed technical contracts, scope, risks, gates, and acceptance criteria.

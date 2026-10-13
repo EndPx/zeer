@@ -1,0 +1,1 @@
+{"candidate": "chef", "round": 2, "status": "PASS", "eligible_for_comparison": false, "successful_runs": 1, "median_lookup_normalize_ns": 280888091, "min_lookup_normalize_ns": 280888091, "max_lookup_normalize_ns": 280888091}
