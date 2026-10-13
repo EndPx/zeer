@@ -24,6 +24,58 @@ pub const MAX_RAW_BLOCK_BYTES: usize = 2_000_000;
 pub const MAX_RPC_BYTES: usize = 32 * 1024 * 1024;
 pub const MAX_FULL_ENVELOPE_BYTES: usize = 64 * 1024 * 1024;
 
+/// Only transport interruptions and explicitly temporary HTTP statuses acquire
+/// this type. Integrity, JSON-RPC, authorization and local storage errors never
+/// become retryable merely because their text resembles a transport failure.
+#[derive(Debug)]
+pub(crate) enum TransientSourceError {
+    Transport,
+    HttpStatus,
+}
+
+impl std::fmt::Display for TransientSourceError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(match self {
+            Self::Transport => "rpc_transport_failed",
+            Self::HttpStatus => "rpc_http_status_failed",
+        })
+    }
+}
+
+impl std::error::Error for TransientSourceError {}
+
+pub(crate) fn is_transient_source_error(error: &anyhow::Error) -> bool {
+    error.downcast_ref::<TransientSourceError>().is_some()
+}
+
+fn transport_error(error: reqwest::Error, fallback: &'static str) -> anyhow::Error {
+    use std::error::Error;
+    use std::io::ErrorKind;
+    let mut source: Option<&(dyn Error + 'static)> = Some(&error);
+    let mut transient = error.is_timeout();
+    while let Some(cause) = source {
+        if let Some(io) = cause.downcast_ref::<std::io::Error>() {
+            transient |= matches!(
+                io.kind(),
+                ErrorKind::ConnectionRefused
+                    | ErrorKind::ConnectionReset
+                    | ErrorKind::ConnectionAborted
+                    | ErrorKind::NotConnected
+                    | ErrorKind::BrokenPipe
+                    | ErrorKind::TimedOut
+                    | ErrorKind::UnexpectedEof
+            );
+        }
+        source = cause.source();
+    }
+    if transient {
+        TransientSourceError::Transport.into()
+    } else {
+        // Do not preserve an upstream URL, authentication detail or TLS error.
+        anyhow!(fallback)
+    }
+}
+
 /// RPC display-order hash of Zebra's fixed regtest genesis header. Zebra 6.2.3
 /// can report `chain: "test"` for Regtest, so the RPC label alone is ambiguous.
 /// Verified by SHA256d of the serialized header in the official v6.2.3 fixture:
@@ -173,7 +225,10 @@ impl NodeRpc {
         let mut response = request
             .send()
             .await
-            .map_err(|_| anyhow!("rpc_transport_failed"))?;
+            .map_err(|error| transport_error(error, "rpc_transport_failed"))?;
+        if response.status().is_server_error() || response.status().as_u16() == 429 {
+            return Err(TransientSourceError::HttpStatus.into());
+        }
         ensure!(response.status().is_success(), "rpc_http_status_failed");
         ensure!(
             response
@@ -186,7 +241,7 @@ impl NodeRpc {
         while let Some(chunk) = response
             .chunk()
             .await
-            .map_err(|_| anyhow!("rpc_body_failed"))?
+            .map_err(|error| transport_error(error, "rpc_body_failed"))?
         {
             ensure!(
                 body.len()
@@ -446,6 +501,62 @@ pub fn validate_full_block(
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn only_temporary_http_statuses_and_connection_failures_are_retryable() {
+        use axum::{extract::State, http::StatusCode, routing::post, Router};
+        use tokio::net::TcpListener;
+        async fn handler(State(code): State<StatusCode>) -> (StatusCode, &'static str) {
+            (
+                code,
+                "invalid JSON or an upstream secret must never reach errors",
+            )
+        }
+        for (code, retryable) in [
+            (429, true),
+            (500, true),
+            (503, true),
+            (400, false),
+            (401, false),
+            (403, false),
+            (200, false),
+        ] {
+            let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let source = format!("http://{}", listener.local_addr().unwrap());
+            let app = Router::new()
+                .route("/", post(handler))
+                .with_state(StatusCode::from_u16(code).unwrap());
+            let server = tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+            let client = NodeRpc::with_auth(&source, false, None).await.unwrap();
+            let error = client.chain_info().await.unwrap_err();
+            assert_eq!(
+                is_transient_source_error(&error),
+                retryable,
+                "HTTP {code}: {error}"
+            );
+            assert!(!format!("{error:#}").contains("secret"));
+            server.abort();
+            let _ = server.await;
+        }
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let source = format!("http://{}", listener.local_addr().unwrap());
+        drop(listener);
+        let client = NodeRpc::with_auth(&source, false, None).await.unwrap();
+        assert!(is_transient_source_error(
+            &client.chain_info().await.unwrap_err()
+        ));
+        for message in [
+            "rpc_transport_failed",
+            "rpc_http_status_failed",
+            "raw_header_hash_mismatch",
+            "source_network_mismatch",
+            "archive_disk_budget_exhausted",
+            "deep_reorg_requires_operator_recovery",
+            "sync_deadline_exceeded",
+        ] {
+            assert!(!is_transient_source_error(&anyhow!(message)));
+        }
+    }
 
     pub(crate) fn fixture(height: u64, parent: &[u8], marker: u8) -> (String, Vec<u8>, Value) {
         let mut raw = vec![0u8; 140];

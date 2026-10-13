@@ -64,6 +64,17 @@ choosing a network by difficulty or activation schedule.
   height and lag. A source observation is not proof that the source is at the
   public network tip. Historical mode remains readable after sync exits;
   following-mode status expires after 120 seconds without an update.
+- Follow mode retries classified temporary source failures using the same
+  session and writer lock. `--max-source-retries` defaults to 8 additional
+  attempts (maximum 20); delays are 1, 2, 4, 8, 16, then 30 seconds, capped at
+  30 seconds. A successful step resets the consecutive-failure budget. Status
+  remains not ready while failures are being retried.
+- Only HTTP 429/5xx, request timeouts and recognized interrupted/refused network
+  I/O acquire the typed retry marker. Authentication, malformed responses,
+  integrity/network mismatch, disk errors, deep reorgs and the overall sync-step
+  deadline remain terminal. Historical mode does not retry. Initialization
+  errors and source IP changes are not recovered; private HTTP DNS answers are
+  pinned for the process lifetime. Ctrl-C interrupts polling and backoff.
 - Post-publication filesystem errors can have an ambiguous outcome. Inspect
   the existing catalog/snapshot before retrying; never assume it is absent.
 
@@ -153,6 +164,12 @@ records 4,096-block / 50,283-transaction independent verification and six
 before/after workloads for sequential reads, bounded sizing and concurrent source
 requests. It also records a scientific-notation correction in the independent
 Python oracle; strict output equality is retained.
+
+The [proof follow-up](../benchmarks/results/reports/2026-10-13-prep-proof.md)
+adds genuine historical NU5 full-block replay, a 600-second actual Zebra Regtest
+follow run through two node outages, and actual-node branch replacement with
+epoch advancement and old-cursor rejection. Its raw journals and trust boundaries
+are retained separately from throughput measurements.
 
 Large-scale public operation, millions-of-block latency, complete network
 upgrade interoperability and modern full shielded-payload production workloads

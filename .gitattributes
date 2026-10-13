@@ -4,6 +4,9 @@
 *.gz binary
 *.pbframes binary
 
+# Keep this captured proof fixture byte-identical to its recorded SHA-256.
+benchmarks/fixtures/mainnet-nu5-full-v1/fixture.json -text whitespace=cr-at-eol
+
 # Preserve upstream protocol bytes, including their existing comment whitespace.
 benchmarks/proto/*.proto whitespace=-blank-at-eol
 crates/prep-proto/proto/service.proto whitespace=-blank-at-eol

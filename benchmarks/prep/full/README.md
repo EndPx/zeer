@@ -81,3 +81,98 @@ incomplete file. It is a regression comparison, not a consensus oracle. Use the
 separate full-node verifier for source equality. Record the exact binaries,
 archive identity, resource limits and any regressions; do not publish only the
 fastest case.
+
+## Modern complete-block compatibility
+
+The committed [NU5 fixture](../../fixtures/mainnet-nu5-full-v1/README.md) has
+three genuine complete mainnet blocks with nonempty Sapling and Orchard data.
+It is replayed through a small read-only RPC adapter; the block envelope is
+assembled from official raw headers and separately captured decoded transactions.
+It is not a running modern full node. On Linux, run the replay in one terminal:
+
+```sh
+python benchmarks/prep/full/modern_capture.py serve \
+  --fixture benchmarks/fixtures/mainnet-nu5-full-v1/fixture.json --port 18232
+```
+
+In another terminal, ingest the three-block range and start Prep:
+
+```sh
+target/release/prep sync --source http://127.0.0.1:18232 --network mainnet \
+  --archive ./data/modern-proof --from 1687106 --to 1687108 \
+  --confirmations 0 --segment-blocks 2
+target/release/prep serve-http --archive ./data/modern-proof
+```
+
+Then verify full blocks, full transactions, pagination and all four true/false
+pool-filter cases. `PREP_API_TOKEN` is forwarded when configured:
+
+```sh
+python benchmarks/prep/full/modern_capture.py verify \
+  --fixture benchmarks/fixtures/mainnet-nu5-full-v1/fixture.json \
+  --prep http://127.0.0.1:39368 --out modern-proof.json
+```
+
+## Actual-node outage and branch-change proofs
+
+These tools **mutate only an explicitly disposable, peerless Regtest node**.
+Use a copy of the frozen 1024-block state and `zebra-regtest.toml`. Never use an
+application node. The pinned Zebra binary can run directly with Docker options
+`--entrypoint zebrad --user 10001:10001` and container command
+`--config /config.toml start`; the copied
+state must be writable by that UID. This avoids relying on privileged entrypoint
+initialization when all Linux capabilities are dropped.
+
+The Docker-host outage harness requires these exact container roles, all labelled
+`zeer.benchmark=prep-proof-20261013`, without published ports:
+
+| Name | Role | Executed resource cap |
+| --- | --- | --- |
+| `zeer-prep-proof-node` | Disposable Zebra Regtest at initial height 1024 | 0.75 CPU / 2 GiB |
+| `zeer-prep-proof-follow` | Prep directly as PID 1, no restart supervisor | 0.5 CPU / 2 GiB |
+| `zeer-prep-proof-http` | Prep HTTP over the same follow archive | 0.5 CPU / 1 GiB |
+
+Run the follower from 1020 with segment size 2, confirmations 1, polling 1 second,
+`--follow --max-source-retries 8`. Start HTTP after the archive exists and is
+ready at 1024. Use its bearer token in `PREP_API_TOKEN`. The host driver was
+separately limited to 0.5 CPU / 512 MiB by a temporary systemd unit.
+
+```sh
+python benchmarks/prep/full/resilience_proof.py \
+  --source http://PRIVATE_NODE_IP:18232 --prep http://PRIVATE_PREP_IP:39368 \
+  --expected-head 1024 --duration-seconds 600 \
+  --allow-disposable-regtest-mutation --out resilience-proof.json
+```
+
+The source IP must match the labelled node container. The harness checks the
+actual Regtest genesis and empty peer list, mines periodically, and stops the
+same source container for 30 seconds at each of two scheduled points. It checks
+stopped state, unready status, HTTP 503, automatic recovery and unchanged Prep
+container/PID/start time. Final raw data and the complete old cursor continuation
+are compared with the source. Evidence is a ten-minute rehearsal, not a long-term
+production soak. Source address changes and initialization failures are outside
+the current retry policy.
+
+After it finishes, stop all other mining and use the recorded final height as
+`N`; set `FROM=N-4`. Keep the same Prep follower and HTTP service running:
+
+```sh
+python benchmarks/prep/full/reorg_proof.py \
+  --source http://PRIVATE_NODE_IP:18232 --prep http://PRIVATE_PREP_IP:39368 \
+  --expected-head N --from-block FROM --depth 2 --confirmations 1 --timeout 90 \
+  --allow-disposable-regtest-mutation --out reorg-proof.json
+```
+
+This uses Zebra's real `invalidateblock` and `generate` RPCs to replace the last
+two canonical blocks and extend the new branch. It requires an advanced epoch,
+HTTP 409 `REORG` for the old cursor, and exact replacement blocks/transactions
+without duplicates. It is an administrative canonical branch replacement,
+not a naturally occurring P2P race. Both harnesses retain stage journals on
+failure and reject existing result paths. Stop the experiment services afterward.
+
+Offline guard and fixture checks:
+
+```sh
+python -m unittest benchmarks.prep.full.test_modern_capture \
+  benchmarks.prep.full.test_reorg_proof benchmarks.prep.full.test_resilience_proof -v
+```

@@ -2,7 +2,7 @@
 
 Updated: 2026-10-13 (Asia/Jakarta).
 
-**Status: Prep full-data prototype and the first measured improvement batch completed on 2026-10-13. Target 28 October scope and evidence are recorded in the delivery contract. Chef remains deferred.**
+**Status: Prep full-data prototype, measured read improvements, and bounded modern-data/outage/reorg proofs completed on 2026-10-13. Target 28 October scope and evidence are recorded in the delivery contract. Chef remains deferred.**
 
 Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**, the Zcash data preparation and delivery engine prioritized first, and **Zeer Chef**, the later application-indexing framework. Accepted names, responsibilities and planning precedence are recorded in [the canonical plan](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
@@ -13,6 +13,7 @@ Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**,
 - [Active 28 October delivery contract](docs/PREP_DELIVERY.md): full blocks/transactions required by the user, completed capabilities and exclusions; [full-data execution report](benchmarks/results/reports/2026-10-13-prep-full.md).
 - [Prep HTTP query and client contract](docs/PREP_QUERY.md): supported fields, filters, cursor semantics and numeric precision.
 - [Prep improvement report](benchmarks/results/reports/2026-10-13-prep-improvements.md): sequential range reads, bounded projection sizing, overlapping source reads, 4,096-block verification and before/after measurements.
+- [Modern-data, outage and reorg proof](benchmarks/results/reports/2026-10-13-prep-proof.md): genuine NU5 fixture replay, automatic recovery through two actual source outages, and real Zebra canonical branch replacement.
 - [Benchmark specification](docs/BENCHMARK_SPEC.md): comparison eligibility, scenarios, metrics, fixtures, and publication rules.
 - [Envio / HyperIndex package research](docs/ENVIO_HYPERINDEX_RESEARCH.md): pinned npm/source findings and the ReScript/Rust boundary; recommendations do not override the implementation plan.
 - [Benchmark harness](benchmarks/README.md) and [first measured results](benchmarks/results/reports/2026-10-13.md): two external providers tested on a frozen synthetic regtest fixture before engine implementation.
@@ -35,6 +36,7 @@ Technical contracts live in the implementation plan. Benchmark methodology lives
 - The public-mainnet follow-up includes Zinder and CipherScan as well: all four passed five runs of 128 transaction lookups. Workload/transport differences and the historical-source health policy are documented; this does not complete the broader scanning/ingestion benchmark requirements.
 - The full-data Prep prototype passed 64 Rust tests and 13 SDK tests, verified 1,024 complete mainnet blocks / 13,817 transactions, resumed multi-segment ingestion, and followed two newly mined blocks on an isolated real Regtest node. Reorg recovery is fault-fixture evidence; modern mainnet production behavior and million-block scale remain unproven.
 - The first improvement batch passed 73 Rust tests, 13 SDK tests and four benchmark-oracle tests. All 4,096 early-mainnet blocks / 50,283 transactions passed independent source comparison. Six before/after workloads preserve exact output; the largest observed median reduction was 13.38% for full projection. These are warm shared-host read observations, not a universal speedup.
+- The proof follow-up passed 78 Rust tests and 13 Python fixture/guard tests. Three genuine NU5 blocks / 17 transactions passed full-data replay and pool filters. A real Zebra Regtest follower ran for 600.613 seconds, recovered from two source outages without restart, and followed 18 new blocks. A subsequent real-node two-block branch replacement advanced epoch 0 to 1 and rejected the old cursor. This does not establish long-term production operation or natural P2P reorg behavior.
 
 ## Next implementation step
 
@@ -45,7 +47,33 @@ The user authorized improving Prep on 2026-10-13. This iteration keeps the exist
 - [x] Compare the previous release binary and the improved binary on the same immutable archive, including full payload and filtered transaction workloads; preserve every run and check output equality outside timing.
 - [x] Run the Linux test/lint/build gates, separate code review, and publish the measured evidence with limitations.
 
-Next evidence priorities: representative modern Sapling/Orchard full-data fixtures, sustained live follow with source outages and bounded retry policy, and actual-node reorg recovery. Larger-scale claims follow those correctness gates. The current batch does not claim those gates are complete.
+The first performance batch left modern Sapling/Orchard full-data fixtures,
+follow/source-outage recovery and actual-node reorg evidence open. The bounded
+proof follow-up below now closes its specified acceptance criteria.
+
+### Proof follow-up authorized on 2026-10-13
+
+The user asked to prove the three remaining gates before proceeding. This batch
+has explicit, bounded acceptance criteria:
+
+- [x] Capture complete genuine modern mainnet blocks with nonempty Sapling and
+  Orchard activity; retain pinned provenance and verify raw/decoded query output
+  and pool filters. If captured data is replayed through a fixture RPC, label it
+  as replay, not a live modern full-node or consensus proof.
+- [x] Reproduce the current exit-on-source-outage behavior, implement bounded
+  retries for classified transient failures only, and run a 10-minute Regtest
+  follow rehearsal with actual node outages/restarts, status checks, new blocks
+  and exact output verification. A 10-minute rehearsal is not a production soak.
+- [x] Trigger a canonical branch replacement using a real, isolated Zebra
+  Regtest node, then verify Prep rollback, new epoch, old-cursor rejection and
+  exact replacement-block output. Distinguish explicit invalidate/generate from
+  a naturally occurring peer-to-peer reorg.
+- [x] Review independently, run applicable checks, retain failures and successful
+  evidence, stop experiments and confirm existing applications remain active.
+
+Use disposable copies of the frozen Regtest state and the existing 3 CPU / 8 GiB
+/ 40 GiB experiment envelope. No private viewing keys or public-chain writes are
+needed for these proofs.
 
 A full public-mainnet deployment, broader performance claims and production readiness require additional evidence. Chef remains deferred. This iteration does not publish npm packages or public endpoints.
 

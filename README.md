@@ -21,6 +21,8 @@ The [full-data report](benchmarks/results/reports/2026-10-13-prep-full.md) verif
 
 The [first improvement report](benchmarks/results/reports/2026-10-13-prep-improvements.md) expands verification to **4,096 blocks / 50,283 transactions**, adds sequential range reads and bounded projection sizing, and overlaps raw/decoded source requests. It records 73 Rust tests, 13 SDK tests, four oracle tests and six before/after read workloads, with every run and the shared-host limitations retained.
 
+The [proof follow-up](benchmarks/results/reports/2026-10-13-prep-proof.md) adds a genuine NU5 full-data fixture with Sapling and Orchard, a ten-minute real Regtest follow test through two source outages, and a real Zebra branch replacement with cursor rejection. Follow mode now has bounded retries for classified transient source failures. The follow-up passes 78 Rust tests and 13 Python fixture/guard tests; its fixture replay, Regtest and production boundaries are recorded separately.
+
 The earlier [compact snapshot experiment](benchmarks/results/reports/2026-10-13-prep.md) remains supported separately. Neither path decrypts private notes or independently validates consensus.
 
 This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).

@@ -212,6 +212,12 @@ budget, checked between blocks/transactions; cancellation does not interrupt an
 already running filesystem system call. HTTP shutdown allows two seconds to drain.
 This private development service is not hardened against arbitrary hostile traffic.
 
+When follow mode is backing off after a temporary source failure, `/height`
+reports not ready and data queries return503 `SOURCE_NOT_READY`. The process
+retains its committed archive and writer lock. A successful source check restores
+readiness; an ordinary outage/append does not itself invalidate historical
+cursors. This source retry policy does not add automatic retry to the client SDK.
+
 Errors use `{"error":{"code":"SYMBOLIC_CODE"}}` without source URLs, query
 contents, database credentials, or raw internal error messages.
 

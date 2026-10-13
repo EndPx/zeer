@@ -1,4 +1,5 @@
 //! Experimental immutable compact-block snapshots; not a live wallet service.
+pub mod follow;
 pub mod follower;
 pub mod full_source;
 pub mod http;

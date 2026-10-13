@@ -1,0 +1,4 @@
+{"progress":true,"head":1021,"source_height":1024,"epoch":0,"revision":1}
+{"progress":true,"head":1023,"source_height":1024,"epoch":0,"revision":2}
+{"progress":true,"head":1024,"source_height":1024,"epoch":0,"revision":3}
+{"progress":false,"head":1024,"source_height":1024,"epoch":0,"revision":3}

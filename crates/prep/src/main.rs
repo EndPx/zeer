@@ -2,7 +2,7 @@ use std::{net::SocketAddr, path::PathBuf};
 
 use anyhow::{ensure, Result};
 use clap::{Parser, Subcommand};
-use prep::follower::{SyncOptions, SyncSession};
+use prep::follower::SyncOptions;
 use prep::{
     importer::{import, ImportOptions},
     server::{serve, validate_listen},
@@ -55,6 +55,9 @@ enum Command {
         /// Optional finite step budget for rehearsals. Not a complete-chain claim.
         #[arg(long)]
         max_steps: Option<u64>,
+        /// Consecutive temporary-source retries in follow mode (0 disables).
+        #[arg(long, default_value_t = 8)]
+        max_source_retries: u32,
     },
     /// Verify all referenced segments and print the durable archive catalog.
     ArchiveInspect {
@@ -126,19 +129,8 @@ async fn main() -> Result<()> {
             follow,
             poll_seconds,
             max_steps,
+            max_source_retries,
         } => {
-            ensure!(
-                (1..=60).contains(&poll_seconds),
-                "poll_seconds_must_be_1_to_60"
-            );
-            ensure!(
-                !follow || to.is_none(),
-                "follow_cannot_have_fixed_end_height"
-            );
-            ensure!(
-                max_steps.is_none_or(|n| n > 0),
-                "max_steps_must_be_positive"
-            );
             let max_archive_bytes = max_disk_gib
                 .checked_mul(1024 * 1024 * 1024)
                 .ok_or_else(|| anyhow::anyhow!("disk_budget_overflow"))?;
@@ -156,31 +148,18 @@ async fn main() -> Result<()> {
                 allow_insecure,
                 follow_mode: follow,
             };
-            let mut session = SyncSession::new(options).await?;
-            let signal = tokio::signal::ctrl_c();
-            tokio::pin!(signal);
-            let mut steps = 0_u64;
-            loop {
-                let progress = tokio::select! {
-                    _ = &mut signal => break,
-                    result = session.step() => result?,
-                };
-                println!("{}", serde_json::to_string(&progress)?);
-                steps += 1;
-                if max_steps.is_some_and(|limit| steps >= limit)
-                    || (!follow
-                        && (!progress.progress
-                            || to.is_some_and(|end| progress.head.is_some_and(|head| head >= end))))
-                {
-                    break;
-                }
-                if !progress.progress {
-                    tokio::select! {
-                        _ = &mut signal => break,
-                        _ = tokio::time::sleep(std::time::Duration::from_secs(poll_seconds)) => {},
-                    }
-                }
-            }
+            prep::follow::run(
+                options,
+                prep::follow::LoopOptions {
+                    poll_seconds,
+                    max_steps,
+                    max_source_retries,
+                },
+                async {
+                    let _ = tokio::signal::ctrl_c().await;
+                },
+            )
+            .await?;
         }
         Command::ArchiveInspect { archive } => {
             let archive = tokio::task::spawn_blocking(move || Archive::open(archive)).await??;

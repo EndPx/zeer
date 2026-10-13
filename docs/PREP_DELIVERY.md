@@ -69,3 +69,10 @@ copying, license equivalence, or a requirement to use native bindings in Prep.
 blocks / 50,283 transactions, and six measured before/after read workloads. This
 extends early-mainnet evidence; modern shielded coverage, sustained follow and
 real-node reorg recovery remain separate gates.
+
+The later [proof follow-up](../benchmarks/results/reports/2026-10-13-prep-proof.md)
+passes its bounded versions of those gates: complete genuine NU5 fixture replay,
+a ten-minute actual-node follow rehearsal with two stopped-source intervals,
+and a real Zebra Regtest branch replacement with epoch/cursor/raw-data checks.
+Long-term production operation, all network upgrades and natural P2P reorgs
+remain outside those demonstrated claims.
