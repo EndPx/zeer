@@ -13,6 +13,12 @@ Prep supplies the ingredients; Chef applies the developer's recipe. Applications
 
 **Prep's full-data MVP and Chef's first public-data prototype are implemented and tested. Public production hosting, viewing-key scanning and npm publication remain out of scope.**
 
+The [Chef writer optimization](benchmarks/results/reports/2026-10-14-chef-optimized.md)
+passes 38 tests with real PostgreSQL. Five alternating runs per build reduced
+median durable indexing time from 40.311 s to 13.295 s on the unchanged
+2,048-block / 16,962-transaction public example, with every persisted entity
+verified. This measures ingestion; the read-side GraphQL path is unchanged.
+
 The [Chef report](benchmarks/results/reports/2026-10-14-chef.md) records 31 tests
 with real PostgreSQL, a live CLI/GraphQL round trip, and five fresh indexing runs
 for each of Prep and direct RPC: 2,048 blocks / 16,962 transactions, every entity

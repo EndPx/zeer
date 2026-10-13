@@ -1,0 +1,3 @@
+Started zeer-chef-opt-tests.service - /bin/bash -c "npm run build:chef && npm run test:chef".
+zeer-chef-opt-tests.service: Deactivated successfully.
+zeer-chef-opt-tests.service: Consumed 10.594s CPU time, 2.1M memory peak, 0B memory swap peak.

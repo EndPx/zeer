@@ -34,6 +34,15 @@ Unsupported source ranges, deep reorgs, malformed batches and oversized entities
 fail visibly. Private wallet data, hosted services, npm publication, subscriptions,
 joins, dashboards and arbitrary SQL handlers are deferred.
 
+The optimized writer stages ordered entity operations in a bounded per-block
+cache, then flushes unique final values and their original undo images in SQL
+batches inside the existing atomic block transaction. The handler interface and
+database schema remain the same. Exact cache, queue and flush limits are defined
+in the [package contract](../packages/chef/README.md); exceeding them rejects the
+block rather than advancing a partial checkpoint. SQL flush time is accounted
+under transaction overhead, so compare complete durable elapsed time when judging
+performance changes.
+
 ## Benchmark separation
 
 The user supplied Envio's [indexing metrics guide](https://docs.envio.dev/docs/HyperIndex/benchmarking)

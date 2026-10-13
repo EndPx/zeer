@@ -13,7 +13,7 @@ const sha = value => createHash('sha256').update(value).digest('hex');
 const assert = (ok, code) => { if (!ok) throw new Error(code); };
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const flags = new Map();
-const allowed = ['--config', '--manifest', '--out', '--source-url', '--prep-url', '--dsn-env', '--timeout-seconds', '--page-size', '--source-mode'];
+const allowed = ['--config', '--manifest', '--out', '--source-url', '--prep-url', '--dsn-env', '--timeout-seconds', '--page-size', '--source-mode', '--repetitions'];
 for (let i = 2; i < process.argv.length; i += 2) {
   const key = process.argv[i], value = process.argv[i + 1];
   assert(allowed.includes(key) && !flags.has(key) && value && !value.startsWith('--'), 'INVALID_ARGUMENT');
@@ -39,6 +39,8 @@ const dsn = process.env[flags.get('--dsn-env') ?? config.databaseUrlEnv ?? 'DATA
 assert(dsn && (sourceMode === 'rpc' || prepUrl), 'PREP_URL_AND_DSN_REQUIRED');
 const timeoutSeconds = Number(flags.get('--timeout-seconds') ?? 1800);
 const pageSize = Number(flags.get('--page-size') ?? 16);
+const repetitions = Number(flags.get('--repetitions') ?? 5);
+assert(Number.isInteger(repetitions) && repetitions >= 1 && repetitions <= 5, 'INVALID_REPETITIONS');
 assert(Number.isInteger(timeoutSeconds) && timeoutSeconds >= 1 && timeoutSeconds <= 7200, 'INVALID_TIMEOUT');
 assert(Number.isInteger(pageSize) && pageSize >= 1 && pageSize <= 100, 'INVALID_PAGE_SIZE');
 const sourceUrl = new URL(flags.get('--source-url'));
@@ -47,6 +49,9 @@ const controller = new AbortController();
 // Bound oracle preparation as well as each measured application run.
 const oracleSignal = AbortSignal.any([controller.signal, AbortSignal.timeout(timeoutSeconds * 1000)]);
 const stop = () => controller.abort();
+let sqlRequests = 0;
+const originalQuery = pg.Client.prototype.query;
+pg.Client.prototype.query = function (...args) { sqlRequests++; return originalQuery.apply(this, args); };
 process.once('SIGINT', stop); process.once('SIGTERM', stop);
 const report = {
   format: 'chef-bounded-indexing-v1', status: 'RUNNING', started_at: new Date().toISOString(),
@@ -61,7 +66,7 @@ const report = {
     'Migration, independent oracle collection, persisted-output checks and GraphQL validation have separate timers.',
     'transaction_overhead_ms is apply minus awaited handlers; it includes BEGIN, identity/journal/checkpoint/prune/COMMIT, not pure COMMIT latency.',
     'CPU and sampled RSS describe this Node process only. Prep, PostgreSQL and source resource usage require separate host/container measurements.',
-    'Five fresh entity namespaces reuse one prepared source and one Node process; no claim of cold source/cache throughput.',
+    'Fresh entity namespaces reuse prepared sources; repetition count is explicit. Single-run reports require external aggregation; no claim of cold source/cache throughput.',
     'This 1..2048 pre-Overwinter public prefix includes legacy v1/v2 public transaction projections; it is not a genesis-to-current-tip or decrypted shielded workload result.',
     'No external indexer speed ranking is produced; equivalence requires the same durable entity workload.'
   ]
@@ -132,7 +137,7 @@ try {
     ? new FrozenRpcSource({ url: sourceUrl.href, headHeight: manifest.end_height, headHash: manifest.end_hash, signal: controller.signal })
     : new PrepClient({ url: prepUrl, ...(process.env[config.prepTokenEnv ?? 'PREP_API_TOKEN'] ? { token: process.env[config.prepTokenEnv ?? 'PREP_API_TOKEN'] } : {}) });
   if (sourceMode === 'rpc') report.limitations.push('RPC source adapter uses sequential getblockhash + getblock verbosity 2 for full data, verbosity 1 for headers, one in-flight request, and native JSON source-token preservation. It is not a production Chef source adapter.');
-  for (let index = 1; index <= 5; index++) {
+  for (let index = 1; index <= repetitions; index++) {
     const project = `${projectPrefix}_${index}`;
     assert(/^[a-z][a-z0-9_]{0,31}$/.test(project), 'INVALID_GENERATED_PROJECT');
     const namespace = `chef_${project}`, sql = `"${namespace}"`;
@@ -157,6 +162,7 @@ try {
       let peakRss = process.memoryUsage().rss;
       sampler = setInterval(() => { peakRss = Math.max(peakRss, process.memoryUsage().rss); }, 25);
       const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(timeoutSeconds * 1000)]);
+      const sqlBefore = sqlRequests;
       runStarted = performance.now();
       while (true) {
         signal.throwIfAborted();
@@ -170,6 +176,7 @@ try {
         if (step.height === end) break;
       }
       run.elapsed_ms = performance.now() - runStarted;
+      run.sql_requests = sqlRequests - sqlBefore;
       if (sourceMode === 'rpc') { run.source_rpc_requests = client.requests - requestsBefore; run.source_response_bytes = client.responseBytes - bytesBefore; }
       const usageAfter = process.resourceUsage(); clearInterval(sampler); sampler = undefined;
       run.cpu_user_ms = (usageAfter.userCPUTime - usageBefore.userCPUTime) / 1000;
@@ -222,8 +229,10 @@ try {
     }
   }
   const values = report.runs.map(run => run.elapsed_ms).sort((a, b) => a - b);
-  report.summary = { repetitions: 5, elapsed_ms_min: values[0], elapsed_ms_median: values[2], elapsed_ms_max: values[4],
-    blocks: end, transactions: report.oracle.transactions, committed_transactions_per_second_median: report.oracle.transactions / (values[2] / 1000) };
+  const middle = Math.floor(values.length / 2);
+  const median = values.length % 2 ? values[middle] : (values[middle - 1] + values[middle]) / 2;
+  report.summary = { repetitions, elapsed_ms_min: values[0], elapsed_ms_median: median, elapsed_ms_max: values.at(-1),
+    blocks: end, transactions: report.oracle.transactions, committed_transactions_per_second_median: report.oracle.transactions / (median / 1000) };
   report.source_after = await anchor(); report.status = 'PASS';
 } catch (error) {
   report.status = controller.signal.aborted ? 'INTERRUPTED' : 'FAIL';
@@ -233,5 +242,6 @@ try {
   if (pool) await pool.end();
   report.finished_at = new Date().toISOString(); await save();
   process.off('SIGINT', stop); process.off('SIGTERM', stop);
+  pg.Client.prototype.query = originalQuery;
 }
 process.stdout.write(JSON.stringify({ status: report.status, report: reportPath, summary: report.summary, failure_code: report.failure_code }) + '\n');

@@ -4,6 +4,10 @@ import type { ChefStore, Checkpoint, EntityAccess, PublicBlock, ReadView, Stored
 
 type State = { fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reorg_window: number };
 const MAX_MUTATIONS = 10_000;
+const MAX_CACHE_ENTRIES = 10_000;
+const MAX_CACHE_BYTES = 16 * 1024 * 1024;
+const MAX_FLUSH_ROWS = 500;
+const MAX_FLUSH_BYTES = 4 * 1024 * 1024;
 const hashPattern = /^[0-9a-f]{64}$/;
 
 export class StoreNotReadyError extends Error {
@@ -131,15 +135,45 @@ export class PostgresStore implements ChefStore {
       let active = true;
       let mutations = 0;
       let operationError: unknown;
-      const pending = new Set<Promise<unknown>>();
-      const track = <T>(fn: () => Promise<T>): Promise<T> => {
-        if (!active) return Promise.reject(new Error("Entity context is no longer active"));
-        const result = fn();
-        pending.add(result);
-        void result.then(() => pending.delete(result), error => { pending.delete(result); operationError ??= error; });
+      let hasOperationError = false;
+      const poison = (error: unknown): void => {
+        if (!hasOperationError) { hasOperationError = true; operationError = error; }
+      };
+      type Entry = { entity: string; id: string; data: StoredEntity | null; dirty: boolean; bytes: number };
+      const cache = new Map<string, Entry>();
+      let cacheBytes = 0, queuedBytes = 0, queuedOperations = 0;
+      let tail: Promise<void> = Promise.resolve();
+      const failed = <T>(error: unknown): Promise<T> => {
+        poison(error);
+        const result = Promise.reject<T>(error);
+        // Discarded/caught failures still poison the block without an unhandled rejection.
+        void result.catch(() => {});
         return result;
       };
-      const drain = async (): Promise<void> => { while (pending.size) await Promise.allSettled([...pending]); };
+      const track = <T>(prepare: () => { bytes: number; run: () => Promise<T> }): Promise<T> => {
+        if (!active) return Promise.reject(new Error("Entity context is no longer active"));
+        let operation: { bytes: number; run: () => Promise<T> };
+        try {
+          operation = prepare();
+          if (queuedOperations >= MAX_CACHE_ENTRIES || cacheBytes + queuedBytes + operation.bytes > MAX_CACHE_BYTES) throw new Error("Block entity cache limit exceeded");
+        } catch (error) { return failed(error); }
+        queuedBytes += operation.bytes; queuedOperations++;
+        const result = tail.then(async () => {
+          try { return await operation.run(); }
+          finally { queuedBytes -= operation.bytes; queuedOperations--; }
+        });
+        // Invocation order is authoritative, even when handlers omit awaits.
+        tail = result.then(() => {}, error => { poison(error); });
+        return result;
+      };
+      const drain = async (): Promise<void> => { for (;;) { const current = tail; await current; if (current === tail) break; } };
+      const remember = (entity: string, id: string, data: StoredEntity | null, dirty: boolean): void => {
+        const key = JSON.stringify([entity, id]), previous = cache.get(key);
+        const bytes = Buffer.byteLength(key) + Buffer.byteLength(JSON.stringify(data));
+        const nextBytes = cacheBytes - (previous?.bytes ?? 0) + bytes;
+        if ((!previous && cache.size >= MAX_CACHE_ENTRIES) || nextBytes + queuedBytes > MAX_CACHE_BYTES) throw new Error("Block entity cache limit exceeded");
+        cache.set(key, { entity, id, data, dirty: dirty || previous?.dirty === true, bytes }); cacheBytes = nextBytes;
+      };
       try {
         const state = await this.state(client, true);
         if (state.status === "blocked") throw new Error("Chef project is blocked");
@@ -153,32 +187,58 @@ export class PostgresStore implements ChefStore {
         if (block.height !== (state.height === null ? this.options.startHeight : state.height + 1)) throw new Error("Non-contiguous block height");
         if (state.hash !== null && state.hash !== block.previousHash) throw new Error("Block parent does not match checkpoint");
         if (state.height === null && state.anchor_hash !== null && state.anchor_hash !== block.previousHash) throw new Error("Block parent does not match retained anchor");
-        const before = async (entity: string, id: string): Promise<void> => {
-          this.entity(entity); this.id(id);
+        const mutation = (): void => {
           if (++mutations > MAX_MUTATIONS) throw new Error("Block entity mutation limit exceeded");
-          await client.query(`INSERT INTO ${this.sql}.undo(height,entity,id,previous) VALUES($1,$2,$3,(SELECT data FROM ${this.sql}.entities WHERE entity=$2 AND id=$3)) ON CONFLICT DO NOTHING`, [block.height, entity, id]);
         };
         const entities: EntityAccess = {
-          get: (entity, id) => track(async () => {
+          get: (entity, id) => track(() => {
             this.entity(entity); this.id(id);
-            const data = (await client.query<{ data: StoredEntity }>(`SELECT data FROM ${this.sql}.entities WHERE entity=$1 AND id=$2`, [entity, id])).rows[0]?.data;
-            return data ? decodeEntity(this.options.model, entity, data) : null;
+            const key = JSON.stringify([entity, id]);
+            return { bytes: Buffer.byteLength(key), run: async () => {
+              if (!cache.has(key)) {
+                if (cache.size >= MAX_CACHE_ENTRIES) throw new Error("Block entity cache limit exceeded");
+                const data = (await client.query<{ data: StoredEntity }>(`SELECT data FROM ${this.sql}.entities WHERE entity=$1 AND id=$2`, [entity, id])).rows[0]?.data ?? null;
+                remember(entity, id, data, false);
+              }
+              const data = cache.get(key)!.data;
+              return data === null ? null : decodeEntity(this.options.model, entity, data);
+            } };
           }),
-          set: (entity, value) => track(async () => {
+          set: (entity, value) => track(() => {
             this.entity(entity);
+            // Encode now, before queuing: later caller mutations cannot alter the write.
             const data = encodeEntity(this.options.model, entity, value);
-            await before(entity, data.id);
-            await client.query(`INSERT INTO ${this.sql}.entities(entity,id,data) VALUES($1,$2,$3::jsonb) ON CONFLICT(entity,id) DO UPDATE SET data=EXCLUDED.data`, [entity, data.id, JSON.stringify(data)]);
+            this.id(data.id); mutation();
+            return { bytes: Buffer.byteLength(JSON.stringify([entity, data.id])) + Buffer.byteLength(JSON.stringify(data)),
+              run: async () => { remember(entity, data.id, data, true); } };
           }),
-          delete: (entity, id) => track(async () => {
-            await before(entity, id);
-            await client.query(`DELETE FROM ${this.sql}.entities WHERE entity=$1 AND id=$2`, [entity, id]);
+          delete: (entity, id) => track(() => {
+            this.entity(entity); this.id(id); mutation();
+            return { bytes: Buffer.byteLength(JSON.stringify([entity, id])), run: async () => { remember(entity, id, null, true); } };
           }),
         };
         await handler(entities);
         await drain();
         active = false;
-        if (operationError !== undefined) throw operationError;
+        if (hasOperationError) throw operationError;
+        // Each dirty key occurs in exactly one chunk; its journal captures the
+        // pre-block database value before that key's write. Schema stays unchanged.
+        const flush = async (rows: { entity: string; id: string; data: StoredEntity | null }[]): Promise<void> => {
+          const encoded = JSON.stringify(rows);
+          await client.query(`INSERT INTO ${this.sql}.undo(height,entity,id,previous) SELECT $1,r.entity,r.id,e.data FROM jsonb_to_recordset($2::jsonb) AS r(entity text,id text,data jsonb) LEFT JOIN ${this.sql}.entities e ON e.entity=r.entity AND e.id=r.id WHERE true ON CONFLICT DO NOTHING`, [block.height, encoded]);
+          if (rows.some(row => row.data !== null)) await client.query(`INSERT INTO ${this.sql}.entities(entity,id,data) SELECT r.entity,r.id,r.data FROM jsonb_to_recordset($1::jsonb) AS r(entity text,id text,data jsonb) WHERE r.data IS NOT NULL ON CONFLICT(entity,id) DO UPDATE SET data=EXCLUDED.data`, [encoded]);
+          if (rows.some(row => row.data === null)) await client.query(`DELETE FROM ${this.sql}.entities e USING jsonb_to_recordset($1::jsonb) AS r(entity text,id text,data jsonb) WHERE r.data IS NULL AND e.entity=r.entity AND e.id=r.id`, [encoded]);
+        };
+        let rows: { entity: string; id: string; data: StoredEntity | null }[] = [], bytes = 2;
+        for (const entry of cache.values()) {
+          if (!entry.dirty) continue;
+          const row = { entity: entry.entity, id: entry.id, data: entry.data };
+          const rowBytes = Buffer.byteLength(JSON.stringify(row)) + 1;
+          if (rowBytes + 2 > MAX_FLUSH_BYTES) throw new Error("Block entity flush byte limit exceeded");
+          if (rows.length && (rows.length >= MAX_FLUSH_ROWS || bytes + rowBytes > MAX_FLUSH_BYTES)) { await flush(rows); rows = []; bytes = 2; }
+          rows.push(row); bytes += rowBytes;
+        }
+        if (rows.length) await flush(rows);
         await client.query(`INSERT INTO ${this.sql}.blocks VALUES($1,$2)`, [block.height, block.hash]);
         await client.query(`UPDATE ${this.sql}.state SET height=$1,hash=$2,anchor_hash=COALESCE(anchor_hash,$3) WHERE singleton=true`, [block.height, block.hash, block.previousHash]);
         const boundary = block.height - this.options.reorgWindow;

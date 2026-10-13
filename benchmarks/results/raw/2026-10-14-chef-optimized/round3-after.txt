@@ -1,0 +1,8 @@
+{"status":"PASS","report":"/opt/zeer-chef/20261014-opt/results/round3-after.json","summary":{"repetitions":1,"elapsed_ms_min":10888.24508,"elapsed_ms_median":10888.24508,"elapsed_ms_max":10888.24508,"blocks":2048,"transactions":16962,"committed_transactions_per_second_median":1557.8268008640378}}
+Running as unit: zeer-chef-opt-3-after.service
+Finished with result: success
+Main processes terminated with: code=exited/status=0
+Service runtime: 36.328s
+CPU time consumed: 22.157s
+Memory peak: 3.4M
+Memory swap peak: 0B

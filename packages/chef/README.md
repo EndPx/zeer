@@ -28,6 +28,20 @@ checkpoint. A failed block rolls back all its writes; earlier committed blocks
 remain. Contexts cannot be used after their transaction finishes. BigInt values
 are JS `bigint` in handlers and canonical decimal strings in storage/GraphQL.
 
+Within a block, entity operations run in invocation order. `set` snapshots its
+input immediately; `get` returns a separate decoded copy and observes prior
+staged writes/deletes. Repeated writes coalesce by entity/key. Before commit,
+bounded SQL batches capture each key's original database value and flush its
+final value or deletion, within the same block transaction as the checkpoint.
+An entity-operation failure still rejects the block even if handler code catches
+or discards its promise. A database flush failure rolls the whole block back.
+
+Limits are 10,000 mutation calls, 10,000 cached keys, 10,000 queued operations,
+and 16 MiB of accounted serialized cache/queued payload per block. Flushes contain
+at most 500 keys and 4 MiB of serialized input. These byte budgets are not a cap
+on total JavaScript heap/RSS. A limit failure rejects the block; writes are never
+silently omitted. Existing project schemas and handler interfaces are unchanged.
+
 Reorg recovery uses retained block hashes and before-images. Reads are unavailable
 while the framework reconciles/replays or cannot validate its source, and deep
 reorgs enter a rebuild-required state. The caller starts a fresh project namespace

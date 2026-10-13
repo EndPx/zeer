@@ -6,6 +6,10 @@ The first measured scenario is **compact-block serving and normalized header ver
 
 ## Current evidence
 
+- [Chef optimized writer](results/reports/2026-10-14-chef-optimized.md): identical
+  handler/schema and resources, five alternating fresh runs per build, durable
+  output equality and recorded PostgreSQL client query calls.
+
 - [Five-candidate same-session lookup](results/reports/2026-10-14-lookup-session.md):
   Chef, CipherScan, Zinder, Zaino and lightwalletd; equal aggregate source/candidate/client
   ceilings, five rotated rounds and all-field output verification.

@@ -2,12 +2,13 @@
 
 Updated: 2026-10-14 (Asia/Jakarta).
 
-**Status: Prep held at its tested MVP. Chef's first public-data slice is implemented and verified: 31 tests with real PostgreSQL, live CLI/GraphQL, and five fresh indexing runs each over Prep and RPC. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Scope: [CHEF_PUBLIC_MVP.md](docs/CHEF_PUBLIC_MVP.md); evidence: [Chef report](benchmarks/results/reports/2026-10-14-chef.md).**
+**Status: Prep held at its tested MVP. Chef's public writer now has bounded per-block caching and batched SQL, verified by 38 tests with real PostgreSQL and five alternating fresh runs per build. Median durable indexing fell from 40.311 s to 13.295 s on the same bounded workload. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Scope: [CHEF_PUBLIC_MVP.md](docs/CHEF_PUBLIC_MVP.md); latest writer evidence: [optimization report](benchmarks/results/reports/2026-10-14-chef-optimized.md).**
 
 Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**, the Zcash data preparation and delivery engine prioritized first, and **Zeer Chef**, the later application-indexing framework. Accepted names, responsibilities and planning precedence are recorded in [the canonical plan](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
 ## Authoritative documents
 
+- [Chef writer optimization](benchmarks/results/reports/2026-10-14-chef-optimized.md): bounded ordered cache, coalesced SQL, unchanged atomic block/checkpoint guarantees, actual database regression tests and alternating before/after indexing.
 - [Five-candidate lookup session](benchmarks/results/reports/2026-10-14-lookup-session.md): 25 verified visits with rotated order and equal aggregate resource ceilings. This is prepared serving, separate from fresh ingestion.
 - [Active Chef public-data contract](docs/CHEF_PUBLIC_MVP.md): public Prep source, TypeScript handlers, developer PostgreSQL, GraphQL, recovery and separate indexing/retrieval benchmarks.
 - [Chef indexing benchmark and validation](benchmarks/results/reports/2026-10-14-chef.md): identical handlers/schema over Prep and direct RPC, independent all-row verification, native CipherScan ingestion with different explorer outputs, and supplementary external-provider lookup.
@@ -24,6 +25,8 @@ Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**,
 - [Selected logo concept](assets/brand/zeer-logo-concept-v2.png): approved raster concept sheet, not an SVG asset pack.
 
 Technical contracts live in the implementation plan. Benchmark methodology lives in the benchmark specification; do not maintain competing copies.
+
+Positioning check (14 October 2026): [Bitquery documents a Zcash GraphQL API in its V1 catalog](https://docs.bitquery.io/v1/docs/Examples/Zcash/address-api). Do not claim that Chef is Zcash's first or only GraphQL offering. Chef's implemented focus is self-hosted application indexing with developer-defined TypeScript handlers, scalar entity schemas, operator-owned PostgreSQL and generated GraphQL. Bitquery endpoint availability/performance has not been authenticated or benchmarked in this project.
 
 ## Present evidence
 

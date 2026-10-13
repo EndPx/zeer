@@ -207,3 +207,122 @@ test("PostgreSQL: existing unmarked namespace is refused without touching its ta
   await assert.rejects(store.migrate(), /unmarked/);
   assert.equal((await client.query(`SELECT id FROM "chef_${project}".user_data`)).rows[0].id, 42);
 });
+
+test("PostgreSQL: ordered concurrent calls snapshot inputs and return independent copies", { skip: !url }, async t => {
+  const { store } = await fixture(t);
+  await store.apply(block(0), async entities => {
+    const input = account("ordered", 5n, "original");
+    const first = entities.set("Account", input);
+    input.balance = 999n; input.label = "caller changed";
+    const beforeDelete = entities.get("Account", "ordered");
+    const deleted = entities.delete("Account", "ordered");
+    const afterDelete = entities.get("Account", "ordered");
+    const final = entities.set("Account", account("ordered", 7n));
+    const [_, original, __, absent] = await Promise.all([first, beforeDelete, deleted, afterDelete, final]);
+    assert.equal(original.balance, 5n); assert.equal(original.label, "original"); assert.equal(absent, null);
+    original.balance = 1000n;
+    const copy = await entities.get("Account", "ordered"); copy.balance = 2000n;
+    assert.equal((await entities.get("Account", "ordered")).balance, 7n);
+  });
+  assert.equal((await store.read(view => view.get("Account", "ordered"))).balance, "7");
+});
+
+test("PostgreSQL: caught failures poison staged writes and the block checkpoint", { skip: !url }, async t => {
+  const { store } = await fixture(t);
+  await store.apply(block(0), async entities => entities.set("Account", account("before", 1n)));
+  await assert.rejects(store.apply(block(1), async entities => {
+    await entities.set("Account", account("before", 9n));
+    await entities.set("Account", { id: "bad" }).catch(() => {});
+    await entities.set("Account", account("after", 3n));
+  }), /Missing|required|Invalid/);
+  assert.equal((await store.checkpoint()).height, 0);
+  assert.equal((await store.read(view => view.get("Account", "before"))).balance, "1");
+  assert.equal(await store.read(view => view.get("Account", "after")), null);
+});
+
+test("PostgreSQL: undefined/null thrown reasons poison the block and preserve the first reason", { skip: !url }, async t => {
+  const { store } = await fixture(t);
+  await store.apply(block(0), async entities => entities.set("Account", account("before", 1n)));
+  for (const firstReason of [undefined, null]) {
+    const outcome = await store.apply(block(1), async entities => {
+      await entities.set("Account", account("before", 9n));
+      const invalid = account("getter");
+      Object.defineProperty(invalid, "balance", { enumerable: true, get() { throw firstReason; } });
+      await entities.set("Account", invalid).catch(() => {});
+      const discarded = account("second-getter");
+      Object.defineProperty(discarded, "balance", { enumerable: true, get() { throw firstReason === null ? undefined : new Error("second reason"); } });
+      void entities.set("Account", discarded);
+      await entities.set("Account", account("after", 3n));
+    }).then(() => ({ rejected: false }), reason => ({ rejected: true, reason }));
+    assert.equal(outcome.rejected, true);
+    assert.equal(outcome.reason, firstReason);
+    assert.equal((await store.checkpoint()).height, 0);
+    assert.equal((await store.read(view => view.get("Account", "before"))).balance, "1");
+    assert.equal(await store.read(view => view.get("Account", "after")), null);
+  }
+});
+
+test("PostgreSQL: a database flush failure rolls back entities, undo and checkpoint", { skip: !url }, async t => {
+  const { store, options } = await fixture(t);
+  await store.apply(block(0), async entities => entities.set("Account", account("before", 1n)));
+  const client = new pg.Client({ connectionString: url }); await client.connect();
+  t.after(() => client.end());
+  const sql = `"chef_${options.project}"`;
+  await client.query(`CREATE FUNCTION ${sql}.reject_fixture() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id = 'boom' THEN RAISE EXCEPTION 'fixture flush rejection'; END IF; RETURN NEW; END $$`);
+  await client.query(`CREATE TRIGGER reject_fixture BEFORE INSERT OR UPDATE ON ${sql}.entities FOR EACH ROW EXECUTE FUNCTION ${sql}.reject_fixture()`);
+  await assert.rejects(store.apply(block(1), async entities => {
+    await entities.set("Account", account("before", 9n));
+    await entities.set("Account", account("boom", 2n));
+  }), /fixture flush rejection/);
+  assert.equal((await store.checkpoint()).height, 0);
+  assert.equal((await store.read(view => view.get("Account", "before"))).balance, "1");
+  assert.equal(await store.read(view => view.get("Account", "boom")), null);
+  assert.equal((await client.query(`SELECT count(*)::int AS n FROM ${sql}.undo WHERE height=1`)).rows[0].n, 0);
+});
+
+test("PostgreSQL: cache bytes and entries are bounded and reject the whole block", { skip: !url }, async t => {
+  const { store } = await fixture(t);
+  await assert.rejects(store.apply(block(0), async entities => {
+    for (let index = 0; index < 1100; index++) await entities.set("Account", account(`bytes-${index}`, 1n, "x".repeat(16384)));
+  }), /cache limit/);
+  assert.equal((await store.checkpoint()).height, null);
+  await assert.rejects(store.apply(block(0), async entities => {
+    for (let index = 0; index < 10000; index++) await entities.set("Account", account(`entry-${index}`));
+    await entities.get("Account", "one-too-many");
+  }), /cache limit/);
+  assert.equal((await store.checkpoint()).height, null);
+  assert.deepEqual(await store.read(view => view.list("Account", { first: 101 })), []);
+});
+
+test("PostgreSQL: coalescing does not bypass mutation-call limits or queued payload limits", { skip: !url }, async t => {
+  const { store } = await fixture(t);
+  await assert.rejects(store.apply(block(0), async entities => {
+    for (let index = 0; index <= 10000; index++) await entities.set("Account", account("one-key", BigInt(index)));
+  }), /mutation limit/);
+  await assert.rejects(store.apply(block(0), async entities => {
+    for (let index = 0; index < 1100; index++) void entities.set("Account", account("one-key", 1n, "x".repeat(16384)));
+  }), /cache limit/);
+  assert.equal((await store.checkpoint()).height, null);
+  assert.equal(await store.read(view => view.get("Account", "one-key")), null);
+});
+
+test("PostgreSQL: multi-chunk writes/deletes retain each original before-image", { skip: !url }, async t => {
+  const { store } = await fixture(t);
+  const ids = Array.from({ length: 1005 }, (_, index) => `chunk-${String(index).padStart(4, "0")}`);
+  await store.apply(block(0), async entities => {
+    for (const id of ids) await entities.set("Account", account(id, 1n));
+  });
+  await store.apply(block(1), async entities => {
+    for (const [index, id] of ids.entries()) {
+      await entities.set("Account", account(id, 2n));
+      if (index % 2) await entities.delete("Account", id);
+      else await entities.set("Account", account(id, 3n));
+    }
+  });
+  assert.equal(await store.read(view => view.get("Account", ids[501])), null);
+  assert.equal((await store.read(view => view.get("Account", ids[502]))).balance, "3");
+  await store.markReconciling(); await store.rollback(0, h(1)); await store.markReady();
+  for (const id of [ids[0], ids[499], ids[500], ids[999], ids[1004]]) {
+    assert.equal((await store.read(view => view.get("Account", id))).balance, "1");
+  }
+});
