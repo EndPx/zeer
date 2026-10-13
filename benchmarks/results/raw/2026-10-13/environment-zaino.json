@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "profile": "shared-vps-bounded-regtest",
+  "captured_at_utc": "2026-10-13T06:33:43.267959+00:00",
+  "os": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "cpu_model": "AMD EPYC 9354P 32-Core Processor",
+  "logical_cpus": 4,
+  "load_average": [
+    0.31689453125,
+    0.51123046875,
+    0.5126953125
+  ],
+  "host_mem_total": "16376020 kB",
+  "host_mem_available": "13847840 kB",
+  "host_swap_free": "2653080 kB",
+  "docker_version": "29.3.1",
+  "containers": [
+    {
+      "name": "zeer-bench-zaino",
+      "running": true,
+      "oom_killed": false,
+      "image_id": "sha256:c8428a39d510fd59a9182a5e19cf473d6af6a4b6a672aff8b1a690e9c23c17b9",
+      "image_digests": [
+        "zingodevops/zaino@sha256:c8428a39d510fd59a9182a5e19cf473d6af6a4b6a672aff8b1a690e9c23c17b9"
+      ],
+      "declared_source_revision": "3244a74bb09fa6a09a4b2deeb6be53bab0890747",
+      "cpu_quota": 1.25,
+      "memory_bytes": 2684354560,
+      "memory_swap_bytes": 2684354560,
+      "ports": {
+        "8137/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "39137"
+          }
+        ]
+      }
+    },
+    {
+      "name": "zeer-bench-lightwalletd",
+      "running": false,
+      "oom_killed": false,
+      "image_id": "sha256:483a361483531f9fa7b13c67ca69d69e394179ea31746cc0022fbe3af65ab5e0",
+      "image_digests": [
+        "electriccoinco/lightwalletd@sha256:483a361483531f9fa7b13c67ca69d69e394179ea31746cc0022fbe3af65ab5e0"
+      ],
+      "declared_source_revision": null,
+      "cpu_quota": 1.25,
+      "memory_bytes": 2684354560,
+      "memory_swap_bytes": 2684354560,
+      "ports": {
+        "9067/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "39067"
+          }
+        ]
+      }
+    },
+    {
+      "name": "zeer-bench-zebra",
+      "running": true,
+      "oom_killed": false,
+      "image_id": "sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2",
+      "image_digests": [
+        "zfnd/zebra@sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2"
+      ],
+      "declared_source_revision": "7121c82ba6795a151523d5b308a19743f4a1ade7",
+      "cpu_quota": 0.5,
+      "memory_bytes": 1342177280,
+      "memory_swap_bytes": 1342177280,
+      "ports": {
+        "18232/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "39232"
+          }
+        ]
+      }
+    }
+  ],
+  "limits": {
+    "total_cpu": 2,
+    "total_memory_bytes": 4294967296,
+    "operational_disk_bytes": 10737418240
+  },
+  "isolation": "shared VPS; no existing application stopped; CPU quotas are not dedicated cores"
+}

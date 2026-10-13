@@ -1,10 +1,12 @@
 # Zeer benchmark specification v0.1
 
 Date: 2026-10-12 (Asia/Jakarta).
-Status: **planned; no measurements executed**.
+Status: **broad specification; first limited provider-serving experiment completed on 2026-10-13**. See [harness](../benchmarks/README.md) and [results](../benchmarks/results/reports/2026-10-13.md). Most scenarios below remain planned.
 Product and event semantics: [Zeer implementation plan](../.omc/plans/zeer-v0.1.md).
 
 ## 1. Questions the benchmark must answer
+
+The current implemented scenario reads and normalizes already-available compact blocks into memory. Its timer is explicitly labelled `read_normalize_ns`, not durable ingestion. It is preparatory evidence for the later provider comparison track; no Zeer consumer exists yet. Initial data is 1,024 synthetic transparent-coinbase-only regtest blocks. This bounded smoke dataset does not replace D1/D2 or establish performance on their planned sizes.
 
 1. Does the indexer produce the expected canonical data without omissions, duplicates or incorrect values?
 2. How long does a fixed historical workload take to become durably queryable?

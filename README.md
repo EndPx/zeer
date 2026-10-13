@@ -6,7 +6,9 @@ Zeer is a planned open-source indexing framework for Zcash. Developers will defi
 
 ## Status
 
-**Planning and research. No working engine, published npm package, or measured benchmark results yet.**
+**Benchmark harness implemented; Zeer engine and npm package not implemented yet.**
+
+The first external-provider experiment ran lightwalletd and Zaino on an isolated synthetic regtest chain. See [the harness](benchmarks/README.md) and [measured results](benchmarks/results/reports/2026-10-13.md). This is compact-block/header serving evidence, not shielded decryption or application-ingestion performance.
 
 This is the core Zeer monorepo. Implementation proceeds engine-first: prove scanning and persistence, test recovery, establish benchmarks, then finish the developer-facing SDK and CLI. Minimal handler contracts and internal runners are defined early to support that work.
 
@@ -51,7 +53,7 @@ The benchmark plan distinguishes external indexer comparisons, source-provider c
 
 ## Development
 
-There are no installation or runtime commands to execute yet. Proposed commands and APIs in the planning documents are design examples. The first implementation work is the G0 compatibility preflight and G1 scanner/recovery proof.
+There are no Zeer engine/SDK/CLI commands yet. The [benchmark tooling](benchmarks/README.md) has executable tests and reproduction instructions. Proposed Zeer commands and APIs in the planning documents remain design examples. Benchmark-first work precedes the Zeer scanner/recovery proof.
 
 The intended initial deployment target is Linux x86_64; Windows development uses WSL2. Runtime/toolchain versions will be pinned when validated.
 

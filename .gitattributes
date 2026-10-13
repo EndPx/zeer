@@ -1,0 +1,7 @@
+# Keep source/fixture text reproducible across Windows and Linux checkouts.
+* text=auto eol=lf
+*.png binary
+*.gz binary
+
+# Preserve upstream protocol bytes, including their existing comment whitespace.
+benchmarks/proto/*.proto whitespace=-blank-at-eol

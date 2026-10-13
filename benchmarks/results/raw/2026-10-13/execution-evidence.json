@@ -1,0 +1,46 @@
+{
+  "recorded_on": "2026-10-13",
+  "scope": "Facts captured from completed remote operations; these are not performance samples.",
+  "balanced_run_source_hashes": {
+    "benchmarks/runner/harness.py": "3c05a6d69d065c02db7396e0e632672cef0718c817c0478440d46754d4c0f9e1",
+    "benchmarks/adapters/compact_grpc.py": "8f38398ef42e69b6d2b51a46634107ce45ddc2a42ca87298d7af9ea19b2ca2a8",
+    "benchmarks/scripts/run_compact.py": "29f2d6f8f90730d2f42af31e0a14b5de8b55a0629d6d1a124cb93117cccea004",
+    "benchmarks/proto/service.proto": "6fbfa974081fb02366a3118a25764af289bdbb86688978f5ff2bae661dfa346a",
+    "benchmarks/proto/compact_formats.proto": "d8d0c8aaa5ceec7d5dcc188ef25b04011df2ec0254901620fce982fc13aeb32d"
+  },
+  "source_correspondence": "The five file hashes were read over SSH from the executed VPS checkout after balanced runs and matched these local files byte-for-byte.",
+  "fixture_replay": {
+    "status": "PASS",
+    "fresh_node": true,
+    "replayed_blocks": 1024,
+    "tip_hash": "7c0638f1c1eea7e383d63280c60f99bf1131c6bf40c5cad73226876dc448ec7d"
+  },
+  "post_run": {
+    "benchmark_containers_running": 0,
+    "oom_killed": false,
+    "runtime_directory_bytes": 40845912,
+    "requested_image_size_fields_bytes": [
+      118871226,
+      44166858,
+      46327567,
+      43277070
+    ],
+    "existing_services_checked_active": 5
+  },
+  "shutdown_note": "lightwalletd exits with code 1 after intentional docker stop; its completed read experiments passed and OOMKilled was false.",
+  "local_unit_tests": {
+    "command": "python -m unittest discover -s benchmarks/tests -q",
+    "passed": 40
+  },
+  "compose_validation": {
+    "status": "PASS",
+    "command": "docker compose config --quiet",
+    "runtime_execution": "The measured run used equivalent explicit docker run commands, not this compose file."
+  },
+  "executed_source_archive": {
+    "file": "executed-source.tar.gz",
+    "sha256": "3e4f1bba5a263695b3c5fd4d1c3f282a3950efe7fa85a85c59f945086f009846",
+    "purpose": "Exact measured source before the later aggregate-memory preflight guard; no timed algorithm changed."
+  },
+  "post_measurement_change": "Added aggregate server-plus-client memory preflight validation; exact measured source archived and timings unchanged."
+}

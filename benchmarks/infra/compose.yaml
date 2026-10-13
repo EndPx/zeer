@@ -1,0 +1,75 @@
+# Isolated reference topology. Run only ONE provider profile at a time.
+# Source .25 CPU + provider .75 CPU + client 1 CPU = authorized aggregate 2.
+name: zeer-benchmark
+x-provider: &provider
+  cpus: 0.75
+  mem_limit: 2560m
+  memswap_limit: 2560m
+  pids_limit: 256
+  labels:
+    zeer.benchmark: "20261013"
+  logging:
+    driver: json-file
+    options:
+      max-size: 5m
+      max-file: "2"
+
+services:
+  zebra:
+    image: zfnd/zebra@sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2
+    cpus: 0.25
+    mem_limit: 1280m
+    memswap_limit: 1280m
+    pids_limit: 256
+    labels:
+      zeer.benchmark: "20261013"
+    environment:
+      ZEBRA_NETWORK__NETWORK: Regtest
+      ZEBRA_RPC__LISTEN_ADDR: 0.0.0.0:18232
+      ZEBRA_RPC__ENABLE_COOKIE_AUTH: "false"
+      ZEBRA_MINING__MINER_ADDRESS: tmSRd1r8gs77Ja67Fw1JcdoXytxsyrLTPJm
+    volumes:
+      - ./zebra-regtest.toml:/home/zebra/.config/zebrad.toml:ro
+      - ${ZEER_BENCH_STATE:?set an isolated benchmark directory}/zebra:/home/zebra/.cache/zebra
+    networks:
+      default:
+        aliases: [zeer-bench-zebra]
+    ports: ["127.0.0.1:39232:18232"]
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: "2"}
+
+  lightwalletd:
+    <<: *provider
+    profiles: [lightwalletd]
+    image: electriccoinco/lightwalletd@sha256:483a361483531f9fa7b13c67ca69d69e394179ea31746cc0022fbe3af65ab5e0
+    command: ["--rpchost", "zebra", "--rpcport", "18232", "--rpcuser", "fixture", "--rpcpassword", "fixture", "--grpc-bind-addr", "0.0.0.0:9067", "--http-bind-addr", "127.0.0.1:9068", "--no-tls-very-insecure", "--data-dir", "/data", "--log-file", "/dev/stdout"]
+    volumes:
+      - ${ZEER_BENCH_STATE}/lightwalletd:/data
+    ports: ["127.0.0.1:39067:9067"]
+
+  zaino:
+    <<: *provider
+    profiles: [zaino]
+    image: zingodevops/zaino@sha256:c8428a39d510fd59a9182a5e19cf473d6af6a4b6a672aff8b1a690e9c23c17b9
+    volumes:
+      - ./zaino-regtest.toml:/app/config/zainod.toml:ro
+      - ${ZEER_BENCH_STATE}/zaino:/app/data
+    ports: ["127.0.0.1:39137:8137"]
+
+  client:
+    profiles: [tools]
+    image: python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+    cpus: 1
+    mem_limit: 256m
+    memswap_limit: 256m
+    pids_limit: 128
+    labels:
+      zeer.benchmark: "20261013"
+    working_dir: /work
+    environment:
+      PYTHONPATH: /client/deps:/client/generated:/work
+    volumes:
+      - ../..:/work:ro
+      - ${ZEER_BENCH_STATE}/client:/client
+      - ${ZEER_BENCH_STATE}/results:/results

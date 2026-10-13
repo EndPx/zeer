@@ -1,0 +1,28 @@
+# Bounded synthetic-regtest profile. Dummy auth is not a production secret.
+backend = "rpc"
+network = "Regtest"
+ephemeral_finalised_state = false
+
+[grpc_settings]
+listen_address = "0.0.0.0:8137"
+
+[validator_settings]
+validator_jsonrpc_listen_address = "zeer-bench-zebra:18232"
+validator_grpc_listen_address = "zeer-bench-zebra:18230"
+validator_user = "fixture"
+validator_password = "fixture"
+
+[service]
+timeout = 30
+channel_size = 32
+
+[storage.cache]
+capacity = 1000
+shard_power = 4
+
+[storage.database]
+path = "/app/data"
+size = 2
+sync_write_batch_size = 1
+accumulator_rebuild_memory_size = 1
+sync_checkpoint_interval = 5

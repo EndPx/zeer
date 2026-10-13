@@ -1,0 +1,313 @@
+{
+  "candidate": {
+    "endpoint": "grpc://zeer-bench-zaino:8137",
+    "name": "zaino",
+    "source_version": "Zebra 6.2.3",
+    "version": "0.10.1"
+  },
+  "client_cgroup_after": {
+    "cpu.max": "100000 100000",
+    "cpu.stat": "usage_usec 1548887\nuser_usec 1047686\nsystem_usec 501201\ncore_sched.force_idle_usec 0\nnr_periods 17\nnr_throttled 6\nthrottled_usec 71449\nnr_bursts 0\nburst_usec 0",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+    "memory.max": "268435456",
+    "memory.peak": "33337344"
+  },
+  "client_cgroup_before": {
+    "cpu.max": "100000 100000",
+    "cpu.stat": "usage_usec 767995\nuser_usec 620550\nsystem_usec 147444\ncore_sched.force_idle_usec 0\nnr_periods 9\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+    "memory.max": "268435456",
+    "memory.peak": "31019008"
+  },
+  "client_cpu_quota": 1.0,
+  "dataset": {
+    "end_hash": "7c0638f1c1eea7e383d63280c60f99bf1131c6bf40c5cad73226876dc448ec7d",
+    "end_height": 1024,
+    "field_sha256": {
+      "hash": "c70397c2a5e806ef7845ee76d0fbada5958c596fe183e6916e7cae27750141cb",
+      "height": "a1b8dfb5994e647bf7516c4820043827b645a55c22e4f4934c0f279c380cae63",
+      "prev_hash": "7397d4731dcd545590dcc9a59a4032e5776577d210d9a8ef53d916bc6e0e7b43",
+      "txids": "ebd8c3113b05800d695a63f7e3a04b3db7ac0d169909af3a3958c9d563857a59"
+    },
+    "genesis_hash": "029f11d80ef9765602235e1bc9727e3eb6ba20839319f761fee920d63401e327",
+    "network": "regtest",
+    "records_sha256": "21202283a1aa081730927fcee422b6a5d704d63e254c1a70b34abd1238f64223",
+    "start_hash": "3e75f9903d907cedf1b065507a2c862709be1eac3b16ff63c9dc9e365908c948",
+    "start_height": 1
+  },
+  "environment": {
+    "captured_at_utc": "2026-10-13T06:37:44.145790+00:00",
+    "containers": [
+      {
+        "cpu_quota": 0.75,
+        "declared_source_revision": "3244a74bb09fa6a09a4b2deeb6be53bab0890747",
+        "image_digests": [
+          "zingodevops/zaino@sha256:c8428a39d510fd59a9182a5e19cf473d6af6a4b6a672aff8b1a690e9c23c17b9"
+        ],
+        "image_id": "sha256:c8428a39d510fd59a9182a5e19cf473d6af6a4b6a672aff8b1a690e9c23c17b9",
+        "memory_bytes": 2684354560,
+        "memory_swap_bytes": 2684354560,
+        "name": "zeer-bench-zaino",
+        "oom_killed": false,
+        "ports": {
+          "8137/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "39137"
+            }
+          ]
+        },
+        "running": true
+      },
+      {
+        "cpu_quota": 1.25,
+        "declared_source_revision": null,
+        "image_digests": [
+          "electriccoinco/lightwalletd@sha256:483a361483531f9fa7b13c67ca69d69e394179ea31746cc0022fbe3af65ab5e0"
+        ],
+        "image_id": "sha256:483a361483531f9fa7b13c67ca69d69e394179ea31746cc0022fbe3af65ab5e0",
+        "memory_bytes": 2684354560,
+        "memory_swap_bytes": 2684354560,
+        "name": "zeer-bench-lightwalletd",
+        "oom_killed": false,
+        "ports": {
+          "9067/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "39067"
+            }
+          ]
+        },
+        "running": false
+      },
+      {
+        "cpu_quota": 0.25,
+        "declared_source_revision": "7121c82ba6795a151523d5b308a19743f4a1ade7",
+        "image_digests": [
+          "zfnd/zebra@sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2"
+        ],
+        "image_id": "sha256:bb2a6029db277ee3a10e951dcc0ddd36b4cbcbe0fad684746d695ee21d53fde2",
+        "memory_bytes": 1342177280,
+        "memory_swap_bytes": 1342177280,
+        "name": "zeer-bench-zebra",
+        "oom_killed": false,
+        "ports": {
+          "18232/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "39232"
+            }
+          ]
+        },
+        "running": true
+      }
+    ],
+    "cpu_model": "AMD EPYC 9354P 32-Core Processor",
+    "docker_version": "29.3.1",
+    "host_mem_available": "13913804 kB",
+    "host_mem_total": "16376020 kB",
+    "host_swap_free": "2653080 kB",
+    "isolation": "shared VPS; no existing application stopped; CPU quotas are not dedicated cores",
+    "limits": {
+      "operational_disk_bytes": 10737418240,
+      "total_cpu": 2,
+      "total_memory_bytes": 4294967296
+    },
+    "load_average": [
+      0.30224609375,
+      0.39208984375,
+      0.45166015625
+    ],
+    "logical_cpus": 4,
+    "os": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+    "profile": "shared-vps-bounded-regtest",
+    "schema_version": 1
+  },
+  "environment_profile": "shared-vps-bounded-regtest",
+  "limitations": [
+    "Measures already-available chain data read and normalization into memory, not fresh durable indexing.",
+    "Source cache is uncontrolled across repetitions; record environment and warm/cold state externally.",
+    "Version strings are declared provenance; this runner does not independently attest binaries.",
+    "Reference correctness depends on independently validated provenance; checksums only detect changed input.",
+    "Shielded compact projection only: txids exclude transactions absent from the declared compact projection; this does not prove full transaction completeness.",
+    "Synthetic coinbase-only fixture: zero shielded notes; not a shielded scan/decryption benchmark.",
+    "Pre-synced serving after one verified full-range warmup; cache layers are not independently controlled. Not index construction or durable application ingestion.",
+    "Shared VPS; CPU steal and other workloads remain possible. Client is limited to 1.0 CPU and can dominate these timings."
+  ],
+  "manifest_sha256": "91462321e3e43333cd24c0a86dd5e89ee620b9afff57b0c4f229ebffa1e031c5",
+  "measured_at_utc": "2026-10-13T06:37:46.153627+00:00",
+  "preflight": {
+    "elapsed_ns": 5468873,
+    "status": "PASS"
+  },
+  "projection": "shielded_compact",
+  "protobuf_payload_bytes_total": 403845,
+  "repetitions": 5,
+  "run_timeout_s": 60,
+  "runs": [
+    {
+      "blocks_per_second": 10806.535657684071,
+      "eligible": true,
+      "read_normalize_ns": 94757472,
+      "run": 1,
+      "source_requests": 1,
+      "status": "PASS",
+      "transactions_per_second": 0.0,
+      "verification": {
+        "actual_blocks": 1024,
+        "actual_field_sha256": {
+          "hash": "c70397c2a5e806ef7845ee76d0fbada5958c596fe183e6916e7cae27750141cb",
+          "height": "a1b8dfb5994e647bf7516c4820043827b645a55c22e4f4934c0f279c380cae63",
+          "prev_hash": "7397d4731dcd545590dcc9a59a4032e5776577d210d9a8ef53d916bc6e0e7b43",
+          "txids": "ebd8c3113b05800d695a63f7e3a04b3db7ac0d169909af3a3958c9d563857a59"
+        },
+        "actual_records_sha256": "21202283a1aa081730927fcee422b6a5d704d63e254c1a70b34abd1238f64223",
+        "actual_transactions": 0,
+        "duplicate_height_count": 0,
+        "expected_blocks": 1024,
+        "expected_transactions": 0,
+        "mismatched_fields": [],
+        "missing_heights": [],
+        "passed": true,
+        "unexpected_heights": []
+      },
+      "verification_ns": 2796902
+    },
+    {
+      "blocks_per_second": 8279.49833452312,
+      "eligible": true,
+      "read_normalize_ns": 123678991,
+      "run": 2,
+      "source_requests": 1,
+      "status": "PASS",
+      "transactions_per_second": 0.0,
+      "verification": {
+        "actual_blocks": 1024,
+        "actual_field_sha256": {
+          "hash": "c70397c2a5e806ef7845ee76d0fbada5958c596fe183e6916e7cae27750141cb",
+          "height": "a1b8dfb5994e647bf7516c4820043827b645a55c22e4f4934c0f279c380cae63",
+          "prev_hash": "7397d4731dcd545590dcc9a59a4032e5776577d210d9a8ef53d916bc6e0e7b43",
+          "txids": "ebd8c3113b05800d695a63f7e3a04b3db7ac0d169909af3a3958c9d563857a59"
+        },
+        "actual_records_sha256": "21202283a1aa081730927fcee422b6a5d704d63e254c1a70b34abd1238f64223",
+        "actual_transactions": 0,
+        "duplicate_height_count": 0,
+        "expected_blocks": 1024,
+        "expected_transactions": 0,
+        "mismatched_fields": [],
+        "missing_heights": [],
+        "passed": true,
+        "unexpected_heights": []
+      },
+      "verification_ns": 3220888
+    },
+    {
+      "blocks_per_second": 9137.688311559905,
+      "eligible": true,
+      "read_normalize_ns": 112063354,
+      "run": 3,
+      "source_requests": 1,
+      "status": "PASS",
+      "transactions_per_second": 0.0,
+      "verification": {
+        "actual_blocks": 1024,
+        "actual_field_sha256": {
+          "hash": "c70397c2a5e806ef7845ee76d0fbada5958c596fe183e6916e7cae27750141cb",
+          "height": "a1b8dfb5994e647bf7516c4820043827b645a55c22e4f4934c0f279c380cae63",
+          "prev_hash": "7397d4731dcd545590dcc9a59a4032e5776577d210d9a8ef53d916bc6e0e7b43",
+          "txids": "ebd8c3113b05800d695a63f7e3a04b3db7ac0d169909af3a3958c9d563857a59"
+        },
+        "actual_records_sha256": "21202283a1aa081730927fcee422b6a5d704d63e254c1a70b34abd1238f64223",
+        "actual_transactions": 0,
+        "duplicate_height_count": 0,
+        "expected_blocks": 1024,
+        "expected_transactions": 0,
+        "mismatched_fields": [],
+        "missing_heights": [],
+        "passed": true,
+        "unexpected_heights": []
+      },
+      "verification_ns": 2735909
+    },
+    {
+      "blocks_per_second": 13970.324656565695,
+      "eligible": true,
+      "read_normalize_ns": 73298225,
+      "run": 4,
+      "source_requests": 1,
+      "status": "PASS",
+      "transactions_per_second": 0.0,
+      "verification": {
+        "actual_blocks": 1024,
+        "actual_field_sha256": {
+          "hash": "c70397c2a5e806ef7845ee76d0fbada5958c596fe183e6916e7cae27750141cb",
+          "height": "a1b8dfb5994e647bf7516c4820043827b645a55c22e4f4934c0f279c380cae63",
+          "prev_hash": "7397d4731dcd545590dcc9a59a4032e5776577d210d9a8ef53d916bc6e0e7b43",
+          "txids": "ebd8c3113b05800d695a63f7e3a04b3db7ac0d169909af3a3958c9d563857a59"
+        },
+        "actual_records_sha256": "21202283a1aa081730927fcee422b6a5d704d63e254c1a70b34abd1238f64223",
+        "actual_transactions": 0,
+        "duplicate_height_count": 0,
+        "expected_blocks": 1024,
+        "expected_transactions": 0,
+        "mismatched_fields": [],
+        "missing_heights": [],
+        "passed": true,
+        "unexpected_heights": []
+      },
+      "verification_ns": 4230339
+    },
+    {
+      "blocks_per_second": 9685.559630784197,
+      "eligible": true,
+      "read_normalize_ns": 105724402,
+      "run": 5,
+      "source_requests": 1,
+      "status": "PASS",
+      "transactions_per_second": 0.0,
+      "verification": {
+        "actual_blocks": 1024,
+        "actual_field_sha256": {
+          "hash": "c70397c2a5e806ef7845ee76d0fbada5958c596fe183e6916e7cae27750141cb",
+          "height": "a1b8dfb5994e647bf7516c4820043827b645a55c22e4f4934c0f279c380cae63",
+          "prev_hash": "7397d4731dcd545590dcc9a59a4032e5776577d210d9a8ef53d916bc6e0e7b43",
+          "txids": "ebd8c3113b05800d695a63f7e3a04b3db7ac0d169909af3a3958c9d563857a59"
+        },
+        "actual_records_sha256": "21202283a1aa081730927fcee422b6a5d704d63e254c1a70b34abd1238f64223",
+        "actual_transactions": 0,
+        "duplicate_height_count": 0,
+        "expected_blocks": 1024,
+        "expected_transactions": 0,
+        "mismatched_fields": [],
+        "missing_heights": [],
+        "passed": true,
+        "unexpected_heights": []
+      },
+      "verification_ns": 3679189
+    }
+  ],
+  "scenario": "public-chain-data-read",
+  "schema_version": 1,
+  "server_info": {
+    "blockHeight": 1024,
+    "chainName": "test",
+    "gitCommit": "",
+    "vendor": "ZingoLabs ZainoD",
+    "version": "0.10.1"
+  },
+  "summary": {
+    "eligible_for_comparison": true,
+    "max_read_normalize_ns": 123678991,
+    "median_read_normalize_ns": 105724402,
+    "min_read_normalize_ns": 73298225,
+    "requested_runs": 5,
+    "status": "PASS",
+    "successful_runs": 5
+  },
+  "timing_boundary": "chain-data read + normalization to memory; excludes reference verification and all durable DB ingestion",
+  "warmup": {
+    "excluded_from_timing": true,
+    "full_range_verified": true,
+    "runs": 1
+  }
+}

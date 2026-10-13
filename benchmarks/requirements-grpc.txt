@@ -1,0 +1,6 @@
+# Benchmark-client tooling only; not dependencies of a Zeer engine.
+grpcio==1.84.0
+grpcio-tools==1.84.0
+protobuf==7.36.2
+typing-extensions==4.16.0
+setuptools==84.0.0

@@ -1,0 +1,8 @@
+{
+  "file": "blocks.jsonl.gz",
+  "sha256": "47ddf8654bf4d7ba3681812722c1d66a374632d857a4b388e1ad4718e90245d7",
+  "blocks": 1024,
+  "compressed_bytes": 220865,
+  "network": "regtest",
+  "genesis_hash": "029f11d80ef9765602235e1bc9727e3eb6ba20839319f761fee920d63401e327"
+}

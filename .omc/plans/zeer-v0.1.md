@@ -2,7 +2,7 @@
 
 Date: 2026-10-12 (Asia/Jakarta).
 Last planning update: 2026-10-13 (Asia/Jakarta), repository ownership and engine-first sequencing.
-Status: **pending approval for implementation**. This document authorizes no execution by itself.
+Status: **Zeer engine design pending implementation approval; benchmark-first work authorized on 2026-10-13**. This document authorizes no additional execution by itself.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
 ## 1. Product and evidence boundaries
@@ -342,7 +342,7 @@ Zaino/lightwalletd/Zinder are generally provider variants for this framework, no
 
 ## 9. Implementation gates
 
-Every gate produces a short evidence record with commands, exact versions, result, failure cases and remaining limitations. Check source diffs and workspace state after each bounded task. Commit/push only after a repository exists and the corresponding workflow is requested. All gates are currently **not started**.
+Every gate produces a short evidence record with commands, exact versions, result, failure cases and remaining limitations. Check source diffs and workspace state after each bounded task. Commit/push only after a repository exists and the corresponding workflow is requested. G0 has partial benchmark preflight evidence in [the first report](../../benchmarks/results/reports/2026-10-13.md); no implementation gate is complete. Zeer engine work remains not started.
 
 Engine-first sequencing clarified on 2026-10-13: implement scanner and transactional runtime through internal runners before polishing the public SDK/CLI. Freeze basic wire/handler contracts early; collect scanner and persistence benchmark baselines as soon as correctness allows. G2 is the minimal runtime/query integration needed to prove the engine, G4 measures the connected pipeline, and G5 completes developer-facing packaging. Re-run affected end-to-end measurements after packaging changes. Repository setup is administrative preparation, not completion of any implementation gate.
 
@@ -468,4 +468,4 @@ All proposed API names, limits, schemas, paths, acceptance gates and architectur
 
 Two bounded independent design-review passes were completed on 2026-10-12. Findings were incorporated into the recovery, delivery, pagination, observation-history and benchmark timing contracts. The final clarification makes rollback progress atomic with the corresponding undo transaction. This is a review of a proposed design, not an audit or implementation proof.
 
-Document checks cover relative-link resolution, balanced code fences, trailing whitespace and workspace inventory. No application tests or benchmarks have run. Remaining feasibility questions are explicitly assigned to G0/G1; all execution gates remain not started.
+At the planning review, document checks covered relative-link resolution, balanced code fences, trailing whitespace and workspace inventory; no application tests or benchmarks had run then. Subsequent benchmark-first work is recorded separately in the linked benchmark report. Remaining engine feasibility questions belong to G0/G1; the design review does not establish their completion.
