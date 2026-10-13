@@ -1,5 +1,6 @@
 //! Atomically published catalogs over immutable, independently checked segments.
 
+use super::transaction_index::ARCHIVE_INDEX_BYTES;
 use super::*;
 use std::collections::{HashMap, HashSet};
 
@@ -151,7 +152,16 @@ fn read_catalog(root: &Path) -> Result<Catalog> {
     Ok(catalog)
 }
 
+#[cfg(all(test, unix))]
 fn reference_for(root: &Path, directory: &str) -> Result<(SegmentReference, Store)> {
+    reference_for_with_budget(root, directory, SEGMENT_INDEX_BYTES)
+}
+
+fn reference_for_with_budget(
+    root: &Path,
+    directory: &str,
+    budget: usize,
+) -> Result<(SegmentReference, Store)> {
     let path = segment_path(root, directory)?;
     let mut file = regular_file(&path.join(MANIFEST_NAME))?;
     if file.metadata()?.len() > MAX_MANIFEST_BYTES {
@@ -165,7 +175,7 @@ fn reference_for(root: &Path, directory: &str) -> Result<(SegmentReference, Stor
         return Err(Error::Limit("segment manifest grew while reading"));
     }
     let observed: Manifest = serde_json::from_slice(&bytes)?;
-    let store = Store::open(&path)?; // Full integrity pass on new segment admission.
+    let store = Store::open_with_index_budget(&path, budget)?; // Full integrity pass even when index budget is zero.
     let manifest = store.manifest();
     if *manifest != observed {
         return Err(Error::Invalid("segment manifest changed during admission"));
@@ -244,6 +254,20 @@ impl Archive {
             })
             .unwrap_or_default();
         let mut stores = Vec::with_capacity(catalog.segments.len());
+        // Reserve reused Arc caches first, including those later in catalog order.
+        let reused_bytes: usize = catalog
+            .segments
+            .iter()
+            .filter_map(|reference| {
+                cached
+                    .get(reference.directory.as_str())
+                    .filter(|(old, _)| *old == reference)
+                    .map(|(_, store)| store.transaction_index_bytes())
+            })
+            .sum();
+        let mut remaining = ARCHIVE_INDEX_BYTES
+            .checked_sub(reused_bytes)
+            .ok_or(Error::Limit("archive transaction index bytes"))?;
         for reference in &catalog.segments {
             // Admission checks path safety even when immutable contents are cached.
             segment_path(root, &reference.directory)?;
@@ -254,13 +278,17 @@ impl Archive {
                     continue;
                 }
             }
-            let (observed, store) = reference_for(root, &reference.directory)?;
+            let (observed, store) =
+                reference_for_with_budget(root, &reference.directory, remaining)?;
             if observed != *reference {
                 return Err(Error::Invalid(
                     "catalog reference differs from checked segment",
                 ));
             }
             check_segment_kind(&catalog, &store)?;
+            remaining = remaining
+                .checked_sub(store.transaction_index_bytes())
+                .ok_or(Error::Limit("archive transaction index bytes"))?;
             stores.push(store);
         }
         Ok(Self {
@@ -296,6 +324,45 @@ impl Archive {
         self.read_range(height, height)?
             .next()
             .ok_or(Error::Invalid("missing archive block"))?
+    }
+
+    pub fn transaction_index_bytes(&self) -> usize {
+        self.stores.iter().map(Store::transaction_index_bytes).sum()
+    }
+
+    pub fn transaction_metadata(&self, height: u64) -> Result<Option<Vec<TransactionMetadata>>> {
+        self.store_for_height(height)?.transaction_metadata(height)
+    }
+
+    pub fn transaction_locations(
+        &self,
+        txids: &[[u8; 32]],
+        start: u64,
+        end: u64,
+    ) -> Result<Option<Vec<u64>>> {
+        count(start, end, 1000)?;
+        if txids.len() > 128 {
+            return Err(Error::Limit("transaction lookup ID count"));
+        }
+        self.store_for_height(start)?;
+        self.store_for_height(end)?;
+        let mut heights = Vec::new();
+        for store in self.stores.iter().filter(|store| {
+            store.manifest().end_height >= start && store.manifest().start_height <= end
+        }) {
+            let Some(found) = store.transaction_locations(
+                txids,
+                start.max(store.manifest().start_height),
+                end.min(store.manifest().end_height),
+            )?
+            else {
+                return Ok(None);
+            };
+            heights.extend(found);
+        }
+        heights.sort_unstable();
+        heights.dedup();
+        Ok(Some(heights))
     }
 
     fn store_for_height(&self, height: u64) -> Result<&Store> {
@@ -521,7 +588,11 @@ impl ArchiveWriter {
 
     pub fn append_segment(&mut self, relative_directory: &str) -> Result<Catalog> {
         self.ensure_current()?;
-        let (reference, store) = reference_for(&self.archive.root, relative_directory)?;
+        let budget = ARCHIVE_INDEX_BYTES
+            .checked_sub(self.archive.transaction_index_bytes())
+            .ok_or(Error::Limit("archive transaction index bytes"))?;
+        let (reference, store) =
+            reference_for_with_budget(&self.archive.root, relative_directory, budget)?;
         check_segment_kind(&self.archive.catalog, &store)?;
         let mut catalog = (*self.archive.catalog).clone();
         catalog.revision = catalog
@@ -962,5 +1033,114 @@ mod tests {
         assert!(archive.read_header(0).is_err());
         assert!(archive.read_header(5).is_err());
         assert!(archive.block_hash(5).is_err());
+    }
+
+    fn indexed_segment(root: &Path, name: &str, start: u64, end: u64, txid: &str) -> String {
+        let relative = format!("segments/{name}");
+        let mut writer = StoreWriter::create_full(
+            root.join(&relative),
+            "regtest",
+            start,
+            end,
+            &display_hash(&hash(start - 1)).unwrap(),
+            &display_hash(&hash(end)).unwrap(),
+        )
+        .unwrap();
+        for height in start..=end {
+            let payload = prep_proto::prep::FullBlock { height, hash: hash(height), prev_hash: hash(height - 1), time: 1,
+                raw_block: vec![1, 2, 3], decoded_json: format!(r#"{{"tx":[{{"txid":"{txid}","hex":"0102","version":1,"locktime":0,"vin":[{{}}],"vout":[{{}}]}}]}}"#) }.encode_to_vec();
+            writer
+                .push(BlockRecord {
+                    height,
+                    hash: hash(height),
+                    prev_hash: hash(height - 1),
+                    payload,
+                })
+                .unwrap();
+        }
+        writer.finish().unwrap();
+        relative
+    }
+
+    #[test]
+    fn metadata_cache_is_shared_across_append_refresh_and_replaced_after_rollback() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        writer
+            .append_segment(&indexed_segment(&root, "a", 1, 2, &"ab".repeat(32)))
+            .unwrap();
+        let old = writer.snapshot();
+        writer
+            .append_segment(&indexed_segment(&root, "b", 3, 4, &"ab".repeat(32)))
+            .unwrap();
+        let fresh = old.refresh().unwrap();
+        assert!(Arc::ptr_eq(
+            old.stores[0].transaction_index.as_ref().unwrap(),
+            fresh.stores[0].transaction_index.as_ref().unwrap()
+        ));
+        assert_eq!(
+            fresh.transaction_locations(&[[0xab; 32]], 1, 4).unwrap(),
+            Some(vec![1, 2, 3, 4])
+        );
+        assert!(fresh.transaction_index_bytes() <= ARCHIVE_INDEX_BYTES);
+        writer.rollback_to(2).unwrap();
+        writer
+            .append_segment(&indexed_segment(
+                &root,
+                "replacement",
+                3,
+                4,
+                &"cd".repeat(32),
+            ))
+            .unwrap();
+        let replaced = fresh.refresh().unwrap();
+        assert_eq!(
+            replaced.transaction_locations(&[[0xab; 32]], 1, 4).unwrap(),
+            Some(vec![1, 2])
+        );
+        assert_eq!(
+            replaced.transaction_locations(&[[0xcd; 32]], 1, 4).unwrap(),
+            Some(vec![3, 4])
+        );
+        assert_eq!(
+            fresh.transaction_locations(&[[0xab; 32]], 1, 4).unwrap(),
+            Some(vec![1, 2, 3, 4])
+        );
+        assert_eq!(
+            replaced.transaction_metadata(3).unwrap().unwrap()[0].txid,
+            [0xcd; 32]
+        );
+        assert!(replaced
+            .transaction_locations(&[[0; 32]; 129], 1, 4)
+            .is_err());
+        assert!(replaced.transaction_locations(&[], 1, 1001).is_err());
+    }
+
+    #[test]
+    fn one_unindexed_overlap_requires_fallback_even_for_absent_or_empty_ids() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        writer
+            .append_segment(&indexed_segment(&root, "a", 1, 2, &"ab".repeat(32)))
+            .unwrap();
+        writer
+            .append_segment(&make_segment(&root, "legacy", 3, 4, false, true))
+            .unwrap();
+        let archive = writer.snapshot();
+        assert_eq!(
+            archive.transaction_locations(&[[0; 32]], 1, 2).unwrap(),
+            Some(vec![])
+        );
+        assert_eq!(
+            archive.transaction_locations(&[[0; 32]], 1, 4).unwrap(),
+            None
+        );
+        assert_eq!(archive.transaction_locations(&[], 1, 4).unwrap(), None);
+        assert_eq!(archive.transaction_metadata(3).unwrap(), None);
+        assert!(archive.read_block(3).is_ok());
     }
 }

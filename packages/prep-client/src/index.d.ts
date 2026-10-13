@@ -1,5 +1,5 @@
 export type BlockField = "height" | "hash" | "previous_hash" | "time" | "raw" | "decoded";
-export type TransactionField = "txid" | "block_height" | "index" | "version" | "locktime" | "raw" | "vin" | "vout" | "decoded";
+export type TransactionField = "txid" | "block_height" | "index" | "version" | "locktime" | "size_bytes" | "transparent_input_count" | "transparent_output_count" | "raw" | "vin" | "vout" | "decoded";
 export interface Query {
   from_block: number;
   /** Exclusive. Omit to capture the indexed head on the first request. */

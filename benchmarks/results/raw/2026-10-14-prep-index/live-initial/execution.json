@@ -1,0 +1,12 @@
+{
+  "status": "FAIL",
+  "failure_type": "ValueError",
+  "cleanup_errors": [],
+  "services": {
+    "commitpass-api": "active",
+    "nabungfi-api": "active",
+    "nabungfi-keeper": "active",
+    "rocket-arena": "active",
+    "nginx": "active"
+  }
+}

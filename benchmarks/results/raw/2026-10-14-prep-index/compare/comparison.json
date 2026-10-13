@@ -1,0 +1,1054 @@
+{
+  "format": "prep-index-before-after-v1",
+  "status": "PASS",
+  "started_at": "2026-10-13T21:48:18.652575+00:00",
+  "orchestrator_sha256": "67f62e227d41f45f2e44548cf0f08d5d9e21dbf87387fc2ea5b80921542bb4a9",
+  "driver_sha256": "9b916a49449c87693df3b554d7741a6293d44628361559f360ad080e03478b87",
+  "archive_catalog_sha256": "a0b0db166db9fc2d145f2f79b4f26e8c0d5b74da7dd8d8e9b2c3dad3d2e1fc26",
+  "host_before": {
+    "commitpass-api": "active",
+    "nabungfi-api": "active",
+    "nabungfi-keeper": "active",
+    "rocket-arena": "active",
+    "nginx": "active"
+  },
+  "profile": {
+    "each_server_cpu": 1,
+    "each_server_memory": 2147483648,
+    "client_and_controller_cpu": 1,
+    "client_and_controller_memory": 1073741824
+  },
+  "servers": {
+    "before": {
+      "name": "zeer-index-before",
+      "endpoint": "http://172.29.0.2:39368",
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+      "binary_sha256": "c14324f40f2e3982efcdf413193d5c5a5c7055b282a52315ba71e69277d02391",
+      "admission_seconds": 0.540887488052249,
+      "meta": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "cgroup_after_admission": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "11771904",
+        "memory.peak": "11997184",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 271025\nuser_usec 188500\nsystem_usec 82525\ncore_sched.force_idle_usec 0\nnr_periods 4\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "cgroup_path": "/sys/fs/cgroup/system.slice/docker-0543fe72e4288b99dcec558ba74bbef31db6a694c1c6816f1da2807246dcaf57.scope",
+      "cgroup_after_queries": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "55255040",
+        "memory.peak": "59940864",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 14487539\nuser_usec 13220328\nsystem_usec 1267211\ncore_sched.force_idle_usec 0\nnr_periods 251\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      }
+    },
+    "after": {
+      "name": "zeer-index-after",
+      "endpoint": "http://172.29.0.3:39368",
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+      "binary_sha256": "cd1ceb28c9ae05d3fb5595175709e2ef6eee8b9f4ce1af757ee7f12de2225e97",
+      "admission_seconds": 0.540512153878808,
+      "meta": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "cgroup_after_admission": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "5402624",
+        "memory.peak": "6270976",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 337839\nuser_usec 283507\nsystem_usec 54331\ncore_sched.force_idle_usec 0\nnr_periods 4\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "cgroup_path": "/sys/fs/cgroup/system.slice/docker-231c14664ce08e9a1af79ee2e1c879712027c7af3d78cb1ab6449c797f0374fd.scope",
+      "cgroup_after_queries": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "48680960",
+        "memory.peak": "53325824",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 11452797\nuser_usec 10398921\nsystem_usec 1053875\ncore_sched.force_idle_usec 0\nnr_periods 264\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      }
+    }
+  },
+  "visits": [
+    {
+      "round": 1,
+      "case": "before-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-before-decoded-headers.json",
+      "sha256": "519abee6b286d0642ca8a26296a0a30671e9d5402c33a1d55ae227046b637962",
+      "elapsed_ns": 19440553,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 1,
+      "case": "before-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-before-decoded-transactions.json",
+      "sha256": "1b9d1da806b59ba61fd3ec15ba2ad9e0776bb46b90d01fe8e9340c90f37a7e85",
+      "elapsed_ns": 1569410682,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 1,
+      "case": "before-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-before-decoded-sparse.json",
+      "sha256": "b3453e115feb0b25e3ca40188e6506296189f4d1fc13c76294e753d58dafad2b",
+      "elapsed_ns": 471874511,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 1,
+      "case": "after-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-after-decoded-headers.json",
+      "sha256": "145883808a52978b975132ce1b4243145ccfb3e58376df878aeeb5a03ddd2741",
+      "elapsed_ns": 23787147,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 1,
+      "case": "after-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-after-decoded-transactions.json",
+      "sha256": "44bb844fc853e7dbd2cc5252fc93caefa9b0ed47c6c6266589e067c5acfcdbf0",
+      "elapsed_ns": 1549030099,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 1,
+      "case": "after-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-after-decoded-sparse.json",
+      "sha256": "393ea834de487fc5a598a76fa2bc06a2ab71224e7a8c12876fe2c0baa1e65cde",
+      "elapsed_ns": 47973155,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 1,
+      "case": "after-metadata",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-after-metadata-headers.json",
+      "sha256": "e02ef3f27950d52a6b710e4bf4ed14223d37127d6e35e5eca34735b031173b1e",
+      "elapsed_ns": 19148453,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 1,
+      "case": "after-metadata",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-after-metadata-transactions.json",
+      "sha256": "d1a8ebf9873494eb4d440b989ba65c98d4366c3bd81dcb0a360a896aeb03b4e5",
+      "elapsed_ns": 160601255,
+      "response_bytes": 3352249,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 1,
+      "case": "after-metadata",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round1-after-metadata-sparse.json",
+      "sha256": "640b834437dd40380972d293612cacac88e1cde0e17b097b1e5f5e3d37d96448",
+      "elapsed_ns": 15654332,
+      "response_bytes": 36410,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 2,
+      "case": "after-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-after-decoded-headers.json",
+      "sha256": "5c320d410037068f0794a02229e6ad265b1ef9aff0ba1bc5fab98e7024f8b748",
+      "elapsed_ns": 20130612,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 2,
+      "case": "after-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-after-decoded-transactions.json",
+      "sha256": "ef02d8ce2c7a72b2787621d22b808b14584432262b70ea43c229ec7b76996141",
+      "elapsed_ns": 1624094031,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 2,
+      "case": "after-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-after-decoded-sparse.json",
+      "sha256": "26d6845c24e7246efd4e80fc413cbc442374f88318dc2f6c047f469157cc2b5b",
+      "elapsed_ns": 54535486,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 2,
+      "case": "after-metadata",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-after-metadata-headers.json",
+      "sha256": "954e7314b4a120a1ae90e322e1ee3c40f622a0b454b51d92ddff05d3636fb649",
+      "elapsed_ns": 21903941,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 2,
+      "case": "after-metadata",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-after-metadata-transactions.json",
+      "sha256": "9736b8973b737c801971a860b4f09565bec2133fca6ce10217e9994c3984b7ac",
+      "elapsed_ns": 152922361,
+      "response_bytes": 3352249,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 2,
+      "case": "after-metadata",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-after-metadata-sparse.json",
+      "sha256": "2884f74306ebb896da06db0e659aced7d83740a817055d06c8523510494621b8",
+      "elapsed_ns": 15473428,
+      "response_bytes": 36410,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 2,
+      "case": "before-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-before-decoded-headers.json",
+      "sha256": "9997e317d9d1d2a4929e31a5e5a8314d0e7be0910ea603a181463d2d66f30439",
+      "elapsed_ns": 25454868,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 2,
+      "case": "before-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-before-decoded-transactions.json",
+      "sha256": "84e04aa0d4b2f6e249c4b5a2df685a7e746f654c74365f23e857246700cc69e1",
+      "elapsed_ns": 1545888739,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 2,
+      "case": "before-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round2-before-decoded-sparse.json",
+      "sha256": "18fc2f052430d54a8fa449ae708137a3d16d680f4b25d1399f33c1d1c1d78478",
+      "elapsed_ns": 398008065,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 3,
+      "case": "after-metadata",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-after-metadata-headers.json",
+      "sha256": "0fd491b5520e9a5d8d73f4dedd0f0dfaeda68c226e3053846caa25a7fbbdd402",
+      "elapsed_ns": 23040462,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 3,
+      "case": "after-metadata",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-after-metadata-transactions.json",
+      "sha256": "879154711d73f7b7c88352ca0300200c341653d0770c706af5aa5ef5c78c0731",
+      "elapsed_ns": 166564381,
+      "response_bytes": 3352249,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 3,
+      "case": "after-metadata",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-after-metadata-sparse.json",
+      "sha256": "c9eb8db6c51a41fd8ec5045e13538650c9090f143898b3aadefdf593f57cae29",
+      "elapsed_ns": 16612423,
+      "response_bytes": 36410,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 3,
+      "case": "before-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-before-decoded-headers.json",
+      "sha256": "0bdc9431f8d1eed59e3152990ec81f8543f2955655508bb72a2ce14c741986d6",
+      "elapsed_ns": 24044304,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 3,
+      "case": "before-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-before-decoded-transactions.json",
+      "sha256": "9c19be17312e4c2556d8f8d64fdb49636797bbb75d44c58d5d3a9e38ebb8fa45",
+      "elapsed_ns": 1651054395,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 3,
+      "case": "before-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-before-decoded-sparse.json",
+      "sha256": "79b6912d604fd8f94165c0ec1e81ecf877f4af29dfdaebce41e712479c9c09ec",
+      "elapsed_ns": 462704409,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 3,
+      "case": "after-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-after-decoded-headers.json",
+      "sha256": "06f3c8062e66e20deba50ff2e917023f51c5e93360c93ef5a424dafb85f83d29",
+      "elapsed_ns": 20050110,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 3,
+      "case": "after-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-after-decoded-transactions.json",
+      "sha256": "a2b0755ecc104a831d3f22e93d75416234d19ab4f6ad0361a56b646bd51dc53c",
+      "elapsed_ns": 1571914808,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 3,
+      "case": "after-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round3-after-decoded-sparse.json",
+      "sha256": "aee2615d7f673750bb9fb644503f4dcef3febdfaf2c80546d5950863934d12dc",
+      "elapsed_ns": 41932810,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 4,
+      "case": "before-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-before-decoded-headers.json",
+      "sha256": "2684f803ca851eadc4783211351605a9aa57e64d54a1edbe1ac6696e501ceaef",
+      "elapsed_ns": 17567331,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 4,
+      "case": "before-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-before-decoded-transactions.json",
+      "sha256": "8f82e662ed044dd8249a2fb7f9f87e6f32e397ca56acf5cf20e26a9731576616",
+      "elapsed_ns": 1505534935,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 4,
+      "case": "before-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-before-decoded-sparse.json",
+      "sha256": "32aaf118d6862284c4d4a7ba582f9b4d11108a446760c2380f582c5a9141db21",
+      "elapsed_ns": 416160524,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 4,
+      "case": "after-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-after-decoded-headers.json",
+      "sha256": "f62e9d25dc78cbb02240b17019dfaef45471b0bc0079834f30f30f874e99da4b",
+      "elapsed_ns": 22390234,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 4,
+      "case": "after-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-after-decoded-transactions.json",
+      "sha256": "90577b3e432fdb598f168f42b731a44f8f826778e127d7673b20ef3a1e97f514",
+      "elapsed_ns": 1515352023,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 4,
+      "case": "after-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-after-decoded-sparse.json",
+      "sha256": "6d31a3c34c42d6f3fa9d2e288997c47845fb51f6ef08bdb445fbd3eb46c3d425",
+      "elapsed_ns": 42940176,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 4,
+      "case": "after-metadata",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-after-metadata-headers.json",
+      "sha256": "1cde1c22892f24887245429807891a2377408dbd38939a37a347d8ab4adbb88d",
+      "elapsed_ns": 18405163,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 4,
+      "case": "after-metadata",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-after-metadata-transactions.json",
+      "sha256": "ba92e79bf1e0dd4ac0bc99e8db6063351bdc0a925584125758325324d32bd39a",
+      "elapsed_ns": 154973809,
+      "response_bytes": 3352249,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 4,
+      "case": "after-metadata",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round4-after-metadata-sparse.json",
+      "sha256": "b1bc254e71583f087aaedb19df0bf0ade661452d369893228a9d7744dfb55397",
+      "elapsed_ns": 21015483,
+      "response_bytes": 36410,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 5,
+      "case": "after-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-after-decoded-headers.json",
+      "sha256": "04939824435aa86f535296ff9a374bb11bdc47459994028ae4f570c0c8d070e8",
+      "elapsed_ns": 22138314,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 5,
+      "case": "after-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-after-decoded-transactions.json",
+      "sha256": "e8bfa63ebf1476d1ca2b867cfdae824725c99ed295c83f9ab5f99de3540c6e13",
+      "elapsed_ns": 1618265697,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 5,
+      "case": "after-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-after-decoded-sparse.json",
+      "sha256": "ab3d192a3ca0477c5af4e36f8a8cface4c5bc83ad92bca514c359f0ddbc8ef94",
+      "elapsed_ns": 40962788,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 5,
+      "case": "after-metadata",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-after-metadata-headers.json",
+      "sha256": "f10467702dbdefeab4960389f934f5011ee91ee78a69d4c347dd63639309ce7e",
+      "elapsed_ns": 17075531,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 5,
+      "case": "after-metadata",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-after-metadata-transactions.json",
+      "sha256": "9c5d9bb5023cd691792a877a421832f05d984afb92b3929c28583d7d22a14e73",
+      "elapsed_ns": 143304536,
+      "response_bytes": 3352249,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 5,
+      "case": "after-metadata",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-after-metadata-sparse.json",
+      "sha256": "5571dd7911e004644f7acd699a5d377d21a2bc3224ac837bd3a10c102392faee",
+      "elapsed_ns": 17478659,
+      "response_bytes": 36410,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    },
+    {
+      "round": 5,
+      "case": "before-decoded",
+      "workload": "headers",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-before-decoded-headers.json",
+      "sha256": "2206f72c5658d76a86041a3427e9c1dbeea7cf3f7481c0eae266624fdbc28a8d",
+      "elapsed_ns": 17411377,
+      "response_bytes": 231478,
+      "result_hash": "b2eaeb0e8dbc71e41fe3b467565ad8373d04faf2bd3c1b37819c51be0abbccf5"
+    },
+    {
+      "round": 5,
+      "case": "before-decoded",
+      "workload": "transactions",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-before-decoded-transactions.json",
+      "sha256": "a2cb9976be7640a0860629edf1ddfac805bb4457c15bc4206d6c8df220cc7afe",
+      "elapsed_ns": 1624182692,
+      "response_bytes": 78110289,
+      "result_hash": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71"
+    },
+    {
+      "round": 5,
+      "case": "before-decoded",
+      "workload": "sparse",
+      "host_before": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "status": "PASS",
+      "file": "round5-before-decoded-sparse.json",
+      "sha256": "cd8d7b39aa0ec4d88435d65ac3c7d76771b067cb9228d2e5dbf761799ab528eb",
+      "elapsed_ns": 437477227,
+      "response_bytes": 312733,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3"
+    }
+  ],
+  "limitations": [
+    "Same immutable archive; index admission is excluded from query timing and recorded separately.",
+    "In-memory derived index, not a new persisted disk format. Prepared warm-cache results on a shared VPS.",
+    "Old/new decoded cases request identical fields. New metadata case returns direct scalars with identical final normalized rows, reducing overfetch.",
+    "Five cyclic rounds across three cases; each workload uses verified warmup then one measured pass. Headers serve as an unchanged control.",
+    "Cgroup memory includes page cache and startup; it is not isolated Rust heap size. One admission observation per server is not a cold-start benchmark."
+  ],
+  "summary": {
+    "before-decoded-headers": {
+      "repetitions": 5,
+      "median_ms": 19.440553,
+      "min_ms": 17.411377,
+      "max_ms": 25.454868,
+      "response_bytes": [
+        231478,
+        231478,
+        231478,
+        231478,
+        231478
+      ]
+    },
+    "after-decoded-headers": {
+      "repetitions": 5,
+      "median_ms": 22.138314,
+      "min_ms": 20.05011,
+      "max_ms": 23.787147,
+      "response_bytes": [
+        231478,
+        231478,
+        231478,
+        231478,
+        231478
+      ]
+    },
+    "after-metadata-headers": {
+      "repetitions": 5,
+      "median_ms": 19.148453,
+      "min_ms": 17.075531,
+      "max_ms": 23.040462,
+      "response_bytes": [
+        231478,
+        231478,
+        231478,
+        231478,
+        231478
+      ]
+    },
+    "before-decoded-transactions": {
+      "repetitions": 5,
+      "median_ms": 1569.410682,
+      "min_ms": 1505.534935,
+      "max_ms": 1651.054395,
+      "response_bytes": [
+        78110289,
+        78110289,
+        78110289,
+        78110289,
+        78110289
+      ]
+    },
+    "after-decoded-transactions": {
+      "repetitions": 5,
+      "median_ms": 1571.914808,
+      "min_ms": 1515.352023,
+      "max_ms": 1624.094031,
+      "response_bytes": [
+        78110289,
+        78110289,
+        78110289,
+        78110289,
+        78110289
+      ]
+    },
+    "after-metadata-transactions": {
+      "repetitions": 5,
+      "median_ms": 154.973809,
+      "min_ms": 143.304536,
+      "max_ms": 166.564381,
+      "response_bytes": [
+        3352249,
+        3352249,
+        3352249,
+        3352249,
+        3352249
+      ]
+    },
+    "before-decoded-sparse": {
+      "repetitions": 5,
+      "median_ms": 437.477227,
+      "min_ms": 398.008065,
+      "max_ms": 471.874511,
+      "response_bytes": [
+        312733,
+        312733,
+        312733,
+        312733,
+        312733
+      ]
+    },
+    "after-decoded-sparse": {
+      "repetitions": 5,
+      "median_ms": 42.940176,
+      "min_ms": 40.962788,
+      "max_ms": 54.535486,
+      "response_bytes": [
+        312733,
+        312733,
+        312733,
+        312733,
+        312733
+      ]
+    },
+    "after-metadata-sparse": {
+      "repetitions": 5,
+      "median_ms": 16.612423,
+      "min_ms": 15.473428,
+      "max_ms": 21.015483,
+      "response_bytes": [
+        36410,
+        36410,
+        36410,
+        36410,
+        36410
+      ]
+    }
+  },
+  "host_after": {
+    "commitpass-api": "active",
+    "nabungfi-api": "active",
+    "nabungfi-keeper": "active",
+    "rocket-arena": "active",
+    "nginx": "active"
+  },
+  "cleanup_errors": [],
+  "finished_at": "2026-10-13T21:49:43.879914+00:00"
+}

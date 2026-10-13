@@ -10,7 +10,7 @@ use std::{
 };
 
 use prep_proto::prep::FullBlock;
-use prep_store::{Archive, BlockHeader, BlockRecord};
+use prep_store::{Archive, BlockHeader, BlockRecord, TransactionMetadata};
 use prost::Message;
 use serde::{ser::SerializeMap, ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use serde_json::{json, Map, Value};
@@ -28,6 +28,9 @@ const TX_FIELDS: &[&str] = &[
     "index",
     "version",
     "locktime",
+    "size_bytes",
+    "transparent_input_count",
+    "transparent_output_count",
     "raw",
     "vin",
     "vout",
@@ -125,6 +128,20 @@ pub struct QueryMeta {
 pub trait QueryArchive {
     fn query_meta(&self) -> QueryMeta;
     fn query_block(&self, height: u64) -> Result<BlockRecord, QueryError>;
+    fn query_transaction_metadata(
+        &self,
+        _height: u64,
+    ) -> Result<Option<Vec<TransactionMetadata>>, QueryError> {
+        Ok(None)
+    }
+    fn query_transaction_locations(
+        &self,
+        _txids: &[[u8; 32]],
+        _start: u64,
+        _end: u64,
+    ) -> Result<Option<Vec<u64>>, QueryError> {
+        Ok(None)
+    }
     /// Inclusive range; production archives reuse a segment handle across blocks.
     fn query_range(
         &self,
@@ -167,6 +184,22 @@ impl QueryArchive for Archive {
     }
     fn query_block(&self, height: u64) -> Result<BlockRecord, QueryError> {
         self.read_block(height)
+            .map_err(|_| QueryError::new(503, "ARCHIVE_READ_FAILED"))
+    }
+    fn query_transaction_metadata(
+        &self,
+        height: u64,
+    ) -> Result<Option<Vec<TransactionMetadata>>, QueryError> {
+        self.transaction_metadata(height)
+            .map_err(|_| QueryError::new(503, "ARCHIVE_READ_FAILED"))
+    }
+    fn query_transaction_locations(
+        &self,
+        txids: &[[u8; 32]],
+        start: u64,
+        end: u64,
+    ) -> Result<Option<Vec<u64>>, QueryError> {
+        self.transaction_locations(txids, start, end)
             .map_err(|_| QueryError::new(503, "ARCHIVE_READ_FAILED"))
     }
     fn query_header(&self, height: u64) -> Result<BlockHeader, QueryError> {
@@ -550,6 +583,20 @@ fn has_array(value: Option<&Value>) -> Result<bool, QueryError> {
         _ => Err(QueryError::new(503, "INVALID_STORED_TRANSACTION")),
     }
 }
+fn transaction_size(tx: &Value) -> Result<u32, QueryError> {
+    let size = u32::try_from(valid_hex_field(tx, "hex", None)?.len() / 2)
+        .map_err(|_| QueryError::new(503, "INVALID_STORED_TRANSACTION"))?;
+    if tx.get("size").is_some() && node_u32(tx, "size")? != size {
+        return Err(QueryError::new(503, "INVALID_STORED_TRANSACTION"));
+    }
+    Ok(size)
+}
+fn transaction_array_count(tx: &Value, field: &str) -> Result<u32, QueryError> {
+    tx.get(field)
+        .and_then(Value::as_array)
+        .and_then(|values| u32::try_from(values.len()).ok())
+        .ok_or_else(|| QueryError::new(503, "INVALID_STORED_TRANSACTION"))
+}
 fn matches_tx(tx: &Value, filter: &TransactionFilter) -> Result<bool, QueryError> {
     if let Some(ids) = &filter.txids {
         if !ids.contains(&hex_field(tx, "txid", Some(32))?) {
@@ -669,6 +716,13 @@ fn project_block(
                     "index" => ProjectedValue::Owned(json!(index)),
                     "version" => ProjectedValue::Owned(json!(node_u32(tx, "version")?)),
                     "locktime" => ProjectedValue::Owned(json!(node_u32(tx, "locktime")?)),
+                    "size_bytes" => ProjectedValue::Owned(json!(transaction_size(tx)?)),
+                    "transparent_input_count" => {
+                        ProjectedValue::Owned(json!(transaction_array_count(tx, "vin")?))
+                    }
+                    "transparent_output_count" => {
+                        ProjectedValue::Owned(json!(transaction_array_count(tx, "vout")?))
+                    }
                     "raw" => ProjectedValue::HexText(valid_hex_field(tx, "hex", None)?),
                     "vin" | "vout" | "decoded" => {
                         let value = if field == "decoded" {
@@ -723,6 +777,100 @@ fn project_header(header: BlockHeader, fields: &[String]) -> Result<QueryData, Q
     }
     data.blocks.push(Value::Object(selected));
     Ok(data)
+}
+
+fn project_transaction_metadata(
+    height: u64,
+    header: Option<BlockHeader>,
+    transactions: &[TransactionMetadata],
+    request: &QueryRequest,
+    control: &QueryControl,
+    max_bytes: usize,
+) -> Result<(QueryData, usize), QueryError> {
+    let mut data = match header {
+        Some(header) => project_header(header, &request.field_selection.block)?,
+        None => QueryData {
+            blocks: vec![],
+            transactions: vec![],
+        },
+    };
+    let mut budget = ProjectionBudget::new(max_bytes, control)?;
+    if let Some(Value::Object(block)) = data.blocks.first() {
+        budget.object(false)?;
+        let mut checked = Map::new();
+        for (field, value) in block {
+            budget.insert(&mut checked, field, ProjectedValue::Owned(value.clone()))?;
+        }
+    }
+    for (index, tx) in transactions.iter().enumerate() {
+        control.check()?;
+        if tx.block_height != height
+            || usize::try_from(tx.index).ok() != Some(index)
+            || tx.size_bytes == 0
+        {
+            return Err(QueryError::new(503, "INVALID_STORED_TRANSACTION"));
+        }
+        let filter = &request.transaction_filter;
+        if filter
+            .txids
+            .as_ref()
+            .is_some_and(|ids| !ids.contains(&hex::encode(tx.txid)))
+            || filter
+                .versions
+                .as_ref()
+                .is_some_and(|versions| !versions.contains(&tx.version))
+            || filter
+                .has_sapling
+                .is_some_and(|wanted| wanted != tx.has_sapling)
+            || filter
+                .has_orchard
+                .is_some_and(|wanted| wanted != tx.has_orchard)
+        {
+            continue;
+        }
+        budget.object(!data.transactions.is_empty())?;
+        let mut selected = Map::new();
+        for field in &request.field_selection.transaction {
+            let value = match field.as_str() {
+                "txid" => json!(hex::encode(tx.txid)),
+                "block_height" => json!(tx.block_height),
+                "index" => json!(tx.index),
+                "version" => json!(tx.version),
+                "locktime" => json!(tx.locktime),
+                "size_bytes" => json!(tx.size_bytes),
+                "transparent_input_count" => json!(tx.transparent_input_count),
+                "transparent_output_count" => json!(tx.transparent_output_count),
+                _ => unreachable!("metadata-only selection"),
+            };
+            budget.insert(&mut selected, field, ProjectedValue::Owned(value))?;
+        }
+        data.transactions.push(Value::Object(selected));
+    }
+    Ok((data, budget.bytes))
+}
+
+fn bounded_header_projection<A: QueryArchive>(
+    archive: &A,
+    height: u64,
+    fields: &[String],
+    remaining: usize,
+) -> Result<(QueryData, usize), QueryError> {
+    let selected = if fields.is_empty() {
+        QueryData {
+            blocks: vec![],
+            transactions: vec![],
+        }
+    } else {
+        project_header(archive.query_header(height)?, fields)?
+    };
+    let size = serde_json::to_vec(&selected)
+        .map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?
+        .len();
+    if size <= remaining {
+        Ok((selected, size))
+    } else {
+        Err(block_too_large())
+    }
 }
 
 pub fn execute_query<A: QueryArchive>(
@@ -808,39 +956,107 @@ pub fn execute_query<A: QueryArchive>(
     };
     let mut encoded_bytes = RESPONSE_OVERHEAD;
     let mut data_content_bytes = 0usize;
-    let header_only = request.field_selection.transaction.is_empty()
-        && !request
+    let header_fields = !request
+        .field_selection
+        .block
+        .iter()
+        .any(|field| field == "raw" || field == "decoded");
+    let header_only = request.field_selection.transaction.is_empty() && header_fields;
+    let metadata_only = header_fields
+        && request
             .field_selection
-            .block
+            .transaction
             .iter()
-            .any(|field| field == "raw" || field == "decoded");
-    let mut records = if !header_only && next < stop {
+            .all(|field| !["raw", "vin", "vout", "decoded"].contains(&field.as_str()))
+        && request
+            .transaction_filter
+            .transparent_output_addresses
+            .is_none();
+    let candidates = if header_fields && !header_only && next < stop {
+        if let Some(ids) = &request.transaction_filter.txids {
+            let ids: Vec<[u8; 32]> = ids
+                .iter()
+                .map(|id| {
+                    let bytes = hex::decode(id).expect("validated txid");
+                    bytes.try_into().expect("validated 32-byte txid")
+                })
+                .collect();
+            let locations = archive.query_transaction_locations(&ids, next, stop - 1)?;
+            if locations.as_ref().is_some_and(|heights| {
+                heights.windows(2).any(|pair| pair[0] >= pair[1])
+                    || heights
+                        .iter()
+                        .any(|height| *height < next || *height >= stop)
+            }) {
+                return Err(QueryError::new(503, "INVALID_TRANSACTION_INDEX"));
+            }
+            locations
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    let mut records = if !header_only && !metadata_only && candidates.is_none() && next < stop {
         Some(archive.query_range(next, stop - 1)?)
     } else {
         None
     };
+    let mut record_next = next;
     while next < stop {
         control.check()?;
         let remaining = control.max_response_bytes - encoded_bytes;
-        let projection = if header_only {
-            let selected =
-                project_header(archive.query_header(next)?, &request.field_selection.block)?;
-            // At most four fixed header fields (two 64-character hashes and two
-            // integers). This tiny buffer is bounded independently of the page;
-            // avoid a checked writer and deadline reads for each small field.
-            let size = serde_json::to_vec(&selected)
-                .map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?
-                .len();
-            if size <= remaining {
-                Ok((selected, size))
-            } else {
-                Err(block_too_large())
+        let projection = if header_only
+            || candidates
+                .as_ref()
+                .is_some_and(|heights| heights.binary_search(&next).is_err())
+        {
+            bounded_header_projection(archive, next, &request.field_selection.block, remaining)
+        } else if metadata_only {
+            match archive.query_transaction_metadata(next)? {
+                Some(transactions) => {
+                    let header = if request.field_selection.block.is_empty() {
+                        None
+                    } else {
+                        Some(archive.query_header(next)?)
+                    };
+                    project_transaction_metadata(
+                        next,
+                        header,
+                        &transactions,
+                        request,
+                        control,
+                        remaining,
+                    )
+                }
+                None => {
+                    let record = if candidates.is_some() {
+                        archive.query_block(next)?
+                    } else {
+                        // Retain segment-handle reuse for legacy/unindexed ranges.
+                        // A mixed indexed range may skip earlier iterator entries.
+                        if records.is_none() || record_next != next {
+                            records = Some(archive.query_range(next, stop - 1)?);
+                        }
+                        record_next = next + 1;
+                        records
+                            .as_mut()
+                            .and_then(|reader| reader.next())
+                            .ok_or_else(|| QueryError::new(503, "ARCHIVE_READ_FAILED"))??
+                    };
+                    if record.height != next {
+                        return Err(QueryError::new(503, "INVALID_STORED_BLOCK"));
+                    }
+                    project_block(record, request, control, remaining)
+                }
             }
         } else {
-            let record = records
-                .as_mut()
-                .and_then(|reader| reader.next())
-                .ok_or_else(|| QueryError::new(503, "ARCHIVE_READ_FAILED"))??;
+            let record = match records.as_mut() {
+                Some(reader) => reader
+                    .next()
+                    .ok_or_else(|| QueryError::new(503, "ARCHIVE_READ_FAILED"))??,
+                None => archive.query_block(next)?,
+            };
             if record.height != next {
                 return Err(QueryError::new(503, "INVALID_STORED_BLOCK"));
             }
@@ -966,6 +1182,240 @@ mod tests {
     }
     fn request() -> QueryRequest {
         serde_json::from_value(json!({"from_block":10,"limit":2})).unwrap()
+    }
+
+    struct IndexedFixture {
+        source: Fixture,
+        indexed: bool,
+        payload_reads: std::cell::Cell<usize>,
+    }
+    impl QueryArchive for IndexedFixture {
+        fn query_meta(&self) -> QueryMeta {
+            self.source.query_meta()
+        }
+        fn query_block(&self, height: u64) -> Result<BlockRecord, QueryError> {
+            self.payload_reads.set(self.payload_reads.get() + 1);
+            self.source.query_block(height)
+        }
+        fn query_header(&self, height: u64) -> Result<BlockHeader, QueryError> {
+            self.source.query_header(height)
+        }
+        fn query_transaction_metadata(
+            &self,
+            height: u64,
+        ) -> Result<Option<Vec<TransactionMetadata>>, QueryError> {
+            Ok(self.indexed.then(|| {
+                vec![TransactionMetadata {
+                    txid: [0x11; 32],
+                    block_height: height,
+                    index: 0,
+                    version: 1,
+                    locktime: 0,
+                    size_bytes: 3,
+                    transparent_input_count: 1,
+                    transparent_output_count: 1,
+                    has_sapling: false,
+                    has_orchard: false,
+                }]
+            }))
+        }
+        fn query_transaction_locations(
+            &self,
+            ids: &[[u8; 32]],
+            start: u64,
+            end: u64,
+        ) -> Result<Option<Vec<u64>>, QueryError> {
+            Ok(self.indexed.then(|| {
+                if ids.contains(&[0x11; 32]) {
+                    (start..=end).collect()
+                } else {
+                    vec![]
+                }
+            }))
+        }
+    }
+    fn indexed_fixture(indexed: bool) -> IndexedFixture {
+        IndexedFixture {
+            source: fixture(10),
+            indexed,
+            payload_reads: std::cell::Cell::new(0),
+        }
+    }
+    fn compact_request() -> QueryRequest {
+        let mut request = request();
+        request.field_selection.transaction = [
+            "txid",
+            "block_height",
+            "index",
+            "version",
+            "locktime",
+            "size_bytes",
+            "transparent_input_count",
+            "transparent_output_count",
+        ]
+        .map(String::from)
+        .to_vec();
+        request
+    }
+
+    #[test]
+    fn compact_index_and_checked_payload_have_identical_projection_and_pagination() {
+        let filters = [
+            TransactionFilter::default(),
+            TransactionFilter {
+                txids: Some(vec!["11".repeat(32), "11".repeat(32)]),
+                versions: Some(vec![1]),
+                has_sapling: Some(false),
+                has_orchard: Some(false),
+                ..Default::default()
+            },
+            TransactionFilter {
+                txids: Some(vec![]),
+                ..Default::default()
+            },
+            TransactionFilter {
+                txids: Some(vec!["ff".repeat(32)]),
+                ..Default::default()
+            },
+            TransactionFilter {
+                versions: Some(vec![]),
+                ..Default::default()
+            },
+            TransactionFilter {
+                versions: Some(vec![2]),
+                ..Default::default()
+            },
+            TransactionFilter {
+                has_sapling: Some(true),
+                ..Default::default()
+            },
+            TransactionFilter {
+                has_orchard: Some(true),
+                ..Default::default()
+            },
+            TransactionFilter {
+                txids: Some(vec!["11".repeat(32)]),
+                transparent_output_addresses: Some(vec!["tExampleAddress".into()]),
+                ..Default::default()
+            },
+        ];
+        for filter in filters {
+            let mut request = compact_request();
+            request.transaction_filter = filter;
+            let indexed = indexed_fixture(true);
+            let unindexed = indexed_fixture(false);
+            let fast = execute_query(&indexed, &request, &QueryControl::default()).unwrap();
+            let slow = execute_query(&unindexed, &request, &QueryControl::default()).unwrap();
+            assert_eq!(
+                serde_json::to_value(&fast).unwrap(),
+                serde_json::to_value(&slow).unwrap()
+            );
+            assert_eq!((fast.next_block, fast.data.blocks.len()), (12, 2));
+            if request
+                .transaction_filter
+                .transparent_output_addresses
+                .is_none()
+            {
+                assert_eq!(indexed.payload_reads.get(), 0);
+            }
+            assert_eq!(unindexed.payload_reads.get(), 2);
+        }
+    }
+
+    #[test]
+    fn txid_index_skips_payloads_but_never_filters_selected_blocks() {
+        for fields in [
+            vec![],
+            vec!["height".into()],
+            vec!["raw".into()],
+            vec!["decoded".into()],
+        ] {
+            let archive = indexed_fixture(true);
+            let mut request = request();
+            request.field_selection.block = fields;
+            request.field_selection.transaction = vec!["raw".into(), "decoded".into()];
+            request.transaction_filter.txids = Some(vec!["ff".repeat(32)]);
+            let response = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+            assert_eq!(response.next_block, 12);
+            assert!(response.data.transactions.is_empty());
+            assert_eq!(
+                response.data.blocks.len(),
+                if request.field_selection.block.is_empty() {
+                    0
+                } else {
+                    2
+                }
+            );
+            assert_eq!(
+                archive.payload_reads.get(),
+                if request
+                    .field_selection
+                    .block
+                    .iter()
+                    .any(|field| field == "raw" || field == "decoded")
+                {
+                    2
+                } else {
+                    0
+                }
+            );
+        }
+    }
+
+    #[test]
+    fn compact_projection_obeys_whole_block_response_boundary() {
+        let request = compact_request();
+        let archive = indexed_fixture(false);
+        let (_, size) = project_block(
+            archive.source.query_block(10).unwrap(),
+            &request,
+            &QueryControl::default(),
+            MAX_RESPONSE_BYTES,
+        )
+        .unwrap();
+        let control = QueryControl {
+            max_response_bytes: RESPONSE_OVERHEAD + size * 2 - 1,
+            ..Default::default()
+        };
+        let fast = execute_query(&indexed_fixture(true), &request, &control).unwrap();
+        let slow = execute_query(&archive, &request, &control).unwrap();
+        assert_eq!(
+            serde_json::to_value(&fast).unwrap(),
+            serde_json::to_value(&slow).unwrap()
+        );
+        assert_eq!((fast.next_block, fast.data.transactions.len()), (11, 1));
+        assert!(fast.cursor.is_some());
+    }
+
+    #[test]
+    fn compact_projection_rejects_malformed_metadata_and_checked_size_mismatch() {
+        let request = compact_request();
+        let control = QueryControl::default();
+        let mut malformed = indexed_fixture(true)
+            .query_transaction_metadata(10)
+            .unwrap()
+            .unwrap();
+        malformed[0].index = 2;
+        assert_eq!(
+            project_transaction_metadata(
+                10,
+                None,
+                &malformed,
+                &request,
+                &control,
+                MAX_RESPONSE_BYTES
+            )
+            .unwrap_err()
+            .code,
+            "INVALID_STORED_TRANSACTION"
+        );
+        let mut tx = json!({"hex":"010203","size":4,"vin":[],"vout":[]});
+        assert_eq!(
+            transaction_size(&tx).unwrap_err().code,
+            "INVALID_STORED_TRANSACTION"
+        );
+        tx["size"] = json!(3);
+        assert_eq!(transaction_size(&tx).unwrap(), 3);
     }
 
     #[test]

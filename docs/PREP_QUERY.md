@@ -118,6 +118,8 @@ Supported transaction fields:
 | `block_height` | Containing block's indexed height |
 | `index` | Zero-based transaction position within that block |
 | `version`, `locktime` | Bounded decoded integer metadata |
+| `size_bytes` | Serialized transaction length derived from validated raw hex; checked against optional node size |
+| `transparent_input_count`, `transparent_output_count` | Array lengths; the coinbase input counts as one input |
 | `raw` | Entire serialized transaction as lowercase hex, including encrypted components |
 | `vin`, `vout` | Node-decoded transparent input/output JSON; all nested numbers are strings |
 | `decoded` | Entire node-decoded transaction object; all nested numbers are strings |
@@ -130,6 +132,39 @@ number token to a string, including amounts, indexes, versions and counts. Examp
 conversion appropriate to the source field's units; do not convert amounts to
 JavaScript floating point. Top-level Prep height/version/index fields remain
 bounded numeric integers. Raw hex remains available for independent decoding.
+
+The three count/size fields are also bounded numeric integers. Request them
+directly when full `decoded`, `vin` and `vout` objects are unnecessary. Existing
+default field selections and old field names are unchanged.
+
+## Optional transaction indexes
+
+During full-segment integrity admission, Prep derives an immutable in-memory
+transaction-ID index and public metadata projection. Compatible old archives use
+this path without migration or new files. A restart rebuilds the derived index;
+it is not a persisted disk index. Catalog refresh reuses unchanged segment
+caches and removes replaced segments from the new snapshot's lookup scope.
+
+Metadata-only queries can avoid payload reads. Exact-ID filters locate all
+matching block positions, including repeated IDs, before fetching requested
+payloads. Raw/decoded block selections still return every scanned block, even
+when its transactions do not match. Header-only block selections remain available
+without reading full payloads. Cursor and epoch rules are unchanged: `limit`
+counts the logical whole-block window, including positions skipped by an index,
+and does not become a limit on matching transactions.
+
+Index allocation is capped at 16 MiB per segment and 64 MiB per archive snapshot,
+accounting for vector capacities and index/Arc structures. This does not cap total
+process RSS: payload buffers, responses, allocator overhead, and older retained
+snapshots can coexist. Malformed, unsupported or over-budget metadata disables
+the optional index for that entire segment. Queries then use checked payload
+reads; an incomplete index never proves that a transaction is absent.
+
+The cache has the same immutable-admission trust boundary as the existing header
+index. Fresh admission verifies segment bytes; a cached fast path does not reread
+all payload bytes to detect later out-of-band modification. Operators must keep
+published segments immutable. Reorgs use catalog replacement and epochs, rather
+than modifying published segment files in place.
 
 ## Transaction filters
 

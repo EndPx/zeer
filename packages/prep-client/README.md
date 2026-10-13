@@ -6,6 +6,14 @@ the Prep full-block archive; it is not a wallet SDK or native Rust binding.
 
 Use this package locally from the repository. No public npm publication is implied.
 
+For compact public transaction metadata, select `size_bytes`,
+`transparent_input_count`, and `transparent_output_count` alongside `txid`,
+`block_height`, `version`, and `locktime`. These are bounded JSON integers and do
+not require transferring full decoded input/output objects. They require a Prep
+server with the transaction metadata extension; older servers reject unknown
+selected fields. Unknown or duplicate selections are rejected by the client
+before transport. Existing defaults and lossless decoded-number handling remain.
+
 ```ts
 import { PrepClient, ReorgError } from "@zeer/prep-client";
 

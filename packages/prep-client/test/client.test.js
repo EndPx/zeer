@@ -137,3 +137,26 @@ test("URLs containing secrets are rejected before transport", () => {
     assert.throws(() => new PrepClient({ url }), TypeError);
   }
 });
+
+test("compact transaction projection fields are accepted and numeric bounds enforced", async () => {
+  const result = page(13);
+  result.data.transactions = [{ size_bytes: 12, transparent_input_count: 0, transparent_output_count: 4294967295 }];
+  const query = { from_block: 10, field_selection: { block: [], transaction: ["size_bytes", "transparent_input_count", "transparent_output_count"] } };
+  const client = new PrepClient({ url: "http://localhost", fetch: async () => json(result) });
+  assert.deepEqual((await client.get(query)).data.transactions[0], result.data.transactions[0]);
+  for (const [field, value] of [["size_bytes", 0], ["size_bytes", "12"], ["transparent_input_count", -1], ["transparent_input_count", 1.5], ["transparent_output_count", 4294967296], ["transparent_output_count", null]]) {
+    const previous = result.data.transactions[0][field];
+    result.data.transactions[0][field] = value;
+    await assert.rejects(client.get(query), { code: "INVALID_TRANSACTION_METADATA" });
+    result.data.transactions[0][field] = previous;
+  }
+});
+
+test("unknown or duplicate selected fields fail before transport", async () => {
+  let requests = 0;
+  const client = new PrepClient({ url: "http://localhost", fetch: async () => { requests++; return json(page(13)); } });
+  for (const selection of [{ transaction: ["size_bytes", "size_bytes"] }, { transaction: ["private_memo"] }, { block: ["size_bytes"] }, { transaction: "txid" }, { unexpected: [] }, null]) {
+    await assert.rejects(client.get({ from_block: 10, field_selection: selection }), TypeError);
+  }
+  assert.equal(requests, 0);
+});

@@ -1,8 +1,8 @@
 # Zeer v0.1 implementation plan
 
 Date: 2026-10-12 (Asia/Jakarta).
-Last planning update: 2026-10-14 (Asia/Jakarta), Chef public-data first slice authorized.
-Status: **Prep is held at its tested MVP. The user authorized Chef public-data work under [CHEF_PUBLIC_MVP.md](../../docs/CHEF_PUBLIC_MVP.md); viewing-key scanning remains deferred.** This older framework proposal does not authorize additional execution by itself.
+Last planning update: 2026-10-14 (Asia/Jakarta), public Chef and measured Prep retrieval improvements.
+Status: **Chef's public writer is optimized; the user subsequently authorized Prep transaction-ID indexes and direct metadata. That bounded update is implemented with [measured evidence](../../benchmarks/results/reports/2026-10-14-prep-index.md). Viewing-key scanning remains deferred.** This older framework proposal does not authorize additional execution by itself.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
 ## 0. Accepted product names and planning order

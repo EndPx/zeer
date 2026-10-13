@@ -107,6 +107,19 @@ class RetrievalTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "MEMBERSHIP_MISMATCH"):
             rpc.retrieve("sparse")
 
+    def test_direct_metadata_has_same_projection_without_decoded_payload(self):
+        expected = transaction([TXID, 1, 1, 0, 12, 1, 2])
+        response = page(2049, [])
+        response["data"]["transactions"] = [{"txid": TXID, "block_height": 1, "version": 1, "locktime": 0,
+            "size_bytes": 12, "transparent_input_count": 1, "transparent_output_count": 2}]
+        prep = Prep.__new__(Prep)
+        prep.projection = "metadata"
+        prep.http, prep.dataset, prep.identity = FakeHttp([response]), {"sparse": [expected]}, {"epoch": "stable", "revision": "1"}
+        self.assertEqual(prep.retrieve("sparse"), [expected])
+        fields = prep.http.bodies[0][1]["field_selection"]["transaction"]
+        self.assertNotIn("decoded", fields)
+        self.assertIn("size_bytes", fields)
+
     def test_measure_verifies_every_row_instead_of_only_counts(self):
         expected = [transaction([TXID, 1, 1, 0, 12, 1, 2])]
         class Adapter:

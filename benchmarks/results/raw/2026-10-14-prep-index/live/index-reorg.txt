@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "network": "isolated-regtest",
+  "method": "Zebra invalidateblock followed by generate on a disposable peerless node",
+  "initial_height": 1043,
+  "final_height": 1044,
+  "confirmations": 1,
+  "final_indexed_height": 1044,
+  "common_ancestor_height": 1041,
+  "replaced_block_count": 2,
+  "invalidated_hash": "426f86aa7224cf63565f1ab093ad8c44f0fd1f0e9fe6cf558360bd42cd27b78b",
+  "replacement_hashes": [
+    "0e9d5bd15f580265bdc8afdae5be26e778a25a113e18f75276dd7fe90d1f0862",
+    "bad0b74a5f8f484c6b46c1e9a671654d129c3c4605b64a494825e884f5977369",
+    "f30858b84449642f99e9c7fe2ecb730c1d6bb0939c3952bae3e43f1045906c05"
+  ],
+  "old_epoch": "0",
+  "new_epoch": "1",
+  "old_cursor_http_status": 409,
+  "old_cursor_error": "REORG",
+  "verified_blocks": [
+    {
+      "height": 1039,
+      "hash": "dd31e60de05b47bb19ebc555c4c856decfca9fb7d223425ac9412bc72503b09f",
+      "raw_sha256": "a6e6b25b10d88d9365423d7cfa2d9bb677499a72087f507997fe61d677a3ba8c"
+    },
+    {
+      "height": 1040,
+      "hash": "81975840b007fa2a4997b5b230e0bd2a4453c35c4fb4d71a54c4420b39ca5525",
+      "raw_sha256": "d20afa3c564df6652ff2e2a4c82ca6c9a9a0a84d4421426d587b9785af928ae4"
+    },
+    {
+      "height": 1041,
+      "hash": "528c7d0d5b3f6d02415fbbd5dfc7f31b5ce7ebaeb8ea80cb813d60767adbbaf4",
+      "raw_sha256": "a740b7a948f777e54d6d9efb509a58e76eaf233a0c4ad7e7bedb01220b081b73"
+    },
+    {
+      "height": 1042,
+      "hash": "0e9d5bd15f580265bdc8afdae5be26e778a25a113e18f75276dd7fe90d1f0862",
+      "raw_sha256": "ed0636734492bb95d85e358e5add0a59d2435b95d4059e55ca64cff329655d30"
+    },
+    {
+      "height": 1043,
+      "hash": "bad0b74a5f8f484c6b46c1e9a671654d129c3c4605b64a494825e884f5977369",
+      "raw_sha256": "33c8398898e87b01d21b7d291ef67237d104af2bda0824b2e140eb1a8aa0a88c"
+    },
+    {
+      "height": 1044,
+      "hash": "f30858b84449642f99e9c7fe2ecb730c1d6bb0939c3952bae3e43f1045906c05",
+      "raw_sha256": "f16f6e9c5c62398f4732f0d93026b25850ac91acfad2c0e01bf269d5a5675984"
+    }
+  ],
+  "verified_transactions": 6,
+  "no_missing_or_duplicate_blocks_or_transactions": true,
+  "raw_blocks_and_transactions_equal_node": true,
+  "lag_blocks": 0,
+  "limitations": "Administrative real-node Regtest reorg; not natural P2P, mainnet or deep-reorg proof."
+}
+{"status": "PASS", "removed_unique_txid_count": 0, "old_epoch": "0", "new_epoch": "1"}

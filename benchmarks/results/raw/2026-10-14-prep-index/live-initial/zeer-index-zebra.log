@@ -1,0 +1,2 @@
+mkdir: cannot create directory '/home/zebra': Permission denied
+Failed to create directory: /home/zebra/.cache/zebra

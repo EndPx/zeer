@@ -7,6 +7,19 @@ network follower, database engine, or consensus validation is implemented here.
 
 ## API
 
+Full-segment admission also derives an optional in-memory transaction metadata
+and exact-ID lookup index. `transaction_metadata(height)` returns canonical
+metadata rows; `transaction_locations(ids, start, end)` returns all matching
+heights in an inclusive range, preserving duplicate IDs across blocks. `None`
+means checked payload fallback is required, not that no transaction exists.
+`transaction_index_bytes()` reports accounted index allocations.
+
+The derived cache changes no manifest or segment format and writes no sidecar.
+Limits are 16 MiB per segment and 64 MiB per archive snapshot; retained older
+snapshots can coexist. Unindexable or over-budget segments remain readable through
+the original path. See the [query contract](../../docs/PREP_QUERY.md#optional-transaction-indexes)
+for admission, immutability and reorg boundaries.
+
 ```rust,ignore
 use prep_store::{BlockRecord, Store, StoreWriter};
 

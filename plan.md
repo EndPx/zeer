@@ -2,12 +2,13 @@
 
 Updated: 2026-10-14 (Asia/Jakarta).
 
-**Status: Prep held at its tested MVP. Chef's public writer now has bounded per-block caching and batched SQL, verified by 38 tests with real PostgreSQL and five alternating fresh runs per build. Median durable indexing fell from 40.311 s to 13.295 s on the same bounded workload. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Scope: [CHEF_PUBLIC_MVP.md](docs/CHEF_PUBLIC_MVP.md); latest writer evidence: [optimization report](benchmarks/results/reports/2026-10-14-chef-optimized.md).**
+**Status: Prep now has bounded admitted transaction-ID indexes and direct public metadata fields, with 45 verified comparison passes plus modern-fixture and actual-node Regtest checks. Chef's optimized public writer remains verified by 38 tests and five alternating runs per build. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Latest Prep evidence: [index report](benchmarks/results/reports/2026-10-14-prep-index.md); Chef evidence: [writer report](benchmarks/results/reports/2026-10-14-chef-optimized.md).**
 
 Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**, the Zcash data preparation and delivery engine prioritized first, and **Zeer Chef**, the later application-indexing framework. Accepted names, responsibilities and planning precedence are recorded in [the canonical plan](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
 ## Authoritative documents
 
+- [Prep index and metadata optimization](benchmarks/results/reports/2026-10-14-prep-index.md): bounded immutable in-memory indexes, unchanged archives/cursors, explicit payload fallback, 45-pass comparison and actual Regtest branch/append verification.
 - [Prep native retrieval comparison](benchmarks/results/reports/2026-10-14-prep-retrieval.md): full-range header/metadata and sparse-ID measurements; Prep beats the tested RPC path on full-range reads but needs further sparse-lookup work. Engine unchanged in this comparison.
 - [Chef writer optimization](benchmarks/results/reports/2026-10-14-chef-optimized.md): bounded ordered cache, coalesced SQL, unchanged atomic block/checkpoint guarantees, actual database regression tests and alternating before/after indexing.
 - [Five-candidate lookup session](benchmarks/results/reports/2026-10-14-lookup-session.md): 25 verified visits with rotated order and equal aggregate resource ceilings. This is prepared serving, separate from fresh ingestion.

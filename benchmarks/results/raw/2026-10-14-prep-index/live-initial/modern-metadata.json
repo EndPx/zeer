@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "blocks": 3,
+  "transactions": 17,
+  "versions": [
+    4,
+    5
+  ],
+  "filters": [
+    {
+      "field": "has_sapling",
+      "enabled": false,
+      "matches": 8
+    },
+    {
+      "field": "has_sapling",
+      "enabled": true,
+      "matches": 9
+    },
+    {
+      "field": "has_orchard",
+      "enabled": false,
+      "matches": 16
+    },
+    {
+      "field": "has_orchard",
+      "enabled": true,
+      "matches": 1
+    }
+  ],
+  "raw_fallback_equal": true,
+  "source_kind": "frozen-genuine-mainnet-fixture-replay",
+  "limitations": [
+    "Synthesized RPC block envelope; not a captured getblock verbosity=2 response.",
+    "Full raw blocks and every transaction byte matched official Zebra mainnet fixtures.",
+    "Decoded transactions captured from CipherScan node-backed getrawtransaction verbose endpoint.",
+    "No independent consensus/proof validation or v5 transaction-id computation.",
+    "Historical NU5 sample; not modern-tip sustained follow or production-scale evidence."
+  ]
+}

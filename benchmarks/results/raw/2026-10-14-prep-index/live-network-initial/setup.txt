@@ -1,0 +1,12 @@
+Started zeer-index-live-proof-final.service - /usr/bin/python3 /opt/zeer-prep/20261014-index/source/benchmarks/prep/full/index_live.py.
+Traceback (most recent call last):
+  File "/opt/zeer-prep/20261014-index/source/benchmarks/prep/full/index_live.py", line 143, in <module>
+    main()
+  File "/opt/zeer-prep/20261014-index/source/benchmarks/prep/full/index_live.py", line 55, in main
+    call(['docker','network','create','--internal',NETWORK])
+  File "/opt/zeer-prep/20261014-index/source/benchmarks/prep/full/index_live.py", line 25, in call
+    if result.returncode:raise RuntimeError('COMMAND_FAILED:'+args[0])
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: COMMAND_FAILED:docker
+zeer-index-live-proof-final.service: Main process exited, code=exited, status=1/FAILURE
+zeer-index-live-proof-final.service: Failed with result 'exit-code'.

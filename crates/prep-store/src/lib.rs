@@ -18,7 +18,10 @@ use std::sync::Arc;
 use thiserror::Error;
 
 mod archive;
+mod transaction_index;
 pub use archive::{Archive, ArchiveRangeReader, ArchiveWriter, Catalog, SegmentReference};
+pub use transaction_index::TransactionMetadata;
+use transaction_index::{IndexBuilder, TransactionIndex, SEGMENT_INDEX_BYTES};
 
 pub const MAX_BLOCK_BYTES: u64 = 4 * 1024 * 1024;
 pub const MAX_FULL_BLOCK_BYTES: u64 = 64 * 1024 * 1024;
@@ -575,18 +578,33 @@ pub struct Store {
     path: PathBuf,
     manifest: Arc<Manifest>,
     limits: StoreLimits,
+    transaction_index: Option<Arc<TransactionIndex>>,
 }
 
 impl Store {
     pub fn open(path: impl AsRef<Path>) -> Result<Self> {
-        Self::open_internal(path, StoreLimits::default(), true)
+        Self::open_internal(path, StoreLimits::default(), true, SEGMENT_INDEX_BYTES)
     }
 
     pub fn open_with_limits(path: impl AsRef<Path>, limits: StoreLimits) -> Result<Self> {
-        Self::open_internal(path, limits, false)
+        Self::open_internal(path, limits, false, SEGMENT_INDEX_BYTES)
     }
 
-    fn open_internal(path: impl AsRef<Path>, limits: StoreLimits, auto_kind: bool) -> Result<Self> {
+    pub(crate) fn open_with_index_budget(path: impl AsRef<Path>, budget: usize) -> Result<Self> {
+        Self::open_internal(
+            path,
+            StoreLimits::default(),
+            true,
+            budget.min(SEGMENT_INDEX_BYTES),
+        )
+    }
+
+    fn open_internal(
+        path: impl AsRef<Path>,
+        limits: StoreLimits,
+        auto_kind: bool,
+        index_budget: usize,
+    ) -> Result<Self> {
         let mut limits = limits.validate()?;
         let path = path.as_ref().to_path_buf();
         if !fs::symlink_metadata(&path)?.file_type().is_dir() {
@@ -615,6 +633,9 @@ impl Store {
             return Err(Error::Invalid("segment length differs from manifest"));
         }
         let mut digest = Sha256::new();
+        let mut transaction_builder = (manifest.payload_kind == FULL_KIND)
+            .then(|| IndexBuilder::new(manifest.start_height, manifest.blocks.len(), index_budget))
+            .flatten();
         for index in &manifest.blocks {
             let record = read_record(
                 &mut segment,
@@ -624,6 +645,12 @@ impl Store {
             )?;
             digest.update(index.length.to_le_bytes());
             digest.update(&record.payload);
+            if let Some(builder) = transaction_builder.as_mut() {
+                let full = prep_proto::prep::FullBlock::decode(record.payload.as_slice())?;
+                if builder.block(record.height, &full.decoded_json).is_none() {
+                    transaction_builder = None;
+                }
+            }
         }
         if hex::encode(digest.finalize()) != manifest.segment_sha256 {
             return Err(Error::Invalid("segment checksum mismatch"));
@@ -637,11 +664,46 @@ impl Store {
             path,
             manifest: Arc::new(manifest),
             limits,
+            transaction_index: transaction_builder
+                .and_then(IndexBuilder::finish)
+                .map(Arc::new),
         })
     }
 
     pub fn manifest(&self) -> &Manifest {
         &self.manifest
+    }
+
+    pub fn transaction_index_bytes(&self) -> usize {
+        self.transaction_index
+            .as_ref()
+            .map_or(0, |index| index.bytes())
+    }
+
+    pub fn transaction_metadata(&self, height: u64) -> Result<Option<Vec<TransactionMetadata>>> {
+        self.block_index(height)?;
+        Ok(self
+            .transaction_index
+            .as_ref()
+            .map(|index| index.block(height)))
+    }
+
+    pub fn transaction_locations(
+        &self,
+        txids: &[[u8; 32]],
+        start: u64,
+        end: u64,
+    ) -> Result<Option<Vec<u64>>> {
+        count(start, end, 1000)?;
+        if txids.len() > 128 {
+            return Err(Error::Limit("transaction lookup ID count"));
+        }
+        self.block_index(start)?;
+        self.block_index(end)?;
+        Ok(self
+            .transaction_index
+            .as_ref()
+            .map(|index| index.locations(txids, start, end)))
     }
 
     pub fn read_range(&self, start: u64, end: u64) -> Result<RangeReader> {
@@ -1218,6 +1280,51 @@ mod tests {
             hash: hash(1),
             prev_hash: hash(0),
             payload: block.encode_to_vec(),
+        }
+    }
+
+    #[test]
+    fn optional_transaction_index_admits_legacy_and_malformed_fallback_safely() {
+        let root = tempfile::tempdir().unwrap();
+        for (name, json, indexed) in [
+            (
+                "metadata",
+                format!(
+                    r#"{{"tx":[{{"txid":"{}","hex":"0102","version":1,"locktime":0,"vin":[{{}}],"vout":[{{}}]}}]}}"#,
+                    "ab".repeat(32)
+                ),
+                true,
+            ),
+            ("malformed", "{\"tx\":[{\"txid\":\"bad\"}]}".into(), false),
+            ("legacy", "{\"synthetic\":true}".into(), false),
+        ] {
+            let path = root.path().join(name);
+            let mut writer = StoreWriter::create_full(
+                &path,
+                "regtest",
+                1,
+                1,
+                &display_hash(&hash(0)).unwrap(),
+                &display_hash(&hash(1)).unwrap(),
+            )
+            .unwrap();
+            writer.push(full_record(json, vec![1, 2, 3])).unwrap();
+            writer.finish().unwrap();
+            let store = Store::open(&path).unwrap();
+            assert_eq!(store.transaction_metadata(1).unwrap().is_some(), indexed);
+            assert_eq!(
+                store.transaction_locations(&[[0xab; 32]], 1, 1).unwrap(),
+                indexed.then_some(vec![1])
+            );
+            assert!(store.transaction_metadata(0).is_err());
+            assert!(store.transaction_locations(&[[0; 32]; 129], 1, 1).is_err());
+            assert!(store.transaction_locations(&[], 1, 1001).is_err());
+            assert!(Store::open_with_index_budget(&path, 0)
+                .unwrap()
+                .transaction_metadata(1)
+                .unwrap()
+                .is_none());
+            assert!(store.read_block(1).is_ok());
         }
     }
 

@@ -1,0 +1,62 @@
+{
+  "format": "prep-common-prepared-retrieval-v1",
+  "status": "PASS",
+  "candidate": "prep",
+  "workload": "transactions",
+  "round": 5,
+  "range": {
+    "from": 1,
+    "to_inclusive": 2048
+  },
+  "oracle_sha256": "fd230e62f1f4909f394c3a2c21f6cc9f0e651bc707bc05e924701a8a82a7cc73",
+  "manifest_sha256": "ee4290df5bc0cb96da423437f0f887992cb54cf38ec0240962378eda20fc01e0",
+  "runner_sha256": "9b916a49449c87693df3b554d7741a6293d44628361559f360ad080e03478b87",
+  "timing_boundary": "First request through final response decode, projection normalization and ordering; hashing/equality verification and pre/postflight excluded. PG BEGIN/COMMIT and RPC scheduling are included.",
+  "limitations": [
+    "Prepared sources, warm caches; no source sync, archive build or entity indexing included.",
+    "Native access paths differ: Prep pagination/filter, RPC bounded concurrency8, PostgreSQL SQL indexes.",
+    "All normalized rows retained in client memory during timing; same canonical order for all candidates.",
+    "Early mainnet public v1/v2 projection only; no current mainnet, private scanning, EVM logs or engine-only ranking.",
+    "PostgreSQL response bytes unavailable; requests counts include BEGIN/COMMIT SQL commands.",
+    "gRPC response bytes are serialized protobuf payload ByteSize, excluding transport frames; HTTP bytes exclude headers. PG counts also include bounded timeout settings."
+  ],
+  "timeout_seconds": 180,
+  "prep_projection": "metadata",
+  "strategy": "Persistent HTTP; limit 128 blocks/page; batched txids filter; direct size/input/output count metadata fields.",
+  "initial_source": {
+    "network": "mainnet",
+    "start_block": 1,
+    "archive_height": 2048,
+    "epoch": "0",
+    "revision": "16",
+    "payload_kind": "full-v1"
+  },
+  "warmup": {
+    "status": "PASS",
+    "rows": 16962,
+    "sha256": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71",
+    "retrieval_normalize_ns": 147676950,
+    "verification_ns": 68984030,
+    "rows_per_second": 114858.8185224573,
+    "requests": 16,
+    "response_bytes": 3352249
+  },
+  "run": {
+    "status": "PASS",
+    "rows": 16962,
+    "sha256": "dcebb8c31e09bdd118762de90b2e446a4d524f04dd82584a11d42e6e9adeff71",
+    "retrieval_normalize_ns": 143304536,
+    "verification_ns": 73208712,
+    "rows_per_second": 118363.31545011248,
+    "requests": 16,
+    "response_bytes": 3352249
+  },
+  "final_source": {
+    "network": "mainnet",
+    "start_block": 1,
+    "archive_height": 2048,
+    "epoch": "0",
+    "revision": "16",
+    "payload_kind": "full-v1"
+  }
+}

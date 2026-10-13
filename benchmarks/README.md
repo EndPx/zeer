@@ -6,6 +6,10 @@ The first measured scenario is **compact-block serving and normalized header ver
 
 ## Current evidence
 
+- [Prep admitted indexes and direct metadata](results/reports/2026-10-14-prep-index.md):
+  old/new identical-field and direct-field comparisons, 45 verified passes,
+  admission/memory observations, NU5 fixture and actual Regtest cursor/append checks.
+
 - [Prep retrieval comparison](results/reports/2026-10-14-prep-retrieval.md):
   60 verified observations across full-range headers, transaction metadata and
   sparse IDs, using Prep/RPC/CipherScan and three gRPC sparse adapters.

@@ -1,0 +1,23 @@
+✔ finite stream advances through empty filtered pages and freezes the first head (6.545475ms)
+✔ HTTP409 throws typed ReorgError without retry (1.318517ms)
+✔ a server returning200 with another epoch is also rejected (0.875087ms)
+✔ nonadvancing continuation stops instead of looping (1.232227ms)
+✔ empty completed range is a finite single page (0.669508ms)
+✔ nested decoded amounts remain decimal strings and numeric amounts fail closed (0.971472ms)
+✔ request cancellation is preserved without printing transport secrets (0.929359ms)
+✔ whole decoded block preserves source fields and rejects numeric nested tokens (0.64413ms)
+✔ request timeout aborts a pending native-fetch-compatible transport (10.483897ms)
+✔ oversized response and invalid cursor contract are rejected (1.041789ms)
+✔ maxPages bounds a progressing but unexpectedly long stream (0.665582ms)
+✔ real local HTTP roundtrip forwards auth and address filter (28.106813ms)
+✔ URLs containing secrets are rejected before transport (0.296908ms)
+✔ compact transaction projection fields are accepted and numeric bounds enforced (1.332907ms)
+✔ unknown or duplicate selected fields fail before transport (0.391419ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.781236

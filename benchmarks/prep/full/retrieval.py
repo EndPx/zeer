@@ -136,8 +136,12 @@ class Http:
 class Prep:
     strategy = "Persistent HTTP; limit 128 blocks/page; batched txids filter for sparse; decoded transaction object overfetch."
 
-    def __init__(self, endpoint, dataset, deadline=None):
+    def __init__(self, endpoint, dataset, deadline=None, projection="decoded"):
         self.http, self.dataset, self.identity = Http(endpoint, os.environ.get("PREP_API_TOKEN"), deadline), dataset, None
+        require(projection in ("decoded", "metadata"), "INVALID_PREP_PROJECTION")
+        self.projection = projection
+        if projection == "metadata":
+            self.strategy = "Persistent HTTP; limit 128 blocks/page; batched txids filter; direct size/input/output count metadata fields."
 
     def preflight(self):
         meta = self.http.request("/height")
@@ -152,9 +156,10 @@ class Prep:
         return identity
 
     def retrieve(self, workload):
+        compact = getattr(self, "projection", "decoded") == "metadata"
         query = {"from_block": FROM, "to_block": TO + 1, "limit": 128, "field_selection": {
             "block": ["height", "hash", "time"] if workload == "headers" else [],
-            "transaction": [] if workload == "headers" else ["txid", "block_height", "version", "locktime", "decoded"]}}
+            "transaction": [] if workload == "headers" else ["txid", "block_height", "version", "locktime", *(["size_bytes", "transparent_input_count", "transparent_output_count"] if compact else ["decoded"])]}}
         if workload == "sparse":
             query["transaction_filter"] = {"txids": [row["txid"] for row in self.dataset["sparse"]]}
         rows, next_block, cursor = [], FROM, None
@@ -166,7 +171,10 @@ class Prep:
             if workload == "headers":
                 rows.extend(header(row["height"], row["hash"], row["time"]) for row in page["data"]["blocks"])
             else:
-                rows.extend(decoded_transaction(row["txid"], row["block_height"], row["version"], row["locktime"], row["decoded"]) for row in page["data"]["transactions"])
+                if compact:
+                    rows.extend(transaction((row["txid"], row["block_height"], row["version"], row["locktime"], row["size_bytes"], row["transparent_input_count"], row["transparent_output_count"])) for row in page["data"]["transactions"])
+                else:
+                    rows.extend(decoded_transaction(row["txid"], row["block_height"], row["version"], row["locktime"], row["decoded"]) for row in page["data"]["transactions"])
             if cursor is None:
                 require(next_block == TO + 1, "PREP_TRUNCATED_RANGE")
                 return ordered(rows, workload)
@@ -354,7 +362,9 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--round", type=int, required=True)
     parser.add_argument("--timeout-seconds", type=int, default=180)
+    parser.add_argument("--prep-projection", choices=("decoded", "metadata"), default="decoded")
     args = parser.parse_args()
+    require(args.prep_projection == "decoded" or args.candidate == "prep", "PREP_PROJECTION_REQUIRES_PREP")
     require(re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", args.endpoint_env) and 1 <= args.round <= 5 and 1 <= args.timeout_seconds <= 900, "INVALID_ARGUMENT")
     endpoint = os.environ.get(args.endpoint_env)
     require(endpoint, "ENDPOINT_ENV_REQUIRED")
@@ -371,6 +381,7 @@ def main():
                               "PostgreSQL response bytes unavailable; requests counts include BEGIN/COMMIT SQL commands."]}
     report["limitations"].append("gRPC response bytes are serialized protobuf payload ByteSize, excluding transport frames; HTTP bytes exclude headers. PG counts also include bounded timeout settings.")
     report["timeout_seconds"] = args.timeout_seconds
+    report["prep_projection"] = args.prep_projection if args.candidate == "prep" else None
     adapter = None
     with args.out.open("x", encoding="utf-8") as output:
         try:
@@ -378,7 +389,9 @@ def main():
                 report["status"] = "NOT_APPLICABLE"
                 report["reason"] = "Only the sparse gRPC adapter is validated in this harness. Compact blocks alone cannot enumerate the same full public transaction projection; early-range height/hash/time header compatibility has not been validated, so these workloads are not measured."
             else:
-                adapter = {"prep": Prep, "rpc": Rpc, "cipherscan": CipherScan, "lwd": GrpcSparse, "zinder": GrpcSparse, "zaino": GrpcSparse}[args.candidate](endpoint, dataset, time.monotonic() + args.timeout_seconds)
+                adapter = {"prep": Prep, "rpc": Rpc, "cipherscan": CipherScan, "lwd": GrpcSparse, "zinder": GrpcSparse, "zaino": GrpcSparse}[args.candidate](
+                    endpoint, dataset, time.monotonic() + args.timeout_seconds,
+                    **({"projection": args.prep_projection} if args.candidate == "prep" else {}))
             if adapter is None:
                 print(json.dumps({"status": report["status"], "reason": report["reason"]}))
                 return 0

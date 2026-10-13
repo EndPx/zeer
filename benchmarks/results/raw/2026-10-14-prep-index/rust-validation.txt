@@ -1,0 +1,149 @@
+info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+info: downloading 2 components
+   Compiling prep-store v0.1.0 (/work/crates/prep-store)
+   Compiling prep v0.1.0 (/work/crates/prep)
+    Finished `test` profile [unoptimized] target(s) in 6.22s
+     Running unittests src/lib.rs (/target/debug/deps/prep-32aed948dcfbd5bd)
+
+running 40 tests
+test follow::tests::cancellation_interrupts_backoff_and_releases_writer ... ok
+test follow::tests::retries_are_bounded_exponential_resettable_and_typed ... ok
+test follower::tests::corrupted_source_and_disk_admission_never_publish_segments ... ok
+test follower::tests::http_source_backfill_restart_growth_and_confirmation_policy ... ok
+test follower::tests::shallow_reorg_replaces_segments_and_deep_reorg_fails_closed ... ok
+test follower::tests::shortened_source_rolls_back_without_claiming_future_data ... ok
+test follower::tests::source_fork_during_capture_cannot_publish_stale_segment ... ok
+test follower::tests::verified_prefix_remains_ready_during_slow_append ... ok
+test full_source::tests::compact_size_rejects_noncanonical_and_truncated_values ... ok
+test full_source::tests::failed_full_rpc_does_not_wait_for_pending_sibling ... ok
+test full_source::tests::full_bytes_extensions_and_non_sha256d_v5_ids_are_preserved ... ok
+test full_source::tests::full_rpc_requests_overlap_and_preserve_validated_content ... ok
+test full_source::tests::header_identity_transaction_inclusion_and_counts_are_checked ... ok
+test full_source::tests::only_temporary_http_statuses_and_connection_failures_are_retryable ... ok
+test full_source::tests::test_rpc_alias_uses_exact_genesis_and_lookup_errors_fail_closed ... ok
+test http::tests::actual_http_auth_append_cursor_and_reorg_rejection ... ok
+test http::tests::historical_status_survives_age_but_follow_stale_and_revision_mismatch_fail ... ok
+test http::tests::transport_frame_keeps_admission_after_body_drop ... ok
+test query::tests::aggregate_data_size_matches_json_across_empty_and_nonempty_groups ... ok
+test query::tests::block_decoded_preserves_all_source_fields_and_exact_numbers_without_tx_selection ... ok
+test query::tests::budget_pagination_retains_identical_whole_blocks_and_transactions ... ok
+test query::tests::compact_index_and_checked_payload_have_identical_projection_and_pagination ... ok
+test query::tests::compact_projection_obeys_whole_block_response_boundary ... ok
+test query::tests::compact_projection_rejects_malformed_metadata_and_checked_size_mismatch ... ok
+test query::tests::counting_writer_matches_wire_bytes_and_checks_limits_and_cancellation ... ok
+test query::tests::cursor_rejects_changed_selection_and_unknown_inputs ... ok
+test query::tests::decoded_amounts_are_lossless_strings_and_public_address_filter_works ... ok
+test query::tests::empty_ranges_compact_archives_and_cancel_are_explicit ... ok
+test query::tests::filter_only_empty_pages_still_advance_whole_blocks ... ok
+test query::tests::final_metadata_plus_data_size_enforces_exact_response_byte_limit ... ok
+test query::tests::full_query_uses_one_lazy_range_per_page_and_checks_record_order ... ok
+test query::tests::header_only_projection_and_cursor_anchor_never_read_full_payloads ... ok
+test query::tests::incremental_projection_budget_matches_every_field_and_exact_block_boundary ... ok
+test query::tests::oversized_decoded_field_is_rejected_before_materializing_its_projection ... ok
+test query::tests::pages_stop_at_captured_head_and_survive_append ... ok
+test query::tests::response_cap_stops_before_entire_block_or_fails_first_block ... ok
+test query::tests::rollback_and_rebuilt_prefix_invalidate_cursor ... ok
+test query::tests::txid_index_skips_payloads_but_never_filters_selected_blocks ... ok
+test follow::tests::exhausted_budget_historical_mode_and_authorization_errors_exit ... ok
+test follow::tests::follow_recovers_after_http_outage_without_restarting_or_duplicate_segments ... ok
+
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.07s
+
+     Running unittests src/main.rs (/target/debug/deps/prep-87c378b0479cc27e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (/target/debug/deps/integration-9749a106e17f321e)
+
+running 7 tests
+test cancellation_and_shutdown_release_backpressured_producers ... ok
+test actual_grpc_two_clients_subranges_and_full_shielded_payloads ... ok
+test native_server_shutdown_is_bounded_with_unread_large_response ... ok
+test byte_bounded_batch_splits_large_blocks ... ok
+test url_and_listener_policies_reject_credentials_and_implicit_exposure ... ok
+test short_unread_responses_keep_permits_until_stream_drop ... ok
+test importer_grpc_preserves_payload_and_publishes_only_after_anchor_checks ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.97s
+
+     Running unittests src/lib.rs (/target/debug/deps/prep_proto-706f7fea86df257e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/target/debug/deps/prep_store-fab700bad652f6d1)
+
+running 41 tests
+test archive::tests::empty_archive_is_explicit_and_reopens ... ok
+test archive::tests::corrupt_catalog_checksum_is_rejected ... ok
+test archive::tests::exclusive_writer_lock_released_on_drop ... ok
+test archive::tests::append_cross_segment_reads_and_restart ... ok
+test archive::tests::header_and_hash_lookup_route_across_segment_boundaries ... ok
+test archive::tests::invalid_link_or_gap_cannot_publish ... ok
+test archive::tests::partial_unreferenced_directories_are_ignored ... ok
+test archive::tests::one_unindexed_overlap_requires_fallback_even_for_absent_or_empty_ids ... ok
+test archive::tests::metadata_cache_is_shared_across_append_refresh_and_replaced_after_rollback ... ok
+test archive::tests::payload_kinds_cannot_be_mixed ... ok
+test archive::tests::refresh_preserves_old_snapshot_and_reuses_immutable_cache ... ok
+test archive::tests::unsafe_paths_and_symlinks_are_rejected ... ok
+test archive::tests::rollback_removes_overlap_invalidates_epoch_and_retains_files ... ok
+test tests::compact_manifest_defaults_preserve_legacy_identity_and_serialization ... ok
+test tests::construction_rejects_heights_beyond_zcash_u32_range ... ok
+test tests::complete_snapshot_reopens_and_preserves_exact_bytes ... ok
+test tests::corrupt_indexed_time_is_rejected_during_open ... ok
+test tests::corrupt_length_prefix_is_rejected_without_large_allocation ... ok
+test tests::corruption_after_open_is_checked_on_each_read ... ok
+test tests::existing_output_even_empty_is_never_overwritten ... ok
+test tests::corruption_truncation_and_extra_bytes_are_rejected ... ok
+test archive::tests::same_epoch_refresh_rejects_truncated_or_replaced_history ... ok
+test tests::gaps_duplicates_and_wrong_parents_poison_writer ... ok
+test tests::full_payload_requires_raw_bytes_and_valid_object_json ... ok
+test tests::incomplete_or_dropped_writer_never_publishes ... ok
+test tests::indexed_full_header_matches_payload_without_payload_io ... ok
+test tests::legacy_full_header_without_time_uses_checked_payload_fallback ... ok
+test tests::manifest_offset_and_dataset_identity_are_checked ... ok
+test tests::manifest_rejects_heights_beyond_zcash_u32_range ... ok
+test tests::metadata_must_match_protobuf ... ok
+test tests::publication_does_not_clobber_an_existing_manifest ... ok
+test tests::range_is_contained_and_bounded ... ok
+test tests::snapshot_identity_changes_with_network_and_anchors ... ok
+test tests::optional_transaction_index_admits_legacy_and_malformed_fallback_safely ... ok
+test tests::subranges_have_independent_seek_positions ... ok
+test tests::wrong_tip_never_publishes ... ok
+test transaction_index::tests::budgets_include_reserved_rows_offsets_and_secondary_capacity ... ok
+test transaction_index::tests::streaming_metadata_keeps_duplicate_locations_and_exact_public_fields ... ok
+test transaction_index::tests::unsupported_metadata_never_publishes_a_partial_negative_index ... ok
+test tests::total_and_per_block_limits_are_enforced_before_publish ... ok
+test tests::full_payload_larger_than_compact_limit_reopens_with_full_profile ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.92s
+
+   Doc-tests prep
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests prep_proto
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests prep_store
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking prep-store v0.1.0 (/work/crates/prep-store)
+    Checking prep v0.1.0 (/work/crates/prep)
+    Finished `dev` profile [unoptimized] target(s) in 2.24s
+   Compiling prep-proto v0.1.0 (/work/crates/prep-proto)
+   Compiling prep-store v0.1.0 (/work/crates/prep-store)
+   Compiling prep v0.1.0 (/work/crates/prep)
+    Finished `release` profile [optimized] target(s) in 22.93s

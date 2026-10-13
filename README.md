@@ -13,6 +13,13 @@ Prep supplies the ingredients; Chef applies the developer's recipe. Applications
 
 **Prep's full-data MVP and Chef's first public-data prototype are implemented and tested. Public production hosting, viewing-key scanning and npm publication remain out of scope.**
 
+The [Prep index/metadata update](benchmarks/results/reports/2026-10-14-prep-index.md)
+adds bounded immutable transaction-ID indexes and direct size/input/output counts
+without changing the archive format. On the same early-mainnet workload, the
+128-ID query falls from 437.477 ms to 42.940 ms with identical decoded fields,
+or 16.612 ms using direct metadata. All 45 measured projections match their
+independent oracle. Admission, memory, fallback and scale limits are documented.
+
 The [Chef writer optimization](benchmarks/results/reports/2026-10-14-chef-optimized.md)
 passes 38 tests with real PostgreSQL. Five alternating runs per build reduced
 median durable indexing time from 40.311 s to 13.295 s on the unchanged

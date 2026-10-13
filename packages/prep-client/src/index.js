@@ -1,6 +1,8 @@
 /** Native fetch only. No wallet keys, native addon, or implicit reorg restart. */
 const MAX_BODY_BYTES = 32 * 1024 * 1024;
 const MAX_CURSOR_CHARACTERS = 4096;
+const BLOCK_FIELDS = ["height", "hash", "previous_hash", "time", "raw", "decoded"];
+const TRANSACTION_FIELDS = ["txid", "block_height", "index", "version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count", "raw", "vin", "vout", "decoded"];
 
 export class PrepError extends Error {
   constructor(code, status = 0) {
@@ -46,6 +48,9 @@ function validateQueryResult(value, query) {
     throw new ProtocolError();
   }
   for (const tx of value.data.transactions) {
+    for (const field of ["size_bytes", "transparent_input_count", "transparent_output_count"]) {
+      if (Object.hasOwn(tx, field) && !integer(tx[field], field === "size_bytes" ? 1 : 0, 0xffffffff)) throw new ProtocolError("INVALID_TRANSACTION_METADATA");
+    }
     for (const field of ["vin", "vout", "decoded"]) {
       if (Object.hasOwn(tx, field)) ensureNestedNumbersAreStrings(tx[field]);
     }
@@ -153,6 +158,13 @@ export class PrepClient {
     if (!object(query) || !integer(query.from_block, 0, 0xffffffff)) throw new TypeError("from_block must be a bounded integer");
     if (query.to_block !== undefined && query.to_block !== null && !integer(query.to_block, query.from_block, 0x100000000)) throw new TypeError("Invalid exclusive to_block");
     if (query.limit !== undefined && !integer(query.limit, 1, 1000)) throw new TypeError("limit must be 1..1000 scanned blocks");
+    if (query.field_selection !== undefined) {
+      if (!object(query.field_selection) || Object.keys(query.field_selection).some(key => !["block", "transaction"].includes(key))) throw new TypeError("Invalid field_selection");
+      for (const [key, fields] of [["block", BLOCK_FIELDS], ["transaction", TRANSACTION_FIELDS]]) {
+        const selected = query.field_selection[key];
+        if (selected !== undefined && (!Array.isArray(selected) || new Set(selected).size !== selected.length || selected.some(field => !fields.includes(field)))) throw new TypeError("Invalid selected fields");
+      }
+    }
     return validateQueryResult(await this.#request("query", query, options), query);
   }
 
