@@ -1,13 +1,28 @@
 # Zeer v0.1 implementation plan
 
 Date: 2026-10-12 (Asia/Jakarta).
-Last planning update: 2026-10-13 (Asia/Jakarta), repository ownership and engine-first sequencing.
+Last planning update: 2026-10-13 (Asia/Jakarta), accepted Zeer Prep / Zeer Chef names and data-engine-first direction.
 Status: **Zeer engine design pending implementation approval; benchmark-first work authorized on 2026-10-13**. This document authorizes no additional execution by itself.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
+## 0. Accepted product names and planning order
+
+The user accepted **Zeer Prep** and **Zeer Chef** on 2026-10-13. **Zeer** remains the umbrella brand and existing monorepo name.
+
+| Product | Responsibility | Priority |
+| --- | --- | --- |
+| Zeer Prep | Retrieve, prepare and supply Zcash chain data through a proposed batch/stream API and client SDK; analogous product layer to HyperSync | First: establish workload, source bottlenecks, correctness and a bounded data-engine design |
+| Zeer Chef | Process chain observations and authorized shielded receipts using developer schemas and TypeScript handlers, persist application entities and expose GraphQL; analogous product layer to HyperIndex | Later application-framework phase |
+
+The kitchen analogy is preparation followed by cooking: Prep supplies ingredients ready for application processing; Chef applies the developer's recipe. Consumers may use Prep directly without Chef. These are accepted product names and intended roles, not implemented capabilities or registry/package names.
+
+This direction supersedes the earlier framework-only priority. Sections 1 onward preserve the **Chef framework proposal**, including its scanner, PostgreSQL, GraphQL and recovery contracts. They are not a technical specification for Prep. Prep's storage engine, API/protocol, source adapters, package boundaries and release gates still require design; do not assume the Chef architecture applies to it.
+
+The next benchmark question is bulk historical data retrieval on equivalent outputs, with fetch/transfer, decoding, authorized scanning and persistence costs measured separately. The existing 128-transaction lookup results do not establish a bulk-ingestion or shielded-scanning advantage. No engine implementation, package publication or hosted-service rollout is authorized by accepting these names.
+
 ## 1. Product and evidence boundaries
 
-**Product:** an open-source, self-hosted indexing framework that turns Zcash chain observations and authorized shielded receipts into developer-defined entities and a GraphQL API.
+**Product in the framework proposal below: Zeer Chef**, an open-source, self-hosted indexing framework that turns Zcash chain observations and authorized shielded receipts into developer-defined entities and a GraphQL API.
 
 **Primary user:** a backend developer building Zcash payment tracking, accounting views, or a relayer's read-side integration.
 
@@ -19,7 +34,7 @@ Scope: independently usable Core & Tooling prototype; existing ZeeSwap project r
 | --- | --- |
 | Zeer name | Accepted in conversation; namespace/domain/trademark availability not established |
 | Brand asset | `../../assets/brand/zeer-logo-concept-v2.png` is an approved PNG concept sheet |
-| Framework direction | Accepted: HyperIndex-style, not a new HyperSync-scale data service |
+| Framework direction | Zeer Chef retains the application-framework role; Zeer Prep is now the first data-engine priority, as defined in section 0 |
 | Developer language/output | Accepted: TypeScript developer surface and GraphQL as primary query interface |
 | Hosting/database | Accepted: self-hosted, developer-owned database; framework owns its schemas and consistency |
 | Open source | MIT selected for original Zeer project material; dependencies retain their own licenses and require inventory |
@@ -29,7 +44,7 @@ Scope: independently usable Core & Tooling prototype; existing ZeeSwap project r
 | Technical choices below | Proposed design, not a claim of existing capability |
 
 Tagline proposed earlier: **Zcash data. Ready to build.**
-Descriptor: **The TypeScript indexing framework for Zcash.**
+Chef descriptor: **The TypeScript indexing framework for Zcash.**
 
 The organizer screenshot supplied by the user allows two submissions in distinct tracks. ZeeSwap targets Cross-chain and Zeer targets Core & Tooling. Keep separate product scope, examples, evidence and submission narratives; disclose shared components. Organizer guidance is not a promise of a prize or acceptance. Recheck live submission requirements before release; no deadline is assumed by this plan.
 
@@ -53,7 +68,7 @@ The organizer screenshot supplied by the user allows two submissions in distinct
 ### Explicitly outside v0.1
 
 - Hosted Zeer Cloud, billing, public multitenant hosting, accounts shared between unrelated customers.
-- Full-node consensus validation, mining, a new global chain archive or HyperSync competitor.
+- Full-node consensus validation and mining. A separate global data archive is outside this Chef framework proposal; Prep's bounded data-service scope is pending its own design.
 - Spending keys, mnemonic import, transaction signing, swaps, bridges, custody or a payout engine.
 - Complete wallet balances, exhaustive outbound transaction accounting, sender identification or deanonymization.
 - Mempool payment events; only mined chain observations enter the v0.1 event contract.

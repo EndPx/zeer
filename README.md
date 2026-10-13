@@ -2,7 +2,12 @@
 
 **Zcash data. Ready to build.**
 
-Zeer is a planned open-source indexing framework for Zcash. Developers will define TypeScript handlers, supply their own PostgreSQL database, and query indexed application data through GraphQL. A Rust scanner will handle Zcash integration and authorized shielded receipt discovery.
+Zeer is an open-source project for Zcash data tooling, with two planned products:
+
+- **Zeer Prep** prepares and supplies chain data to applications through a proposed batch/stream API and client SDK. This is the first development priority.
+- **Zeer Chef** turns chain observations and authorized shielded receipts into application entities through TypeScript handlers, developer-owned PostgreSQL and GraphQL. This is the later framework phase.
+
+Prep supplies the ingredients; Chef applies the developer's recipe. Applications may use Prep directly without Chef.
 
 ## Status
 
@@ -12,9 +17,9 @@ The first external-provider experiment ran lightwalletd and Zaino on an isolated
 
 A second [historical transaction-lookup experiment](benchmarks/results/reports/2026-10-13-four.md) successfully included lightwalletd, Zaino, Zinder and CipherScan on the same 128 public mainnet transactions. It compares disclosed native read paths, not isolated engine or ingestion speed.
 
-This is the core Zeer monorepo. Implementation proceeds engine-first: prove scanning and persistence, test recovery, establish benchmarks, then finish the developer-facing SDK and CLI. Minimal handler contracts and internal runners are defined early to support that work.
+This is the core Zeer monorepo. Work proceeds benchmark-first, then toward a bounded Prep data engine. Bulk retrieval and its bottlenecks still need measurement; neither product has an implemented engine. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
-## Planned developer experience
+## Planned Chef developer experience
 
 - One user-facing npm package with a CLI and TypeScript SDK.
 - Self-hosted operation with developer-owned PostgreSQL and local scanner state.
@@ -25,9 +30,9 @@ This is the core Zeer monorepo. Implementation proceeds engine-first: prove scan
 
 Zeer does not require spending keys. Viewing keys and decoded private data remain sensitive and belong in the operator's protected environment. Shielded receipt discovery does not reveal every sender or private transaction in the network.
 
-## Planned monorepo layout
+## Earlier Chef layout proposal
 
-Folders will be introduced as their components are implemented:
+The following is the earlier framework layout proposal. Prep's architecture and package layout remain to be designed; accepting product names does not create separate npm packages. Folders will be introduced as their components are implemented:
 
 ```text
 crates/zeer-scanner/        Rust Zcash integration and scanning
@@ -55,7 +60,7 @@ The benchmark plan distinguishes external indexer comparisons, source-provider c
 
 ## Development
 
-There are no Zeer engine/SDK/CLI commands yet. The [benchmark tooling](benchmarks/README.md) has executable tests and reproduction instructions. Proposed Zeer commands and APIs in the planning documents remain design examples. Benchmark-first work precedes the Zeer scanner/recovery proof.
+There are no Prep or Chef engine/SDK/CLI commands yet. The [benchmark tooling](benchmarks/README.md) has executable tests and reproduction instructions. Proposed commands and APIs in the framework planning document remain Chef design examples. Prep's next planning step is a bulk-retrieval workload and bounded engine design.
 
 The intended initial deployment target is Linux x86_64; Windows development uses WSL2. Runtime/toolchain versions will be pinned when validated.
 
