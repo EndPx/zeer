@@ -1,0 +1,47 @@
+# Credentials and private configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+.secrets/
+secrets/
+*.ufvk
+*.pem
+*.key
+
+# Local scanner state, private data, and backups
+.zeer/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.log
+backups/
+
+# Research downloads and machine-specific work
+.omc/research/
+.omc/drafts/
+.omc/state/
+.deploy-local/
+deliverables/
+tmp/
+.tmp/
+
+# Dependencies and generated build output
+node_modules/
+target/
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+__pycache__/
+*.pyc
+
+# Editor and OS artifacts
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
