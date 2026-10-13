@@ -1,0 +1,1 @@
+{"status": "PASS", "candidate": "cipherscan", "workload": "sparse", "round": 1, "run": {"status": "PASS", "rows": 128, "sha256": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3", "retrieval_normalize_ns": 5926932, "verification_ns": 609807, "rows_per_second": 21596.333482483013, "requests": 6, "response_bytes": null}, "failure_code": null}

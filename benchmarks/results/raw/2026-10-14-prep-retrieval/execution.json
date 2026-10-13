@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "session_sha256": "6c6bf5c4e866fc78e3b199cefa59ec066c3ced64876930f41160fa664ce8add0",
+  "source_files_sha256": {
+    "benchmarks/prep/full/retrieval.py": "f0c322e963291eb44b27fabde1554dde7fc32eacb1df4b511413ae819beff7fe",
+    "benchmarks/prep/full/test_retrieval.py": "fb74e77b7dbd84425a506c093b59c2e8583127cfb92fd5a593bbdcf610608a2b",
+    "benchmarks/transactions/benchmark.py": "3f3c48576f188feb54495673ded16cb1c70643b766be4cf856ef361f1101bf52",
+    "benchmarks/chef/session_lookup.py": "d9ae15a9803644329295b1d0d954bc876760def08b3ce386fe57ab9f8738758c",
+    "benchmarks/chef/lookup.py": "103afae21f628533d4bf2fdb7714425f204807b768b7daee17a86038615dd168"
+  },
+  "executed_orchestrator_sha256": "4a093ad865b9e5fe763544eb2a20a5be32f4552f78a9cc1015919833ea4b9f5c",
+  "wording_note": "Executed raw limitation says source idle; the source remained available and gRPC backends could query it. This is corrected in the published reproduction recipe; measured code paths and results are unchanged.",
+  "prep_binary_sha256": "c14324f40f2e3982efcdf413193d5c5a5c7055b282a52315ba71e69277d02391",
+  "running_containers": [
+    "stockpilot-app-1",
+    "stockpilot-redis-1",
+    "hermes-agent-e0qr-hermes-agent-1",
+    "sos-pg"
+  ],
+  "tests_exit_code": 0
+}

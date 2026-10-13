@@ -6,6 +6,10 @@ The first measured scenario is **compact-block serving and normalized header ver
 
 ## Current evidence
 
+- [Prep retrieval comparison](results/reports/2026-10-14-prep-retrieval.md):
+  60 verified observations across full-range headers, transaction metadata and
+  sparse IDs, using Prep/RPC/CipherScan and three gRPC sparse adapters.
+
 - [Chef optimized writer](results/reports/2026-10-14-chef-optimized.md): identical
   handler/schema and resources, five alternating fresh runs per build, durable
   output equality and recorded PostgreSQL client query calls.

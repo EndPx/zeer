@@ -1,0 +1,1 @@
+{"status": "PASS", "candidate": "zinder", "workload": "sparse", "round": 1, "run": {"status": "PASS", "rows": 128, "sha256": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3", "retrieval_normalize_ns": 92249430, "verification_ns": 536997, "rows_per_second": 1387.5424487717703, "requests": 128, "response_bytes": 33487}, "failure_code": null}
