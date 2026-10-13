@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-13T11:04:04.822267+00:00",
+  "rust": "1.99.0",
+  "profile": "dev, unoptimized; no performance ranking",
+  "build_image": "rust@sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+  "source_files_sha256": {
+    "Cargo.toml": "1c4cf8322e0e56675bb4105e70622649ac2c77fb3310ae0b1ff30e206e873723",
+    "Cargo.lock": "93867e4be0e659e51009e2650f70c27a7d11a8e76aa36d08fd750c0647a4f863",
+    "rust-toolchain.toml": "2ad6f15416572b4836585087f1d4abc53b8fa2dbd616f8dacfaa587ed6714228",
+    "crates/prep/Cargo.toml": "5ceafc536f8a51b6fd0e9a14a420fbe534df166b80a69ff520035f17bf1d67b3",
+    "crates/prep/src/importer.rs": "be31d7bf71a8e0b422b3ff3bdcf94a69a4803d22050bc3513578be33c16c86e9",
+    "crates/prep/src/lib.rs": "100125c25a53fb66694880a7cbd35aa622451770761629984276aa7f640e9dd5",
+    "crates/prep/src/main.rs": "bd0e9f54b7de9e89e7f59fff92ddd76376ce92a6150ed2246becf0e2225fce51",
+    "crates/prep/src/server.rs": "178e3e0ee9e8ee71945fa0fbcf1760b4a72eac50c5c814fe682c1b74de7bce31",
+    "crates/prep/tests/integration.rs": "00edd9e86e467ee13fe0a3a0c4a31fd86450eb551f0fee2a29d1574f6d24f175",
+    "crates/prep-proto/Cargo.toml": "02448ca4f41c2a8562911014c15ded6722b413f8fa708a728ecb144aa1c4a28f",
+    "crates/prep-proto/build.rs": "0ac7651a5bff98e3334d800537b521e79a9ad9f163dcca1bc206968c3b4242d0",
+    "crates/prep-proto/proto/compact_formats.proto": "d8d0c8aaa5ceec7d5dcc188ef25b04011df2ec0254901620fce982fc13aeb32d",
+    "crates/prep-proto/proto/prep.proto": "3306c081e6526ccff51d10370366c0181bef823e97990e71222911bf1ad8808f",
+    "crates/prep-proto/proto/service.proto": "6fbfa974081fb02366a3118a25764af289bdbb86688978f5ff2bae661dfa346a",
+    "crates/prep-proto/src/lib.rs": "c11b48f9181d9003c2fb6e01281eb76ac13cb6d874c01e7e647a3c2a90031f26",
+    "crates/prep-store/Cargo.toml": "fe91ee07f219e5bc95f7f7f4f44e7dac52d47f32cad5b67a4133a6298114a085",
+    "crates/prep-store/src/lib.rs": "e79cc1c04f21b42bba6faedfe8d0c8f524a680442ee645ec6335fc70e9baa1ec"
+  },
+  "binary_sha256": "439e2a8f2fa6958d02d44d080de02a9a7ed08a6a447df5bd052d53fc1f28d175",
+  "snapshot_manifest_sha256": "f89e43882c105347a286945a1368e7d49a1c7c00af55f8fcb5098a2b72c85659",
+  "validation": {
+    "rustfmt": "PASS",
+    "rust_tests": 24,
+    "clippy_D_warnings": "PASS",
+    "build": "PASS"
+  },
+  "server": {
+    "running": false,
+    "oom_killed": false,
+    "exit_code": 0,
+    "cpus": 1.0,
+    "memory_bytes": 536870912,
+    "published_ports": {},
+    "readonly_rootfs": true
+  },
+  "network_internal": true,
+  "caps": {
+    "build_cpus": 3,
+    "build_memory_gib": 4,
+    "serving_cpus": 1,
+    "serving_memory_mib": 512,
+    "client_cpus": 1,
+    "client_memory_mib": 512
+  },
+  "directory_bytes": 966308100,
+  "free_disk_bytes": 86352613376,
+  "notes": [
+    "Source, build and serving tests ran sequentially within authorized aggregate3CPU8GiB40GiB envelope.",
+    "All Prep containers stopped at evidence capture; prior apps active.",
+    "Reference and Rust import independently decode same provider, not independent consensus."
+  ]
+}

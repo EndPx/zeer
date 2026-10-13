@@ -2,7 +2,7 @@
 
 Date: 2026-10-12 (Asia/Jakarta).
 Last planning update: 2026-10-13 (Asia/Jakarta), accepted Zeer Prep / Zeer Chef names and data-engine-first direction.
-Status: **Zeer engine design pending implementation approval; benchmark-first work authorized on 2026-10-13**. This document authorizes no additional execution by itself.
+Status: **Prep implementation authorized on 2026-10-13; first snapshot engine implemented under [its contract](../../docs/PREP_ENGINE.md). Chef remains a later framework proposal.** This document authorizes no additional execution by itself.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
 ## 0. Accepted product names and planning order
@@ -16,9 +16,9 @@ The user accepted **Zeer Prep** and **Zeer Chef** on 2026-10-13. **Zeer** remain
 
 The kitchen analogy is preparation followed by cooking: Prep supplies ingredients ready for application processing; Chef applies the developer's recipe. Consumers may use Prep directly without Chef. These are accepted product names and intended roles, not implemented capabilities or registry/package names.
 
-This direction supersedes the earlier framework-only priority. Sections 1 onward preserve the **Chef framework proposal**, including its scanner, PostgreSQL, GraphQL and recovery contracts. They are not a technical specification for Prep. Prep's storage engine, API/protocol, source adapters, package boundaries and release gates still require design; do not assume the Chef architecture applies to it.
+This direction supersedes the earlier framework-only priority. Sections 1 onward preserve the **Chef framework proposal**, including its scanner, PostgreSQL, GraphQL and recovery contracts. They are not a technical specification for Prep. Prep's first bounded snapshot architecture is documented in its separate engine contract; scalable storage, additional sources/transports and later release gates still require work. Do not assume the Chef architecture applies to Prep.
 
-The next benchmark question is bulk historical data retrieval on equivalent outputs, with fetch/transfer, decoding, authorized scanning and persistence costs measured separately. The existing 128-transaction lookup results do not establish a bulk-ingestion or shielded-scanning advantage. No engine implementation, package publication or hosted-service rollout is authorized by accepting these names.
+The next benchmark question is bulk historical data retrieval on equivalent outputs, with fetch/transfer, decoding, authorized scanning and persistence costs measured separately. The existing 128-transaction lookup results do not establish a bulk-ingestion or shielded-scanning advantage. After accepting these names, the user separately authorized Prep implementation. The first slice is defined by [the Prep contract](../../docs/PREP_ENGINE.md); package publication and hosted-service rollout remain outside this work.
 
 ## 1. Product and evidence boundaries
 

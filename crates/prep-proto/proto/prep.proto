@@ -1,0 +1,30 @@
+syntax = "proto3";
+package zeer.prep.v1;
+
+// Experimental immutable historical snapshots. This is not a wallet RPC server.
+service Prep {
+  rpc GetInfo(InfoRequest) returns (DatasetInfo);
+  rpc GetRange(RangeRequest) returns (stream BlockBatch);
+}
+message InfoRequest {}
+message DatasetInfo {
+  string dataset_id = 1;
+  string network = 2;
+  uint64 start_height = 3;
+  uint64 end_height = 4;
+  string manifest_json = 5;
+}
+message RangeRequest {
+  // Required on every request. Reject a cursor from another snapshot.
+  string dataset_id = 1;
+  uint64 start_height = 2;
+  uint64 end_height = 3; // inclusive
+  uint32 batch_blocks = 4; // 1..128, 0 means default 32; also byte-bounded
+}
+message BlockBatch {
+  string dataset_id = 1;
+  uint64 start_height = 2;
+  uint64 next_height = 3;
+  // Encoded CompactBlock messages from the pinned upstream schema.
+  repeated bytes compact_blocks = 4;
+}

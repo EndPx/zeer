@@ -2,22 +2,24 @@
 
 **Zcash data. Ready to build.**
 
-Zeer is an open-source project for Zcash data tooling, with two planned products:
+Zeer is an open-source project for Zcash data tooling, with two product layers:
 
-- **Zeer Prep** prepares and supplies chain data to applications through a proposed batch/stream API and client SDK. This is the first development priority.
+- **Zeer Prep** prepares and supplies chain data to applications. Its first Rust prototype imports bounded historical compact-block snapshots and serves subranges through a native gRPC batch API.
 - **Zeer Chef** turns chain observations and authorized shielded receipts into application entities through TypeScript handlers, developer-owned PostgreSQL and GraphQL. This is the later framework phase.
 
 Prep supplies the ingredients; Chef applies the developer's recipe. Applications may use Prep directly without Chef.
 
 ## Status
 
-**Benchmark harness implemented; Zeer engine and npm package not implemented yet.**
+**Prep's first immutable-snapshot engine and benchmark harness are implemented. Chef, live following, production serving and npm packages are not implemented.**
 
 The first external-provider experiment ran lightwalletd and Zaino on an isolated synthetic regtest chain. See [the harness](benchmarks/README.md) and [measured results](benchmarks/results/reports/2026-10-13.md). This is compact-block/header serving evidence, not shielded decryption or application-ingestion performance.
 
 A second [historical transaction-lookup experiment](benchmarks/results/reports/2026-10-13-four.md) successfully included lightwalletd, Zaino, Zinder and CipherScan on the same 128 public mainnet transactions. It compares disclosed native read paths, not isolated engine or ingestion speed.
 
-This is the core Zeer monorepo. Work proceeds benchmark-first, then toward a bounded Prep data engine. Bulk retrieval and its bottlenecks still need measurement; neither product has an implemented engine. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
+The [first Prep slice](docs/PREP_ENGINE.md) has Linux storage/integration tests and a [256-block mainnet capture/round-trip](benchmarks/results/reports/2026-10-13-prep.md), including nonempty Sapling and Orchard data. It preserves represented compact fields; it does not decrypt notes, validate consensus, or prove wallet compatibility. No comparative Prep speedup is claimed.
+
+This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
 ## Planned Chef developer experience
 
@@ -30,9 +32,18 @@ This is the core Zeer monorepo. Work proceeds benchmark-first, then toward a bou
 
 Zeer does not require spending keys. Viewing keys and decoded private data remain sensitive and belong in the operator's protected environment. Shielded receipt discovery does not reveal every sender or private transaction in the network.
 
+## Implemented Prep layout
+
+```text
+crates/prep/              Rust importer, native gRPC server, internal CLI
+crates/prep-store/        Immutable bounded segment storage and integrity checks
+crates/prep-proto/        Pinned upstream protocol and experimental Prep API
+benchmarks/prep/          Independent reference capture and round-trip verifier
+```
+
 ## Earlier Chef layout proposal
 
-The following is the earlier framework layout proposal. Prep's architecture and package layout remain to be designed; accepting product names does not create separate npm packages. Folders will be introduced as their components are implemented:
+The following is the earlier framework layout proposal. It is separate from the implemented Prep slice; folders will be introduced as their components are implemented:
 
 ```text
 crates/zeer-scanner/        Rust Zcash integration and scanning
@@ -51,6 +62,7 @@ Internal modules do not imply separate npm publications. The initial target is o
 ## Planning and research
 
 - [Start here: project plan](plan.md)
+- [Prep engine contract and commands](docs/PREP_ENGINE.md)
 - [Implementation plan and acceptance gates](.omc/plans/zeer-v0.1.md)
 - [Benchmark methodology](docs/BENCHMARK_SPEC.md)
 - [Envio / HyperIndex architecture research](docs/ENVIO_HYPERINDEX_RESEARCH.md)
@@ -60,9 +72,17 @@ The benchmark plan distinguishes external indexer comparisons, source-provider c
 
 ## Development
 
-There are no Prep or Chef engine/SDK/CLI commands yet. The [benchmark tooling](benchmarks/README.md) has executable tests and reproduction instructions. Proposed commands and APIs in the framework planning document remain Chef design examples. Prep's next planning step is a bulk-retrieval workload and bounded engine design.
+On Linux/WSL, use the pinned Rust 1.99.0 toolchain and committed lockfile:
 
-The intended initial deployment target is Linux x86_64; Windows development uses WSL2. Runtime/toolchain versions will be pinned when validated.
+```sh
+cargo test --workspace --locked
+cargo build -p prep --locked
+target/debug/prep --help
+```
+
+Prep provides internal `import`, `inspect` and `serve` commands. See [the bounded snapshot workflow](docs/PREP_ENGINE.md#developer-commands). Serving defaults to loopback. The API is experimental and has no public-service authentication. Chef commands remain design examples.
+
+The tested target is Linux x86_64; Windows development uses WSL2. Snapshot writes require Unix filesystem durability operations. Dependency versions are recorded in `Cargo.lock`.
 
 ## License
 

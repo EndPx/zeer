@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "dataset_id": "d7de831d716517909b5d9fd3d9c93d77551ad4fc94620eaf633f39c69a0da9c4",
+  "start": 2700000,
+  "end": 2700255,
+  "counts": {
+    "blocks": 256,
+    "transactions": 249,
+    "sapling_outputs": 417,
+    "orchard_actions": 81
+  },
+  "verified_blocks": 256,
+  "verification": "Every normalized pinned-schema CompactBlock equals independent Python provider capture",
+  "warmup": "PASS",
+  "resume_subranges": "PASS",
+  "invalid_requests": [
+    {
+      "case": "wrong_dataset",
+      "code": "FAILED_PRECONDITION",
+      "status": "PASS"
+    },
+    {
+      "case": "outside_range",
+      "code": "OUT_OF_RANGE",
+      "status": "PASS"
+    },
+    {
+      "case": "invalid_batch",
+      "code": "INVALID_ARGUMENT",
+      "status": "PASS"
+    }
+  ],
+  "postflight": "PASS",
+  "runs": [
+    {
+      "run": 1,
+      "elapsed_ns": 53034694,
+      "batches": 8,
+      "status": "PASS"
+    },
+    {
+      "run": 2,
+      "elapsed_ns": 35978372,
+      "batches": 8,
+      "status": "PASS"
+    },
+    {
+      "run": 3,
+      "elapsed_ns": 29379607,
+      "batches": 8,
+      "status": "PASS"
+    },
+    {
+      "run": 4,
+      "elapsed_ns": 25223478,
+      "batches": 8,
+      "status": "PASS"
+    },
+    {
+      "run": 5,
+      "elapsed_ns": 22275873,
+      "batches": 8,
+      "status": "PASS"
+    }
+  ],
+  "median_local_serving_ms": 29.379607,
+  "timing_boundary": "Local private-network fetch + Python decode/serialize + cursor checks; full reference comparison outside timer",
+  "limitation": "One local snapshot service, not comparative throughput, wallet scanning or production evidence"
+}

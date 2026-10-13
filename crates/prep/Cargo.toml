@@ -1,0 +1,23 @@
+[package]
+name = "prep"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+prep-proto.workspace = true
+prep-store.workspace = true
+prost.workspace = true
+tonic.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+serde_json.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+hex.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

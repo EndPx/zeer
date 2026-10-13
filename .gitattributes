@@ -2,6 +2,9 @@
 * text=auto eol=lf
 *.png binary
 *.gz binary
+*.pbframes binary
 
 # Preserve upstream protocol bytes, including their existing comment whitespace.
 benchmarks/proto/*.proto whitespace=-blank-at-eol
+crates/prep-proto/proto/service.proto whitespace=-blank-at-eol
+crates/prep-proto/proto/compact_formats.proto whitespace=-blank-at-eol

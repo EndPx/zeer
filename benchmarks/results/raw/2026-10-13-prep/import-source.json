@@ -1,0 +1,16 @@
+{
+  "anchors_checked_before_and_after": true,
+  "claim": "immutable source snapshot; integrity and linkage checked, not independent consensus validation or current-chain status",
+  "encoding": "prost re-encoding of all fields in pinned CompactBlock schema; unknown future fields are not retained",
+  "end_height": 2700255,
+  "expected_end_hash": "000000000102414eebc037d5bd2b7ac5dba0edd03a4102f69c9ac462e66c7b52",
+  "network": "mainnet",
+  "pool_types": "empty: upstream default shielded pools",
+  "predecessor_hash": "000000000017bb3276cb97bce533b8a9a350c418398808ee1907810daec22ac3",
+  "schema_version": 1,
+  "source": "https://zec.rocks/",
+  "start_height": 2700000,
+  "upstream_git_commit": "062e8bfc5bb47e42e3c26567cd6e093cfb854ed4",
+  "upstream_vendor": "ECC LightWalletD",
+  "upstream_version": "v0.5.3"
+}
