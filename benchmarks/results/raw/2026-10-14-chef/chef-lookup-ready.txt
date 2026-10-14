@@ -1,1 +1,0 @@
-{"status": "PASS", "eligible_for_comparison": true, "successful_runs": 5, "median_lookup_normalize_ns": 520849316, "min_lookup_normalize_ns": 371821590, "max_lookup_normalize_ns": 634386031}

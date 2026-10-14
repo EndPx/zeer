@@ -1,1 +1,0 @@
-{"status": "PASS", "candidate": "zaino", "workload": "sparse", "round": 4, "run": {"status": "PASS", "rows": 128, "sha256": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3", "retrieval_normalize_ns": 1810010295, "verification_ns": 425360, "rows_per_second": 70.7178298121227, "requests": 128, "response_bytes": 33487}, "failure_code": null}

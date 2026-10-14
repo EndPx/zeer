@@ -116,7 +116,7 @@ def main():
                           '--pids-limit','64','--cap-drop','ALL','--security-opt','no-new-privileges','--read-only','-e','PYTHONDONTWRITEBYTECODE=1','-e','PREP_API_TOKEN','-e','ZEER_INDEX_ENDPOINT',
                           '-v',str(SOURCE)+':/work:ro','-v',str(OUT)+':/results','-w','/work',PYTHON,'python','-m','benchmarks.prep.full.retrieval',
                           '--candidate','prep','--workload',workload,'--prep-projection',projection,'--endpoint-env','ZEER_INDEX_ENDPOINT',
-                          '--oracle','benchmarks/results/raw/2026-10-14-chef/indexing-oracle.json.gz','--manifest','benchmarks/fixtures/mainnet-transactions-v1/manifest.json',
+                          '--oracle','benchmarks/fixtures/mainnet-public-2048/oracle.json.gz','--manifest','benchmarks/fixtures/mainnet-transactions-v1/manifest.json',
                           '--out','/results/'+prefix+'.json','--round',str(number),'--timeout-seconds','180'],env=env)
                     clients.append(name)
                     # The known container also has scoped cleanup on timeout/interruption.

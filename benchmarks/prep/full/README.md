@@ -47,10 +47,9 @@ accidental rerun against an already advanced fixture. Source growth must become
 queryable while an old cursor retains its captured range. Reorgs are tested by
 the Rust controlled-source suite rather than claimed from this two-block test.
 
-The mainnet source and Regtest source image pins, process limits, binary and code
-hashes are recorded in the [execution evidence](../../results/raw/2026-10-13-prep-full/execution.json).
-See [the report](../../results/reports/2026-10-13-prep-full.md) for setup findings,
-what was actually measured, and the limits of the resulting claims.
+Record source images, process limits, code/binary hashes and all outcomes in
+local execution manifests under `benchmarks/results/`. Reports and measurements
+are excluded from Git; see the [retention policy](../../README.md#local-results-policy).
 
 ## Comparing Prep revisions
 

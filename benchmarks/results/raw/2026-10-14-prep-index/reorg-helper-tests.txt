@@ -1,8 +1,0 @@
-test_authorization_required_before_endpoint_or_mutation (__main__.self_test.<locals>.MetadataTests.test_authorization_required_before_endpoint_or_mutation) ... ok
-test_duplicate_ids_preserve_all_canonical_locations_and_headers (__main__.self_test.<locals>.MetadataTests.test_duplicate_ids_preserve_all_canonical_locations_and_headers) ... ok
-test_version6_public_projection_ignores_float_economic_fields (__main__.self_test.<locals>.MetadataTests.test_version6_public_projection_ignores_float_economic_fields) ... ok
-
-----------------------------------------------------------------------
-Ran 3 tests in 0.001s
-
-OK

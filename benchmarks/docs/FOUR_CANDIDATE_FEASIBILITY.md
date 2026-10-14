@@ -2,7 +2,7 @@
 
 Research date: 2026-10-13. This is a source-grounded deployment proposal, not evidence that four candidates have completed a benchmark. The expanded run authorization is aggregate **3 vCPU / 8 GiB RAM / 40 GiB operational disk** on the existing shared VPS; no paid upgrade or unrelated application changes. Root owns deployment and actual measurements.
 
-Subsequent execution completed: [all four candidates passed](../results/reports/2026-10-13-four.md). This preflight remains the research record; the result report documents actual versions, frozen height 6764, historical readiness policy and limitations.
+This document preserves candidate research and admission methodology. Runtime results are retained locally under `benchmarks/results/`.
 
 ## Selected practical route
 

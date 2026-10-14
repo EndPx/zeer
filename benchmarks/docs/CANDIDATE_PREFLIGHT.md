@@ -2,7 +2,7 @@
 
 Checked 2026-10-13. This document records upstream source/artifact inspection, not successful startup or measured performance. Machine-readable pins are in [candidates.json](../manifests/candidates.json). Runtime image IDs, versions, config hashes, resource limits, and result files belong in each run's evidence.
 
-**Follow-up runtime evidence:** [all four passed the new early-mainnet transaction-lookup scenario](../results/reports/2026-10-13-four.md). The deferred labels in this document are historical findings for the smaller regtest scenario and original resource cap.
+Runtime evidence and subsequent outcomes are local-only. The deferred labels below are historical preflight findings for the original workload and resource cap.
 
 ## Initial comparison
 

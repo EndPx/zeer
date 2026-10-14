@@ -1,6 +1,6 @@
 # Four-provider frozen-mainnet profile
 
-See [measured results](../../results/reports/2026-10-13-four.md) for the completed experiment and [feasibility](../../docs/FOUR_CANDIDATE_FEASIBILITY.md) for pinned upstream evidence. This folder holds the actual serving configurations and a corrected bounded-sync recipe. It does not provision hosting or contain a Zeer engine.
+See [feasibility](../../docs/FOUR_CANDIDATE_FEASIBILITY.md) for pinned upstream research. This folder holds serving configurations and a bounded-sync recipe. Execution records remain local-only.
 
 ## Boundaries
 

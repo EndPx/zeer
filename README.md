@@ -13,44 +13,19 @@ Prep supplies the ingredients; Chef applies the developer's recipe. Applications
 
 **Prep's full-data MVP and Chef's first public-data prototype are implemented and tested. Public production hosting, viewing-key scanning and npm publication remain out of scope.**
 
-The [bounded batch lookup](benchmarks/results/reports/2026-10-14-prep-batch.md)
-adds `/transactions`, `/capabilities` and SDK helpers after a
+Prep supports bounded transaction-ID lookup, snapshot pinning, capability
+discovery, immutable transaction indexes and direct metadata projection. See
+the [query contract](docs/PREP_QUERY.md) and
 [pinned CipherScan architecture review](docs/SL_CIPHERSCAN_RESEARCH.md).
-In one session, the verified 128-ID workload takes a median 8.901 ms in one batch
-request, versus 20.654 ms for previous 16-page retrieval and 4.550 ms for native
-CipherScan SQL. The paths have different protocol work; this is not an engine-only
-ranking. No code from the reviewed fork was copied into Zeer.
+Chef uses bounded write coalescing while preserving atomic block/checkpoint commits.
 
-The [Prep index/metadata update](benchmarks/results/reports/2026-10-14-prep-index.md)
-adds bounded immutable transaction-ID indexes and direct size/input/output counts
-without changing the archive format. On the same early-mainnet workload, the
-128-ID query falls from 437.477 ms to 42.940 ms with identical decoded fields,
-or 16.612 ms using direct metadata. All 45 measured projections match their
-independent oracle. Admission, memory, fallback and scale limits are documented.
+Benchmark outputs, comparison tables and reports are retained locally under
+`benchmarks/results/` and excluded from Git. The public repository keeps the
+[harness and reproduction instructions](benchmarks/README.md), source pins and
+input fixtures. No performance ranking is published here.
 
-The [Chef writer optimization](benchmarks/results/reports/2026-10-14-chef-optimized.md)
-passes 38 tests with real PostgreSQL. Five alternating runs per build reduced
-median durable indexing time from 40.311 s to 13.295 s on the unchanged
-2,048-block / 16,962-transaction public example, with every persisted entity
-verified. This measures ingestion; the read-side GraphQL path is unchanged.
-
-The [Chef report](benchmarks/results/reports/2026-10-14-chef.md) records 31 tests
-with real PostgreSQL, a live CLI/GraphQL round trip, and five fresh indexing runs
-for each of Prep and direct RPC: 2,048 blocks / 16,962 transactions, every entity
-verified independently. Whole-chain indexing was not run; source retrieval,
-application indexing and supplemental external-provider lookups are kept separate.
-
-The first external-provider experiment ran lightwalletd and Zaino on an isolated synthetic regtest chain. See [the harness](benchmarks/README.md) and [measured results](benchmarks/results/reports/2026-10-13.md). This is compact-block/header serving evidence, not shielded decryption or application-ingestion performance.
-
-A second [historical transaction-lookup experiment](benchmarks/results/reports/2026-10-13-four.md) successfully included lightwalletd, Zaino, Zinder and CipherScan on the same 128 public mainnet transactions. It compares disclosed native read paths, not isolated engine or ingestion speed.
-
-The [full-data report](benchmarks/results/reports/2026-10-13-prep-full.md) verifies 1,024 complete mainnet blocks and 13,817 transactions, real isolated-Regtest following, 64 Rust tests and 13 SDK tests. A narrow header-query comparison is published with its source/preparation boundaries; it is not a millions-of-block or general indexing-speed claim.
-
-The [first improvement report](benchmarks/results/reports/2026-10-13-prep-improvements.md) expands verification to **4,096 blocks / 50,283 transactions**, adds sequential range reads and bounded projection sizing, and overlaps raw/decoded source requests. It records 73 Rust tests, 13 SDK tests, four oracle tests and six before/after read workloads, with every run and the shared-host limitations retained.
-
-The [proof follow-up](benchmarks/results/reports/2026-10-13-prep-proof.md) adds a genuine NU5 full-data fixture with Sapling and Orchard, a ten-minute real Regtest follow test through two source outages, and a real Zebra branch replacement with cursor rejection. Follow mode now has bounded retries for classified transient source failures. The follow-up passes 78 Rust tests and 13 Python fixture/guard tests; its fixture replay, Regtest and production boundaries are recorded separately.
-
-The earlier [compact snapshot experiment](benchmarks/results/reports/2026-10-13-prep.md) remains supported separately. Neither path decrypts private notes or independently validates consensus.
+Whole-chain execution and production readiness remain unproven. Neither Prep
+nor the current public Chef slice decrypts private notes or validates consensus.
 
 This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 

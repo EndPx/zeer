@@ -103,7 +103,7 @@ class BatchRetrievalTests(unittest.TestCase):
             verified_measure(adapter([response]), dataset["sparse"], {A: (1, 0), B: (2, 0)})
 
     def test_retained_oracle_positions_follow_node_order_not_sorted_txid_order(self):
-        dataset = load_dataset(ROOT / "benchmarks/results/raw/2026-10-14-chef/indexing-oracle.json.gz",
+        dataset = load_dataset(ROOT / "benchmarks/fixtures/mainnet-public-2048/oracle.json.gz",
                                ROOT / "benchmarks/fixtures/mainnet-transactions-v1/manifest.json")
         positions = oracle_locations(dataset)
         self.assertEqual(len(positions), 16962)

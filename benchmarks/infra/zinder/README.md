@@ -1,11 +1,8 @@
 # Zinder v0.6.0 bounded benchmark deployment draft
 
-Status: the wrapper was subsequently executed successfully for the
-[four-provider mainnet-prefix experiment](../../results/reports/2026-10-13-four.md),
-using the separate [mainnet configurations](../mainnet-prefix/README.md), an
-Ubuntu 24.04 runtime, and 1 CPU / 4 GiB for the four-process group. The Debian
-Dockerfile and regtest Compose recipe below remain alternative, unexecuted
-recipes. Their 1.5 CPU / 4 GiB ceiling is not Zinder's minimum requirement.
+Use the [mainnet configurations](../mainnet-prefix/README.md) for the bounded
+mainnet recipe. Execution records stay local. The alternative Debian/regtest
+recipe below is not a statement of Zinder's minimum resource requirement.
 
 ## Pinned upstream and native package
 

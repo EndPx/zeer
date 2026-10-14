@@ -2,30 +2,21 @@
 
 Updated: 2026-10-14 (Asia/Jakarta).
 
-**Status: Prep now has admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. The latest API slice passes 96 Rust tests, 27 SDK tests and a 20-visit comparison. Chef's optimized public writer remains verified by 38 tests and five alternating runs per build. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Latest Prep evidence: [batch report](benchmarks/results/reports/2026-10-14-prep-batch.md); Chef evidence: [writer report](benchmarks/results/reports/2026-10-14-chef-optimized.md).**
+**Status: Prep supports admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. Chef implements a public-data writer and GraphQL API. Viewing-key scanning, whole-chain execution and public deployment remain deferred. All benchmark results and reports are local-only under `benchmarks/results/`; source, methodology and fixtures remain public.**
 
 Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**, the Zcash data preparation and delivery engine prioritized first, and **Zeer Chef**, the later application-indexing framework. Accepted names, responsibilities and planning precedence are recorded in [the canonical plan](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
 ## Authoritative documents
 
 - [ShieldedLabs CipherScan pinned review](docs/SL_CIPHERSCAN_RESEARCH.md): architecture coverage, source-only findings, license declarations and independently adapted public-data concepts.
-- [Prep batch and capabilities](benchmarks/results/reports/2026-10-14-prep-batch.md): complete bounded ID lookup, snapshot pinning, SDK validation and same-session pagination/batch/native SQL comparison.
-- [Prep index and metadata optimization](benchmarks/results/reports/2026-10-14-prep-index.md): bounded immutable in-memory indexes, unchanged archives/cursors, explicit payload fallback, 45-pass comparison and actual Regtest branch/append verification.
-- [Prep native retrieval comparison](benchmarks/results/reports/2026-10-14-prep-retrieval.md): full-range header/metadata and sparse-ID measurements; Prep beats the tested RPC path on full-range reads but needs further sparse-lookup work. Engine unchanged in this comparison.
-- [Chef writer optimization](benchmarks/results/reports/2026-10-14-chef-optimized.md): bounded ordered cache, coalesced SQL, unchanged atomic block/checkpoint guarantees, actual database regression tests and alternating before/after indexing.
-- [Five-candidate lookup session](benchmarks/results/reports/2026-10-14-lookup-session.md): 25 verified visits with rotated order and equal aggregate resource ceilings. This is prepared serving, separate from fresh ingestion.
 - [Active Chef public-data contract](docs/CHEF_PUBLIC_MVP.md): public Prep source, TypeScript handlers, developer PostgreSQL, GraphQL, recovery and separate indexing/retrieval benchmarks.
-- [Chef indexing benchmark and validation](benchmarks/results/reports/2026-10-14-chef.md): identical handlers/schema over Prep and direct RPC, independent all-row verification, native CipherScan ingestion with different explorer outputs, and supplementary external-provider lookup.
 - [Implementation plan and architecture](.omc/plans/zeer-v0.1.md): accepted product decisions, proposed technical contracts, scope, risks, gates, and acceptance criteria.
-- [Prep engine contract](docs/PREP_ENGINE.md): implemented first slice, limits, commands and next engine gates; [execution evidence](benchmarks/results/reports/2026-10-13-prep.md).
-- [Active 28 October delivery contract](docs/PREP_DELIVERY.md): full blocks/transactions required by the user, completed capabilities and exclusions; [full-data execution report](benchmarks/results/reports/2026-10-13-prep-full.md).
+- [Prep engine contract](docs/PREP_ENGINE.md): implemented first slice, limits, commands and next engine gates.
+- [Active 28 October delivery contract](docs/PREP_DELIVERY.md): full blocks/transactions required by the user, completed capabilities and exclusions.
 - [Prep HTTP query and client contract](docs/PREP_QUERY.md): supported fields, filters, cursor semantics and numeric precision.
-- [Prep improvement report](benchmarks/results/reports/2026-10-13-prep-improvements.md): sequential range reads, bounded projection sizing, overlapping source reads, 4,096-block verification and before/after measurements.
-- [Modern-data, outage and reorg proof](benchmarks/results/reports/2026-10-13-prep-proof.md): genuine NU5 fixture replay, automatic recovery through two actual source outages, and real Zebra canonical branch replacement.
 - [Benchmark specification](docs/BENCHMARK_SPEC.md): comparison eligibility, scenarios, metrics, fixtures, and publication rules.
 - [Envio / HyperIndex package research](docs/ENVIO_HYPERINDEX_RESEARCH.md): pinned npm/source findings and the ReScript/Rust boundary; recommendations do not override the implementation plan.
-- [Benchmark harness](benchmarks/README.md) and [first measured results](benchmarks/results/reports/2026-10-13.md): two external providers tested on a frozen synthetic regtest fixture before engine implementation.
-- [Four-candidate measured follow-up](benchmarks/results/reports/2026-10-13-four.md): all four completed the same historical transaction-lookup projection under a disclosed expanded resource profile.
+- [Benchmark harness](benchmarks/README.md): reproduction instructions and local output policy.
 - [Selected logo concept](assets/brand/zeer-logo-concept-v2.png): approved raster concept sheet, not an SVG asset pack.
 
 Technical contracts live in the implementation plan. Benchmark methodology lives in the benchmark specification; do not maintain competing copies.
@@ -41,12 +32,7 @@ Positioning check (14 October 2026): [Bitquery documents a Zcash GraphQL API in 
 - Implementation priority clarified: engine, correctness/recovery tests and early benchmarks first; polished public SDK/CLI packaging follows.
 - Workspace inspected on 2026-10-12: logo asset only before these planning documents; no application source or Git repository.
 - Benchmark-first work and later Prep engine implementation were authorized on 2026-10-13. The user subsequently required complete blocks/transactions, following, queries and a client. A typed Prep client and the first public Chef framework now exist locally; neither package is published to a registry.
-- The first Prep slice passed 24 Linux Rust tests and round-tripped 256 real mainnet compact blocks, including 417 Sapling outputs and 81 Orchard actions, against a separately captured provider reference. This does not prove shielded decryption, consensus or performance superiority.
-- lightwalletd and Zaino both passed five measured reads in each of two separately reported resource profiles. This proves the declared synthetic compact header/projection case, not nonempty shielded scanning or application indexing.
-- The public-mainnet follow-up includes Zinder and CipherScan as well: all four passed five runs of 128 transaction lookups. Workload/transport differences and the historical-source health policy are documented; this does not complete the broader scanning/ingestion benchmark requirements.
-- The full-data Prep prototype passed 64 Rust tests and 13 SDK tests, verified 1,024 complete mainnet blocks / 13,817 transactions, resumed multi-segment ingestion, and followed two newly mined blocks on an isolated real Regtest node. Reorg recovery is fault-fixture evidence; modern mainnet production behavior and million-block scale remain unproven.
-- The first improvement batch passed 73 Rust tests, 13 SDK tests and four benchmark-oracle tests. All 4,096 early-mainnet blocks / 50,283 transactions passed independent source comparison. Six before/after workloads preserve exact output; the largest observed median reduction was 13.38% for full projection. These are warm shared-host read observations, not a universal speedup.
-- The proof follow-up passed 78 Rust tests and 13 Python fixture/guard tests. Three genuine NU5 blocks / 17 transactions passed full-data replay and pool filters. A real Zebra Regtest follower ran for 600.613 seconds, recovered from two source outages without restart, and followed 18 new blocks. A subsequent real-node two-block branch replacement advanced epoch 0 to 1 and rejected the old cursor. This does not establish long-term production operation or natural P2P reorg behavior.
+- Historical validation records, benchmark outcomes and comparisons are retained in the local results directory. Public documents describe contracts, implementation scope and reproduction steps.
 
 ## Next implementation step
 
@@ -55,7 +41,7 @@ The user authorized improving Prep on 2026-10-13. This iteration keeps the exist
 - [x] Reuse sequential segment readers for payload queries and remove response-sized temporary serialization buffers used only for length checks; preserve pagination, exact numbers and response limits.
 - [x] Overlap the two independent raw/decoded RPC reads for each block, with bounded concurrency and unchanged source validation.
 - [x] Compare the previous release binary and the improved binary on the same immutable archive, including full payload and filtered transaction workloads; preserve every run and check output equality outside timing.
-- [x] Run the Linux test/lint/build gates, separate code review, and publish the measured evidence with limitations.
+- [x] Run the Linux test/lint/build gates, separate code review, and retain measured evidence and limitations locally.
 
 The first performance batch left modern Sapling/Orchard full-data fixtures,
 follow/source-outage recovery and actual-node reorg evidence open. The bounded

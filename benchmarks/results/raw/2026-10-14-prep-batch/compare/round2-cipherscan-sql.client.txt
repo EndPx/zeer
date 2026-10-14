@@ -1,1 +1,0 @@
-{"status": "PASS", "candidate": "sql", "round": 2, "run": {"status": "PASS", "rows": 128, "sha256": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3", "retrieval_normalize_ns": 7166227, "verification_ns": 729217, "rows_per_second": 17861.56090227117, "requests": 6, "response_bytes": null}, "failure_code": null}

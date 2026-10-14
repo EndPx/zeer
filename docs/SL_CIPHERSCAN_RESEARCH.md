@@ -53,8 +53,8 @@ patterns invisible.
 | Retrieve lightweight candidate metadata before heavy transaction bytes | [scan.js](https://github.com/ShieldedLabs/sl-cipherscan/blob/f94b13be58f69105978e7fe3185fb698786cf94a/server/api/routes/scan.js#L145-L195) | Default batch lookup to public metadata while supporting explicit raw/decoded selection within byte limits |
 | Developer-facing API examples and network configuration | [API docs](https://github.com/ShieldedLabs/sl-cipherscan/tree/f94b13be58f69105978e7fe3185fb698786cf94a/app/docs), [api-config.ts](https://github.com/ShieldedLabs/sl-cipherscan/blob/f94b13be58f69105978e7fe3185fb698786cf94a/lib/api-config.ts) | Expose machine-readable capabilities from validation constants; keep live readiness in `/height` |
 
-The batch transport idea extends a bottleneck already measured in Zeer: the
-128-ID metadata query still required 16 HTTP pages over a 2,048-block range.
+The batch transport idea reduces the need for paginated range requests when
+the application already knows the small set of transaction IDs it needs.
 It is not a claim that batch APIs are unique to this repository or to Zeer.
 
 ## Implementation details not adopted

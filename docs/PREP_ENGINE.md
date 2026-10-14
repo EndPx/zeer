@@ -153,23 +153,9 @@ snapshots. Existing public compact APIs and full-node APIs are distinct sources.
 
 ## Evidence and remaining limits
 
-See the [full-archive report](../benchmarks/results/reports/2026-10-13-prep-full.md)
-for full mainnet-range validation, isolated real-node follow, failure tests,
-SDK verification and a narrowly defined native-read comparison. The
-[first compact-snapshot report](../benchmarks/results/reports/2026-10-13-prep.md)
-remains historical evidence.
-
-The [improvement report](../benchmarks/results/reports/2026-10-13-prep-improvements.md)
-records 4,096-block / 50,283-transaction independent verification and six
-before/after workloads for sequential reads, bounded sizing and concurrent source
-requests. It also records a scientific-notation correction in the independent
-Python oracle; strict output equality is retained.
-
-The [proof follow-up](../benchmarks/results/reports/2026-10-13-prep-proof.md)
-adds genuine historical NU5 full-block replay, a 600-second actual Zebra Regtest
-follow run through two node outages, and actual-node branch replacement with
-epoch advancement and old-cursor rejection. Its raw journals and trust boundaries
-are retained separately from throughput measurements.
+Execution records and benchmark comparisons are local-only under
+`benchmarks/results/`. See the [harness](../benchmarks/README.md) for reproduction
+and the committed public fixtures for deterministic regression inputs.
 
 Large-scale public operation, millions-of-block latency, complete network
 upgrade interoperability and modern full shielded-payload production workloads

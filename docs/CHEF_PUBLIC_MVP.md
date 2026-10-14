@@ -82,10 +82,9 @@ outputs, not merely the same transaction IDs.
 - [x] Explicit whole-chain feasibility and eligible external comparison evidence.
 - [x] Independent review, source/runtime hashes and cleanup of isolated services.
 
-Evidence: [2026-10-14 Chef report](../benchmarks/results/reports/2026-10-14-chef.md).
-The external evidence includes native CipherScan ingestion with additional explorer
-outputs and a supplementary lightwalletd lookup. A controlled indexing ranking
-against an independent application framework remains open until its durable
-workload and resource allocation are equivalent. The main controlled experiment
-compares the same Chef application over Prep and direct RPC. Whole-chain execution
-was not run.
+Execution evidence and comparisons are retained locally under
+`benchmarks/results/`; see the [harness](../benchmarks/README.md) for reproduction.
+An independent application-framework ranking requires equivalent durable entity
+workloads and resource allocations. Native explorer ingestion, prepared lookups
+and Chef application ingestion must be measured separately. Whole-chain
+execution remains unproven.

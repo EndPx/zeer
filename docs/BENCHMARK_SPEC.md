@@ -1,7 +1,7 @@
 # Zeer benchmark specification v0.1
 
 Date: 2026-10-12 (Asia/Jakarta).
-Status: **broad specification; two limited serving experiments completed on 2026-10-13**. See the [harness](../benchmarks/README.md), [two-provider compact-block results](../benchmarks/results/reports/2026-10-13.md), and [four-provider historical transaction lookup results](../benchmarks/results/reports/2026-10-13-four.md). Their workloads differ and their times must not be combined into one ranking. Most scenarios below remain planned.
+Status: **benchmark methodology; execution records and results are local-only**. See the [harness](../benchmarks/README.md). Retrieval, ingestion and scanning workloads must not be combined into one ranking.
 Product and event semantics: [Zeer implementation plan](../.omc/plans/zeer-v0.1.md).
 
 ## 1. Questions the benchmark must answer
@@ -39,7 +39,7 @@ Its README documents direct Zebra RocksDB ingestion, PostgreSQL output and addit
 
 Start with the common block/transaction identity projection: height, block hash, parent hash, txid, transaction position, and supported public count/version fields. Do not add private decrypted values to this track. Prevout resolution, address histories, fees and pool-value analysis remain excluded unless every participant's required work is defined and validated.
 
-If CipherScan necessarily performs additional indexing, publish a **native-stack task comparison** with those operations listed. Do not describe it as isolated engine speed or claim a universal multiplier. An isolated like-for-like chart requires evidence that required ingestion, transformation and persistence work match; a projection adapter that only reads one tool's already-built database is not equivalent to another tool's fresh indexing.
+If CipherScan necessarily performs additional indexing, record a **native-stack task comparison** with those operations listed. Do not describe it as isolated engine speed or claim a universal multiplier. An isolated like-for-like chart requires evidence that required ingestion, transformation and persistence work match; a projection adapter that only reads one tool's already-built database is not equivalent to another tool's fresh indexing.
 
 Do not fork away competitor validation or durability to make a result convenient. Minimal format adapters must be public and separately identified.
 
@@ -181,8 +181,8 @@ benchmarks/
   reference/       # our direct-SDK baseline, never called an external peer
   scenarios/      # public, shielded, GraphQL, recovery, privacy
   scripts/        # prepare, run, verify, report
-  results/raw/    # per-run machine-readable data and redacted logs
-  results/reports/
+  results/raw/    # ignored local per-run data and redacted logs
+  results/reports/ # ignored local reports and comparison tables
 ```
 
 Each result carries schema version, UTC run timestamp, tool commit, fixture hash, configuration hash, source identity, hardware profile, run number, timing boundary, correctness result and failure reason. Export no operational keys, database credentials or private memos. Publish fixture-only secrets only inside clearly identified disposable test data.
@@ -218,3 +218,11 @@ Preferred columns: **Tool | Data source / native path | Throughput | vs fastest 
 - **B3:** [Zaino](https://github.com/zingolabs/zaino), [lightwalletd](https://github.com/zcash/lightwalletd), [Zinder](https://github.com/ZcashFoundation/zinder). Provider candidates, not interchangeable performance claims.
 - **B4:** [Zcash scanning module](https://docs.rs/zcash_client_backend/latest/zcash_client_backend/scanning/index.html). Direct-library baseline foundation.
 - **B5:** [Zebra regtest](https://github.com/ZcashFoundation/zebra/blob/main/book/src/user/regtest.md). Controlled chain infrastructure, subject to actual harness capability.
+
+## Result retention policy
+
+All benchmark outputs, reports and measured comparisons stay in the ignored
+`benchmarks/results/` directory. This policy supersedes earlier publication
+requirements in this specification and project plans. Publication requires an
+explicit new owner request. Source, methodology, pins and public input fixtures
+remain committed so independent reproduction does not depend on local results.

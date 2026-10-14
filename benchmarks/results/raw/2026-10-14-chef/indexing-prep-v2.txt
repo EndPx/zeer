@@ -1,1 +1,0 @@
-{"status":"PASS","report":"/opt/zeer-chef/20261014/results/indexing-prep-v2.json","summary":{"repetitions":5,"elapsed_ms_min":51032.844868000015,"elapsed_ms_median":55715.240220999985,"elapsed_ms_max":59640.11930400001,"blocks":2048,"transactions":16962,"committed_transactions_per_second_median":304.4409381117008}}

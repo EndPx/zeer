@@ -26,7 +26,7 @@ CLIENT_SLICE = 'zeerretrievalclient.slice'
 BASE = ['prep', 'rpc', 'cipherscan', 'lwd', 'zinder', 'zaino']
 PROVIDERS = {'prep': PREP, 'rpc': NODE, 'cipherscan': PG, 'lwd': 'zeer-bench-four-lightwalletd',
              'zinder': 'zeer-bench-four-zinder', 'zaino': 'zeer-bench-four-zaino'}
-ORACLE = Path('benchmarks/results/raw/2026-10-14-chef/indexing-oracle.json.gz')
+ORACLE = Path('benchmarks/fixtures/mainnet-public-2048/oracle.json.gz')
 MANIFEST = Path('benchmarks/fixtures/mainnet-transactions-v1/manifest.json')
 PYTHON_IMAGE = 'python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1'
 DEPS, GENERATED = '/opt/zeer-bench/20261013/state/client/deps', '/opt/zeer-bench/20261013/state/client/generated'

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { PrepClient, ReorgError } from '../../../packages/prep-client/src/index.js';
 
 const manifest=JSON.parse(await readFile('benchmarks/fixtures/mainnet-transactions-v1/manifest.json','utf8'));
-const oracle=JSON.parse(gunzipSync(await readFile('benchmarks/results/raw/2026-10-14-chef/indexing-oracle.json.gz')));
+const oracle=JSON.parse(gunzipSync(await readFile('benchmarks/fixtures/mainnet-public-2048/oracle.json.gz')));
 const positions=new Map(), counts=new Map();
 for(const row of oracle.transactions){const index=counts.get(row.minedHeight)??0;positions.set(row.id,index);counts.set(row.minedHeight,index+1);}
 for(const block of oracle.blocks)assert.equal(counts.get(Number(block.id)),block.transactionCount);

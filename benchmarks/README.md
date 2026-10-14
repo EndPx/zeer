@@ -1,53 +1,28 @@
 # Zeer benchmark harness
 
-This directory contains external-provider baselines, Zeer Prep retrieval experiments,
-and Zeer Chef application-indexing benchmarks.
-The first measured scenario is **compact-block serving and normalized header verification on a frozen synthetic regtest chain**. It does not measure fresh database ingestion, wallet scanning, shielded decryption, GraphQL, or a Zeer engine.
+This repository contains source, methodology, pinned candidates and public input
+fixtures for Prep retrieval, Chef application indexing and native serving comparisons.
 
-## Current evidence
+## Local results policy
 
-- [Prep bounded batch lookup](results/reports/2026-10-14-prep-batch.md): one session
-  comparing old/new pagination, one-request lookup and native CipherScan SQL;
-  20 verified measurements with equal backend resource ceilings.
+All generated benchmark results stay local. Store raw runs, logs, comparison
+tables, reports and execution manifests under `benchmarks/results/`, which is
+ignored by Git. Do not force-add that directory or copy measured results into
+public READMEs, plans or candidate manifests. Publication requires a new explicit
+request from the project owner. This storage policy does not change where an
+authorized experiment runs; remote working copies remain operational state.
 
-- [Prep admitted indexes and direct metadata](results/reports/2026-10-14-prep-index.md):
-  old/new identical-field and direct-field comparisons, 45 verified passes,
-  admission/memory observations, NU5 fixture and actual Regtest cursor/append checks.
+A fresh checkout has no result directory; create it when starting an experiment.
+Keep failures and successful runs together locally. Commit source, configuration,
+methodology and deterministic public-chain input fixtures needed to reproduce tests.
+The [public mainnet oracle](fixtures/mainnet-public-2048/README.md) is an input
+fixture, not a performance result.
 
-- [Prep retrieval comparison](results/reports/2026-10-14-prep-retrieval.md):
-  60 verified observations across full-range headers, transaction metadata and
-  sparse IDs, using Prep/RPC/CipherScan and three gRPC sparse adapters.
-
-- [Chef optimized writer](results/reports/2026-10-14-chef-optimized.md): identical
-  handler/schema and resources, five alternating fresh runs per build, durable
-  output equality and recorded PostgreSQL client query calls.
-
-- [Five-candidate same-session lookup](results/reports/2026-10-14-lookup-session.md):
-  Chef, CipherScan, Zinder, Zaino and lightwalletd; equal aggregate source/candidate/client
-  ceilings, five rotated rounds and all-field output verification.
-
-- [Chef public indexing](results/reports/2026-10-14-chef.md): five fresh PostgreSQL
-  runs each over Prep and RPC, all-row verification, native CipherScan ingestion
-  as a separate workload, and supplementary prepared lookup. See the
-  [reproduction and metric boundaries](../docs/CHEF_BENCHMARK_PREFLIGHT.md).
-
-- [Prep full-data prototype](results/reports/2026-10-13-prep-full.md): full-node ingestion, 1,024 blocks / 13,817 transactions, real Regtest follow, local SDK and a specifically bounded header-retrieval comparison.
-
-- [First Prep engine round-trip](results/reports/2026-10-13-prep.md): 256 public mainnet compact blocks, nonempty Sapling/Orchard fields, immutable local storage and native gRPC serving. Correctness evidence, not a performance ranking.
-
-**Follow-up:** [all four services now have a common measured transaction-lookup case](results/reports/2026-10-13-four.md) on a frozen early-mainnet prefix. This uses a separately authorized 3 CPU / 8 GiB / 40 GiB envelope. The original regtest results below remain separate.
-
-- Two real services run sequentially: lightwalletd v0.5.5 and Zaino 0.10.1.
-- One independent Zebra 6.2.3 source and frozen 1,024-block dataset.
-- Typed gRPC calls through the pinned upstream protocol; no fake candidate implementations.
-- A verified warmup followed by five repetitions per candidate/profile.
-- Full normalized output comparison, separate verification timer and failure evidence.
-- [First measured results](results/reports/2026-10-13.md).
-- [Four-provider transaction runner](transactions/README.md) and [four-provider results](results/reports/2026-10-13-four.md).
-- [Candidate preflight](docs/CANDIDATE_PREFLIGHT.md) and [pins](manifests/candidates.json).
-- [Full methodology](../docs/BENCHMARK_SPEC.md) includes later, broader scenarios that are **not implemented or measured yet**.
-
-The Python harness is benchmark tooling, not the planned public TypeScript SDK/CLI.
+- [Benchmark specification](../docs/BENCHMARK_SPEC.md)
+- [Public transaction lookup harness](transactions/README.md)
+- [Prep full-data verification](prep/full/README.md)
+- [Chef workload and reproduction](../docs/CHEF_BENCHMARK_PREFLIGHT.md)
+- [Candidate preflight](docs/CANDIDATE_PREFLIGHT.md) and [source pins](manifests/candidates.json)
 
 ## Local harness tests
 
@@ -89,7 +64,7 @@ docker compose -f benchmarks/infra/compose.yaml --profile tools run --rm client 
   --metadata /work/benchmarks/fixtures/regtest-1024/blocks.jsonl.gz.manifest.json
 ```
 
-The replay checks the archive checksum, genesis, every height/hash and the resulting tip. It can resume a matching prefix, refuses a conflicting chain and never deletes existing data. `prepare_regtest.py` creates a **new** disposable fixture and therefore must not be substituted when reproducing these published hashes.
+The replay checks the archive checksum, genesis, every height/hash and the resulting tip. It can resume a matching prefix, refuses a conflicting chain and never deletes existing data. `prepare_regtest.py` creates a **new** disposable fixture and therefore must not be substituted when reproducing these fixture hashes.
 
 Start exactly one provider, wait for its startup/catch-up, and capture the sanitized host evidence **before** starting the client:
 
@@ -138,6 +113,9 @@ No global Docker cleanup command is part of this workflow.
 - The internal report field `eligible_for_comparison` means the required repeated correctness checks passed; external workload/environment comparability must still be assessed.
 - The native deadline adapter stops subsequent runs on timeout. A generic Python adapter stuck beyond its deadline cannot be forcibly terminated inside a thread; the caller must end the candidate process before another experiment.
 
-## Scope still pending
+## Scope boundaries
 
-Nonempty shielded fixtures, independent-wallet decryption truth, public mainnet/testnet state snapshots, native index-construction comparisons, restart/reorg fault suites for candidate services, and GraphQL benchmarks remain future cases. Zeer engine code has not been started.
+Keep retrieval, application ingestion and authorized shielded scanning as separate
+workloads. The current public-data implementation does not establish whole-chain
+performance, private-note scanning or production readiness. See the active
+[project plan](../plan.md) for implementation scope.

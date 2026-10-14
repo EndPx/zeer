@@ -1,1 +1,0 @@
-{"candidate": "lightwalletd", "round": 1, "status": "PASS", "eligible_for_comparison": false, "successful_runs": 1, "median_lookup_normalize_ns": 181791467, "min_lookup_normalize_ns": 181791467, "max_lookup_normalize_ns": 181791467}

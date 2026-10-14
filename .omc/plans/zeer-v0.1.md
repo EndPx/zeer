@@ -2,11 +2,12 @@
 
 Date: 2026-10-12 (Asia/Jakarta).
 Last planning update: 2026-10-14 (Asia/Jakarta), public Chef, measured Prep retrieval improvements and bounded batch APIs.
-Status: **Chef's public writer is optimized; the user subsequently authorized Prep transaction-ID indexes and direct metadata. That bounded update is implemented with [measured evidence](../../benchmarks/results/reports/2026-10-14-prep-index.md). Viewing-key scanning remains deferred.** This older framework proposal does not authorize additional execution by itself.
+Status: **Chef's public writer is optimized; the user subsequently authorized Prep transaction-ID indexes and direct metadata. That bounded update is implemented; benchmark evidence is retained locally. Viewing-key scanning remains deferred.** This older framework proposal does not authorize additional execution by itself.
+Result policy (2026-10-14): all benchmark outputs and reports are local-only; this supersedes earlier result-publication requirements.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
 The user subsequently authorized a pinned ShieldedLabs CipherScan review and
-relevant independent improvements. [Batch lookup and capabilities](../../benchmarks/results/reports/2026-10-14-prep-batch.md)
+relevant independent improvements. [Batch lookup and capabilities](../../docs/PREP_QUERY.md)
 are implemented; this does not reopen private scanning or copy the reference
 repository's differently licensed code.
 
@@ -73,7 +74,7 @@ The organizer screenshot supplied by the user allows two submissions in distinct
 9. Read-only GraphQL, protected by a per-deployment token and a constrained generated query surface.
 10. Historical processing, live following, crash recovery and bounded reorg handling.
 11. Optional signed webhooks using a durable outbox; downstream delivery is at least once.
-12. Public benchmark harness, external comparison, results with correctness evidence, and a standalone example.
+12. Public benchmark harness and standalone example; external comparison results and correctness evidence retained locally.
 
 ### Explicitly outside v0.1
 
@@ -367,7 +368,7 @@ Zaino/lightwalletd/Zinder are generally provider variants for this framework, no
 
 ## 9. Implementation gates
 
-Every gate produces a short evidence record with commands, exact versions, result, failure cases and remaining limitations. Check source diffs and workspace state after each bounded task. G0 initially had partial benchmark preflight evidence in [the first report](../../benchmarks/results/reports/2026-10-13.md). The older shielded/two-store gates below remain a proposal; executed Prep work and the superseding public-only Chef slice are tracked in their contracts and [current project plan](../../plan.md).
+Every gate produces a short evidence record with commands, exact versions, result, failure cases and remaining limitations. Check source diffs and workspace state after each bounded task. Benchmark evidence is stored locally under `benchmarks/results/` and excluded from Git. The older shielded/two-store gates below remain a proposal; executed Prep work and the superseding public-only Chef slice are tracked in their contracts and [current project plan](../../plan.md).
 
 Engine-first sequencing clarified on 2026-10-13: implement scanner and transactional runtime through internal runners before polishing the public SDK/CLI. Freeze basic wire/handler contracts early; collect scanner and persistence benchmark baselines as soon as correctness allows. G2 is the minimal runtime/query integration needed to prove the engine, G4 measures the connected pipeline, and G5 completes developer-facing packaging. Re-run affected end-to-end measurements after packaging changes. Repository setup is administrative preparation, not completion of any implementation gate.
 

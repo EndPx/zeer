@@ -1,11 +1,8 @@
 # Zeer Chef public-data benchmark preflight
 
-Observed on **2026-10-14 WIB** (2026-10-13 17:49:55–17:50:05 UTC). This is a
-coverage and resource preflight, not a completed Chef benchmark. Public-chain
-means publicly available transaction data; no viewing keys or decrypted shielded
-notes, values, recipient addresses, or memos are involved.
-
-Subsequent execution is recorded in the [Chef report](../benchmarks/results/reports/2026-10-14-chef.md).
+Public-data benchmark methodology and reproduction instructions. Run observations
+and results are retained locally under `benchmarks/results/`. No viewing keys or
+decrypted shielded notes are involved.
 
 ## Decision
 
@@ -16,48 +13,13 @@ with a separately collected all-entity oracle. The existing independently
 verified 128-transaction manifest is an additional check and serving workload.
 **Do not label either case as a genesis-to-current-tip run.**
 
-A complete mainnet run is not currently admitted under the existing shared-VPS
-profile: the available local node is frozen at height 6764, Prep currently starts
-at height one, and no complete compatible local source/archive has been provisioned.
-The remote CipherScan node reports roughly 263 GiB of node data, while the current
-experiment has a 40 GiB incremental disk allowance. Its reported size is an
-observation of that provider, not a claim that every implementation needs exactly
-that amount. No duration for indexing the whole chain has been measured or
-extrapolated.
-
-## Fresh public-source observations
-
-[Raw observation record](../benchmarks/results/raw/2026-10-14-chef/preflight.json)
-and [read-only probe](../benchmarks/chef/preflight.py).
-
-The fixed observation target is height **3516619**, block hash
-`00000000005284c5d40bc799b7cb0f34feebe9a427e5240f1a782f295794ccf9`.
-That is the tip observed at capture time, not a permanently latest height. Both
-gRPC providers returned the same hash and parent as CipherScan for this height.
-
-| Source | Height 0 | Height 1 | Fixed observed tip | Data shape |
-| --- | --- | --- | --- | --- |
-| CipherScan public HTTP, source reports Zakura 1.6.0 | HTTP 200 | HTTP 200 | HTTP 200, 16 transactions in block listing | Explorer block/transaction summaries |
-| `zec.rocks:443`, lightwalletd v0.5.3 | `InvalidArgument`: unspecified identifier | Success | Success, 16 compact transaction entries | Compact protocol |
-| `zec.0xrpc.io:443`, Zaino 0.10.1 | Success; protobuf omits default zero height | Success | Success, 8 compact transaction entries | Compact protocol |
-
-At height one, lightwalletd returned one compact transaction entry and Zaino
-returned zero. The same header can therefore be accompanied by different
-transaction subsets. **Compact entry counts cannot be treated as the number of
-all public transactions or a substitute for complete public transaction fields.**
-Three sampled heights do not prove that every intervening block is available.
-The height-zero lightwalletd result is a request-path limitation, not a claim that
-its underlying node lacks genesis or that every alternative retrieval method
-must fail.
-
-CipherScan's documented endpoints were used: `/api/blockchain-info` and
-`/api/block/:heightOrHash`. The former reported `pruned=false` and
-`size_on_disk=282311217721` bytes. The public API has bounded response limits and
-documents HTTP 429 rate limiting; it must not be silently turned into an
-unlimited bulk-backfill source. [API documentation](https://cipherscan.app/docs).
-Provider endpoints were discovered through the operator's
-[server directory](https://hosh.zec.rocks/zec). Single-request response times in
-the raw record are diagnostic observations, not a comparative speed ranking.
+A complete mainnet run requires a compatible full source, coverage beginning at
+height zero, a pinned head and sufficient isolated storage. The bounded workload
+below does not meet those conditions. Check coverage and resource availability
+using the [read-only probe](../benchmarks/chef/preflight.py) before admission.
+Compact transaction entries are not a replacement for all public transaction
+fields. Preserve diagnostic observations locally and do not infer whole-chain
+availability from a few sampled heights.
 
 ## Separate the measured jobs
 

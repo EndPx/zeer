@@ -1,1 +1,0 @@
-{"candidate": "zinder", "round": 3, "status": "PASS", "eligible_for_comparison": false, "successful_runs": 1, "median_lookup_normalize_ns": 146992578, "min_lookup_normalize_ns": 146992578, "max_lookup_normalize_ns": 146992578}

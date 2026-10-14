@@ -1,7 +1,0 @@
-{
-  "height": 2909,
-  "hash": "00000005e43b2f343765c79579d61ed32d25cc06179fb9b75dc14deb2909f92b",
-  "path": "$.decoded.tx[1].vjoinsplit[0].vpub_old",
-  "expected": "0.000001",
-  "actual": "1e-6"
-}

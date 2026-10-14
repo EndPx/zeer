@@ -60,19 +60,10 @@ declarations and platform-specific native packages. The public repository
 describes Rust/N-API bindings. These inform developer experience, not code
 copying, license equivalence, or a requirement to use native bindings in Prep.
 
-## Executed evidence
+## Validation records
 
-[Full-data report](../benchmarks/results/reports/2026-10-13-prep-full.md): 64 Rust tests, 13 client tests, a packed-client real-server read, 1,024 complete mainnet blocks / 13,817 transactions, real isolated-Regtest source growth, and a workload-specific header comparison. Checked boxes describe this bounded functional delivery; they do not certify production readiness or complete HyperSync performance parity.
-
-[Improvement report](../benchmarks/results/reports/2026-10-13-prep-improvements.md):
-73 Rust tests, 13 client tests, four oracle tests, independent equality for 4,096
-blocks / 50,283 transactions, and six measured before/after read workloads. This
-extends early-mainnet evidence; modern shielded coverage, sustained follow and
-real-node reorg recovery remain separate gates.
-
-The later [proof follow-up](../benchmarks/results/reports/2026-10-13-prep-proof.md)
-passes its bounded versions of those gates: complete genuine NU5 fixture replay,
-a ten-minute actual-node follow rehearsal with two stopped-source intervals,
-and a real Zebra Regtest branch replacement with epoch/cursor/raw-data checks.
-Long-term production operation, all network upgrades and natural P2P reorgs
-remain outside those demonstrated claims.
+Execution records and benchmark reports are retained locally under
+`benchmarks/results/`. The [harness](../benchmarks/README.md) and public input
+fixtures remain available for reproduction. Checked boxes describe bounded
+functional delivery; they do not certify production readiness, whole-chain
+performance, all network upgrades or HyperSync parity.

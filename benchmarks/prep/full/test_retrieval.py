@@ -12,7 +12,7 @@ from benchmarks.prep.full.retrieval import (
 )
 
 ROOT = Path(__file__).resolve().parents[3]
-ORACLE = ROOT / "benchmarks/results/raw/2026-10-14-chef/indexing-oracle.json.gz"
+ORACLE = ROOT / "benchmarks/fixtures/mainnet-public-2048/oracle.json.gz"
 MANIFEST = ROOT / "benchmarks/fixtures/mainnet-transactions-v1/manifest.json"
 TXID = "a" * 64
 

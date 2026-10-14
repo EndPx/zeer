@@ -45,3 +45,6 @@ __pycache__/
 Thumbs.db
 .idea/
 *.swp
+
+# Benchmark outputs and reports stay local; commit harnesses and input fixtures only.
+/benchmarks/results/

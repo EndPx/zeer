@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { PrepClient } from '../../../packages/prep-client/src/index.js';
-const oracle = JSON.parse(gunzipSync(await readFile('benchmarks/results/raw/2026-10-14-chef/indexing-oracle.json.gz')));
+const oracle = JSON.parse(gunzipSync(await readFile('benchmarks/fixtures/mainnet-public-2048/oracle.json.gz')));
 const expected = new Map(oracle.transactions.map(row => [row.id, row]));
 const client = new PrepClient({ url: process.env.PREP_URL, token: process.env.PREP_API_TOKEN });
 let count=0, pages=0;
