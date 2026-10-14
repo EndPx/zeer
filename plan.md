@@ -2,12 +2,14 @@
 
 Updated: 2026-10-14 (Asia/Jakarta).
 
-**Status: Prep now has bounded admitted transaction-ID indexes and direct public metadata fields, with 45 verified comparison passes plus modern-fixture and actual-node Regtest checks. Chef's optimized public writer remains verified by 38 tests and five alternating runs per build. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Latest Prep evidence: [index report](benchmarks/results/reports/2026-10-14-prep-index.md); Chef evidence: [writer report](benchmarks/results/reports/2026-10-14-chef-optimized.md).**
+**Status: Prep now has admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. The latest API slice passes 96 Rust tests, 27 SDK tests and a 20-visit comparison. Chef's optimized public writer remains verified by 38 tests and five alternating runs per build. Private viewing-key scanning, whole-chain execution and public deployment remain deferred. Latest Prep evidence: [batch report](benchmarks/results/reports/2026-10-14-prep-batch.md); Chef evidence: [writer report](benchmarks/results/reports/2026-10-14-chef-optimized.md).**
 
 Zeer is the umbrella brand and monorepo for two planned products: **Zeer Prep**, the Zcash data preparation and delivery engine prioritized first, and **Zeer Chef**, the later application-indexing framework. Accepted names, responsibilities and planning precedence are recorded in [the canonical plan](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
 ## Authoritative documents
 
+- [ShieldedLabs CipherScan pinned review](docs/SL_CIPHERSCAN_RESEARCH.md): architecture coverage, source-only findings, license declarations and independently adapted public-data concepts.
+- [Prep batch and capabilities](benchmarks/results/reports/2026-10-14-prep-batch.md): complete bounded ID lookup, snapshot pinning, SDK validation and same-session pagination/batch/native SQL comparison.
 - [Prep index and metadata optimization](benchmarks/results/reports/2026-10-14-prep-index.md): bounded immutable in-memory indexes, unchanged archives/cursors, explicit payload fallback, 45-pass comparison and actual Regtest branch/append verification.
 - [Prep native retrieval comparison](benchmarks/results/reports/2026-10-14-prep-retrieval.md): full-range header/metadata and sparse-ID measurements; Prep beats the tested RPC path on full-range reads but needs further sparse-lookup work. Engine unchanged in this comparison.
 - [Chef writer optimization](benchmarks/results/reports/2026-10-14-chef-optimized.md): bounded ordered cache, coalesced SQL, unchanged atomic block/checkpoint guarantees, actual database regression tests and alternating before/after indexing.

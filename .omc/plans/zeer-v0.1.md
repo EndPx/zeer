@@ -1,9 +1,14 @@
 # Zeer v0.1 implementation plan
 
 Date: 2026-10-12 (Asia/Jakarta).
-Last planning update: 2026-10-14 (Asia/Jakarta), public Chef and measured Prep retrieval improvements.
+Last planning update: 2026-10-14 (Asia/Jakarta), public Chef, measured Prep retrieval improvements and bounded batch APIs.
 Status: **Chef's public writer is optimized; the user subsequently authorized Prep transaction-ID indexes and direct metadata. That bounded update is implemented with [measured evidence](../../benchmarks/results/reports/2026-10-14-prep-index.md). Viewing-key scanning remains deferred.** This older framework proposal does not authorize additional execution by itself.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
+
+The user subsequently authorized a pinned ShieldedLabs CipherScan review and
+relevant independent improvements. [Batch lookup and capabilities](../../benchmarks/results/reports/2026-10-14-prep-batch.md)
+are implemented; this does not reopen private scanning or copy the reference
+repository's differently licensed code.
 
 ## 0. Accepted product names and planning order
 

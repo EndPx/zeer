@@ -13,6 +13,14 @@ Prep supplies the ingredients; Chef applies the developer's recipe. Applications
 
 **Prep's full-data MVP and Chef's first public-data prototype are implemented and tested. Public production hosting, viewing-key scanning and npm publication remain out of scope.**
 
+The [bounded batch lookup](benchmarks/results/reports/2026-10-14-prep-batch.md)
+adds `/transactions`, `/capabilities` and SDK helpers after a
+[pinned CipherScan architecture review](docs/SL_CIPHERSCAN_RESEARCH.md).
+In one session, the verified 128-ID workload takes a median 8.901 ms in one batch
+request, versus 20.654 ms for previous 16-page retrieval and 4.550 ms for native
+CipherScan SQL. The paths have different protocol work; this is not an engine-only
+ranking. No code from the reviewed fork was copied into Zeer.
+
 The [Prep index/metadata update](benchmarks/results/reports/2026-10-14-prep-index.md)
 adds bounded immutable transaction-ID indexes and direct size/input/output counts
 without changing the archive format. On the same early-mainnet workload, the

@@ -7,7 +7,7 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use anyhow::Result;
@@ -31,10 +31,15 @@ use crate::query::{
     check_cursor_epoch, execute_query, validate_query, QueryArchive, QueryControl, QueryError,
     QueryRequest,
 };
+use crate::transactions::{
+    check_snapshot, encode_response, execute_transactions, validate_transactions,
+    TransactionRequest, MAX_LOOKUP_BYTES,
+};
 
 pub const MAX_ACTIVE_QUERIES: usize = 2;
 pub const MAX_REQUEST_BYTES: usize = 64 * 1024;
 pub const STATUS_MAX_AGE_SECONDS: u64 = 120;
+pub(crate) const QUERY_TIMEOUT_SECONDS: u64 = 30;
 
 #[derive(Clone)]
 struct HttpState {
@@ -47,11 +52,16 @@ struct HttpState {
 }
 
 fn error_response(error: QueryError) -> Response {
-    (
+    let mut response = (
         StatusCode::from_u16(error.status).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
         axum::Json(json!({"error": {"code": error.code}})),
     )
-        .into_response()
+        .into_response();
+    response.headers_mut().insert(
+        "cache-control",
+        axum::http::HeaderValue::from_static("no-store"),
+    );
+    response
 }
 fn authorize(state: &HttpState, headers: &HeaderMap) -> Result<(), QueryError> {
     if state.stopping.load(Ordering::Acquire) {
@@ -273,6 +283,17 @@ async fn health(State(state): State<HttpState>, headers: HeaderMap) -> Response 
         Err(error) => error_response(error),
     }
 }
+async fn capabilities(State(state): State<HttpState>, headers: HeaderMap) -> Response {
+    if let Err(error) = authorize(&state, &headers) {
+        return error_response(error);
+    }
+    let mut response = axum::Json(crate::capabilities::document()).into_response();
+    response.headers_mut().insert(
+        "cache-control",
+        axum::http::HeaderValue::from_static("no-store"),
+    );
+    response
+}
 
 struct CancelOnDrop(Arc<AtomicBool>);
 impl Drop for CancelOnDrop {
@@ -310,33 +331,89 @@ async fn query(
     if let Err(error) = validate_query(&request) {
         return error_response(error);
     }
+    read_response(state, ReadRequest::Query(request)).await
+}
+
+async fn transactions(
+    State(state): State<HttpState>,
+    headers: HeaderMap,
+    body: Result<Bytes, BytesRejection>,
+) -> Response {
+    if let Err(error) = authorize(&state, &headers) {
+        return error_response(error);
+    }
+    let body = match body {
+        Ok(body) => body,
+        Err(_) => return error_response(QueryError::new(413, "REQUEST_TOO_LARGE")),
+    };
+    let request: TransactionRequest = match serde_json::from_slice(&body) {
+        Ok(request) => request,
+        Err(_) => return error_response(QueryError::new(400, "INVALID_LOOKUP_JSON")),
+    };
+    if let Err(error) = validate_transactions(&request) {
+        return error_response(error);
+    }
+    read_response(state, ReadRequest::Transactions(request)).await
+}
+
+enum ReadRequest {
+    Query(QueryRequest),
+    Transactions(TransactionRequest),
+}
+async fn read_response(state: HttpState, request: ReadRequest) -> Response {
     let permit = match state.permits.clone().try_acquire_owned() {
         Ok(permit) => Arc::new(permit),
         Err(_) => return error_response(QueryError::new(429, "QUERY_CAPACITY_EXCEEDED")),
     };
     let worker_permit = permit.clone();
-    let control = QueryControl::default();
+    let control = QueryControl {
+        deadline: Instant::now() + Duration::from_secs(QUERY_TIMEOUT_SECONDS),
+        max_response_bytes: if matches!(&request, ReadRequest::Transactions(_)) {
+            MAX_LOOKUP_BYTES
+        } else {
+            crate::query::MAX_RESPONSE_BYTES
+        },
+        ..Default::default()
+    };
     let _cancel = CancelOnDrop(control.cancelled.clone());
     let task = tokio::task::spawn_blocking(move || {
         let _permit = worker_permit;
         let (archive, source) = coherent_snapshot(&state)?;
         // Epoch conflicts take precedence over range/source status, allowing clients
         // to distinguish a rollback from temporary source unavailability.
-        check_cursor_epoch(&request, &archive.query_meta())?;
+        match &request {
+            ReadRequest::Query(request) => check_cursor_epoch(request, &archive.query_meta())?,
+            ReadRequest::Transactions(request) => check_snapshot(&archive, request)?,
+        }
         if !source.ready {
             return Err(QueryError::new(503, "SOURCE_NOT_READY"));
         }
-        let response = execute_query(&archive, &request, &control)?;
+        let (bytes, lookup_snapshot) = match &request {
+            ReadRequest::Query(request) => (
+                serde_json::to_vec(&execute_query(&archive, request, &control)?)
+                    .map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?,
+                None,
+            ),
+            ReadRequest::Transactions(request) => {
+                let response = execute_transactions(&archive, request, &control)?;
+                let snapshot = response.snapshot.clone();
+                (encode_response(&response, &control)?, Some(snapshot))
+            }
+        };
         let (latest, latest_source) = coherent_snapshot(&state)?;
         if latest.catalog().epoch != archive.catalog().epoch {
             return Err(QueryError::new(409, "REORG"));
         }
+        if let (ReadRequest::Transactions(request), Some(snapshot)) = (&request, lookup_snapshot) {
+            // Recheck the pinned prefix as well as epoch, including rebuilt epoch-zero archives.
+            let mut pinned = request.clone();
+            pinned.at = Some(snapshot);
+            check_snapshot(&latest, &pinned)?;
+        }
         if !latest_source.ready {
             return Err(QueryError::new(503, "SOURCE_NOT_READY"));
         }
-        let bytes = serde_json::to_vec(&response)
-            .map_err(|_| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?;
-        if bytes.len() > crate::query::MAX_RESPONSE_BYTES {
+        if bytes.len() > control.max_response_bytes {
             return Err(QueryError::new(
                 413,
                 "RESPONSE_TOO_LARGE_USE_FIELD_SELECTION",
@@ -344,7 +421,7 @@ async fn query(
         }
         Ok::<_, QueryError>(bytes)
     });
-    match tokio::time::timeout(Duration::from_secs(30), task).await {
+    match tokio::time::timeout(Duration::from_secs(QUERY_TIMEOUT_SECONDS), task).await {
         Ok(Ok(Ok(bytes))) => {
             // The frame's byte owner, rather than just the Body wrapper, retains
             // admission while the transport still owns the response allocation.
@@ -372,9 +449,11 @@ async fn query(
 fn build_router(state: HttpState) -> Router {
     Router::new()
         .route("/health", get(health))
+        .route("/capabilities", get(capabilities))
         .route("/ready", get(ready))
         .route("/height", get(height))
         .route("/query", post(query))
+        .route("/transactions", post(transactions))
         .layer(DefaultBodyLimit::max(MAX_REQUEST_BYTES))
         .with_state(state)
 }
@@ -464,6 +543,125 @@ mod tests {
         add_segment(root.path(), &mut writer, 1);
         add_segment(root.path(), &mut writer, 2);
         (root, writer)
+    }
+
+    #[tokio::test]
+    async fn batch_lookup_and_query_share_admission_and_retained_response_frames() {
+        let (_root, writer) = fixture();
+        let state = make_state(writer.snapshot(), Some("fixture-token".into())).unwrap();
+        let body =
+            Bytes::from(json!({"from_block":1,"to_block":3,"txids":["11".repeat(32)]}).to_string());
+        let unauthorized =
+            transactions(State(state.clone()), HeaderMap::new(), Ok(body.clone())).await;
+        assert_eq!(unauthorized.status(), StatusCode::UNAUTHORIZED);
+        let mut headers = HeaderMap::new();
+        headers.insert("authorization", "Bearer fixture-token".parse().unwrap());
+        let a = state.permits.clone().try_acquire_owned().unwrap();
+        let b = state.permits.clone().try_acquire_owned().unwrap();
+        assert_eq!(
+            transactions(State(state.clone()), headers.clone(), Ok(body.clone()))
+                .await
+                .status(),
+            StatusCode::TOO_MANY_REQUESTS
+        );
+        drop(a);
+        drop(b);
+        let response = transactions(State(state.clone()), headers.clone(), Ok(body.clone())).await;
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers()["cache-control"], "no-store");
+        let mut stream = response.into_body().into_data_stream();
+        let frame = stream.next().await.unwrap().unwrap();
+        drop(stream);
+        assert_eq!(state.permits.available_permits(), 1);
+        let query_body = Bytes::from(json!({"from_block":1,"to_block":3}).to_string());
+        let query_response = query(State(state.clone()), headers.clone(), Ok(query_body)).await;
+        assert_eq!(query_response.status(), StatusCode::OK);
+        assert_eq!(state.permits.available_permits(), 0);
+        assert_eq!(
+            transactions(State(state.clone()), headers, Ok(body))
+                .await
+                .status(),
+            StatusCode::TOO_MANY_REQUESTS
+        );
+        drop(frame);
+        drop(query_response);
+        assert_eq!(state.permits.available_permits(), 2);
+    }
+
+    #[tokio::test]
+    async fn actual_batch_http_is_complete_and_snapshot_conflicts_precede_source_readiness() {
+        let (root, mut writer) = fixture();
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        let (stop, shutdown) = tokio::sync::oneshot::channel();
+        let task = tokio::spawn(serve(
+            writer.snapshot(),
+            listener,
+            Some("fixture-token".into()),
+            async {
+                let _ = shutdown.await;
+            },
+        ));
+        let client = reqwest::Client::new();
+        let mut request = json!({"from_block":1,"to_block":3,"txids":["11".repeat(32),"22".repeat(32),"11".repeat(32)]});
+        let response = client
+            .post(format!("{base}/transactions"))
+            .bearer_auth("fixture-token")
+            .json(&request)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let result: Value = response.json().await.unwrap();
+        assert_eq!(result["complete"], true);
+        assert_eq!(result["transactions"].as_array().unwrap().len(), 2);
+        assert_eq!(result["missing_txids"], json!(["22".repeat(32)]));
+        request["at"] = result["snapshot"].clone();
+        add_segment(root.path(), &mut writer, 3);
+        assert_eq!(
+            client
+                .post(format!("{base}/transactions"))
+                .bearer_auth("fixture-token")
+                .json(&request)
+                .send()
+                .await
+                .unwrap()
+                .status(),
+            StatusCode::OK
+        );
+        writer.rollback_to(1).unwrap();
+        std::fs::write(
+            root.path().join("status.json"),
+            json!({"schema_version":1,"mode":"follow","ready":false,"updated_at_unix":1})
+                .to_string(),
+        )
+        .unwrap();
+        let conflict = client
+            .post(format!("{base}/transactions"))
+            .bearer_auth("fixture-token")
+            .json(&request)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(conflict.status(), StatusCode::CONFLICT);
+        assert_eq!(
+            conflict.json::<Value>().await.unwrap()["error"]["code"],
+            "REORG"
+        );
+        request.as_object_mut().unwrap().remove("at");
+        assert_eq!(
+            client
+                .post(format!("{base}/transactions"))
+                .bearer_auth("fixture-token")
+                .json(&request)
+                .send()
+                .await
+                .unwrap()
+                .status(),
+            StatusCode::SERVICE_UNAVAILABLE
+        );
+        let _ = stop.send(());
+        task.await.unwrap().unwrap();
     }
 
     #[tokio::test]

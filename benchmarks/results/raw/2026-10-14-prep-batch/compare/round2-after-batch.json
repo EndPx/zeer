@@ -1,0 +1,66 @@
+{
+  "format": "prep-common-batch-retrieval-v1",
+  "status": "PASS",
+  "candidate": "batch",
+  "workload": "sparse",
+  "round": 2,
+  "range": {
+    "from": 1,
+    "to_inclusive": 2048
+  },
+  "oracle_sha256": "fd230e62f1f4909f394c3a2c21f6cc9f0e651bc707bc05e924701a8a82a7cc73",
+  "manifest_sha256": "ee4290df5bc0cb96da423437f0f887992cb54cf38ec0240962378eda20fc01e0",
+  "runner_sha256": "b7a364944d08b46ae74029e270f9de8a2bcb4eaabd3d966ddec77a0965298506",
+  "timeout_seconds": 300,
+  "timing_boundary": "First request through decode, protocol validation, normalization and ordering; independent row digest/equality and oracle location verification excluded. SQL read-only transaction/timeout commands included.",
+  "limitations": [
+    "Prepared warm sources; no ingestion, source synchronization or archive preparation included.",
+    "Same128 frozen early-mainnet v1 public records. Query pages use128 scanned blocks; batch usesone complete HTTP request; SQL usesnative ANY filter.",
+    "Batch timed request binds the verified warmup snapshot. Canonical index positions independently reconstructed from retained node block.tx insertion order and block transaction counts.",
+    "HTTP byte totals exclude headers. SQL byte totals unavailable; its requests include transaction/timeout commands. Native paths differ, not an isolated engine ranking."
+  ],
+  "strategy": "One POST /transactions for all128 fixed IDs; eight public metadata fields; verified warmup snapshot bound with at on measured request.",
+  "initial_source": {
+    "network": "mainnet",
+    "start_block": 1,
+    "archive_height": 2048,
+    "epoch": "0",
+    "revision": "16",
+    "payload_kind": "full-v1"
+  },
+  "warmup": {
+    "status": "PASS",
+    "rows": 128,
+    "sha256": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+    "retrieval_normalize_ns": 8821970,
+    "verification_ns": 778041,
+    "rows_per_second": 14509.230931413278,
+    "requests": 1,
+    "response_bytes": 26605
+  },
+  "bound_snapshot": {
+    "network": "mainnet",
+    "archive_start": 1,
+    "to_block": 2049,
+    "epoch": "0",
+    "boundary_hash": "00000002ae0de0d3719e9495e3c3334a935fb5c3a859c0f912e2d46fda3620b1"
+  },
+  "run": {
+    "status": "PASS",
+    "rows": 128,
+    "sha256": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+    "retrieval_normalize_ns": 8678022,
+    "verification_ns": 795367,
+    "rows_per_second": 14749.904989869812,
+    "requests": 1,
+    "response_bytes": 26605
+  },
+  "final_source": {
+    "network": "mainnet",
+    "start_block": 1,
+    "archive_height": 2048,
+    "epoch": "0",
+    "revision": "16",
+    "payload_kind": "full-v1"
+  }
+}

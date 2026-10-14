@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "blocks": 3,
+  "transactions": 17,
+  "versions": [
+    4,
+    5
+  ],
+  "raw_equal": true,
+  "metadata_equal": true,
+  "snapshot_reused": true,
+  "source_kind": "frozen-genuine-mainnet-fixture-replay",
+  "limitations": [
+    "Synthesized RPC block envelope; not a captured getblock verbosity=2 response.",
+    "Full raw blocks and every transaction byte matched official Zebra mainnet fixtures.",
+    "Decoded transactions captured from CipherScan node-backed getrawtransaction verbose endpoint.",
+    "No independent consensus/proof validation or v5 transaction-id computation.",
+    "Historical NU5 sample; not modern-tip sustained follow or production-scale evidence."
+  ]
+}

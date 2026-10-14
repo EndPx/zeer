@@ -6,6 +6,10 @@ The first measured scenario is **compact-block serving and normalized header ver
 
 ## Current evidence
 
+- [Prep bounded batch lookup](results/reports/2026-10-14-prep-batch.md): one session
+  comparing old/new pagination, one-request lookup and native CipherScan SQL;
+  20 verified measurements with equal backend resource ceilings.
+
 - [Prep admitted indexes and direct metadata](results/reports/2026-10-14-prep-index.md):
   old/new identical-field and direct-field comparisons, 45 verified passes,
   admission/memory observations, NU5 fixture and actual Regtest cursor/append checks.

@@ -21,8 +21,9 @@ pub const MAX_SCAN_BLOCKS: u32 = 1000;
 pub const MAX_CURSOR_BYTES: usize = 2048;
 const RESPONSE_OVERHEAD: usize = 4096;
 const EMPTY_DATA_BYTES: usize = br#"{"blocks":[],"transactions":[]}"#.len();
-const BLOCK_FIELDS: &[&str] = &["height", "hash", "previous_hash", "time", "raw", "decoded"];
-const TX_FIELDS: &[&str] = &[
+pub(crate) const BLOCK_FIELDS: &[&str] =
+    &["height", "hash", "previous_hash", "time", "raw", "decoded"];
+pub(crate) const TX_FIELDS: &[&str] = &[
     "txid",
     "block_height",
     "index",

@@ -1,0 +1,35 @@
+✔ finite stream advances through empty filtered pages and freezes the first head (7.222492ms)
+✔ HTTP409 throws typed ReorgError without retry (1.576915ms)
+✔ a server returning200 with another epoch is also rejected (1.013445ms)
+✔ nonadvancing continuation stops instead of looping (1.191984ms)
+✔ empty completed range is a finite single page (0.768206ms)
+✔ nested decoded amounts remain decimal strings and numeric amounts fail closed (1.135669ms)
+✔ request cancellation is preserved without printing transport secrets (0.536487ms)
+✔ whole decoded block preserves source fields and rejects numeric nested tokens (0.794466ms)
+✔ request timeout aborts a pending native-fetch-compatible transport (11.912261ms)
+✔ oversized response and invalid cursor contract are rejected (2.097798ms)
+✔ maxPages bounds a progressing but unexpectedly long stream (1.020667ms)
+✔ real local HTTP roundtrip forwards auth and address filter (35.95972ms)
+✔ URLs containing secrets are rejected before transport (0.280623ms)
+✔ compact transaction projection fields are accepted and numeric bounds enforced (1.416283ms)
+✔ unknown or duplicate selected fields fail before transport (0.508214ms)
+✔ complete sparse lookup preserves repeated canonical IDs and input-order unique missing IDs (9.448823ms)
+✔ empty ID sets and empty ranges still require coherent prefix snapshot metadata (3.827371ms)
+✔ invalid sparse request bounds, IDs, fields and snapshots fail before transport (1.802363ms)
+✔ legal inclusive limits accept 128 filter entries, 10000-block span and 4096 rows (29.122908ms)
+✔ partial, unrequested, unsorted, duplicate-location and incomplete accounting responses fail closed (15.906784ms)
+✔ successful snapshot changes are protocol errors; actual 409 REORG remains typed (1.997286ms)
+✔ raw and nested projections require valid hex, shapes and lossless numeric strings (1.719668ms)
+✔ sparse lookup freezes the caller request across asynchronous transport (0.47781ms)
+✔ sparse lookup has its own 4 MiB declared and streamed response cap (1.554119ms)
+✔ sparse and capability calls preserve caller cancellation and transport timeouts (11.995957ms)
+✔ capabilities validates compiled support and bounds while allowing future additional fields (2.235234ms)
+✔ real HTTP sparse/capabilities routes forward auth and reuse a snapshot (29.576742ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 281.304741

@@ -1,0 +1,2192 @@
+{
+  "format": "prep-batch-before-after-sql-v1",
+  "status": "PASS",
+  "eligible_for_comparison": true,
+  "started_at": "2026-10-13T23:36:27.421850+00:00",
+  "orchestrator_sha256": "a63590dbf15f41cb2dd194001e5ffe6416297c479a5847741dfdb6deb9b7bb77",
+  "driver_sha256": "b7a364944d08b46ae74029e270f9de8a2bcb4eaabd3d966ddec77a0965298506",
+  "archive_catalog_sha256": "a0b0db166db9fc2d145f2f79b4f26e8c0d5b74da7dd8d8e9b2c3dad3d2e1fc26",
+  "binary_sha256": {
+    "before": "cd1ceb28c9ae05d3fb5595175709e2ef6eee8b9f4ce1af757ee7f12de2225e97",
+    "after": "2bd4e19bccba01599266e07e755da43231171df60c7209ea4adc66b69b3c4089"
+  },
+  "runtime_image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+  "client_image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+  "native_database": "chef_cs_a26de7adb2020a06_5",
+  "pg_original": {
+    "name": "zeer-chef-pg",
+    "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+    "running": false,
+    "oom_killed": false,
+    "pid": 0,
+    "NanoCpus": 750000000,
+    "Memory": 1073741824,
+    "MemorySwap": 1073741824,
+    "CgroupParent": ""
+  },
+  "host_before": {
+    "services": {
+      "commitpass-api": "active",
+      "nabungfi-api": "active",
+      "nabungfi-keeper": "active",
+      "rocket-arena": "active",
+      "nginx": "active"
+    },
+    "available_memory": 14253576192,
+    "loadavg": "0.26 0.28 0.21 2/660 2676846"
+  },
+  "order": [
+    [
+      "before-query",
+      "after-query",
+      "after-batch",
+      "cipherscan-sql"
+    ],
+    [
+      "after-query",
+      "after-batch",
+      "cipherscan-sql",
+      "before-query"
+    ],
+    [
+      "after-batch",
+      "cipherscan-sql",
+      "before-query",
+      "after-query"
+    ],
+    [
+      "cipherscan-sql",
+      "before-query",
+      "after-query",
+      "after-batch"
+    ],
+    [
+      "before-query",
+      "after-query",
+      "after-batch",
+      "cipherscan-sql"
+    ]
+  ],
+  "profile": {
+    "queried_backend_cpu": 1,
+    "queried_backend_memory": 2147483648,
+    "client_and_controller_cpu": 1,
+    "client_and_controller_memory": 1073741824
+  },
+  "visits": [
+    {
+      "round": 1,
+      "position": 1,
+      "case": "before-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:27.735891+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14314790912,
+        "loadavg": "0.26 0.28 0.21 1/640 2676909"
+      },
+      "file": "round1-before-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.7069484945386648,
+      "backend": {
+        "name": "zeer-batch-before",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2676952,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4886528",
+        "memory.peak": "6389760",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 332509\nuser_usec 257373\nsystem_usec 75136\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14422016",
+        "memory.peak": "23465984",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 763121\nuser_usec 315693\nsystem_usec 447428\ncore_sched.force_idle_usec 0\nnr_periods 15\nnr_throttled 1\nthrottled_usec 4643\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round1-before-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4956160",
+        "memory.peak": "6389760",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 356049\nuser_usec 278192\nsystem_usec 77857\ncore_sched.force_idle_usec 0\nnr_periods 8\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14438400",
+        "memory.peak": "55836672",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 1495162\nuser_usec 908538\nsystem_usec 586623\ncore_sched.force_idle_usec 0\nnr_periods 25\nnr_throttled 1\nthrottled_usec 4643\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 15496254,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "5518ec5a1f409853feb7828b737be632431ffd27a2104db2cf688ec5adf1f65a",
+      "finished_at": "2026-10-13T23:36:29.510903+00:00"
+    },
+    {
+      "round": 1,
+      "position": 2,
+      "case": "after-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:29.811471+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14339461120,
+        "loadavg": "0.24 0.27 0.21 1/648 2677218"
+      },
+      "file": "round1-after-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6929164603352547,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2677259,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4886528",
+        "memory.peak": "6262784",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 338096\nuser_usec 263449\nsystem_usec 74646\ncore_sched.force_idle_usec 0\nnr_periods 7\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14475264",
+        "memory.peak": "55836672",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 1840572\nuser_usec 1029125\nsystem_usec 811446\ncore_sched.force_idle_usec 0\nnr_periods 36\nnr_throttled 2\nthrottled_usec 30533\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round1-after-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4964352",
+        "memory.peak": "6262784",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 372528\nuser_usec 287059\nsystem_usec 85468\ncore_sched.force_idle_usec 0\nnr_periods 11\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14524416",
+        "memory.peak": "56147968",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 2565609\nuser_usec 1585343\nsystem_usec 980265\ncore_sched.force_idle_usec 0\nnr_periods 46\nnr_throttled 2\nthrottled_usec 30533\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 22208769,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "f626d13ba3b14e59b0e285b1552abf937e0832f4056d4ee8156d17654563dd7d",
+      "finished_at": "2026-10-13T23:36:31.618780+00:00"
+    },
+    {
+      "round": 1,
+      "position": 3,
+      "case": "after-batch",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:31.909347+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14340177920,
+        "loadavg": "0.24 0.27 0.21 1/648 2677506"
+      },
+      "file": "round1-after-batch.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6213939171284437,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2677547,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4861952",
+        "memory.peak": "6365184",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 327548\nuser_usec 271038\nsystem_usec 56509\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14581760",
+        "memory.peak": "56147968",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 2878045\nuser_usec 1698504\nsystem_usec 1179540\ncore_sched.force_idle_usec 0\nnr_periods 54\nnr_throttled 4\nthrottled_usec 49025\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round1-after-batch",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4935680",
+        "memory.peak": "6365184",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 346149\nuser_usec 285490\nsystem_usec 60658\ncore_sched.force_idle_usec 0\nnr_periods 9\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14712832",
+        "memory.peak": "56389632",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 3608768\nuser_usec 2276228\nsystem_usec 1332540\ncore_sched.force_idle_usec 0\nnr_periods 64\nnr_throttled 4\nthrottled_usec 49025\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 7573431,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 1,
+      "response_bytes": 26605,
+      "report_sha256": "0009d6060f37c98248a1bbe2cd203c773a52b7b9b7e7497e5a3b192e8d836e31",
+      "finished_at": "2026-10-13T23:36:33.634079+00:00"
+    },
+    {
+      "round": 1,
+      "position": 4,
+      "case": "cipherscan-sql",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:33.904521+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14358151168,
+        "loadavg": "0.30 0.28 0.21 2/648 2677832"
+      },
+      "file": "round1-cipherscan-sql.json",
+      "readiness": {
+        "status": "PASS"
+      },
+      "startup_seconds": 1.101048706099391,
+      "backend": {
+        "name": "zeer-chef-pg",
+        "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2677875,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "19636224",
+        "memory.peak": "23293952",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 309779\nuser_usec 131872\nsystem_usec 177906\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 1\nthrottled_usec 37933\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14610432",
+        "memory.peak": "56389632",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 3966326\nuser_usec 2377480\nsystem_usec 1588845\ncore_sched.force_idle_usec 0\nnr_periods 76\nnr_throttled 6\nthrottled_usec 86931\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round1-cipherscan-sql",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "22810624",
+        "memory.peak": "25493504",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 334351\nuser_usec 137650\nsystem_usec 196701\ncore_sched.force_idle_usec 0\nnr_periods 14\nnr_throttled 1\nthrottled_usec 37933\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15138816",
+        "memory.peak": "64565248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 4970924\nuser_usec 3196657\nsystem_usec 1774266\ncore_sched.force_idle_usec 0\nnr_periods 88\nnr_throttled 7\nthrottled_usec 86959\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 4550259,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 6,
+      "response_bytes": null,
+      "report_sha256": "bdbfea3e4e1b8ea42c27cabb45780778faffcced953d7dcb42e08ebcd48dfd25",
+      "finished_at": "2026-10-13T23:36:36.358548+00:00"
+    },
+    {
+      "round": 2,
+      "position": 1,
+      "case": "after-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:36.746182+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14361518080,
+        "loadavg": "0.30 0.28 0.21 1/648 2678255"
+      },
+      "file": "round2-after-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6537228394299746,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2678294,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4857856",
+        "memory.peak": "6356992",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 348475\nuser_usec 298316\nsystem_usec 50159\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14860288",
+        "memory.peak": "64565248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 5285084\nuser_usec 3307903\nsystem_usec 1977180\ncore_sched.force_idle_usec 0\nnr_periods 100\nnr_throttled 9\nthrottled_usec 102377\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round2-after-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4943872",
+        "memory.peak": "6356992",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 383759\nuser_usec 314455\nsystem_usec 69303\ncore_sched.force_idle_usec 0\nnr_periods 8\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14725120",
+        "memory.peak": "64565248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 6059380\nuser_usec 3909201\nsystem_usec 2150178\ncore_sched.force_idle_usec 0\nnr_periods 110\nnr_throttled 9\nthrottled_usec 102377\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 25970841,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "8398780ba39683d5b9b6c3058096eddf643b2d3180fc0a208a61ba2ff6644562",
+      "finished_at": "2026-10-13T23:36:38.555761+00:00"
+    },
+    {
+      "round": 2,
+      "position": 2,
+      "case": "after-batch",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:38.817622+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14357803008,
+        "loadavg": "0.36 0.30 0.22 1/648 2678543"
+      },
+      "file": "round2-after-batch.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6327556874603033,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2678584,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4853760",
+        "memory.peak": "6201344",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 342742\nuser_usec 288673\nsystem_usec 54069\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14917632",
+        "memory.peak": "64565248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 6343174\nuser_usec 4027803\nsystem_usec 2315371\ncore_sched.force_idle_usec 0\nnr_periods 120\nnr_throttled 10\nthrottled_usec 109336\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round2-after-batch",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4927488",
+        "memory.peak": "6201344",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 359297\nuser_usec 299728\nsystem_usec 59568\ncore_sched.force_idle_usec 0\nnr_periods 9\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14831616",
+        "memory.peak": "64565248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 7031166\nuser_usec 4554131\nsystem_usec 2477034\ncore_sched.force_idle_usec 0\nnr_periods 129\nnr_throttled 11\nthrottled_usec 109465\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 8678022,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 1,
+      "response_bytes": 26605,
+      "report_sha256": "61219965da26615905e653e998e9e8d7474b58f6d609fda930137f0ca776bc17",
+      "finished_at": "2026-10-13T23:36:40.447799+00:00"
+    },
+    {
+      "round": 2,
+      "position": 3,
+      "case": "cipherscan-sql",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:40.665252+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14340820992,
+        "loadavg": "0.36 0.30 0.22 1/648 2678847"
+      },
+      "file": "round2-cipherscan-sql.json",
+      "readiness": {
+        "status": "PASS"
+      },
+      "startup_seconds": 0.49684659764170647,
+      "backend": {
+        "name": "zeer-chef-pg",
+        "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2678888,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "19611648",
+        "memory.peak": "22917120",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 286231\nuser_usec 94099\nsystem_usec 192131\ncore_sched.force_idle_usec 0\nnr_periods 4\nnr_throttled 2\nthrottled_usec 71477\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15114240",
+        "memory.peak": "64565248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 7339791\nuser_usec 4684084\nsystem_usec 2655707\ncore_sched.force_idle_usec 0\nnr_periods 137\nnr_throttled 12\nthrottled_usec 110430\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round2-cipherscan-sql",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "22732800",
+        "memory.peak": "25395200",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 312892\nuser_usec 102120\nsystem_usec 210772\ncore_sched.force_idle_usec 0\nnr_periods 9\nnr_throttled 2\nthrottled_usec 71477\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14778368",
+        "memory.peak": "64958464",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 8366851\nuser_usec 5504975\nsystem_usec 2861876\ncore_sched.force_idle_usec 0\nnr_periods 150\nnr_throttled 12\nthrottled_usec 110430\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 7166227,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 6,
+      "response_bytes": null,
+      "report_sha256": "075b37636b1418f05b35f51ae4e5b952833cbbf7df0622666e21377f14c65e7b",
+      "finished_at": "2026-10-13T23:36:42.545441+00:00"
+    },
+    {
+      "round": 2,
+      "position": 4,
+      "case": "before-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:42.973813+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14381215744,
+        "loadavg": "0.36 0.30 0.22 1/648 2679263"
+      },
+      "file": "round2-before-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6285664811730385,
+      "backend": {
+        "name": "zeer-batch-before",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2679304,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4866048",
+        "memory.peak": "6197248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 349575\nuser_usec 290276\nsystem_usec 59298\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "14999552",
+        "memory.peak": "64958464",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 8677049\nuser_usec 5620241\nsystem_usec 3056807\ncore_sched.force_idle_usec 0\nnr_periods 159\nnr_throttled 14\nthrottled_usec 125907\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round2-before-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4943872",
+        "memory.peak": "6197248",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 384684\nuser_usec 309251\nsystem_usec 75433\ncore_sched.force_idle_usec 0\nnr_periods 9\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15306752",
+        "memory.peak": "64958464",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 9458849\nuser_usec 6237762\nsystem_usec 3221087\ncore_sched.force_idle_usec 0\nnr_periods 169\nnr_throttled 15\nthrottled_usec 126098\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 23117676,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "6bd9e30437fd73a1e1ae43a532c1248c40dafdb6e5f500d2d21e7949a790ab4d",
+      "finished_at": "2026-10-13T23:36:44.710687+00:00"
+    },
+    {
+      "round": 3,
+      "position": 1,
+      "case": "after-batch",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:44.971931+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14351814656,
+        "loadavg": "0.41 0.31 0.22 1/647 2679556"
+      },
+      "file": "round3-after-batch.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6540021616965532,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2679599,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4866048",
+        "memory.peak": "6209536",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 339350\nuser_usec 273629\nsystem_usec 65721\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15310848",
+        "memory.peak": "64958464",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 9765728\nuser_usec 6348909\nsystem_usec 3416818\ncore_sched.force_idle_usec 0\nnr_periods 177\nnr_throttled 16\nthrottled_usec 143085\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round3-after-batch",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4935680",
+        "memory.peak": "6209536",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 357052\nuser_usec 290875\nsystem_usec 66176\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15003648",
+        "memory.peak": "64958464",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 10512325\nuser_usec 6916704\nsystem_usec 3595621\ncore_sched.force_idle_usec 0\nnr_periods 187\nnr_throttled 16\nthrottled_usec 143085\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 8900547,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 1,
+      "response_bytes": 26605,
+      "report_sha256": "a4806d2ba7e303dacd1701cd781ed93cc651dfbfe4a1b9788bd539ec089a656e",
+      "finished_at": "2026-10-13T23:36:46.718036+00:00"
+    },
+    {
+      "round": 3,
+      "position": 2,
+      "case": "cipherscan-sql",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:47.001015+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14336573440,
+        "loadavg": "0.41 0.31 0.22 1/649 2679859"
+      },
+      "file": "round3-cipherscan-sql.json",
+      "readiness": {
+        "status": "PASS"
+      },
+      "startup_seconds": 0.4637480080127716,
+      "backend": {
+        "name": "zeer-chef-pg",
+        "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2679902,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "19668992",
+        "memory.peak": "23748608",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 251684\nuser_usec 79619\nsystem_usec 172064\ncore_sched.force_idle_usec 0\nnr_periods 4\nnr_throttled 1\nthrottled_usec 57831\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15097856",
+        "memory.peak": "64958464",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 10869116\nuser_usec 7062116\nsystem_usec 3807000\ncore_sched.force_idle_usec 0\nnr_periods 194\nnr_throttled 17\nthrottled_usec 161892\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round3-cipherscan-sql",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "22786048",
+        "memory.peak": "25473024",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 277560\nuser_usec 90623\nsystem_usec 186937\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 1\nthrottled_usec 57831\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15392768",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 11898308\nuser_usec 7899641\nsystem_usec 3998666\ncore_sched.force_idle_usec 0\nnr_periods 208\nnr_throttled 17\nthrottled_usec 161892\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 5667711,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 6,
+      "response_bytes": null,
+      "report_sha256": "128e1495c2684a6f4468754000a0bff83775bed27a8a22ce838d0fd054a2065f",
+      "finished_at": "2026-10-13T23:36:48.869972+00:00"
+    },
+    {
+      "round": 3,
+      "position": 3,
+      "case": "before-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:49.281219+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14322343936,
+        "loadavg": "0.46 0.32 0.23 1/647 2680257"
+      },
+      "file": "round3-before-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6471345014870167,
+      "backend": {
+        "name": "zeer-batch-before",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2680298,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4857856",
+        "memory.peak": "6131712",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 332936\nuser_usec 284426\nsystem_usec 48509\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15073280",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 12235069\nuser_usec 8028241\nsystem_usec 4206827\ncore_sched.force_idle_usec 0\nnr_periods 218\nnr_throttled 17\nthrottled_usec 161892\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round3-before-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4952064",
+        "memory.peak": "6131712",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 384882\nuser_usec 307825\nsystem_usec 77056\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15495168",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 12963649\nuser_usec 8584860\nsystem_usec 4378789\ncore_sched.force_idle_usec 0\nnr_periods 229\nnr_throttled 18\nthrottled_usec 166434\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 25079851,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "bb404ad174c520a29348b73ad6d0e7a28cffd5b43a67252800562c44ee627d75",
+      "finished_at": "2026-10-13T23:36:51.069462+00:00"
+    },
+    {
+      "round": 3,
+      "position": 4,
+      "case": "after-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:51.330575+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14363963392,
+        "loadavg": "0.46 0.32 0.23 2/654 2680571"
+      },
+      "file": "round3-after-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6256803683936596,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2680611,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4861952",
+        "memory.peak": "6307840",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 324760\nuser_usec 270076\nsystem_usec 54683\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15200256",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 13270314\nuser_usec 8700212\nsystem_usec 4570101\ncore_sched.force_idle_usec 0\nnr_periods 238\nnr_throttled 18\nthrottled_usec 166434\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round3-after-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4923392",
+        "memory.peak": "6307840",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 351961\nuser_usec 288081\nsystem_usec 63880\ncore_sched.force_idle_usec 0\nnr_periods 8\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15343616",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 14017068\nuser_usec 9272867\nsystem_usec 4744200\ncore_sched.force_idle_usec 0\nnr_periods 249\nnr_throttled 18\nthrottled_usec 166434\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 14601979,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "7476f7a47c94e9b6d188b606396495282adc7373ce90410cc202f1a3317ab082",
+      "finished_at": "2026-10-13T23:36:53.124663+00:00"
+    },
+    {
+      "round": 4,
+      "position": 1,
+      "case": "cipherscan-sql",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:53.411082+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14349004800,
+        "loadavg": "0.50 0.33 0.23 1/647 2680890"
+      },
+      "file": "round4-cipherscan-sql.json",
+      "readiness": {
+        "status": "PASS"
+      },
+      "startup_seconds": 0.4468172825872898,
+      "backend": {
+        "name": "zeer-chef-pg",
+        "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2680934,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "19611648",
+        "memory.peak": "23474176",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 235711\nuser_usec 83987\nsystem_usec 151723\ncore_sched.force_idle_usec 0\nnr_periods 4\nnr_throttled 1\nthrottled_usec 137946\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15360000",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 14352030\nuser_usec 9397164\nsystem_usec 4954865\ncore_sched.force_idle_usec 0\nnr_periods 257\nnr_throttled 19\nthrottled_usec 182424\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round4-cipherscan-sql",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "22732800",
+        "memory.peak": "25419776",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 260663\nuser_usec 88572\nsystem_usec 172091\ncore_sched.force_idle_usec 0\nnr_periods 8\nnr_throttled 1\nthrottled_usec 137946\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15364096",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 15340939\nuser_usec 10210451\nsystem_usec 5130488\ncore_sched.force_idle_usec 0\nnr_periods 269\nnr_throttled 19\nthrottled_usec 182424\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 4354595,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 6,
+      "response_bytes": null,
+      "report_sha256": "ca4c169ab4bf1ce35cfdd08a21607f3bce3af716b6b3c53dcfa37cae0e06d4d8",
+      "finished_at": "2026-10-13T23:36:55.149849+00:00"
+    },
+    {
+      "round": 4,
+      "position": 2,
+      "case": "before-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:55.625461+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14344155136,
+        "loadavg": "0.50 0.33 0.23 1/649 2681287"
+      },
+      "file": "round4-before-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6226359866559505,
+      "backend": {
+        "name": "zeer-batch-before",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2681327,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4849664",
+        "memory.peak": "6135808",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 311888\nuser_usec 251258\nsystem_usec 60629\ncore_sched.force_idle_usec 0\nnr_periods 5\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15785984",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 15621992\nuser_usec 10309344\nsystem_usec 5312647\ncore_sched.force_idle_usec 0\nnr_periods 278\nnr_throttled 20\nthrottled_usec 182643\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round4-before-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4923392",
+        "memory.peak": "6135808",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 343444\nuser_usec 272757\nsystem_usec 70687\ncore_sched.force_idle_usec 0\nnr_periods 8\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15409152",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 16340716\nuser_usec 10869579\nsystem_usec 5471136\ncore_sched.force_idle_usec 0\nnr_periods 288\nnr_throttled 20\nthrottled_usec 182643\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 20654319,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "b07cef0c0c0a58d89f1a51cc238ea27638121b6dbd01a27af8a78fc02f7a49da",
+      "finished_at": "2026-10-13T23:36:57.340016+00:00"
+    },
+    {
+      "round": 4,
+      "position": 3,
+      "case": "after-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:57.672518+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14354948096,
+        "loadavg": "0.50 0.33 0.23 3/649 2681576"
+      },
+      "file": "round4-after-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6399671919643879,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2681617,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4861952",
+        "memory.peak": "6344704",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 332045\nuser_usec 281013\nsystem_usec 51031\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15196160",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 16680299\nuser_usec 10999390\nsystem_usec 5680908\ncore_sched.force_idle_usec 0\nnr_periods 297\nnr_throttled 22\nthrottled_usec 225107\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round4-after-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4939776",
+        "memory.peak": "6344704",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 358246\nuser_usec 300221\nsystem_usec 58024\ncore_sched.force_idle_usec 0\nnr_periods 8\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15687680",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 17440456\nuser_usec 11572826\nsystem_usec 5867629\ncore_sched.force_idle_usec 0\nnr_periods 308\nnr_throttled 23\nthrottled_usec 226074\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 18388177,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "927e78e5bc9b2f72a53b86b691f8179835c53e0235dd8859e54adb316a562448",
+      "finished_at": "2026-10-13T23:36:59.532564+00:00"
+    },
+    {
+      "round": 4,
+      "position": 4,
+      "case": "after-batch",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:36:59.773505+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14313287680,
+        "loadavg": "0.78 0.39 0.25 1/649 2681891"
+      },
+      "file": "round4-after-batch.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6458444520831108,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2681933,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4853760",
+        "memory.peak": "6246400",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 368656\nuser_usec 299319\nsystem_usec 69336\ncore_sched.force_idle_usec 0\nnr_periods 7\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15859712",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 17739282\nuser_usec 11662545\nsystem_usec 6076736\ncore_sched.force_idle_usec 0\nnr_periods 316\nnr_throttled 24\nthrottled_usec 239032\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round4-after-batch",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4923392",
+        "memory.peak": "6246400",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 401033\nuser_usec 324284\nsystem_usec 76748\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15515648",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 18612877\nuser_usec 12323534\nsystem_usec 6289342\ncore_sched.force_idle_usec 0\nnr_periods 329\nnr_throttled 25\nthrottled_usec 255810\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 15182482,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 1,
+      "response_bytes": 26605,
+      "report_sha256": "1f4ccbc8f808f69b537a3bc623dfb56b89de520dbadca70bd7e771dd87b0223c",
+      "finished_at": "2026-10-13T23:37:01.790362+00:00"
+    },
+    {
+      "round": 5,
+      "position": 1,
+      "case": "before-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:37:02.554435+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14326403072,
+        "loadavg": "0.78 0.39 0.25 1/649 2682216"
+      },
+      "file": "round5-before-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.7737246565520763,
+      "backend": {
+        "name": "zeer-batch-before",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2682258,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4866048",
+        "memory.peak": "6135808",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 405307\nuser_usec 340826\nsystem_usec 64480\ncore_sched.force_idle_usec 0\nnr_periods 7\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15642624",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 19225041\nuser_usec 12637233\nsystem_usec 6587808\ncore_sched.force_idle_usec 0\nnr_periods 340\nnr_throttled 27\nthrottled_usec 264592\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round5-before-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4939776",
+        "memory.peak": "6135808",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 452291\nuser_usec 372902\nsystem_usec 79389\ncore_sched.force_idle_usec 0\nnr_periods 11\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15728640",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 20093642\nuser_usec 13318476\nsystem_usec 6775166\ncore_sched.force_idle_usec 0\nnr_periods 352\nnr_throttled 28\nthrottled_usec 273953\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 18643332,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "e2239385c57c4708cb386f9e2240604a11f2cabefc2ddad3dd46726ccec393ba",
+      "finished_at": "2026-10-13T23:37:04.664567+00:00"
+    },
+    {
+      "round": 5,
+      "position": 2,
+      "case": "after-query",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:37:04.950994+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14355562496,
+        "loadavg": "0.72 0.39 0.25 1/649 2682503"
+      },
+      "file": "round5-after-query.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.671188946813345,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2682544,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4857856",
+        "memory.peak": "6361088",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 357681\nuser_usec 299676\nsystem_usec 58005\ncore_sched.force_idle_usec 0\nnr_periods 7\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15540224",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 20452679\nuser_usec 13468975\nsystem_usec 6983704\ncore_sched.force_idle_usec 0\nnr_periods 363\nnr_throttled 30\nthrottled_usec 299013\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round5-after-query",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4935680",
+        "memory.peak": "6361088",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 408028\nuser_usec 329690\nsystem_usec 78337\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "16044032",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 21185234\nuser_usec 14004450\nsystem_usec 7180784\ncore_sched.force_idle_usec 0\nnr_periods 374\nnr_throttled 30\nthrottled_usec 299013\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 32944577,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 16,
+      "response_bytes": 36410,
+      "report_sha256": "7ce440d267235bcc13cd042352a7f1fb4edf2e24da54c3778d5c60381f4f710c",
+      "finished_at": "2026-10-13T23:37:06.792661+00:00"
+    },
+    {
+      "round": 5,
+      "position": 3,
+      "case": "after-batch",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:37:07.101411+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14343917568,
+        "loadavg": "0.72 0.39 0.25 1/649 2682807"
+      },
+      "file": "round5-after-batch.json",
+      "readiness": {
+        "archive_height": 2048,
+        "canonicality": "historical_snapshot_not_independently_consensus_validated",
+        "epoch": "0",
+        "indexed_height": 2048,
+        "lag_blocks": 4716,
+        "network": "mainnet",
+        "payload_kind": "full-v1",
+        "ready": true,
+        "revision": "16",
+        "source_height": 6764,
+        "source_mode": "historical_snapshot",
+        "source_observed_at": 1791914921,
+        "start_block": 1,
+        "state": "FRESHNESS_UNKNOWN"
+      },
+      "startup_seconds": 0.6980054005980492,
+      "backend": {
+        "name": "zeer-batch-after",
+        "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2682847,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4853760",
+        "memory.peak": "6320128",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 360427\nuser_usec 299789\nsystem_usec 60637\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "16199680",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 21530246\nuser_usec 14136130\nsystem_usec 7394115\ncore_sched.force_idle_usec 0\nnr_periods 385\nnr_throttled 30\nthrottled_usec 299013\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round5-after-batch",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "4931584",
+        "memory.peak": "6320128",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 377285\nuser_usec 314442\nsystem_usec 62842\ncore_sched.force_idle_usec 0\nnr_periods 9\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15536128",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 22269377\nuser_usec 14698137\nsystem_usec 7571239\ncore_sched.force_idle_usec 0\nnr_periods 395\nnr_throttled 30\nthrottled_usec 299013\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 9510606,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 1,
+      "response_bytes": 26605,
+      "report_sha256": "535bc2a115f0f7f285ce43d636d1813ed422004ec6121c7078aa08e4c1c2622b",
+      "finished_at": "2026-10-13T23:37:08.938688+00:00"
+    },
+    {
+      "round": 5,
+      "position": 4,
+      "case": "cipherscan-sql",
+      "status": "PASS",
+      "started_at": "2026-10-13T23:37:09.204968+00:00",
+      "host_before": {
+        "services": {
+          "commitpass-api": "active",
+          "nabungfi-api": "active",
+          "nabungfi-keeper": "active",
+          "rocket-arena": "active",
+          "nginx": "active"
+        },
+        "available_memory": 14341697536,
+        "loadavg": "0.74 0.40 0.25 1/649 2683115"
+      },
+      "file": "round5-cipherscan-sql.json",
+      "readiness": {
+        "status": "PASS"
+      },
+      "startup_seconds": 1.0233007557690144,
+      "backend": {
+        "name": "zeer-chef-pg",
+        "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+        "running": true,
+        "oom_killed": false,
+        "pid": 2683160,
+        "NanoCpus": 1000000000,
+        "Memory": 2147483648,
+        "MemorySwap": 2147483648,
+        "CgroupParent": ""
+      },
+      "backend_cgroup_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "19578880",
+        "memory.peak": "23396352",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 290536\nuser_usec 105746\nsystem_usec 184789\ncore_sched.force_idle_usec 0\nnr_periods 6\nnr_throttled 1\nthrottled_usec 55126\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_before": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "16371712",
+        "memory.peak": "65507328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 22633196\nuser_usec 14830575\nsystem_usec 7802620\ncore_sched.force_idle_usec 0\nnr_periods 405\nnr_throttled 31\nthrottled_usec 306982\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_exit_code": 0,
+      "client": {
+        "name": "zeer-batch-client-round5-cipherscan-sql",
+        "image_id": "sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
+        "running": false,
+        "oom_killed": false,
+        "pid": 0,
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824,
+        "MemorySwap": 1073741824,
+        "CgroupParent": "zeerbatchclient.slice"
+      },
+      "backend_cgroup_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "2147483648",
+        "memory.swap.max": "0",
+        "memory.current": "22700032",
+        "memory.peak": "25366528",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 314186\nuser_usec 110923\nsystem_usec 203263\ncore_sched.force_idle_usec 0\nnr_periods 10\nnr_throttled 1\nthrottled_usec 55126\nnr_bursts 0\nburst_usec 0"
+      },
+      "client_slice_after": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0",
+        "memory.current": "15974400",
+        "memory.peak": "66019328",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 23964512\nuser_usec 15938422\nsystem_usec 8026089\ncore_sched.force_idle_usec 0\nnr_periods 421\nnr_throttled 31\nthrottled_usec 306982\nnr_bursts 0\nburst_usec 0"
+      },
+      "elapsed_ns": 3163172,
+      "result_hash": "2f7a8ab98f024d475cb91d95473989bf505e43b4d02ae697f7894603a91a55d3",
+      "requests": 6,
+      "response_bytes": null,
+      "report_sha256": "2f1e86a262c6c8b3451b3a5981e4a2a630962e99023e5bc59c7da5c0ff81a945",
+      "finished_at": "2026-10-13T23:37:11.953083+00:00"
+    }
+  ],
+  "limitations": [
+    "One queried backend at a time; source node stopped; immutable prepared archive/native SQL database.",
+    "Five cyclic rounds over four cases; one position repeats. Verified warmup followed by one timed read per visit; caches are not dropped.",
+    "Same128 normalized seven-field output; batch also checks canonical transaction positions against the independent oracle.",
+    "Startup/index admission excluded from timed reads and recorded separately; cgroup counters include startup/warmup/verification.",
+    "HTTP page/batch and native SQL access paths differ. SQL wire bytes unavailable. No ingestion or engine-only performance ranking."
+  ],
+  "summary": {
+    "before-query": {
+      "repetitions": 5,
+      "median_ms": 20.654319,
+      "min_ms": 15.496254,
+      "max_ms": 25.079851,
+      "requests": [
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "response_bytes": [
+        36410,
+        36410,
+        36410,
+        36410,
+        36410
+      ]
+    },
+    "after-query": {
+      "repetitions": 5,
+      "median_ms": 22.208769,
+      "min_ms": 14.601979,
+      "max_ms": 32.944577,
+      "requests": [
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "response_bytes": [
+        36410,
+        36410,
+        36410,
+        36410,
+        36410
+      ]
+    },
+    "after-batch": {
+      "repetitions": 5,
+      "median_ms": 8.900547,
+      "min_ms": 7.573431,
+      "max_ms": 15.182482,
+      "requests": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "response_bytes": [
+        26605,
+        26605,
+        26605,
+        26605,
+        26605
+      ]
+    },
+    "cipherscan-sql": {
+      "repetitions": 5,
+      "median_ms": 4.550259,
+      "min_ms": 3.163172,
+      "max_ms": 7.166227,
+      "requests": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "response_bytes": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "final_containers": {
+    "zeer-batch-before": {
+      "name": "zeer-batch-before",
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+      "running": false,
+      "oom_killed": false,
+      "pid": 0,
+      "NanoCpus": 1000000000,
+      "Memory": 2147483648,
+      "MemorySwap": 2147483648,
+      "CgroupParent": ""
+    },
+    "zeer-batch-after": {
+      "name": "zeer-batch-after",
+      "image_id": "sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa",
+      "running": false,
+      "oom_killed": false,
+      "pid": 0,
+      "NanoCpus": 1000000000,
+      "Memory": 2147483648,
+      "MemorySwap": 2147483648,
+      "CgroupParent": ""
+    },
+    "zeer-chef-pg": {
+      "name": "zeer-chef-pg",
+      "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+      "running": false,
+      "oom_killed": false,
+      "pid": 0,
+      "NanoCpus": 750000000,
+      "Memory": 1073741824,
+      "MemorySwap": 1073741824,
+      "CgroupParent": ""
+    },
+    "zeer-bench-four-frozen": {
+      "name": "zeer-bench-four-frozen",
+      "image_id": "sha256:17894f48b51ee4249a6555692a07881a305085f25b5c7b0bed5887a73e2ad85a",
+      "running": false,
+      "oom_killed": false,
+      "pid": 0,
+      "NanoCpus": 1000000000,
+      "Memory": 2147483648,
+      "MemorySwap": 2147483648,
+      "CgroupParent": ""
+    },
+    "zeer-lookup-chef-pg": {
+      "name": "zeer-lookup-chef-pg",
+      "image_id": "sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2",
+      "running": false,
+      "oom_killed": false,
+      "pid": 0,
+      "NanoCpus": 1000000000,
+      "Memory": 4294967296,
+      "MemorySwap": 4294967296,
+      "CgroupParent": "zeerlookup.slice"
+    }
+  },
+  "host_after": {
+    "services": {
+      "commitpass-api": "active",
+      "nabungfi-api": "active",
+      "nabungfi-keeper": "active",
+      "rocket-arena": "active",
+      "nginx": "active"
+    },
+    "available_memory": 14360170496,
+    "loadavg": "0.76 0.41 0.26 1/649 2683980"
+  },
+  "cleanup_errors": [],
+  "finished_at": "2026-10-13T23:37:13.908717+00:00"
+}

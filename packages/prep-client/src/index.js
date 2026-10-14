@@ -3,6 +3,9 @@ const MAX_BODY_BYTES = 32 * 1024 * 1024;
 const MAX_CURSOR_CHARACTERS = 4096;
 const BLOCK_FIELDS = ["height", "hash", "previous_hash", "time", "raw", "decoded"];
 const TRANSACTION_FIELDS = ["txid", "block_height", "index", "version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count", "raw", "vin", "vout", "decoded"];
+const TRANSACTION_IDENTITIES = ["txid", "block_height", "index"];
+const DEFAULT_TRANSACTION_FIELDS = [...TRANSACTION_IDENTITIES, "version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count"];
+const MAX_TRANSACTIONS_BODY_BYTES = 4 * 1024 * 1024;
 
 export class PrepError extends Error {
   constructor(code, status = 0) {
@@ -25,6 +28,73 @@ function integer(value, minimum, maximum) {
 function decimal(value) { return typeof value === "string" && /^(0|[1-9][0-9]*)$/.test(value) && value.length <= 20; }
 function cursor(value) { return value === null || (typeof value === "string" && value.length > 0 && value.length <= MAX_CURSOR_CHARACTERS && value.length % 2 === 0 && /^[0-9a-f]+$/.test(value)); }
 function object(value) { return value !== null && typeof value === "object" && !Array.isArray(value); }
+function hash(value) { return typeof value === "string" && /^[0-9a-f]{64}$/.test(value); }
+function counter(value) { return decimal(value) && BigInt(value) <= 0xffffffffffffffffn; }
+function snapshot(value, from, to) {
+  return object(value) && Object.keys(value).length === 5
+    && ["network", "archive_start", "to_block", "epoch", "boundary_hash"].every(key => Object.hasOwn(value, key))
+    && ["mainnet", "testnet", "regtest"].includes(value.network)
+    && integer(value.archive_start, 0, from) && value.to_block === to && counter(value.epoch)
+    && (to === value.archive_start ? value.boundary_hash === "" : hash(value.boundary_hash));
+}
+
+function validateTransactionsResult(value, request, fields) {
+  const fail = () => { throw new ProtocolError("INVALID_TRANSACTIONS_RESPONSE"); };
+  if (!object(value) || !["mainnet", "testnet", "regtest"].includes(value.network)
+      || !counter(value.epoch) || !counter(value.revision) || value.complete !== true
+      || value.from_block !== request.from_block || value.to_block !== request.to_block
+      || !snapshot(value.snapshot, request.from_block, request.to_block)
+      || value.snapshot.network !== value.network || value.snapshot.epoch !== value.epoch
+      || !(value.archive_height === null ? request.from_block === request.to_block && value.snapshot.archive_start === request.from_block
+        : integer(value.archive_height, value.snapshot.archive_start, 0xffffffff) && request.to_block <= value.archive_height + 1)
+      || !Array.isArray(value.transactions) || value.transactions.length > 4096
+      || !Array.isArray(value.missing_txids)) fail();
+  if (request.at && Object.keys(request.at).some(key => request.at[key] !== value.snapshot[key])) fail();
+  const requested = new Set(request.txids);
+  const found = new Set();
+  let previousHeight = -1, previousIndex = -1;
+  for (const tx of value.transactions) {
+    if (!object(tx) || fields.some(field => !Object.hasOwn(tx, field))
+        || Object.keys(tx).some(field => !fields.includes(field))
+        || !hash(tx.txid) || !requested.has(tx.txid)
+        || !integer(tx.block_height, request.from_block, request.to_block - 1)
+        || !integer(tx.index, 0, 0xffffffff)
+        || tx.block_height < previousHeight || (tx.block_height === previousHeight && tx.index <= previousIndex)) fail();
+    previousHeight = tx.block_height; previousIndex = tx.index; found.add(tx.txid);
+    for (const field of ["version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count"]) {
+      if (Object.hasOwn(tx, field) && !integer(tx[field], field === "size_bytes" ? 1 : 0, 0xffffffff)) fail();
+    }
+    if (Object.hasOwn(tx, "raw") && (typeof tx.raw !== "string" || tx.raw.length === 0 || tx.raw.length % 2 !== 0 || !/^[0-9a-f]+$/.test(tx.raw))) fail();
+    for (const field of ["vin", "vout", "decoded"]) {
+      if (Object.hasOwn(tx, field)) {
+        if (field === "decoded" ? !object(tx[field]) : !Array.isArray(tx[field])) fail();
+        ensureNestedNumbersAreStrings(tx[field]);
+      }
+    }
+  }
+  const expectedMissing = [...requested].filter(txid => !found.has(txid));
+  if (value.missing_txids.length !== expectedMissing.length || value.missing_txids.some((txid, index) => txid !== expectedMissing[index])) fail();
+  return value;
+}
+
+function validateCapabilities(value) {
+  const list = (values, required) => Array.isArray(values) && values.length <= 256
+    && values.every(item => typeof item === "string" && item.length > 0 && item.length <= 128)
+    && new Set(values).size === values.length && required.every(item => values.includes(item));
+  const bounds = (value, keys) => object(value) && keys.every(key => integer(value[key], 1, 0x100000000));
+  if (!object(value) || value.api_version !== 1
+      || !list(value.routes, ["/health", "/ready", "/height", "/query", "/transactions", "/capabilities"])
+      || !bounds(value.limits, ["max_request_bytes", "max_active_queries", "query_timeout_ms"])
+      || !bounds(value.query, ["max_scan_blocks", "max_response_bytes"])
+      || !list(value.query.block_fields, BLOCK_FIELDS) || !list(value.query.transaction_fields, TRANSACTION_FIELDS)
+      || !list(value.query.transaction_filters, ["txids", "versions", "has_sapling", "has_orchard", "transparent_output_addresses"])
+      || !bounds(value.transactions, ["max_ids", "max_range_blocks", "max_records", "max_response_bytes"])
+      || !list(value.transactions.required_fields, TRANSACTION_IDENTITIES)
+      || !list(value.transactions.default_fields, DEFAULT_TRANSACTION_FIELDS)
+      || value.transactions.required_fields.some(field => !value.query.transaction_fields.includes(field))
+      || value.transactions.default_fields.some(field => !value.query.transaction_fields.includes(field))) throw new ProtocolError("INVALID_CAPABILITIES_RESPONSE");
+  return value;
+}
 function validateTimeout(value) {
   if (!integer(value, 1, 2_147_483_647)) throw new TypeError("timeoutMs must be a positive bounded integer");
   return value;
@@ -64,9 +134,9 @@ function validateQueryResult(value, query) {
   return value;
 }
 
-async function readJson(response) {
+async function readJson(response, maxBytes = MAX_BODY_BYTES) {
   const declaredLength = response.headers.get("content-length");
-  if (declaredLength !== null && (!/^[0-9]+$/.test(declaredLength) || Number(declaredLength) > MAX_BODY_BYTES)) {
+  if (declaredLength !== null && (!/^[0-9]+$/.test(declaredLength) || Number(declaredLength) > maxBytes)) {
     await response.body?.cancel();
     throw new ProtocolError("RESPONSE_TOO_LARGE");
   }
@@ -79,7 +149,7 @@ async function readJson(response) {
       const { value, done } = await reader.read();
       if (done) break;
       length += value.byteLength;
-      if (length > MAX_BODY_BYTES) { await reader.cancel(); throw new ProtocolError("RESPONSE_TOO_LARGE"); }
+      if (length > maxBytes) { await reader.cancel(); throw new ProtocolError("RESPONSE_TOO_LARGE"); }
       chunks.push(value);
     }
   } finally { reader.releaseLock(); }
@@ -111,7 +181,7 @@ export class PrepClient {
     this.#timeoutMs = validateTimeout(timeoutMs);
   }
 
-  async #request(path, query, options = {}) {
+  async #request(path, query, options = {}, maxBytes = MAX_BODY_BYTES) {
     const timeout = AbortSignal.timeout(validateTimeout(options.timeoutMs ?? this.#timeoutMs));
     const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
     signal.throwIfAborted();
@@ -123,7 +193,7 @@ export class PrepClient {
         method: query === undefined ? "GET" : "POST", headers, signal,
         redirect: "error", ...(query === undefined ? {} : { body: JSON.stringify(query) }),
       });
-      const value = await readJson(response);
+      const value = await readJson(response, maxBytes);
       signal.throwIfAborted();
       if (!response.ok) {
         const reported = value?.error?.code;
@@ -154,6 +224,11 @@ export class PrepClient {
     return result;
   }
 
+  /** Compiled API support and bounds; readiness is obtained separately via getHeight. */
+  async getCapabilities(options = {}) {
+    return validateCapabilities(await this.#request("capabilities", undefined, options));
+  }
+
   async get(query, options = {}) {
     if (!object(query) || !integer(query.from_block, 0, 0xffffffff)) throw new TypeError("from_block must be a bounded integer");
     if (query.to_block !== undefined && query.to_block !== null && !integer(query.to_block, query.from_block, 0x100000000)) throw new TypeError("Invalid exclusive to_block");
@@ -166,6 +241,24 @@ export class PrepClient {
       }
     }
     return validateQueryResult(await this.#request("query", query, options), query);
+  }
+
+  /** Complete bounded sparse lookup. Rows are ordered by mined height and index. */
+  async getTransactions(request, options = {}) {
+    if (!object(request) || Object.keys(request).some(key => !["from_block", "to_block", "txids", "fields", "at"].includes(key))
+        || !integer(request.from_block, 0, 0xffffffff)
+        || !integer(request.to_block, request.from_block, 0x100000000)
+        || request.to_block - request.from_block > 10000
+        || !Array.isArray(request.txids) || request.txids.length > 128 || request.txids.some(txid => !hash(txid))) throw new TypeError("Invalid bounded transactions request");
+    const fields = request.fields === undefined ? DEFAULT_TRANSACTION_FIELDS : request.fields;
+    if (!Array.isArray(fields) || new Set(fields).size !== fields.length || fields.some(field => !TRANSACTION_FIELDS.includes(field))
+        || TRANSACTION_IDENTITIES.some(field => !fields.includes(field))) throw new TypeError("Transaction fields must include txid, block_height and index");
+    if (request.at !== undefined && !snapshot(request.at, request.from_block, request.to_block)) throw new TypeError("Invalid transactions snapshot");
+    // Freeze the validated request while awaiting the transport; caller mutations
+    // must not change the completeness or snapshot comparison after dispatch.
+    const captured = structuredClone(request);
+    const capturedFields = [...fields];
+    return validateTransactionsResult(await this.#request("transactions", captured, options, MAX_TRANSACTIONS_BODY_BYTES), captured, capturedFields);
   }
 
   /** Finite pagination at a captured exclusive head. Empty filtered pages advance.

@@ -6,6 +6,34 @@ the Prep full-block archive; it is not a wallet SDK or native Rust binding.
 
 Use this package locally from the repository. No public npm publication is implied.
 
+For one bounded lookup rather than paginating through a block range:
+
+```ts
+const capabilities = await client.getCapabilities();
+const result = await client.getTransactions({
+  from_block: 1,
+  to_block: 2049,
+  txids: transactionIds, // up to 128 entries
+});
+const next = await client.getTransactions({
+  from_block: 1,
+  to_block: 2049,
+  txids: anotherIdSet,
+  at: result.snapshot, // same canonical prefix; an append beyond it is allowed
+});
+```
+
+The configured `client` is constructed below. `getTransactions` defaults to eight
+public metadata fields, including canonical height/index. Optional `fields` must
+include `txid`, `block_height`, and `index`. Limits are 10,000 blocks, 4,096 result
+locations and 4 MiB. Every requested unique ID is accounted for by matching rows
+or `missing_txids`; absence is scoped to that completed range. Duplicate input
+IDs do not duplicate rows, while multiple canonical locations are preserved.
+The client rejects partial/unrequested/unsorted responses and changed snapshots.
+These methods use the existing auth, timeout, cancellation and typed errors.
+They require a server implementing the new routes. Capabilities report supported
+protocol features; `getHeight()` reports current readiness and archive coverage.
+
 For compact public transaction metadata, select `size_bytes`,
 `transparent_input_count`, and `transparent_output_count` alongside `txid`,
 `block_height`, `version`, and `locktime`. These are bounded JSON integers and do

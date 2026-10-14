@@ -13,7 +13,7 @@ separate transport with its own representation contract.
 
 Local development is the intended deployment. Binding beyond loopback is an
 explicit CLI choice. Set `PREP_API_TOKEN` to enable a deployment-wide bearer token;
-all four routes require it when configured. Use TLS termination for remote access.
+all routes require it when configured. Use TLS termination for remote access.
 There is no browser CORS policy, account tenancy, billing, or public production
 deployment claim. Never put a private deployment token into a public browser bundle.
 
@@ -23,8 +23,59 @@ deployment claim. Never put a private deployment token into a public browser bun
 | `GET /ready` | Archive/source readiness; HTTP 503 when not ready |
 | `GET /height` | Indexed coverage and latest available source-status metadata |
 | `POST /query` | Bounded JSON field projection and continuation |
+| `POST /transactions` | Complete bounded transaction-ID lookup under one snapshot |
+| `GET /capabilities` | Compiled routes, fields, filters and protocol limits; not live readiness |
 
 `POST /query.bin` is not implemented in this slice. SDK and examples use JSON.
+
+## Batch transaction lookup
+
+Use `POST /transactions` for a small set of IDs when scan-page continuation is
+unnecessary. This independently implemented endpoint follows the general batch
+transport pattern studied in [the pinned CipherScan review](SL_CIPHERSCAN_RESEARCH.md).
+It reuses Prep's admitted indexes and query engine; it does not fan out RPC calls.
+
+```json
+{
+  "from_block": 1,
+  "to_block": 2049,
+  "txids": ["0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"]
+}
+```
+
+The example ID is illustrative. Both range endpoints are required; `to_block`
+is exclusive. Limits: 128 lowercase 64-character ID entries, 10,000 blocks,
+4,096 returned transaction locations, a 64 KiB request and a 4 MiB response body.
+An empty ID list or empty in-archive range is valid. Unsupported properties,
+invalid IDs/fields and oversized requests fail explicitly.
+
+Optional `fields` uses the transaction field list below and must include `txid`,
+`block_height`, and `index`. The default adds `version`, `locktime`, `size_bytes`,
+`transparent_input_count` and `transparent_output_count`. Explicit raw/decoded
+selections remain public/encrypted data and share the same byte ceiling.
+
+Successful responses contain `network`, `epoch`, `revision`, `archive_height`,
+`from_block`, `to_block`, `snapshot`, `complete: true`, `transactions` and
+`missing_txids`. Rows are in canonical height/index order. Repeated request IDs
+do not duplicate rows; every matching canonical occurrence remains present.
+Missing IDs are unique in request order and mean absent **only within the
+successfully completed requested range**. A timeout, read error, byte/row limit
+or incomplete page produces a whole error, never a successful partial result.
+
+`snapshot` contains `network`, `archive_start`, exclusive `to_block`, decimal
+`epoch`, and `boundary_hash` for `to_block - 1` (empty only at archive start).
+Pass that object back as optional `at` to query another ID set under the same
+canonical prefix. Epoch/boundary changes return HTTP 409 `REORG`; mismatched
+network/start/end returns `LOOKUP_SNAPSHOT_MISMATCH`. Appends beyond the pinned
+prefix are allowed. The server rechecks the prefix and source readiness before
+responding. This is archive-snapshot consistency, not independent consensus or
+a guarantee that a historical source matches today's public chain.
+
+The batch and scan routes share two active-query permits, a 30-second budget,
+authentication and `no-store` responses. Admission stays held while a worker or
+response allocation is retained. `GET /capabilities` reports these compiled
+limits and supported fields from the same implementation constants. Use `/height`
+or `/ready` separately to check current coverage and source readiness.
 
 ## Height and source status
 
