@@ -1,0 +1,4 @@
+{
+  "extends": "../chef-public/tsconfig.json",
+  "include": ["chef.config.ts", "chef.generated.ts"]
+}

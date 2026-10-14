@@ -11,8 +11,9 @@ Zeer is the umbrella brand and monorepo for **Zeer Prep**, the Zcash data prepar
 This section is the single source of truth for upcoming work. It supersedes the
 older scanner-first sequence and completed tasks below. The dates are internal
 planning targets in Asia/Jakarta, not verified organizer submission cutoffs or
-promises that unfinished gates will pass. This update plans the work; it does
-not start implementation, deployments, new experiments or package publication.
+promises that unfinished gates will pass. Implementation was subsequently
+authorized on 14 October. M1 is complete; remaining gates are pending. Package
+publication and public deployment remain separate release decisions.
 
 **Release objective:** a developer can obtain Zeer from a clean checkout, run a
 bounded public-data source through Prep and Chef, query their own PostgreSQL
@@ -43,7 +44,7 @@ Prep must also remain usable directly through its API/client without Chef.
 
 | ID | Target window | Work | Depends on | Completion gate |
 | --- | --- | --- | --- | --- |
-| M1 | 14–16 October | Reproducible developer quickstart | Existing public Prep/Chef contracts | Clean checkout reaches verified GraphQL output and resumes after restart without local-only artifacts |
+| M1 — complete | 14 October | Reproducible developer quickstart | Existing public Prep/Chef contracts | Clean checkout reaches verified GraphQL output and resumes after restart without local-only artifacts |
 | M2 | 17–20 October | Recovery across node, Prep, Chef and GraphQL | M1 | Real isolated Regtest branch change, source outage and restart preserve canonical application state |
 | M3 | 21–22 October | Clear CLI status and failure guidance | M1; use M2 state transitions | Human-readable progress is accurate; automation retains structured output and nonzero failures |
 | M4 | 23–24 October | Installable local release packages | M1–M3 | Packed packages work in a separate consumer project without monorepo resolution or registry publication |
@@ -52,25 +53,28 @@ Prep must also remain usable directly through its API/client without Chef.
 
 ### M1 — Reproducible developer quickstart
 
-- [ ] Provide one documented startup path covering the full-node source or clearly
+- [x] Provide one documented startup path covering the full-node source or clearly
   labelled fixture source, Prep ingestion/API, developer PostgreSQL and Chef.
   A compact-only source cannot satisfy full-data ingestion.
-- [ ] Supply bounded isolated runtime configuration, environment examples and
+- [x] Supply bounded isolated runtime configuration, environment examples and
   explicit migration/start/stop instructions. Reuse existing fixture tooling and
   CLI commands; do not create a new launcher framework just for this flow.
-- [ ] Demonstrate direct Prep queries as well as the existing public Chef example:
+- [x] Demonstrate direct Prep queries as well as the existing public Chef example:
   block/transaction handlers, generated types, committed entities and authenticated
   GraphQL. Verify expected identities and fields independently of displayed counts.
-- [ ] Stop/restart the example and confirm checkpoint continuation without
+- [x] Stop/restart the example and confirm checkpoint continuation without
   duplicate entity effects. Reject unavailable ranges and explain the required
   source/Prep coverage instead of silently returning incomplete output.
-- [ ] Reproduce from a fresh checkout with no ignored results, existing database,
+- [x] Reproduce from a fresh checkout with no ignored results, existing database,
   workspace node_modules, machine-specific helper scripts or retained node state.
 
 Acceptance record: exact setup commands, pinned input identity/range, generated
 entity checks, GraphQL response checks and restart checkpoint. Retain the run
 record locally; publish the setup instructions and reusable fixture inputs.
-The first bounded task after this planning update is M1.
+M1 completed on 14 October with a clean-source Docker run, host-loopback queries,
+restart/resume and exact fixture comparison. See the
+[quickstart](examples/quickstart/README.md). Execution records remain local under
+`benchmarks/results/`; the next bounded task is M2.
 
 ### M2 — Recovery across the full pipeline
 

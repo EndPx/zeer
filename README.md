@@ -89,6 +89,11 @@ The benchmark plan distinguishes external indexer comparisons, source-provider c
 
 ## Development
 
+Start with the [public-data quickstart](examples/quickstart/README.md) for an
+isolated complete-block fixture → Prep → Chef → PostgreSQL → GraphQL walkthrough.
+It includes direct Prep reads and a restart/resume check; it is historical
+fixture replay, not a live mainnet service.
+
 On Linux/WSL, use the pinned Rust 1.99.0 toolchain and committed lockfile:
 
 ```sh

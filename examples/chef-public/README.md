@@ -2,6 +2,10 @@
 
 This example turns complete public Zcash transaction data served by Prep into PostgreSQL entities and a read-only GraphQL API. Shielded ciphertext remains encrypted; no viewing key is requested.
 
+For a complete isolated setup including a replay source, Prep and PostgreSQL,
+start with the [public-data quickstart](../quickstart/README.md). The commands
+below are the manual integration path for an already running Prep and database.
+
 Use Node 24.14 or newer, install the monorepo with `npm ci`, then build with `npm run build:chef`. Run these commands from the repository root:
 
 ```sh

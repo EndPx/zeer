@@ -48,3 +48,6 @@ Thumbs.db
 
 # Benchmark outputs and reports stay local; commit harnesses and input fixtures only.
 /benchmarks/results/
+
+# Quickstart code generation (created by the documented setup command).
+/examples/quickstart/chef.generated.ts

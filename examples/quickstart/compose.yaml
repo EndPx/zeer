@@ -1,0 +1,143 @@
+name: zeer-quickstart
+
+x-node: &node
+  image: node@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
+  working_dir: /work
+  volumes:
+    - ../..:/work
+    - node_modules:/work/node_modules
+  cpus: 0.6
+  mem_limit: 768m
+  memswap_limit: 768m
+  pids_limit: 128
+  environment: &env
+    DATABASE_URL: postgres://quickstart:fixture-only-password@postgres:5432/quickstart
+    PREP_URL: http://prep:39368
+    PREP_API_TOKEN: ${PREP_API_TOKEN:?copy .env.example to .env}
+    CHEF_API_TOKEN: ${CHEF_API_TOKEN:?copy .env.example to .env}
+
+x-prep: &prep
+  image: rust@sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa
+  entrypoint: /build/release/prep
+  volumes:
+    - prep_build:/build:ro
+    - archive:/data
+  cpus: 0.5
+  mem_limit: 1g
+  memswap_limit: 1g
+  pids_limit: 64
+
+services:
+  build-prep:
+    image: rust@sha256:2c3a22f0a5533ea2dd5a16627bc841228151faa2d4de2644ac9987e4a2f1f2fa
+    profiles: [tools]
+    working_dir: /work
+    command: [cargo, build, --release, --locked, -p, prep, -j, '2']
+    environment:
+      CARGO_TARGET_DIR: /build
+    volumes:
+      - ../..:/work:ro
+      - prep_build:/build
+      - cargo_cache:/usr/local/cargo/registry
+    networks: [build]
+    cpus: 2
+    mem_limit: 3g
+    memswap_limit: 3g
+    pids_limit: 256
+
+  setup:
+    <<: *node
+    profiles: [tools]
+    networks: [build]
+    command:
+      - sh
+      - -ec
+      - >-
+        npm ci && npm run build:chef &&
+        node packages/chef/dist/cli.js codegen --config examples/quickstart/chef.config.ts &&
+        npm exec --call 'tsc --project examples/quickstart/tsconfig.json'
+
+  fixture:
+    image: python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+    working_dir: /work
+    volumes: [../..:/work:ro]
+    command: [python, benchmarks/prep/full/modern_capture.py, serve, --fixture, benchmarks/fixtures/mainnet-nu5-full-v1/fixture.json, --bind, 0.0.0.0]
+    cpus: 0.15
+    mem_limit: 256m
+    memswap_limit: 256m
+    pids_limit: 32
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:18232', data=b'{\"method\":\"getblockchaininfo\",\"params\":[]}', headers={'Content-Type':'application/json'}), timeout=2).read()"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  postgres:
+    image: postgres@sha256:ceef4a62198b562d6fe3e51be67362f72a0abf0aaa255f54f0c0e55be9768ed2
+    environment:
+      POSTGRES_USER: quickstart
+      POSTGRES_PASSWORD: fixture-only-password
+      POSTGRES_DB: quickstart
+    volumes: [postgres:/var/lib/postgresql/data]
+    cpus: 0.4
+    mem_limit: 512m
+    memswap_limit: 512m
+    pids_limit: 128
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U quickstart -d quickstart]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  ingest:
+    <<: *prep
+    profiles: [tools]
+    depends_on:
+      fixture: {condition: service_healthy}
+    command: [sync, --source, http://fixture:18232, --network, mainnet, --archive, /data/archive, --from, '1687106', --to, '1687108', --confirmations, '0', --segment-blocks, '1', --max-disk-gib, '1', --allow-insecure]
+
+  prep:
+    <<: *prep
+    networks: [default, access]
+    environment:
+      PREP_API_TOKEN: ${PREP_API_TOKEN:?copy .env.example to .env}
+    command: [serve-http, --archive, /data/archive, --listen, '0.0.0.0:39368', --allow-network]
+    ports: ['127.0.0.1:${PREP_PORT:-39378}:39368']
+
+  chef:
+    <<: *node
+    profiles: [tools]
+    entrypoint: [node, packages/chef/dist/cli.js]
+    depends_on:
+      postgres: {condition: service_healthy}
+
+  api:
+    <<: *node
+    networks: [default, access]
+    cpus: 0.35
+    mem_limit: 512m
+    memswap_limit: 512m
+    depends_on:
+      postgres: {condition: service_healthy}
+    command: [node, packages/chef/dist/cli.js, serve, --config, examples/quickstart/chef.config.ts, --listen, 0.0.0.0]
+    ports: ['127.0.0.1:${CHEF_PORT:-39379}:39370']
+
+  check:
+    <<: *node
+    profiles: [tools]
+    entrypoint: [node, examples/quickstart/check.mjs]
+    environment:
+      <<: *env
+      CHEF_URL: http://api:39370
+
+networks:
+  default: {internal: true}
+  access: {}
+  build: {}
+
+volumes:
+  archive: {}
+  postgres: {}
+  node_modules: {}
+  prep_build: {}
+  cargo_cache: {}
