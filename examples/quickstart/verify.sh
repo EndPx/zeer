@@ -11,21 +11,21 @@ dc up -d --wait fixture postgres
 dc run --rm ingest >"$result/ingest.jsonl" 2>"$result/ingest.stderr"
 dc up -d prep
 dc run --rm check --prep-only >"$result/prep-check.jsonl"
-dc run --rm chef migrate --config "$config" >"$result/migrate.jsonl"
-dc run --rm chef status --config "$config" >"$result/initial.jsonl"
+dc run --rm chef migrate --config "$config" --json >"$result/migrate.jsonl"
+dc run --rm chef status --config "$config" --json >"$result/initial.jsonl"
 # Fail early instead of continuing a supposedly fresh test on an old database.
 dc run --rm --entrypoint node check -e 'const fs=require("fs"); const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); if(d.checkpoint.height!==null)throw Error("Use a new COMPOSE_PROJECT_NAME for fresh verification");' "$result/initial.jsonl"
-dc run --rm chef sync --config "$config" --to 1687106 >"$result/first.jsonl"
+dc run --rm chef sync --config "$config" --to 1687106 --json >"$result/first.jsonl"
 dc up -d api
 dc run --rm check 1687106 >"$result/first-check.jsonl"
 dc stop api prep postgres
 dc up -d --wait postgres
 dc up -d prep api
 dc run --rm check --prep-only >"$result/restarted-prep-check.jsonl"
-dc run --rm chef sync --config "$config" --to 1687108 >"$result/resume.jsonl"
+dc run --rm chef sync --config "$config" --to 1687108 --json >"$result/resume.jsonl"
 dc run --rm check 1687108 >"$result/resume-check.jsonl"
-dc run --rm chef sync --config "$config" --to 1687108 >"$result/repeat.jsonl"
-if dc run --rm chef sync --config "$config" --to 1687109 >"$result/outside-range.stdout" 2>"$result/outside-range.stderr"; then
+dc run --rm chef sync --config "$config" --to 1687108 --json >"$result/repeat.jsonl"
+if dc run --rm chef sync --config "$config" --to 1687109 --json >"$result/outside-range.stdout" 2>"$result/outside-range.stderr"; then
   echo 'Unavailable range unexpectedly succeeded' >&2
   exit 1
 fi

@@ -50,7 +50,21 @@ curl http://127.0.0.1:39370/graphql \
 
 Lists use ID ascending order and an `after` ID cursor. For example, `where: { minedHeight: 2048 }` selects exact matches. BigInt fields are decimal strings in GraphQL and `bigint` in TypeScript handlers. The initial API has no mutations, subscriptions, introspection, fragments, or directives. It supports at most five root fields, 100 selected fields, depth five, 100 items per list, and two active requests. Responses are capped at 2 MiB. Bind defaults to loopback; external deployment needs an operator-managed TLS proxy and access controls.
 
-JSON progress is emitted after each committed page. The completion JSON records blocks and transactions committed during that invocation, captured target, initial/final checkpoint, and elapsed milliseconds. `prepRequests` counts calls to Prep, including height and reconciliation-header requests. `fetchMs` measures Prep requests, `handlerIncludingEntityIoMs` includes entity database I/O inside handlers, and `transactionOverheadMs` measures the remaining block-application time. `blocksPerSecond` and `transactionsPerSecond` divide committed invocation counts by total elapsed time. Overall elapsed time also includes reconciliation, checkpoint reads and other orchestration. These are application indexing measurements, not node synchronization or Prep archive-build timings. Benchmark a fresh project for a complete backfill; a resumed project measures only remaining work.
+Progress is emitted after each completed page. JSON is the non-interactive default;
+use `--json` explicitly for automation or `--human` for readable terminal output.
+The JSON records the actual persisted checkpoint separately from invocation
+counters, which cover completed pages (`metricsScope: "completed_pages"`). A
+partially committed page can advance the checkpoint without contributing to those
+counters. The completion record also includes the captured target, initial/final
+height and elapsed milliseconds. `prepRequests` counts Prep calls; `fetchMs`
+measures requests, `handlerIncludingEntityIoMs` includes handler database I/O and
+`transactionOverheadMs` covers the remaining block-application time. Rates divide
+completed-page counts by invocation elapsed time, including orchestration. These
+are application measurements, not node synchronization or Prep archive-build
+timings. Benchmark a fresh project for a full backfill; a resumed project measures
+only remaining work. `status` is a read-only diagnosis: it reports source
+availability, observed coverage and the persisted read gate without replacing a
+running follower or claiming the current upstream tip for a historical snapshot.
 
 GraphQL returns HTTP 503 while the database checkpoint is `reconciling` or `blocked`. Entity writes and the block checkpoint commit atomically, and rollback restores prior entity values before replay. Handlers must remain deterministic and confine effects to `context.entities`: external HTTP calls, email, file writes or payments do not participate in the database transaction and can repeat on retry/reorg. Invocation counters describe successfully returned pages; an interrupted or failed page may already have committed earlier blocks. Use `status` and the durable database checkpoint to determine the restart position.
 

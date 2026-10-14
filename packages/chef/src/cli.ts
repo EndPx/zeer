@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 import { PrepClient, PrepError } from "@zeer/prep-client";
+import type { Height } from "@zeer/prep-client";
 import { parseModel, generateTypes } from "./schema.js";
 import { PostgresStore } from "./store.js";
 import { ChefError, isSourceUnavailable, syncStep } from "./runtime.js";
 import { createChefServer } from "./graphql.js";
-import type { ChefConfig } from "./types.js";
+import { cliFailure, formatOutput, readStatus, sourceObservation } from "./cli-output.js";
+import type { ChefConfig, ChefStore } from "./types.js";
 
 class CliError extends Error { constructor(readonly code: string) { super(code); } }
-const help = "zeer-chef <codegen|migrate|sync|serve|status> [--config chef.config.ts]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
-const out = (value: unknown) => process.stdout.write(`${JSON.stringify(value)}\n`);
+const help = "zeer-chef <codegen|migrate|sync|serve|status> [--config chef.config.ts] [--json | --human]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nOutput defaults to readable text on a terminal and JSON elsewhere. status observes Prep with a 5-second timeout without changing the database.\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
 function integer(value: string | undefined, minimum: number, maximum: number, code: string): number {
   if (value === undefined || !/^(0|[1-9][0-9]*)$/.test(value)) throw new CliError(code);
   const parsed = Number(value);
@@ -29,24 +31,30 @@ function temporarySourceError(error: unknown): boolean {
   return isSourceUnavailable(error) || (error instanceof PrepError && error.code === "TRANSPORT_ERROR") || (error instanceof DOMException && error.name === "TimeoutError");
 }
 
-export async function main(args = process.argv.slice(2)): Promise<void> {
+export async function main(args = process.argv.slice(2), dependencies: {
+  store?: ChefStore; client?: Pick<PrepClient, "get" | "getHeight">;
+  write?: (text: string) => void; tty?: boolean;
+} = {}): Promise<void> {
   if (args.length === 0 || args[0] === "--help" || args[0] === "help") { process.stdout.write(`${help}\n`); return; }
   const command = args[0]!;
   if (!["codegen", "migrate", "sync", "serve", "status"].includes(command)) throw new CliError("UNKNOWN_COMMAND");
   const flags = new Map<string, string>();
   for (let index = 1; index < args.length; index++) {
     const name = args[index]!;
-    const allowed = ["--config", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : []), ...(command === "serve" ? ["--listen", "--port"] : [])];
+    const allowed = ["--config", "--json", "--human", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : []), ...(command === "serve" ? ["--listen", "--port"] : [])];
     if (!allowed.includes(name) || flags.has(name)) throw new CliError("INVALID_OR_DUPLICATE_FLAG");
-    const value = name === "--follow" ? "true" : args[++index];
+    const value = ["--follow", "--json", "--human"].includes(name) ? "true" : args[++index];
     if (!value || value.startsWith("--")) throw new CliError("MISSING_FLAG_VALUE");
     flags.set(name, value);
   }
+  if (flags.has("--json") && flags.has("--human")) throw new CliError("INVALID_OR_DUPLICATE_FLAG");
+  const human = flags.has("--human") || (!flags.has("--json") && (dependencies.tty ?? process.stdout.isTTY ?? false));
+  const out = (value: Record<string, unknown>) => (dependencies.write ?? ((text: string) => { process.stdout.write(text); }))(formatOutput(value, human));
   const follow = flags.has("--follow");
   if (follow && flags.has("--to")) throw new CliError("FOLLOW_AND_TO_ARE_EXCLUSIVE");
   const pollSeconds = integer(flags.get("--poll-seconds") ?? "5", 1, 60, "INVALID_POLL_SECONDS");
   const configPath = resolve(flags.get("--config") ?? "chef.config.ts");
-  const bytes = await readFile(configPath);
+  const bytes = await readFile(configPath).catch(() => { throw new CliError("CONFIG_FILE_UNREADABLE"); });
   if (bytes.length > 1024 * 1024) throw new CliError("CONFIG_TOO_LARGE");
   const loaded: unknown = (await import(pathToFileURL(configPath).href)).default;
   if (!loaded || typeof loaded !== "object" || Array.isArray(loaded)) throw new CliError("INVALID_CONFIG");
@@ -61,7 +69,7 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
   let end = flags.has("--to") ? integer(flags.get("--to"), config.startHeight, 0xffff_fffe, "INVALID_END_HEIGHT") : undefined;
   const port = integer(flags.get("--port") ?? "39370", 1, 65535, "INVALID_PORT");
   const schemaPath = resolve(dirname(configPath), config.schema);
-  const model = parseModel(await readFile(schemaPath, "utf8"));
+  const model = parseModel(await readFile(schemaPath, "utf8").catch(() => { throw new CliError("SCHEMA_FILE_UNREADABLE"); }));
   if (command === "codegen") {
     const generated = resolve(dirname(configPath), "chef.generated.ts");
     await writeFile(generated, generateTypes(model), "utf8");
@@ -72,22 +80,40 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
   const databaseUrl = process.env[envName(config.databaseUrlEnv, "DATABASE_URL")];
   const prepToken = process.env[envName(config.prepTokenEnv, "PREP_API_TOKEN")];
   if (!prepUrl || !databaseUrl) throw new CliError("PREP_URL_AND_DATABASE_URL_REQUIRED");
-  const prep = new PrepClient({ url: prepUrl, ...(prepToken ? { token: prepToken } : {}) });
+  let prep: Pick<PrepClient, "get" | "getHeight">;
+  try { prep = dependencies.client ?? new PrepClient({ url: prepUrl, ...(prepToken ? { token: prepToken } : {}) }); }
+  catch { throw new CliError("INVALID_PREP_URL"); }
   let prepRequests = 0;
+  let lastMeta: Height | undefined;
   const client: Pick<PrepClient, "get" | "getHeight"> = {
-    get: (...args) => { prepRequests++; return prep.get(...args); },
-    getHeight: (...args) => { prepRequests++; return prep.getHeight(...args); },
+    get: async (...args) => {
+      prepRequests++;
+      try { return await prep.get(...args); } catch (error) { lastMeta = undefined; throw error; }
+    },
+    getHeight: async (...args) => {
+      prepRequests++;
+      try { lastMeta = await prep.getHeight(...args); return lastMeta; } catch (error) { lastMeta = undefined; throw error; }
+    },
   };
   const normalizedUrl = new URL(prepUrl); if (!normalizedUrl.pathname.endsWith("/")) normalizedUrl.pathname += "/";
   const fingerprint = createHash("sha256").update(bytes).update("\0").update(JSON.stringify({ schema: model.fingerprint, project: config.project, network: config.network, startHeight: config.startHeight, reorgWindow, handlerVersion: config.handlerVersion, prepUrl: normalizedUrl.href })).digest("hex");
   const controller = new AbortController();
   const abort = () => controller.abort(new DOMException("Stopped", "AbortError"));
   process.once("SIGINT", abort); process.once("SIGTERM", abort);
-  const store = new PostgresStore(databaseUrl, { project: config.project, network: config.network, startHeight: config.startHeight, reorgWindow, model, fingerprint });
+  const store = dependencies.store ?? new PostgresStore(databaseUrl, { project: config.project, network: config.network, startHeight: config.startHeight, reorgWindow, model, fingerprint });
   try {
     if (command === "migrate") { await store.migrate(); out({ command, status: "complete", project: config.project, fingerprint }); return; }
+    if (command === "status") {
+      const status = await readStatus({ store, client, network: config.network, startHeight: config.startHeight, signal: controller.signal });
+      out({ command, project: config.project, fingerprint, ...status });
+      if (status.state === "blocked") throw new CliError("REBUILD_REQUIRED");
+      if (status.state === "source_unavailable") throw new CliError(status.source.availability === "unavailable" ? status.source.errorCode : "SOURCE_UNAVAILABLE");
+      if (status.state === "source_mismatch") throw new CliError("SOURCE_NETWORK_OR_KIND_MISMATCH");
+      if (status.state === "source_not_ready") throw new CliError(status.source.availability === "available" && !status.source.historyAvailable ? "SOURCE_HISTORY_UNAVAILABLE" : "SOURCE_UNAVAILABLE");
+      if (status.state === "reconciliation_needed") throw new CliError("RECONCILIATION_REQUIRED");
+      return;
+    }
     const initial = await store.checkpoint();
-    if (command === "status") { out({ command, project: config.project, fingerprint, checkpoint: initial }); return; }
     if (command === "serve") {
       const token = process.env.CHEF_API_TOKEN;
       if (!token || Buffer.byteLength(token) < 16) throw new CliError("CHEF_API_TOKEN_REQUIRED_MIN_16_BYTES");
@@ -108,51 +134,57 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
     const totals = { blocks: 0, transactions: 0, fetchMs: 0, handlerIncludingEntityIoMs: 0, transactionOverheadMs: 0 };
     const metrics = () => {
       const elapsedMs = performance.now() - started;
-      return { ...totals, prepRequests, elapsedMs,
+      return { ...totals, metricsScope: "completed_pages", prepRequests, elapsedMs,
         blocksPerSecond: elapsedMs > 0 ? totals.blocks * 1000 / elapsedMs : 0,
         transactionsPerSecond: elapsedMs > 0 ? totals.transactions * 1000 / elapsedMs : 0 };
     };
-    if (!follow) {
-      const start = performance.now();
-      let meta;
-      try { meta = await client.getHeight({ signal: controller.signal }); }
-      catch (error) { await store.markReconciling(); throw error; }
-      totals.fetchMs += performance.now() - start;
-      if (!meta.ready || meta.archive_height === null || meta.archive_height < config.startHeight) {
-        await store.markReconciling(); throw new CliError("SOURCE_UNAVAILABLE");
-      }
-      end ??= meta.archive_height;
-      if (end > meta.archive_height) throw new CliError("REQUESTED_RANGE_NOT_AVAILABLE");
-    }
+    const report = async (state: string, details: Record<string, unknown> = {}) => {
+      const checkpoint = await store.checkpoint();
+      const source = lastMeta ? sourceObservation(lastMeta, checkpoint, config.network, config.startHeight)
+        : state === "source_unavailable" ? { availability: "unavailable" } : undefined;
+      out({ command, state, project: config.project, invocationMode: follow ? "follow" : "backfill", checkpoint, ...(source ? { source } : {}), ...metrics(), ...details });
+    };
     try {
+      if (!follow) {
+        const start = performance.now();
+        let meta;
+        try { meta = await client.getHeight({ signal: controller.signal }); }
+        catch (error) { await store.markReconciling(); if (!controller.signal.aborted && temporarySourceError(error)) await report("source_unavailable"); throw error; }
+        totals.fetchMs += performance.now() - start;
+        if (!meta.ready || meta.archive_height === null || meta.archive_height < config.startHeight) {
+          await store.markReconciling(); await report("source_unavailable"); throw new CliError("SOURCE_UNAVAILABLE");
+        }
+        end ??= meta.archive_height;
+        if (end > meta.archive_height) throw new CliError("REQUESTED_RANGE_NOT_AVAILABLE");
+      }
       for (;;) {
         controller.signal.throwIfAborted();
         let result;
         try { result = await syncStep({ client, store, indexer: config.indexer, network: config.network, startHeight: config.startHeight, reorgWindow, signal: controller.signal }, end); }
         catch (error) {
+          if (!controller.signal.aborted && temporarySourceError(error)) await report("source_unavailable");
           if (!follow || !temporarySourceError(error)) throw error;
-          out({ command, state: "source_unavailable", ...metrics() });
           await delay(pollSeconds * 1000, undefined, { signal: controller.signal }); continue;
         }
         totals.blocks += result.blocks; totals.transactions += result.transactions;
         totals.fetchMs += result.fetchMs; totals.handlerIncludingEntityIoMs += result.handlerIncludingEntityIoMs; totals.transactionOverheadMs += result.transactionOverheadMs;
-        if (result.state === "source_unavailable" && !follow) throw new CliError("SOURCE_UNAVAILABLE");
+        if (result.state === "source_unavailable" && !follow) { await report("source_unavailable"); throw new CliError("SOURCE_UNAVAILABLE"); }
         if (!follow && result.state === "caught_up") {
           if (result.height === null || result.height < end!) throw new CliError("REQUESTED_RANGE_NOT_COMPLETE");
-          out({ command, state: "complete", project: config.project, startHeight: config.startHeight, initialHeight: initial.height, targetHeight: end, finalHeight: result.height, ...metrics() });
+          await report("complete", { startHeight: config.startHeight, initialHeight: initial.height, targetHeight: end, finalHeight: result.height });
           break;
         }
         if (result.state === "progress") {
-          out({ command, state: "progress", project: config.project, height: result.height, targetHeight: end ?? result.sourceHeight, ...metrics() });
+          await report("progress", { height: result.height, targetHeight: end ?? result.sourceHeight, prepIndexedHeight: result.sourceHeight, sourceEpoch: result.sourceEpoch });
         }
         if (follow && result.state !== "progress") {
-          out({ command, state: result.state, height: result.height, ...metrics() });
+          await report(result.state, { height: result.height, prepIndexedHeight: result.sourceHeight });
           await delay(pollSeconds * 1000, undefined, { signal: controller.signal });
         }
       }
     } catch (error) {
       if (!controller.signal.aborted) throw error;
-      out({ command, state: "stopped", ...metrics() });
+      await report("stopped");
     }
   } finally {
     process.off("SIGINT", abort); process.off("SIGTERM", abort);
@@ -160,11 +192,21 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+function isCliEntry(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    // npm's POSIX bin entry is a symlink. Compare filesystem identities so the
+    // executable works through that link or a linked parent directory.
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(resolve(process.argv[1]));
+  } catch { return false; }
+}
+
+if (isCliEntry()) {
   main().catch((error: unknown) => {
     // Never print third-party errors: config, handlers and PostgreSQL may contain credentials or SQL.
-    const code = error instanceof CliError || error instanceof ChefError ? error.code : "CHEF_COMMAND_FAILED";
-    process.stderr.write(`${JSON.stringify({ error: { code }, help: "Check configuration, source readiness, and explicit migrate. Configuration changes require a fresh project and replay." })}\n`);
+    const failure = cliFailure(error, error instanceof CliError || error instanceof ChefError ? error.code : undefined);
+    const human = !process.argv.includes("--json") && (process.argv.includes("--human") || process.stdout.isTTY === true);
+    process.stderr.write(formatOutput(failure, human));
     process.exitCode = 1;
   });
 }

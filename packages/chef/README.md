@@ -6,7 +6,10 @@ an authenticated read-only GraphQL API. This private workspace package is not
 published to npm. The current slice has no viewing-key scanner or private memos.
 
 Install the repository with `npm ci`, build with `npm run build:chef`, and follow
-the [public example](../../examples/chef-public/README.md). Node 24.14+ is required
+the [public example](https://github.com/EndPx/zeer/blob/main/examples/chef-public/README.md).
+For installation into a separate consumer project, use the
+[local tarball packaging instructions](https://github.com/EndPx/zeer/blob/main/docs/PACKAGING.md).
+Node 24.14+ is required
 for the validated native TypeScript config path. Use erasable TS syntax.
 
 ```sh
@@ -15,6 +18,53 @@ node --env-file=.env packages/chef/dist/cli.js migrate --config examples/chef-pu
 node --env-file=.env packages/chef/dist/cli.js sync --config examples/chef-public/chef.config.ts --to 2048
 node --env-file=.env packages/chef/dist/cli.js serve --config examples/chef-public/chef.config.ts
 ```
+
+Use `status` to compare the persisted checkpoint with one bounded Prep metadata
+observation. It reads PostgreSQL first and requests Prep metadata with a five-second
+timeout. It does not acquire a writer, migrate, reconcile, or change the read gate.
+It reports a blocked database before any source problem. An unavailable or unready
+Prep, a source identity mismatch, or a blocked project returns a diagnostic on stdout
+and fixed guidance on stderr with exit code one. A ready historical archive can be
+usable while its source freshness remains unknown. A successful `status` observation
+does not establish current canonical consensus or confirm that a separate writer
+is running.
+If the checkpoint is ahead of Prep's archive, status reports `reconciliation_needed`
+and exits with failure until a writer validates/reconciles the retained branch.
+
+```sh
+node --env-file=.env packages/chef/dist/cli.js status --config examples/chef-public/chef.config.ts --human
+node --env-file=.env packages/chef/dist/cli.js sync --config examples/chef-public/chef.config.ts --follow --poll-seconds 5 --json
+```
+
+Output defaults to readable text on an interactive terminal and newline-delimited
+JSON elsewhere. `--human` and `--json` select either format explicitly and cannot
+be combined. Installed consumers use the same flags with `zeer-chef`. JSON retains
+structured progress and failures. The diagnostic separates Prep HTTP availability,
+Prep readiness, the archive's indexed height, and source freshness. Source height
+is reported only as a timestamped Prep observation from a ready follower; it is
+unknown for an unready source or historical snapshot. Chef lag measures remaining
+blocks to Prep's indexed height, not an invented current chain tip. The persisted
+`ready`, `reconciling`, or `blocked` read gate is reported separately from this
+read-only source observation.
+
+Sync output labels the invocation as `backfill` or `follow` and includes its actual
+durable checkpoint on progress, completion, observed source loss, and graceful stop.
+`metricsScope: "completed_pages"` identifies counters and rates from successfully
+returned pages in this invocation. They exclude previously indexed work and any
+committed prefix of an interrupted page; the checkpoint still includes that prefix.
+No ETA is reported. Source outages are detected by the writer's requests and polling,
+not instantaneously. SIGINT/SIGTERM during finite-sync metadata preflight or polling
+emit `stopped` and release resources. A handler already executing may finish its
+current block before graceful cancellation; forced process interruption relies on
+PostgreSQL's atomic block transaction.
+
+For `REBUILD_REQUIRED`, retain the old namespace for inspection, choose a new
+project name, run `migrate`, and replay from a Prep archive covering `startHeight`.
+Independently verify the new projection before switching readers. Chef does not
+automatically reset a blocked namespace. Auth failures direct the operator to
+the appropriate token; missing configuration, schema, migration, unavailable
+ranges, writer contention and identity mismatches have fixed actionable guidance.
+Third-party exception messages, SQL and credentials are omitted from CLI errors.
 
 Migration is explicit. Each project owns a marked `chef_<project>` namespace.
 The framework refuses unmarked existing namespaces and configuration/schema
