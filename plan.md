@@ -12,9 +12,10 @@ This section is the single source of truth for upcoming work. It supersedes the
 older scanner-first sequence and completed tasks below. The dates are internal
 planning targets in Asia/Jakarta, not verified organizer submission cutoffs or
 promises that unfinished gates will pass. Implementation was subsequently
-authorized on 14 October. M1–M4 are complete; the demo candidate is prepared and
-final candidate verification remains pending. Package
-publication and public deployment remain separate release decisions.
+authorized on 14 October. M1–M6 technical delivery is complete on the tested
+candidate `8023c329bbb0cc5b26f101e01b383bb0b9180cea`. Detailed execution evidence
+remains local. Authenticated organizer cutoff/form verification remains a
+separate submission gate; package publication and public deployment were not run.
 
 **Release objective:** a developer can obtain Zeer from a clean checkout, run a
 bounded public-data source through Prep and Chef, query their own PostgreSQL
@@ -49,8 +50,8 @@ Prep must also remain usable directly through its API/client without Chef.
 | M2 — complete | 14 October | Recovery across node, Prep, Chef and GraphQL | M1 | Real isolated Regtest branch change, source outage and restart preserve canonical application state |
 | M3 — complete | 14 October | Clear CLI status and failure guidance | M1; use M2 state transitions | Human-readable progress is accurate; automation retains structured output and nonzero failures |
 | M4 — complete | 14 October | Installable local release packages | M1–M3 | Packed packages work in a separate consumer project without monorepo resolution or registry publication |
-| M5 — candidate prepared | 14 October | Demo, documentation and release candidate | M2–M4 | Complete public-data demo and documented limits match the frozen candidate |
-| M6 | 27–28 October | Final verification and delivery buffer | M5 | Fresh installation and critical recovery checks pass; outstanding limitations are explicit |
+| M5 — complete | 14 October | Demo, documentation and release candidate | M2–M4 | Complete public-data demo and documented limits match the frozen candidate |
+| M6 — technical checks complete | 14 October; remaining days reserved | Final verification and delivery buffer | M5 | Fresh installation and critical recovery checks pass; submission gates remain explicit |
 
 ### M1 — Reproducible developer quickstart
 
@@ -170,14 +171,33 @@ uploaded video. M6 replays the candidate before delivery.
 
 ### M6 — Final verification and buffer
 
-- [ ] Repeat the clean installation and the critical connected recovery checks
+- [x] Repeat the clean installation and the critical connected recovery checks
   on the release candidate after any relevant final fix.
-- [ ] Review tracked files and package contents for local results, credentials,
+- [x] Review tracked files and package contents for local results, credentials,
   accidental generated state and missing license attribution.
-- [ ] Record passed gates and unresolved limits locally; verify the public docs
+- [x] Record passed gates and unresolved limits locally; verify the public docs
   contain no unsupported readiness or performance claims.
-- [ ] Leave time for defects and submission preparation. Recheck the actual event
-  cutoff/timezone and required deliverables before any submission action.
+- [x] Complete the technical candidate early and retain the remaining calendar
+  buffer for defects and submission preparation. Check publicly accessible event
+  information and record what still requires organizer-account access.
+
+M6 used a fresh GitHub clone of the pinned candidate, empty dependency/build
+volumes, the documented quickstart, an independent installed-package consumer,
+and a new real Regtest recovery run. Host-loopback demo queries and readable/JSON
+status were checked. The candidate's tracked Git blobs match the executed source
+hash manifest. Experiment services were stopped; existing application services
+remained active. Windows/WSL execution, natural P2P reorgs, whole-chain performance
+and production readiness are not established by this Linux acceptance.
+
+### Submission gate — separate from the technical candidate
+
+- [ ] Before any submission action, confirm the authenticated organizer cutoff,
+  timezone, eligibility and required form fields/deliverables. The public
+  [Zecathon page](https://thezecathon.com/) directs users to sign in for those
+  details; this run did not verify them. The internal 28 October target does not
+  establish compliance with the actual submission deadline.
+- A demo script is prepared; no video was recorded or uploaded in this delivery.
+- No npm publication, public hosting or hackathon submission was performed.
 
 ### If the schedule slips
 
