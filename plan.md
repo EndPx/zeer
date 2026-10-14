@@ -12,7 +12,8 @@ This section is the single source of truth for upcoming work. It supersedes the
 older scanner-first sequence and completed tasks below. The dates are internal
 planning targets in Asia/Jakarta, not verified organizer submission cutoffs or
 promises that unfinished gates will pass. Implementation was subsequently
-authorized on 14 October. M1 is complete; remaining gates are pending. Package
+authorized on 14 October. M1–M4 are complete; the demo candidate is prepared and
+final candidate verification remains pending. Package
 publication and public deployment remain separate release decisions.
 
 **Release objective:** a developer can obtain Zeer from a clean checkout, run a
@@ -46,9 +47,9 @@ Prep must also remain usable directly through its API/client without Chef.
 | --- | --- | --- | --- | --- |
 | M1 — complete | 14 October | Reproducible developer quickstart | Existing public Prep/Chef contracts | Clean checkout reaches verified GraphQL output and resumes after restart without local-only artifacts |
 | M2 — complete | 14 October | Recovery across node, Prep, Chef and GraphQL | M1 | Real isolated Regtest branch change, source outage and restart preserve canonical application state |
-| M3 | 21–22 October | Clear CLI status and failure guidance | M1; use M2 state transitions | Human-readable progress is accurate; automation retains structured output and nonzero failures |
-| M4 | 23–24 October | Installable local release packages | M1–M3 | Packed packages work in a separate consumer project without monorepo resolution or registry publication |
-| M5 | 25–26 October | Demo, documentation and release candidate | M2–M4 | Complete public-data demo and documented limits match the frozen candidate |
+| M3 — complete | 14 October | Clear CLI status and failure guidance | M1; use M2 state transitions | Human-readable progress is accurate; automation retains structured output and nonzero failures |
+| M4 — complete | 14 October | Installable local release packages | M1–M3 | Packed packages work in a separate consumer project without monorepo resolution or registry publication |
+| M5 — candidate prepared | 14 October | Demo, documentation and release candidate | M2–M4 | Complete public-data demo and documented limits match the frozen candidate |
 | M6 | 27–28 October | Final verification and delivery buffer | M5 | Fresh installation and critical recovery checks pass; outstanding limitations are explicit |
 
 ### M1 — Reproducible developer quickstart
@@ -109,15 +110,15 @@ M6 must repeat the critical checks on the frozen candidate.
 
 ### M3 — Developer-facing CLI status
 
-- [ ] Expose source/Prep availability, Prep indexed height, Chef checkpoint and
+- [x] Expose source/Prep availability, Prep indexed height, Chef checkpoint and
   observed lag, plus backfill/follow/reconciliation/blocked states where known.
   Do not invent a source tip when the upstream source is unavailable.
-- [ ] Add a readable terminal presentation while preserving machine-readable
+- [x] Add a readable terminal presentation while preserving machine-readable
   output for scripts and non-interactive runs. No graphical dashboard is required.
-- [ ] Distinguish invocation progress from persisted checkpoint and source sync.
+- [x] Distinguish invocation progress from persisted checkpoint and source sync.
   Show ETA only when a finite target and defensible sample exist; omit it at the
   live head or when progress is unstable.
-- [ ] Provide actionable errors for missing configuration, auth failures,
+- [x] Provide actionable errors for missing configuration, auth failures,
   unsupported source ranges, identity mismatch and blocked recovery. Keep secrets
   out of output, and preserve cancellation and exit-code behavior.
 
@@ -126,14 +127,14 @@ live follow, source loss, configuration failure and recovery states.
 
 ### M4 — Package and distribution readiness
 
-- [ ] Inspect packed contents, entrypoints, CLI executable metadata, declarations,
+- [x] Inspect packed contents, entrypoints, CLI executable metadata, declarations,
   dependency resolution, licenses and exclusion of private/local artifacts.
-- [ ] Install Prep client and Chef tarballs into a separate empty consumer project.
+- [x] Install Prep client and Chef tarballs into a separate empty consumer project.
   Resolve their relationship locally without a workspace symlink or a previously
   published `@zeer/*` package. Run type checking and the example through the CLI.
-- [ ] Make the Rust Prep build/install path explicit for the supported platform;
+- [x] Make the Rust Prep build/install path explicit for the supported platform;
   test the documented path. A working npm client is not distribution of the server.
-- [ ] Record candidate versions and a short compatibility/change note. Do not
+- [x] Record candidate versions and a short compatibility/change note. Do not
   choose or claim an available npm organization, publish packages, or enable
   hosted services as an incidental packaging step.
 
@@ -141,22 +142,31 @@ Acceptance record: clean consumer installation, types and executable invocation,
 direct Prep query, Chef ingestion and GraphQL result. Public npm publication is a
 separate release decision after this gate, not required to prove the local MVP.
 
+The [package guide](docs/PACKAGING.md) and standalone consumer verifier record the
+reproduction path. The installed executable regression is covered alongside
+strict declaration checks and actual fixture-to-GraphQL validation. Results,
+tarballs, failed attempts and build/install logs remain local.
+
 ### M5 — Demo and release candidate
 
-- [ ] Freeze a candidate commit after M2–M4. Reconcile README, product contracts,
+- [x] Freeze a candidate commit after M2–M4. Reconcile README, product contracts,
   quickstart and supported capability statements against that commit.
-- [ ] Prepare a standalone demo: public chain input → Prep query → TypeScript
+- [x] Prepare a standalone demo: public chain input → Prep query → TypeScript
   handler → PostgreSQL → GraphQL, followed by a short restart/follow demonstration.
   Show direct Prep usage too, so its independent product role is clear.
-- [ ] Use a labelled fixed dataset for a repeatable demonstration; distinguish
+- [x] Use a labelled fixed dataset for a repeatable demonstration; distinguish
   fixture replay, actual Regtest operation and public-network reads in the script.
-- [ ] Prepare demo narration and an architecture explanation. Record only behavior
+- [x] Prepare demo narration and an architecture explanation. Record only behavior
   actually exercised; do not imply a public endpoint, published package, private
   memo access or full-mainnet coverage. Benchmark outputs stay local.
 
 Acceptance record: demo reproducible from the candidate and documentation with
 matching commands, scope and limitations. Submission/upload and any public
 deployment remain separate actions, not implied by preparing these materials.
+
+The [demo script and narration](docs/DEMO.md) distinguish the captured mainnet
+fixture from real Regtest recovery. A prepared script is not a recorded or
+uploaded video. M6 replays the candidate before delivery.
 
 ### M6 — Final verification and buffer
 
