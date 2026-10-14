@@ -1,0 +1,20 @@
+type Block {
+  id: ID!
+  hash: String!
+  previousHash: String!
+  time: BigInt!
+  transactionCount: Int!
+}
+type BranchBlock {
+  id: ID!
+  height: Int!
+}
+type Transaction {
+  id: ID!
+  txid: String!
+  blockHeight: Int!
+  index: Int!
+  version: Int!
+  locktime: BigInt!
+  sizeBytes: Int!
+}

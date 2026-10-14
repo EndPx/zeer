@@ -45,7 +45,7 @@ Prep must also remain usable directly through its API/client without Chef.
 | ID | Target window | Work | Depends on | Completion gate |
 | --- | --- | --- | --- | --- |
 | M1 — complete | 14 October | Reproducible developer quickstart | Existing public Prep/Chef contracts | Clean checkout reaches verified GraphQL output and resumes after restart without local-only artifacts |
-| M2 | 17–20 October | Recovery across node, Prep, Chef and GraphQL | M1 | Real isolated Regtest branch change, source outage and restart preserve canonical application state |
+| M2 — complete | 14 October | Recovery across node, Prep, Chef and GraphQL | M1 | Real isolated Regtest branch change, source outage and restart preserve canonical application state |
 | M3 | 21–22 October | Clear CLI status and failure guidance | M1; use M2 state transitions | Human-readable progress is accurate; automation retains structured output and nonzero failures |
 | M4 | 23–24 October | Installable local release packages | M1–M3 | Packed packages work in a separate consumer project without monorepo resolution or registry publication |
 | M5 | 25–26 October | Demo, documentation and release candidate | M2–M4 | Complete public-data demo and documented limits match the frozen candidate |
@@ -82,25 +82,30 @@ Existing Prep real-node checks and Chef source-fixture/PostgreSQL tests do not
 by themselves prove recovery of the connected pipeline. Exercise one isolated
 real Regtest node feeding Prep, Chef, PostgreSQL and the GraphQL reader together.
 
-- [ ] Backfill to a known head, follow new blocks, and independently compare
+- [x] Backfill to a known head, follow new blocks, and independently compare
   application entities/checkpoint to the canonical source.
-- [ ] Interrupt the source and then Prep separately. Verify the configured
+- [x] Interrupt the source and then Prep separately. Verify the configured
   detection/polling behavior, unavailable-state handling and recovery; do not
   promise instantaneous outage detection or uninterrupted reads.
-- [ ] Interrupt/restart Chef at controlled ingestion boundaries. Confirm atomic
+- [x] Interrupt/restart Chef at controlled ingestion boundaries. Confirm atomic
   entity/checkpoint commits and correct continuation after an ambiguous interruption.
-- [ ] Replace a branch within the supported recovery window using isolated
+- [x] Replace a branch within the supported recovery window using isolated
   Regtest controls. Verify Prep epoch/cursor behavior, Chef undo/replay, removal
   of orphaned effects and GraphQL results from the replacement branch.
-- [ ] Exercise a branch change beyond the safe window. Confirm explicit blocking
+- [x] Exercise a branch change beyond the safe window. Confirm explicit blocking
   and a documented operator recovery path, with no destructive automatic reset.
-- [ ] Check query availability during reconciliation and ensure a single response
+- [x] Check query availability during reconciliation and ensure a single response
   does not combine incompatible application states. Retain failed attempts and
   classify controlled reorg evidence separately from natural P2P behavior.
 
 Acceptance record: source hashes, epochs, checkpoints, independent canonical
 entity comparison and expected failure/recovery transitions. If a correctness
 gate fails, fix that failure before CLI polish or release packaging.
+
+Completed with the connected real-node harness in `benchmarks/chef/recovery.py`.
+See the [operator guide](docs/OPERATIONS.md) for the verified recovery model and
+its boundaries. Detailed comparisons, failures and review evidence remain local.
+M6 must repeat the critical checks on the frozen candidate.
 
 ### M3 — Developer-facing CLI status
 
