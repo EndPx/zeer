@@ -7,6 +7,7 @@ Run under a 0.25 CPU / 512 MiB controller cgroup; containers total <=2.5 CPU/6Gi
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -31,9 +32,13 @@ def main():
     p.add_argument('--source', type=Path, required=True)
     p.add_argument('--prep-binary', type=Path, required=True)
     p.add_argument('--name', required=True)
+    p.add_argument('--subnet', help='Optional unused RFC1918 IPv4 /24-/28; inspect host/VPN routes first')
     p.add_argument('--allow-disposable-regtest-mutation', action='store_true')
     a = p.parse_args()
     assert a.allow_disposable_regtest_mutation and re.fullmatch(r'zeer-[a-z0-9-]{1,40}', a.name)
+    if a.subnet:
+        subnet=ipaddress.ip_network(a.subnet,strict=True)
+        assert subnet.version==4 and 24<=subnet.prefixlen<=28 and any(subnet.subnet_of(ipaddress.ip_network(cidr)) for cidr in ['10.0.0.0/8','172.16.0.0/12','192.168.0.0/16'])
     a.work = a.work.resolve(); a.source = a.source.resolve(); a.prep_binary = a.prep_binary.resolve()
     assert not a.work.exists() and a.prep_binary.is_file()
     assert (a.source/'packages/chef/dist/cli.js').is_file()
@@ -111,7 +116,7 @@ def main():
         assert set(old).isdisjoint(new),'branch_hashes_reused'
         return head+1,old
     try:
-        call(['docker','network','create','--internal',network])
+        call(['docker','network','create','--internal',*(['--subnet',a.subnet] if a.subnet else []),network])
         (a.work/'node').mkdir();os.chown(a.work/'node',10001,10001)
         zebra=create('node',NODE,['--config','/config.toml','start'],.6,'2g',[
             '--entrypoint','zebrad','--user','10001:10001','-v',str(a.source/'benchmarks/prep/full/zebra-regtest.toml')+':/config.toml:ro',

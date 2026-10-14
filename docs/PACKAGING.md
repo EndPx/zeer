@@ -69,6 +69,12 @@ node examples/package-consumer/verify.mjs \
   --integration --port 39470
 ```
 
+Add `--indexed` to annotate `PublicTransaction.minedHeight` and
+`Block.transactionCount` in the consumer's separate schema. The same installed
+CLI, strict declarations, explicit migration and exact-output checks then exercise
+the opt-in feature. This does not alter the default example or an existing
+application namespace. Each invocation still requires a fresh output directory.
+
 After package/type checks, the verifier queries Prep directly and independently
 compares raw blocks and transaction bytes with the committed captured fixture.
 It generates a unique project namespace, explicitly migrates, requires an empty

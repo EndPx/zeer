@@ -30,9 +30,9 @@ Results and reports stay local.
 | S2 | Chef query performance | Concrete application queries, canonical expected results, actual PostgreSQL plans and bounded before/after GraphQL measurements; preserve auth, exact values, keyset pagination and snapshot/reorg gates |
 | S3 | Schema/handler evolution design | Compatible/breaking-change policy, shadow rebuild/replay and verification gates, cutover/rollback failure model, and a real PostgreSQL rehearsal using separate namespaces |
 
-- [ ] S1: admit source and disk budgets, capture baseline tiers, measure and decide
+- [x] S1: admit source and disk budgets, capture baseline tiers, measure and decide
   whether a persistent index or another targeted change is warranted.
-- [ ] S2: measure application query patterns and database plans, implement only
+- [x] S2: measure application query patterns and database plans, implement only
   justified changes, and verify correctness plus read/write/storage tradeoffs.
 - [x] S3: document the proposed version-transition contract and prove the parts
   supported today; identify automatic routing/cutover work still unimplemented.
@@ -41,6 +41,18 @@ The [schema/handler evolution design](docs/SCHEMA_EVOLUTION.md) and
 [PostgreSQL rehearsal](benchmarks/chef/evolution/README.md) cover shadow replay,
 exact replacement validation, pin invalidation and stale rollback targets using
 the existing separate-namespace workflow. Routing automation remains proposed.
+
+S1 retains the released in-memory derived-index policy and full admission checks.
+The [scale and admission-cost harness](benchmarks/prep/scale/README.md) documents
+how to reproduce the investigation; a measurement-only zero-index clone is not
+a released engine variant. A persistent cache needs a separately verified format,
+payload/catalog binding and corruption/reorg recovery contract before adoption.
+
+S2 implements explicit scalar `@index` declarations through namespace migration;
+see [query indexes](docs/CHEF_QUERY_INDEXES.md). No default field indexes or query
+semantics changed. Query plans, read/storage/write tradeoffs and indexed recovery
+were verified; detailed results remain local. Adding annotations changes model
+identity and follows the separate-namespace evolution procedure above.
 
 Larger early-chain datasets must not be presented as modern full-chain coverage.
 No universal speed advantage, persistent-index benefit or atomic version cutover

@@ -110,6 +110,26 @@ introspection, fragments or executable directives. A bearer token is required.
 See the example for request, response and concurrency bounds. No public
 production endpoint or Neon compatibility result is claimed.
 
+Field equality indexes are opt-in through one argument-free `@index` annotation
+in the entity schema. For example, a block transaction browser can declare
+`minedHeight: Int! @index`, and a block-summary projection can declare
+`transactionCount: Int! @index`. `migrate` creates partial PostgreSQL B-tree
+indexes on that entity's native JSONB field value plus ID. Unannotated schemas
+create no extra field indexes and retain their existing model fingerprints.
+
+Annotations support `Int`, `Boolean`, `BigInt`, and non-primary `ID` fields,
+including nullable fields, with at most eight indexes per project. The primary
+`id` already has an index. `String` is excluded because its larger value bound
+can exceed PostgreSQL B-tree tuple limits. Equality types, null handling, exact
+BigInt strings, pagination, authorization and snapshot/read gates stay unchanged.
+Adding or removing an annotation changes model identity: choose a fresh project
+namespace, migrate and replay before switching readers. Existing projects are
+not automatically altered when the application schema changes. Indexes consume
+space and add work to writes and undo/replay; select fields from actual query
+plans instead of annotating every filter. See the
+[query-index contract](https://github.com/EndPx/zeer/blob/main/docs/CHEF_QUERY_INDEXES.md)
+and [schema-evolution procedure](https://github.com/EndPx/zeer/blob/main/docs/SCHEMA_EVOLUTION.md).
+
 ```sh
 npm run build:chef
 # Use a disposable database; integration tests create isolated generated namespaces.

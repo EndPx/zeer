@@ -9,12 +9,13 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
 const integration = args.includes('--integration');
-const allowed = integration ? ['--output', '--integration', '--port'] : ['--output'];
+const indexed = args.includes('--indexed');
+const allowed = integration ? ['--output', '--integration', '--port', '--indexed'] : ['--output', '--indexed'];
 const flags = new Map();
 for (let i = 0; i < args.length; i++) {
   const flag = args[i];
   assert.ok(allowed.includes(flag) && !flags.has(flag), 'Unknown or repeated flag');
-  if (flag === '--integration') { flags.set(flag, true); continue; }
+  if (flag === '--integration' || flag === '--indexed') { flags.set(flag, true); continue; }
   const value = args[++i];
   assert.ok(value && !value.startsWith('--'), 'Missing flag value');
   flags.set(flag, value);
@@ -79,7 +80,9 @@ const project = `pkg_${Date.now().toString(36)}`;
 const config = (await readFile(join(root, 'examples/chef-public/chef.config.ts'), 'utf8'))
   .replace('project: "public_demo"', `project: "${project}"`).replace('startHeight: 1,', 'startHeight: 1687106,');
 await writeFile(join(consumer, 'chef.config.ts'), config);
-await copyFile(join(root, 'examples/chef-public/schema.graphql'), join(consumer, 'schema.graphql'));
+let schema = await readFile(join(root, 'examples/chef-public/schema.graphql'), 'utf8');
+if (indexed) schema = schema.replace('minedHeight: Int!', 'minedHeight: Int! @index').replace('transactionCount: Int!', 'transactionCount: Int! @index');
+await writeFile(join(consumer, 'schema.graphql'), schema);
 const generated = JSON.parse(await recorded(cli, ['codegen', '--json'], consumer, 'consumer-codegen'));
 assert.equal(generated.command, 'codegen');
 assert.equal(generated.status, 'complete');
@@ -138,5 +141,5 @@ if (integration) {
   assert.equal(repeated.state, 'complete');
   assert.equal(repeated.blocks, 0);
 }
-await writeFile(join(output, 'acceptance.json'), JSON.stringify({ status: 'PASS', versions: { chef: '0.1.0', prepClient: '0.1.0' }, consumer, project, installedBin: true, strictTypes: true, fixtureIntegration: integration, scope: integration ? 'Fixed mainnet fixture replay; not live node or reorg proof' : 'Package installation only; no pipeline evidence' }, null, 2));
+await writeFile(join(output, 'acceptance.json'), JSON.stringify({ status: 'PASS', versions: { chef: '0.1.0', prepClient: '0.1.0' }, consumer, project, installedBin: true, strictTypes: true, fixtureIntegration: integration, indexedSchema: indexed, scope: integration ? 'Fixed mainnet fixture replay; not live node or reorg proof' : 'Package installation only; no pipeline evidence' }, null, 2));
 console.log(JSON.stringify({ status: 'PASS', output, consumer, fixtureIntegration: integration }));

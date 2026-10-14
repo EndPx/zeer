@@ -15,6 +15,12 @@ height and recovery window. A different schema or handler identity cannot silent
 reuse the old namespace. Namespace migration is database initialization, not a
 data/schema upgrade command.
 
+Field `@index` annotations also participate in model identity. Their addition or
+removal uses the same new-namespace procedure in this version, even when the
+GraphQL response shape is unchanged. This preserves the existing namespace;
+in-place or concurrent online index-policy migration is not implemented. See the
+[query-index contract](CHEF_QUERY_INDEXES.md) for supported fields and costs.
+
 The CLI fingerprint includes configuration-file bytes, parsed schema fingerprint,
 project, network, start height, recovery window, `handlerVersion` and normalized
 Prep URL. Changing comments in the config can therefore change identity. Imported

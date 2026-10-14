@@ -91,9 +91,16 @@ block, exact-window undo/replay, rejection beyond the window, consistent GraphQL
 snapshots and explicit rebuild into a new namespace. Its SQL pause/lock controls
 exist only in its newly created test database; they are not application hooks.
 These are controlled administrative forks, not naturally occurring P2P reorgs.
+The recovery projection declares indexes on its transaction block height and
+block transaction count, so the same proof exercises index maintenance during
+failure, rollback and replay. It does not change the default public example schema.
 
 Run only one proof within the resource budget, with a new output directory and
 unique `zeer-...` Docker name prefix. All output paths must be local/ignored; keep
 failures as well as passing records. The controller needs its own bounded cgroup
 in addition to the container limits. The harness stops its owned containers on
 exit and retains state for diagnosis. It never globally prunes Docker resources.
+If Docker's default subnet pool is exhausted, an operator can supply `--subnet`
+with an unused RFC1918 IPv4 /24–/28 after checking host/VPN routes and existing
+Docker networks. Docker also checks its own overlap; do not change global network
+configuration or delete another application's network to run the proof.

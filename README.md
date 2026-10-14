@@ -18,6 +18,11 @@ discovery, immutable transaction indexes and direct metadata projection. See
 the [query contract](docs/PREP_QUERY.md) and
 [pinned CipherScan architecture review](docs/SL_CIPHERSCAN_RESEARCH.md).
 Chef uses bounded write coalescing while preserving atomic block/checkpoint commits.
+Developers can opt into bounded scalar equality indexes with field `@index`
+declarations during explicit migration. Existing schemas retain their behavior;
+see the [query-index contract](docs/CHEF_QUERY_INDEXES.md) and
+[schema/handler evolution procedure](docs/SCHEMA_EVOLUTION.md) before changing a
+running project's model.
 
 Benchmark outputs, comparison tables and reports are retained locally under
 `benchmarks/results/` and excluded from Git. The public repository keeps the
@@ -81,6 +86,8 @@ Internal modules do not imply separate npm publications. The initial target is o
 - [Chef public-data contract](docs/CHEF_PUBLIC_MVP.md)
 - [Chef example and commands](examples/chef-public/README.md)
 - [Recovery and operator guide](docs/OPERATIONS.md)
+- [Opt-in query indexes](docs/CHEF_QUERY_INDEXES.md)
+- [Schema and handler evolution design](docs/SCHEMA_EVOLUTION.md)
 - [Local package installation and verification](docs/PACKAGING.md)
 - [Demo script and architecture](docs/DEMO.md)
 - [Implementation plan and acceptance gates](.omc/plans/zeer-v0.1.md)

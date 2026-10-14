@@ -3,7 +3,7 @@ type Block {
   hash: String!
   previousHash: String!
   time: BigInt!
-  transactionCount: Int!
+  transactionCount: Int! @index
 }
 type BranchBlock {
   id: ID!
@@ -12,7 +12,7 @@ type BranchBlock {
 type Transaction {
   id: ID!
   txid: String!
-  blockHeight: Int!
+  blockHeight: Int! @index
   index: Int!
   version: Int!
   locktime: BigInt!

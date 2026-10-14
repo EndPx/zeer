@@ -1,5 +1,5 @@
 export type Scalar = "ID" | "String" | "Boolean" | "Int" | "BigInt";
-export interface Field { name: string; scalar: Scalar; required: boolean }
+export interface Field { name: string; scalar: Scalar; required: boolean; indexed?: true }
 export interface EntityDefinition { name: string; fields: Record<string, Field> }
 export interface Model { entities: Record<string, EntityDefinition>; fingerprint: string }
 export type StoredEntity = Record<string, string | number | boolean | null> & { id: string };

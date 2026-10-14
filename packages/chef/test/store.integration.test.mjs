@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
 import pg from "pg";
-import { parseModel } from "../dist/schema.js";
+import { parseModel, queryIndexes } from "../dist/schema.js";
 import { PostgresStore } from "../dist/store.js";
 
 const url = process.env.CHEF_TEST_DATABASE_URL;
@@ -30,6 +30,81 @@ async function fixture(t, overrides = {}) {
   await store.acquire();
   return { store, options, extra: changes => { const value = new PostgresStore(url, { ...options, ...changes }); extras.push(value); return value; } };
 }
+
+test("PostgreSQL: explicit opt-in indexes are partial, idempotent and identity-bound", { skip: !url }, async t => {
+  const indexed = parseModel("type Account { id: ID! balance: BigInt! @index count: Int @index active: Boolean @index owner: ID @index }");
+  const { store, options, extra } = await fixture(t, { model: indexed });
+  const inspect = new pg.Client({ connectionString: url }); await inspect.connect();
+  t.after(() => inspect.end());
+  const readIndexes = async () => (await inspect.query("SELECT indexname,indexdef FROM pg_indexes WHERE schemaname=$1 AND tablename='entities' ORDER BY indexname", [`chef_${options.project}`])).rows;
+  const first = await readIndexes();
+  assert.equal(first.length, 5); // Primary key plus four explicitly declared field indexes.
+  for (const { name, entity, field } of queryIndexes(indexed)) {
+    const definition = first.find(row => row.indexname === name)?.indexdef;
+    assert.ok(definition, `Missing declared index ${name}`);
+    assert.match(definition, /USING btree/);
+    assert.ok(definition.includes(`data -> '${field}'::text`), definition);
+    assert.ok(definition.includes(`WHERE (entity = '${entity}'::text)`), definition);
+    assert.match(definition, /, id\) WHERE/);
+  }
+  await store.migrate();
+  assert.deepEqual(await readIndexes(), first);
+  const plain = parseModel("type Account { id: ID! balance: BigInt! count: Int active: Boolean owner: ID }");
+  const changed = extra({ model: plain });
+  await assert.rejects(changed.migrate(), /identity mismatch/);
+  await assert.rejects(changed.checkpoint(), /identity mismatch/);
+  assert.deepEqual(await readIndexes(), first);
+  const unindexed = await fixture(t, { model: plain });
+  await assert.rejects(unindexed.extra({ model: indexed }).migrate(), /identity mismatch/);
+  const ordinary = (await inspect.query("SELECT count(*)::int AS count FROM pg_indexes WHERE schemaname=$1 AND tablename='entities'", [`chef_${unindexed.options.project}`])).rows[0].count;
+  assert.equal(ordinary, 1, "Unannotated models must not gain default field indexes");
+});
+
+test("PostgreSQL: indexed exact/null scalar filters and ID pages track updates, failure and rollback", { skip: !url }, async t => {
+  const indexed = parseModel("type Account { id: ID! balance: BigInt! @index count: Int @index active: Boolean @index owner: ID @index }");
+  const { store } = await fixture(t, { model: indexed });
+  const exact = 9007199254740993123456789n;
+  const a = { id: "a", balance: exact, count: 7, active: false, owner: "owner" };
+  const b = { id: "b", balance: exact, count: 7, active: false, owner: null };
+  const c = { id: "c", balance: exact + 1n, count: null, active: null, owner: null };
+  await store.apply(block(0), async entities => { for (const row of [a, b, c]) await entities.set("Account", row); });
+  const ids = where => store.read(async view => (await view.list("Account", { first: 10, where })).map(row => row.id));
+  assert.deepEqual(await ids({ balance: exact }), ["a", "b"]);
+  assert.deepEqual(await ids({ balance: exact.toString() }), ["a", "b"]);
+  assert.deepEqual(await ids({ count: null }), ["c"]);
+  assert.deepEqual(await ids({ active: false }), ["a", "b"]);
+  assert.deepEqual(await ids({ active: null }), ["c"]);
+  assert.deepEqual(await ids({ owner: null }), ["b", "c"]);
+  assert.deepEqual(await ids({ owner: "owner" }), ["a"]);
+  assert.deepEqual(await ids({ balance: exact, count: 7, active: false }), ["a", "b"]);
+  const initial = await store.read(view => view.list("Account", { first: 10 }));
+  assert.equal(initial[0].balance, exact.toString());
+  const first = await store.read(view => view.list("Account", { first: 1, where: { count: 7 } }));
+  const second = await store.read(view => view.list("Account", { first: 1, after: first[0].id, where: { count: 7 } }));
+  assert.deepEqual(first.map(row => row.id), ["a"]); assert.deepEqual(second.map(row => row.id), ["b"]);
+  await assert.rejects(store.apply(block(1), async entities => {
+    await entities.set("Account", { ...a, count: 99, balance: exact + 2n });
+    await entities.delete("Account", "b");
+    throw new Error("indexed block failed");
+  }), /indexed block failed/);
+  assert.deepEqual(await store.read(view => view.list("Account", { first: 10 })), initial);
+  await store.apply(block(1), async entities => {
+    await entities.set("Account", { ...a, count: 8, active: true, owner: null });
+    await entities.delete("Account", "b");
+    await entities.set("Account", { id: "d", balance: exact, count: 8, active: true, owner: "next" });
+  });
+  assert.deepEqual(await ids({ count: 7 }), []);
+  assert.deepEqual(await ids({ count: 8 }), ["a", "d"]);
+  assert.deepEqual(await ids({ active: false }), []);
+  assert.deepEqual(await ids({ owner: "owner" }), []);
+  await store.markReconciling();
+  await assert.rejects(store.read(view => view.list("Account", { first: 10, where: { count: 8 } })), /reconciling/);
+  await store.rollback(0, h(1)); await store.markReady();
+  assert.deepEqual(await store.read(view => view.list("Account", { first: 10 })), initial);
+  assert.deepEqual(await ids({ count: 7 }), ["a", "b"]);
+  assert.deepEqual(await ids({ count: 8 }), []);
+  assert.deepEqual(await ids({ balance: exact }), ["a", "b"]);
+});
 
 test("PostgreSQL: atomic block failure, exact BigInt, restart and retained duplicate", { skip: !url }, async t => {
   const { store, extra } = await fixture(t);

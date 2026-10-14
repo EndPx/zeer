@@ -10,6 +10,27 @@ function safeName(name: string): void {
   if (!/^[_A-Za-z][_0-9A-Za-z]*$/.test(name) || name.startsWith("__") || reserved.has(name) || name.length > 64) throw new Error(`Unsafe schema name: ${name}`);
 }
 
+/** Internal descriptor shared by explicit migration and benchmark experiments. */
+export function queryIndexes(model: Model): { name: string; entity: string; field: string }[] {
+  const indexes: { name: string; entity: string; field: string }[] = [];
+  for (const [entityName, entity] of Object.entries(model.entities).sort(compareNames)) {
+    safeName(entityName);
+    if (entity.name !== entityName) throw new Error("Entity definition name must match its key");
+    for (const [fieldName, field] of Object.entries(entity.fields).sort(compareNames)) {
+      safeName(fieldName);
+      if (field.name !== fieldName) throw new Error("Field definition name must match its key");
+      if (!Object.hasOwn(field, "indexed")) continue;
+      if (field.indexed !== true || fieldName === "id" || !["Int", "Boolean", "BigInt", "ID"].includes(field.scalar)) {
+        throw new Error("@index requires Int, Boolean, BigInt or a non-id ID field");
+      }
+      if (indexes.length === 8) throw new Error("A project supports at most 8 @index fields");
+      indexes.push({ name: `chef_qi_${createHash("sha256").update(JSON.stringify([entityName, fieldName])).digest("hex").slice(0, 24)}`,
+        entity: entityName, field: fieldName });
+    }
+  }
+  return indexes;
+}
+
 export function parseModel(sdl: string): Model {
   if (bytes(sdl) > 64 * 1024) throw new Error("Schema exceeds 64 KiB");
   const document = parse(sdl, { maxTokens: 4096 });
@@ -25,11 +46,15 @@ export function parseModel(sdl: string): Model {
     for (const field of definition.fields) {
       const fieldName = field.name.value;
       safeName(fieldName);
-      if (fields[fieldName] || field.arguments?.length || field.directives?.length) throw new Error(`Invalid or duplicate field: ${fieldName}`);
+      if (fields[fieldName] || field.arguments?.length) throw new Error(`Invalid or duplicate field: ${fieldName}`);
+      const directives = field.directives ?? [];
+      if (directives.length > 1 || (directives.length === 1 && (directives[0]!.name.value !== "index" || directives[0]!.arguments?.length))) {
+        throw new Error(`Only one argument-free @index directive is supported: ${fieldName}`);
+      }
       const required = field.type.kind === Kind.NON_NULL_TYPE;
       const type = field.type.kind === Kind.NON_NULL_TYPE ? field.type.type : field.type;
       if (type.kind !== Kind.NAMED_TYPE || !scalars.has(type.name.value as Scalar)) throw new Error("Entity fields must be ID, String, Boolean, Int, or BigInt; relations and lists are unsupported");
-      fields[fieldName] = { name: fieldName, scalar: type.name.value as Scalar, required };
+      fields[fieldName] = { name: fieldName, scalar: type.name.value as Scalar, required, ...(directives.length ? { indexed: true as const } : {}) };
     }
     if (fields.id?.scalar !== "ID" || !fields.id.required) throw new Error(`Entity ${name} requires id: ID!`);
     entities[name] = { name, fields: Object.fromEntries(Object.entries(fields).sort(compareNames)) };
@@ -42,7 +67,9 @@ export function parseModel(sdl: string): Model {
     }
   }
   const ordered = Object.fromEntries(Object.entries(entities).sort(compareNames));
-  return { entities: ordered, fingerprint: createHash("sha256").update(JSON.stringify(ordered)).digest("hex") };
+  const model = { entities: ordered, fingerprint: createHash("sha256").update(JSON.stringify(ordered)).digest("hex") };
+  queryIndexes(model);
+  return model;
 }
 
 export function encodeEntity(model: Model, name: string, input: unknown): StoredEntity {

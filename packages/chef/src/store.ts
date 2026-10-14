@@ -1,5 +1,5 @@
 import pg, { type PoolClient } from "pg";
-import { encodeEntity, decodeEntity } from "./schema.js";
+import { encodeEntity, decodeEntity, queryIndexes } from "./schema.js";
 import type { ChefStore, Checkpoint, EntityAccess, PublicBlock, ReadView, StoredEntity, StoreOptions } from "./types.js";
 
 type State = { fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reorg_window: number };
@@ -27,11 +27,13 @@ export class PostgresStore implements ChefStore {
   private busy = false;
   private closed = false;
   private writerError: Error | null = null;
+  private readonly indexes: ReturnType<typeof queryIndexes>;
 
   constructor(connectionString: string, private readonly options: StoreOptions) {
     if (!/^[a-z][a-z0-9_]{0,31}$/.test(options.project)) throw new Error("Invalid Chef project name");
     if (!Number.isInteger(options.startHeight) || options.startHeight < 0 || options.startHeight > 0xffff_ffff) throw new Error("Invalid startHeight");
     if (!Number.isInteger(options.reorgWindow) || options.reorgWindow < 1 || options.reorgWindow > 1000) throw new Error("reorgWindow must be 1..1000");
+    this.indexes = queryIndexes(options.model);
     this.namespace = `chef_${options.project}`;
     this.sql = `"${this.namespace}"`;
     this.pool = new pg.Pool({ connectionString, max: 6, connectionTimeoutMillis: 5000 });
@@ -80,6 +82,11 @@ export class PostgresStore implements ChefStore {
         await client.query(`CREATE TABLE ${this.sql}.blocks (height bigint PRIMARY KEY, hash text NOT NULL)`);
         await client.query(`CREATE TABLE ${this.sql}.undo (height bigint NOT NULL, entity text NOT NULL, id text COLLATE "C" NOT NULL, previous jsonb, PRIMARY KEY(height,entity,id))`);
         await client.query(`INSERT INTO ${this.sql}.state (singleton,fingerprint,model,network,start_height,reorg_window,status) VALUES(true,$1,$2,$3,$4,$5,'ready')`, [this.options.fingerprint, this.options.model.fingerprint, this.options.network, this.options.startHeight, this.options.reorgWindow]);
+      }
+      for (const { name, entity, field } of this.indexes) {
+        // Descriptor names are validated even for models supplied programmatically.
+        // Native JSONB equality preserves scalar/null semantics and the ID cursor.
+        await client.query(`CREATE INDEX IF NOT EXISTS "${name}" ON ${this.sql}.entities ((data -> '${field}'), id) WHERE entity = '${entity}'`);
       }
       await client.query("COMMIT");
     } catch (error) { await client.query("ROLLBACK").catch(() => {}); throw error; }
