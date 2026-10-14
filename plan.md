@@ -24,6 +24,14 @@ submission/distribution work. Independent investigations may proceed together;
 resource-intensive runs remain sequential within the shared experiment budget.
 Results and reports stay local.
 
+The subsequent comparison request uses the current production implementation and
+pinned external providers. Keep Prep retrieval, Chef/native prepared lookup, and
+fresh native ingestion observations separate. Reproduction settings live in the
+[benchmark preflight](docs/CHEF_BENCHMARK_PREFLIGHT.md); output equivalence, actual
+aggregate resource limits, source identity and complete cleanup determine whether
+a session is eligible. Different native entity workloads do not establish a pure
+framework ranking. This request does not reopen engine optimization or publishing.
+
 | ID | Work | Acceptance evidence |
 | --- | --- | --- |
 | S1 | Prep scaling | Real bounded dataset tiers, source identity/coverage, preparation versus serving costs, startup/CPU/memory/disk and equivalent query measurements; decision on persistent indexes justified by observations |

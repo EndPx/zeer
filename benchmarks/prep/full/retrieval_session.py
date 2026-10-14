@@ -3,6 +3,7 @@
 Root launches this controller inside zeerretrievalclient.slice (1 CPU/512 MiB).
 No source construction, DDL, database drops, public ports or image installation.
 """
+import argparse
 import datetime
 import gzip
 import hashlib
@@ -31,6 +32,10 @@ MANIFEST = Path('benchmarks/fixtures/mainnet-transactions-v1/manifest.json')
 PYTHON_IMAGE = 'python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1'
 DEPS, GENERATED = '/opt/zeer-bench/20261013/state/client/deps', '/opt/zeer-bench/20261013/state/client/generated'
 TOKEN = 'zeer-chef-prep-private-token'
+NATIVE_REPORT = Path('/opt/zeer-chef/20261014/results/cipherscan-native-final.json')
+CLIENT_PREFIX = 'zeer-retrieval-client-'
+PREP_PROJECTION = 'decoded'
+PREP_SPARSE_ACCESS = 'query'
 SERVICES = ['commitpass-api', 'nabungfi-api', 'nabungfi-keeper', 'rocket-arena', 'nginx']
 
 
@@ -140,10 +145,43 @@ def ready(candidate, endpoint, dataset):
     raise RuntimeError('BACKEND_READINESS_TIMEOUT')
 
 
+def configure(argv=None):
+    """Choose fresh session locations without changing resource or workload bounds."""
+    global SOURCE, OUT, PREP, NATIVE_REPORT, CLIENT_PREFIX, TOKEN, PREP_PROJECTION, PREP_SPARSE_ACCESS
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path, default=SOURCE)
+    parser.add_argument('--out', type=Path, default=OUT)
+    parser.add_argument('--prep-container', default=PREP)
+    parser.add_argument('--native-report', type=Path, default=NATIVE_REPORT)
+    parser.add_argument('--client-prefix', default=CLIENT_PREFIX)
+    parser.add_argument('--token-env')
+    parser.add_argument('--prep-projection', choices=('decoded', 'metadata'), default=PREP_PROJECTION)
+    parser.add_argument('--prep-sparse-access', choices=('query', 'batch'), default=PREP_SPARSE_ACCESS)
+    args = parser.parse_args(argv)
+    if args.prep_sparse_access == 'batch' and args.prep_projection != 'metadata':
+        parser.error('batch sparse access requires metadata projection')
+    if not args.source.is_absolute() or not args.out.is_absolute() or not args.native_report.is_absolute():
+        parser.error('source, out and native-report must be absolute paths')
+    if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}', args.prep_container):
+        parser.error('invalid Prep container name')
+    if args.prep_container in {value for key, value in PROVIDERS.items() if key != 'prep'}:
+        parser.error('Prep container must differ from all other providers')
+    if not re.fullmatch(r'zeer-retrieval-client-[a-z0-9-]{0,32}', args.client_prefix):
+        parser.error('client prefix must start with zeer-retrieval-client-')
+    if args.token_env:
+        if not re.fullmatch(r'[A-Z][A-Z0-9_]{0,63}', args.token_env) or not os.environ.get(args.token_env):
+            parser.error('token environment variable must exist and be nonempty')
+        TOKEN = os.environ[args.token_env]
+    SOURCE, OUT, PREP = args.source, args.out, args.prep_container
+    NATIVE_REPORT, CLIENT_PREFIX, PREP_PROJECTION = args.native_report, args.client_prefix, args.prep_projection
+    PREP_SPARSE_ACCESS = args.prep_sparse_access
+    PROVIDERS['prep'] = PREP
+
+
 def main():
     global CS_DATABASE
     sys.path[:0] = [str(SOURCE), DEPS, GENERATED]
-    guarded = [NODE, PREP, PG, 'zeer-lookup-chef-pg', *[PROVIDERS[key] for key in ('lwd', 'zinder', 'zaino')]]
+    guarded = list(dict.fromkeys([NODE, PREP, 'zeer-chef-prep-http', PG, 'zeer-lookup-chef-pg', *[PROVIDERS[key] for key in ('lwd', 'zinder', 'zaino')]]))
     if OUT.exists() or any(inspect(name)['State']['Running'] for name in guarded):
         raise RuntimeError('OUTPUT_EXISTS_OR_BENCHMARK_ALREADY_RUNNING')
     client_group = Path('/sys/fs/cgroup') / CLIENT_SLICE
@@ -155,7 +193,7 @@ def main():
         oracle = json.load(source)
     if oracle['source']['height'] != manifest['end_height'] or oracle['source']['hash'] != manifest['end_hash']:
         raise RuntimeError('ORACLE_MANIFEST_SOURCE_MISMATCH')
-    native = json.loads(Path('/opt/zeer-chef/20261014/results/cipherscan-native-final.json').read_text())
+    native = json.loads(NATIVE_REPORT.read_text())
     CS_DATABASE = native['runs'][-1]['database']
     if native['status'] != 'PASS' or native['runs'][-1]['status'] != 'PASS' or not re.fullmatch(r'chef_cs_[0-9a-f]{16}_[1-5]', CS_DATABASE):
         raise RuntimeError('NATIVE_BENCHMARK_DATABASE_REQUIRED')
@@ -168,6 +206,7 @@ def main():
     session = {'format': 'six-source-prepared-retrieval-session-v1', 'status': 'RUNNING', 'eligible_for_comparison': False,
                'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'orchestrator_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                'driver_sha256': hashlib.sha256((SOURCE / 'benchmarks/prep/full/retrieval.py').read_bytes()).hexdigest(), 'client_image_id': image_id,
+               'source_directory': str(SOURCE), 'native_report': str(NATIVE_REPORT), 'prep_projection': PREP_PROJECTION, 'prep_sparse_access': PREP_SPARSE_ACCESS,
                'order': [BASE[i:] + BASE[:i] for i in range(5)], 'initial_containers': originals, 'host_before': health(), 'visits': [],
                'profile': {'queried_backend_cpu': 1, 'queried_backend_memory': 2 * 1024**3, 'source_cpu': 1, 'source_memory': 2 * 1024**3,
                            'client_and_controller_cpu': 1, 'client_and_controller_memory': 512 * 1024**2},
@@ -207,7 +246,7 @@ def main():
                              'source_cgroup_before': quota(process_group(inspect(NODE)['State']['Pid']), 2 * 1024**3),
                              'client_slice_before': quota(client_group, 512 * 1024**2), 'report_file': prefix + '.json'}
                     session['visits'].append(visit); save()
-                    client = 'zeer-retrieval-client-' + prefix; clients.append(client)
+                    client = CLIENT_PREFIX + prefix; clients.append(client)
                     env = os.environ.copy(); env.update(ZEER_RETRIEVAL_ENDPOINT=endpoint, PREP_API_TOKEN=TOKEN)
                     create = ['docker', 'create', '--name', client, '--network', 'host', '--cgroup-parent', CLIENT_SLICE, '--cpus', '1', '--memory', '512m', '--memory-swap', '512m',
                               '--pids-limit', '128', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges', '--read-only', '-e', 'PYTHONDONTWRITEBYTECODE=1',
@@ -215,6 +254,10 @@ def main():
                               '-v', DEPS + ':/deps:ro', '-v', GENERATED + ':/generated:ro', '-v', str(SOURCE) + ':/work:ro', '-v', str(OUT) + ':/results', '-w', '/work', image_id,
                               'python', '-m', 'benchmarks.prep.full.retrieval', '--candidate', candidate, '--workload', workload, '--endpoint-env', 'ZEER_RETRIEVAL_ENDPOINT',
                               '--oracle', '/work/' + str(ORACLE), '--manifest', '/work/' + str(MANIFEST), '--out', '/results/' + visit['report_file'], '--round', str(round_number), '--timeout-seconds', '300']
+                    if candidate == 'prep':
+                        create.extend(['--prep-projection', PREP_PROJECTION])
+                        if workload == 'sparse':
+                            create.extend(['--prep-access', PREP_SPARSE_ACCESS])
                     run(create, env=env)
                     try:
                         result = execute_client(client)
@@ -282,6 +325,7 @@ def main():
 
 
 if __name__ == '__main__':
+    configure()
     def interrupt(signum, frame):
         raise RuntimeError('SESSION_INTERRUPTED')
     signal.signal(signal.SIGINT, interrupt); signal.signal(signal.SIGTERM, interrupt)

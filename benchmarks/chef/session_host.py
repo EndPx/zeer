@@ -4,9 +4,11 @@ Runs only against previously prepared Zeer benchmark state. No provisioning,
 database migrations, candidate source changes or public ports are performed.
 """
 import datetime
+import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import statistics
 import signal
@@ -22,6 +24,9 @@ NODE = 'zeer-bench-four-frozen'
 CHEF_PG = 'zeer-lookup-chef-pg'
 SLICE = 'zeerlookup.slice'
 CLIENT_SLICE = 'zeerlookupclient.slice'
+API_UNIT = 'zeer-lookup-chef-api'
+CLIENT_PREFIX = 'zeer-lookup-client-'
+REPORT = ROOT / 'results/indexing-prep-v2.json'
 PYTHON_IMAGE = 'python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1'
 PROVIDERS = {'cipherscan': 'zeer-bench-four-pg', 'zinder': 'zeer-bench-four-zinder',
              'zaino': 'zeer-bench-four-zaino', 'lightwalletd': 'zeer-bench-four-lightwalletd'}
@@ -91,8 +96,8 @@ def health():
 
 def stop_candidate(candidate):
     if candidate == 'chef':
-        subprocess.run(['systemctl', 'stop', 'zeer-lookup-chef-api'], capture_output=True)
-        state = subprocess.run(['systemctl', 'is-active', 'zeer-lookup-chef-api'], capture_output=True, text=True).stdout.strip()
+        subprocess.run(['systemctl', 'stop', API_UNIT], capture_output=True)
+        state = subprocess.run(['systemctl', 'is-active', API_UNIT], capture_output=True, text=True).stdout.strip()
         if state not in {'inactive', 'failed', 'unknown'}:
             raise RuntimeError('CHEF_API_NOT_STOPPED')
         if inspect(CHEF_PG)['State']['Running']:
@@ -110,9 +115,17 @@ def save(session):
 def main():
     if OUT.exists():
         raise RuntimeError('SESSION_OUTPUT_EXISTS')
+    if subprocess.run(['docker', 'container', 'inspect', CHEF_PG], capture_output=True).returncode == 0:
+        raise RuntimeError('SESSION_PG_ALREADY_EXISTS')
+    if run(['systemctl', 'show', API_UNIT, '--property=LoadState', '--value']) != 'not-found':
+        raise RuntimeError('SESSION_API_UNIT_ALREADY_EXISTS')
     initial = [NODE, 'zeer-chef-pg', *PROVIDERS.values()]
     if any(inspect(name)['State']['Running'] for name in initial):
         raise RuntimeError('BENCHMARK_SERVICE_ALREADY_RUNNING')
+    pg_mounts = {mount['Source'] for mount in inspect('zeer-chef-pg')['Mounts']}
+    for name in run(['docker', 'ps', '--format', '{{.Names}}']).splitlines():
+        if pg_mounts.intersection(mount['Source'] for mount in inspect(name)['Mounts']):
+            raise RuntimeError('POSTGRES_SHARED_MOUNT_IN_USE')
     OUT.mkdir()
     session = {'format': 'five-candidate-rotated-lookup-v1', 'status': 'RUNNING',
                'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -175,15 +188,15 @@ def main():
                     pg_env = environment(original)
                     env['DATABASE_URL'] = f"postgres://chef:{quote(pg_env['POSTGRES_PASSWORD'], safe='')}@{ip(CHEF_PG)}:5432/chef_test"
                     env['CHEF_API_TOKEN'] = 'zeer-lookup-session-private-token'
-                    run(['systemd-run', '--unit=zeer-lookup-chef-api', '--collect', '--slice=' + SLICE,
+                    run(['systemd-run', '--unit=' + API_UNIT, '--collect', '--slice=' + SLICE,
                          '--property=WorkingDirectory=' + str(SOURCE), '--setenv=DATABASE_URL', '--setenv=CHEF_API_TOKEN',
-                         '/usr/bin/node', str(SOURCE / 'benchmarks/chef/serve.mjs'), '--report', str(ROOT / 'results/indexing-prep-v2.json'),
+                         '/usr/bin/node', str(SOURCE / 'benchmarks/chef/serve.mjs'), '--report', str(REPORT),
                          '--config', str(SOURCE / 'examples/chef-public/chef.config.ts'), '--port', '39370'], env=env)
                     endpoint = 'http://127.0.0.1:39370/graphql'
                     candidate_path = Path('/sys/fs/cgroup') / SLICE
                     visit['container'] = snapshot(CHEF_PG)
                     assert process_cgroup(visit['container']['pid']).is_relative_to(candidate_path)
-                    api_group = run(['systemctl', 'show', 'zeer-lookup-chef-api', '--property=ControlGroup', '--value'])
+                    api_group = run(['systemctl', 'show', API_UNIT, '--property=ControlGroup', '--value'])
                     assert api_group.startswith('/' + SLICE + '/')
                     visit['api_cgroup'] = api_group
                 else:
@@ -201,7 +214,7 @@ def main():
                 assert visit['cgroup_before']['memory.max'] == str(4 * 1024**3)
                 assert visit['cgroup_before']['memory.swap.max'] == '0'
                 prefix = f'round{round_number}-{candidate}'
-                client_name = 'zeer-lookup-client-' + prefix
+                client_name = CLIENT_PREFIX + prefix
                 env = os.environ.copy()
                 env.update(ZEER_TX_ENDPOINT=endpoint, CHEF_API_TOKEN='zeer-lookup-session-private-token')
                 client_args = ['docker', 'run', '--name', client_name, '--network', 'host', '--cgroup-parent', CLIENT_SLICE,
@@ -268,7 +281,7 @@ def main():
             session['host_after'] = health()
             session['running_containers_after'] = run(['docker', 'ps', '--format', '{{.Names}}']).splitlines()
             owned = {NODE, CHEF_PG, *PROVIDERS.values()}
-            if owned.intersection(session['running_containers_after']) or any(name.startswith('zeer-lookup-client-') for name in session['running_containers_after']):
+            if owned.intersection(session['running_containers_after']) or any(name.startswith(CLIENT_PREFIX) for name in session['running_containers_after']):
                 cleanup_errors.append({'action': 'verify_stopped', 'error_type': 'OwnedContainerStillRunning'})
         except Exception as error:
             cleanup_errors.append({'action': 'final_health', 'error_type': type(error).__name__})
@@ -278,9 +291,27 @@ def main():
             session['eligible_for_comparison'] = False
         session['finished_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
         save(session)
+    if session['status'] != 'PASS' or not session.get('eligible_for_comparison'):
+        raise RuntimeError('SESSION_NOT_ELIGIBLE')
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path, default=SOURCE)
+    parser.add_argument('--out', type=Path, default=OUT)
+    parser.add_argument('--report', type=Path, default=REPORT)
+    parser.add_argument('--name', default='zeerlookup')
+    parser.add_argument('--chef-revision', default=VERSIONS['chef'])
+    args = parser.parse_args()
+    if not re.fullmatch(r'zeer[a-z0-9]{1,24}', args.name) or not re.fullmatch(r'[0-9a-f]{40}', args.chef_revision):
+        raise RuntimeError('INVALID_SESSION_NAME_OR_REVISION')
+    SOURCE, OUT, REPORT = args.source.resolve(), args.out.resolve(), args.report.resolve()
+    if not SOURCE.is_dir() or not REPORT.is_file():
+        raise RuntimeError('PREPARED_SOURCE_AND_REPORT_REQUIRED')
+    SLICE, CLIENT_SLICE = args.name + '.slice', args.name + 'client.slice'
+    CHEF_PG, API_UNIT = 'zeer-' + args.name + '-pg', 'zeer-' + args.name + '-api'
+    CLIENT_PREFIX = 'zeer-' + args.name + '-client-'
+    VERSIONS['chef'] = args.chef_revision
     def interrupt(signum, frame):
         raise RuntimeError('SESSION_INTERRUPTED')
     signal.signal(signal.SIGTERM, interrupt)

@@ -1,7 +1,7 @@
 # Full-block verification and native-read observation
 
 `verify.py` requires a frozen Zebra-compatible JSON-RPC source and a running
-Prep HTTP archive containing mainnet blocks 1000â€“2023. Its allowlisted source
+Prep HTTP archive containing mainnet blocks 1000-2023. Its allowlisted source
 reads compare complete raw blocks and every decoded source field with Prep,
 then validate transaction-ID and transparent-output filtering. JSON decimals
 are read independently with Python Decimal while retaining the original source
@@ -175,3 +175,31 @@ Offline guard and fixture checks:
 python -m unittest benchmarks.prep.full.test_modern_capture \
   benchmarks.prep.full.test_reorg_proof benchmarks.prep.full.test_resilience_proof -v
 ```
+
+## Repeat native retrieval comparisons
+
+`retrieval_session.py` can reuse the preserved six-provider environment with a
+new verified Prep binary/container and fresh results. Set `--source`, `--out`,
+`--prep-container`, `--client-prefix` and `--token-env` explicitly. The prepared
+container must mount the matching immutable archive read-only, expose no public
+port, and accept its token through the environment. The controller does not build
+or replace that container. Record binary, source and archive identities alongside
+the session record.
+
+Use `--prep-projection metadata --prep-sparse-access batch` to measure current
+native public metadata retrieval: `/query` for complete header/transaction scans
+and `/transactions` for the 128 selected IDs. The sparse batch must complete in
+one request; its extra transaction-index positions are checked against independent
+oracle order outside timing. The default `decoded`/`query` options preserve the
+older overfetch workload for explicit historical reproduction.
+
+The same seven normalized fields and complete digests are checked across native
+HTTP, SQL and gRPC paths. Native batching and RPC concurrency differ and must be
+disclosed. gRPC adapters in this harness measure sparse lookup only; empty scan
+cells mean unmeasured compatibility, not a failed provider or zero throughput.
+Five cyclic rounds yield five observations per applicable workload. Run inside
+the enforced `zeerretrievalclient.slice` (1 CPU / 512 MiB / zero swap); source and
+active backend each have 1 CPU / 2 GiB ceilings. Start no parallel experiments.
+Retain failures, all observations, actual limits, and cleanup checks under ignored
+results. Source preparation, startup, warmup and independent equality checks are
+outside the measured retrieval interval.

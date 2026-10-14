@@ -4,6 +4,47 @@ Public-data benchmark methodology and reproduction instructions. Run observation
 and results are retained locally under `benchmarks/results/`. No viewing keys or
 decrypted shielded notes are involved.
 
+## Repeat comparisons with a newer build
+
+Keep retrieval, prepared serving and durable application ingestion in separate
+tables. Do not pool earlier timings with a fresh session. Pin and independently
+verify the source/build files: a supplied revision label alone is not build proof.
+The existing prepared ranges below remain early-mainnet fixtures, regardless of
+the client implementation's age.
+
+`benchmarks/chef/session_host.py` accepts `--source`, `--out`, `--report`,
+`--name` and `--chef-revision` for a new five-candidate serving session. Use an
+absolute verified build path, a retained passing ingestion report, a fresh output
+directory and a unique `zeer`-prefixed alphanumeric name. The report's original
+configuration and schema must still match. This can measure a newer read runtime
+against the same previously verified entity state; it does not remeasure ingestion.
+Run the controller inside `<name>client.slice` and retain its enforced shared
+1 CPU / 512 MiB limit. Each active serving stack has 1 CPU / 4 GiB total, including
+both Chef API and PostgreSQL. All original prepared database owners must be stopped
+before the temporary clone mounts their data. Check final PASS, comparison
+eligibility and empty cleanup errors rather than trusting an exit code alone.
+
+`benchmarks/chef/native_session.py` runs five alternating fresh Chef and pinned
+CipherScan native ingestion observations on the prepared benchmark host. It accepts
+`--root`, `--source`, `--prep-binary`, a full `--source-commit`, and a fresh
+`--name` such as `retry1`. Run it inside the matching `zeerretry1controller.slice`
+(generally `zeer<name>controller.slice`); it enforces the controller's shared 0.25 CPU / 1 GiB
+ceiling. The candidate parent allows 2 CPU / 5 GiB, and the frozen source at most
+0.75 CPU / 2 GiB, for an aggregate 3 CPU / 8 GiB envelope with zero experiment swap.
+It reuses the existing internal `zeer-chef-cs` network and guarded, stopped benchmark
+database storage. Scoped output and container names must be unused. The database
+publishes no host port: the Chef/admin DSN uses its inspected private Docker IP,
+and an authenticated read-only query checks connectivity before oracle collection.
+
+The native session keeps the upstream binary and database schema unchanged. An
+archived, guarded copy of the existing runner changes only repetition count,
+dedicated connection/container settings and resource limits. It retains those
+adaptations and hashes. Both candidates verify the complete common public
+projection, but CipherScan writes additional explorer entities and its primary
+timer includes process initialization/shutdown. Equal aggregate resource ceilings
+therefore still do not establish a pure framework speed ranking. Source sync,
+archive creation, schema setup and verification remain separate phases.
+
 ## Decision
 
 Build Chef's first public-data path over Prep, and measure both its complete

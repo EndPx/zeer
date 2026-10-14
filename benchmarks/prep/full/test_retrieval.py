@@ -1,10 +1,14 @@
 """Offline regressions for equivalent prepared-retrieval projections and bounds."""
 import copy
+import json
+import os
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal
 from pathlib import Path
 import time
+import tempfile
 import unittest
+from unittest.mock import MagicMock, patch
 
 from benchmarks.prep.full.retrieval import (
     Prep, Rpc, GrpcSparse, CipherScan, Http, decoded_transaction, digest, integer,
@@ -36,6 +40,33 @@ def page(next_block, rows, cursor=None, epoch="stable", revision="1"):
 
 
 class RetrievalTests(unittest.TestCase):
+    def test_batch_dispatch_reuses_location_verifier_and_requires_one_request(self):
+        from benchmarks.prep.full import retrieval
+        candidate = MagicMock()
+        candidate.preflight.return_value = {'epoch': 'stable'}
+        candidate.strategy, candidate.at = 'native batch', {'epoch': 'stable'}
+        dataset = {'oracle_sha256': 'oracle', 'manifest_sha256': 'manifest', 'sparse': [{'txid': TXID}]}
+        for requests, expected_status in [(1, 'PASS'), (2, 'FAIL')]:
+            with tempfile.TemporaryDirectory() as directory:
+                output = Path(directory) / 'result.json'
+                argv = ['retrieval', '--candidate', 'prep', '--workload', 'sparse', '--endpoint-env', 'TEST_ENDPOINT',
+                        '--oracle', str(ORACLE), '--manifest', str(MANIFEST), '--out', str(output), '--round', '1',
+                        '--prep-projection', 'metadata', '--prep-access', 'batch']
+                measured = {'requests': requests, 'sha256': 'same'}
+                with patch('sys.argv', argv), patch.dict(os.environ, TEST_ENDPOINT='http://private:39368'), \
+                     patch.object(retrieval, 'load_dataset', return_value=dataset), \
+                     patch('benchmarks.prep.full.batch_retrieval.BatchPrep', return_value=candidate), \
+                     patch('benchmarks.prep.full.batch_retrieval.oracle_locations', return_value={TXID: (1, 0)}), \
+                     patch('benchmarks.prep.full.batch_retrieval.verified_measure', return_value=measured) as verify:
+                    self.assertEqual(retrieval.main(), 0 if expected_status == 'PASS' else 1)
+                    self.assertEqual(verify.call_count, 2)
+                    verify.assert_called_with(candidate, dataset['sparse'], {TXID: (1, 0)})
+                result = json.loads(output.read_text())
+                self.assertEqual(result['status'], expected_status)
+                self.assertEqual(result['prep_access'], 'batch')
+                if expected_status == 'FAIL':
+                    self.assertEqual(result['failure_code'], 'BATCH_NOT_SINGLE_REQUEST')
+
     def test_exact_integer_and_projection_validation(self):
         for value in [True, 1.0, Decimal("1"), "01", "1e1", -1, "4294967296", None]:
             with self.subTest(value=value), self.assertRaises(ValueError):

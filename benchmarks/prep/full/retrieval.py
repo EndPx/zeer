@@ -363,8 +363,10 @@ def main():
     parser.add_argument("--round", type=int, required=True)
     parser.add_argument("--timeout-seconds", type=int, default=180)
     parser.add_argument("--prep-projection", choices=("decoded", "metadata"), default="decoded")
+    parser.add_argument("--prep-access", choices=("query", "batch"), default="query")
     args = parser.parse_args()
     require(args.prep_projection == "decoded" or args.candidate == "prep", "PREP_PROJECTION_REQUIRES_PREP")
+    require(args.prep_access == "query" or (args.candidate == "prep" and args.workload == "sparse" and args.prep_projection == "metadata"), "PREP_BATCH_REQUIRES_SPARSE_METADATA")
     require(re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", args.endpoint_env) and 1 <= args.round <= 5 and 1 <= args.timeout_seconds <= 900, "INVALID_ARGUMENT")
     endpoint = os.environ.get(args.endpoint_env)
     require(endpoint, "ENDPOINT_ENV_REQUIRED")
@@ -382,6 +384,7 @@ def main():
     report["limitations"].append("gRPC response bytes are serialized protobuf payload ByteSize, excluding transport frames; HTTP bytes exclude headers. PG counts also include bounded timeout settings.")
     report["timeout_seconds"] = args.timeout_seconds
     report["prep_projection"] = args.prep_projection if args.candidate == "prep" else None
+    report["prep_access"] = args.prep_access if args.candidate == "prep" else None
     adapter = None
     with args.out.open("x", encoding="utf-8") as output:
         try:
@@ -389,16 +392,28 @@ def main():
                 report["status"] = "NOT_APPLICABLE"
                 report["reason"] = "Only the sparse gRPC adapter is validated in this harness. Compact blocks alone cannot enumerate the same full public transaction projection; early-range height/hash/time header compatibility has not been validated, so these workloads are not measured."
             else:
-                adapter = {"prep": Prep, "rpc": Rpc, "cipherscan": CipherScan, "lwd": GrpcSparse, "zinder": GrpcSparse, "zaino": GrpcSparse}[args.candidate](
-                    endpoint, dataset, time.monotonic() + args.timeout_seconds,
-                    **({"projection": args.prep_projection} if args.candidate == "prep" else {}))
+                deadline = time.monotonic() + args.timeout_seconds
+                if args.prep_access == "batch":
+                    from benchmarks.prep.full.batch_retrieval import BatchPrep, oracle_locations, verified_measure
+                    adapter = BatchPrep(endpoint, dataset, deadline)
+                    positions = oracle_locations(dataset)
+                    perform_measure = lambda: verified_measure(adapter, dataset[args.workload], positions)
+                    report["limitations"].append("Prep sparse uses one snapshot-bound /transactions batch; its additional index locations are verified against independent oracle order outside timing.")
+                else:
+                    adapter = {"prep": Prep, "rpc": Rpc, "cipherscan": CipherScan, "lwd": GrpcSparse, "zinder": GrpcSparse, "zaino": GrpcSparse}[args.candidate](
+                        endpoint, dataset, deadline,
+                        **({"projection": args.prep_projection} if args.candidate == "prep" else {}))
+                    perform_measure = lambda: measure(adapter, args.workload, dataset[args.workload])
             if adapter is None:
                 print(json.dumps({"status": report["status"], "reason": report["reason"]}))
                 return 0
             report["strategy"] = adapter.strategy
             report["initial_source"] = adapter.preflight()
-            report["warmup"] = measure(adapter, args.workload, dataset[args.workload])
-            report["run"] = measure(adapter, args.workload, dataset[args.workload])
+            report["warmup"] = perform_measure()
+            report["run"] = perform_measure()
+            if args.prep_access == "batch":
+                report["bound_snapshot"] = adapter.at
+                require(report["run"]["requests"] == 1, "BATCH_NOT_SINGLE_REQUEST")
             report["final_source"] = adapter.preflight()
             require(report["final_source"] == report["initial_source"], "SOURCE_CHANGED")
             report["status"] = "PASS"
