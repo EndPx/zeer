@@ -6,6 +6,10 @@ Status: **Chef's public writer is optimized; the user subsequently authorized Pr
 Result policy (2026-10-14): all benchmark outputs and reports are local-only; this supersedes earlier result-publication requirements.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 
+Upcoming implementation order and the public-data release gates are maintained
+only in the [active roadmap](../../plan.md#active-roadmap-public-data-mvp-to-28-october).
+The historical gates below do not supersede that roadmap or reopen private scanning.
+
 The user subsequently authorized a pinned ShieldedLabs CipherScan review and
 relevant independent improvements. [Batch lookup and capabilities](../../docs/PREP_QUERY.md)
 are implemented; this does not reopen private scanning or copy the reference

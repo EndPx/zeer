@@ -2,8 +2,10 @@
 
 User instruction on 2026-10-13: develop Prep toward the role HyperSync provides
 for developers, specifically for Zcash. The user explicitly requires **complete
-blocks and transactions**, not a compact-only release. Chef remains deferred.
-This contract supersedes the earlier snapshot-only scope for this work.
+blocks and transactions**, not a compact-only release.
+This contract supersedes the earlier snapshot-only scope for Prep. Chef's public
+slice was subsequently authorized under its own contract. Upcoming work and
+the combined release gates are owned by the [active roadmap](../plan.md#active-roadmap-public-data-mvp-to-28-october).
 
 ## Required delivery
 
@@ -19,7 +21,7 @@ This contract supersedes the earlier snapshot-only scope for this work.
   finite `stream`, cancellation and explicit reorg errors; runnable examples.
 - [x] Correctness, failure/recovery and integration tests, plus reproducible
   real-node evidence. Distinguish local tests from observed live network events.
-- [x] Explain performance boundaries and publish measurements without assuming
+- [x] Explain performance boundaries and retain measurements locally without assuming
   parity with HyperSync's latency, scale, infrastructure or EVM capabilities.
 
 ## Boundaries
