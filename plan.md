@@ -17,6 +17,36 @@ candidate `8023c329bbb0cc5b26f101e01b383bb0b9180cea`. Detailed execution evidenc
 remains local. Authenticated organizer cutoff/form verification remains a
 separate submission gate; package publication and public deployment were not run.
 
+### Current priority after the technical candidate
+
+User direction on 14 October: prioritize the three investigations below before
+submission/distribution work. Independent investigations may proceed together;
+resource-intensive runs remain sequential within the shared experiment budget.
+Results and reports stay local.
+
+| ID | Work | Acceptance evidence |
+| --- | --- | --- |
+| S1 | Prep scaling | Real bounded dataset tiers, source identity/coverage, preparation versus serving costs, startup/CPU/memory/disk and equivalent query measurements; decision on persistent indexes justified by observations |
+| S2 | Chef query performance | Concrete application queries, canonical expected results, actual PostgreSQL plans and bounded before/after GraphQL measurements; preserve auth, exact values, keyset pagination and snapshot/reorg gates |
+| S3 | Schema/handler evolution design | Compatible/breaking-change policy, shadow rebuild/replay and verification gates, cutover/rollback failure model, and a real PostgreSQL rehearsal using separate namespaces |
+
+- [ ] S1: admit source and disk budgets, capture baseline tiers, measure and decide
+  whether a persistent index or another targeted change is warranted.
+- [ ] S2: measure application query patterns and database plans, implement only
+  justified changes, and verify correctness plus read/write/storage tradeoffs.
+- [x] S3: document the proposed version-transition contract and prove the parts
+  supported today; identify automatic routing/cutover work still unimplemented.
+
+The [schema/handler evolution design](docs/SCHEMA_EVOLUTION.md) and
+[PostgreSQL rehearsal](benchmarks/chef/evolution/README.md) cover shadow replay,
+exact replacement validation, pin invalidation and stale rollback targets using
+the existing separate-namespace workflow. Routing automation remains proposed.
+
+Larger early-chain datasets must not be presented as modern full-chain coverage.
+No universal speed advantage, persistent-index benefit or atomic version cutover
+is assumed before evidence. Private scanning remains deferred. These priorities
+supersede the older one-follow-up-at-a-time note for investigation work.
+
 **Release objective:** a developer can obtain Zeer from a clean checkout, run a
 bounded public-data source through Prep and Chef, query their own PostgreSQL
 projection through GraphQL, and understand and recover from supported failures.
