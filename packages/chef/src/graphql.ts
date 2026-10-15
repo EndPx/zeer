@@ -9,6 +9,8 @@ class InputError extends Error {}
 class UnreadyError extends Error {}
 const MAX_BODY = 65536;
 const MAX_RESPONSE = 2 * 1024 * 1024;
+const MAX_DOCUMENTS = 64;
+const MAX_DOCUMENT_SOURCE_BYTES = 256 * 1024;
 
 function bigintValue(value: unknown): string {
   const result = typeof value === "bigint" ? value.toString() : value;
@@ -91,6 +93,10 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
     };
   }
   const expected = Buffer.from(`Bearer ${token}`);
+  // Schema-scoped validated documents only. Bound entries and retained source bytes,
+  // not total AST heap; arguments, results and read snapshots remain per request.
+  const documents = new Map<string, { document: DocumentNode; bytes: number }>();
+  let documentSourceBytes = 0;
   let active = 0;
   const server = createServer(async (request, response) => {
     const send = (status: number, value: unknown) => {
@@ -122,9 +128,24 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
       if (Object.keys(payload).some((key) => !["query", "variables", "operationName"].includes(key)) || typeof payload.query !== "string" || (payload.operationName !== undefined && typeof payload.operationName !== "string")) throw new InputError("Invalid GraphQL request fields");
       if (payload.variables !== undefined && (payload.variables === null || typeof payload.variables !== "object" || Array.isArray(payload.variables))) throw new InputError("variables must be an object");
       let document: DocumentNode;
-      try { document = parse(payload.query, { maxTokens: 4096 }); } catch { throw new InputError("Invalid GraphQL document"); }
-      checkDocument(document);
-      if (validate(schema, document).length) throw new InputError("GraphQL query validation failed");
+      const cached = documents.get(payload.query);
+      if (cached) {
+        documents.delete(payload.query);
+        documents.set(payload.query, cached);
+        document = cached.document;
+      } else {
+        try { document = parse(payload.query, { maxTokens: 4096 }); } catch { throw new InputError("Invalid GraphQL document"); }
+        checkDocument(document);
+        if (validate(schema, document).length) throw new InputError("GraphQL query validation failed");
+        const bytes = Buffer.byteLength(payload.query);
+        while (documents.size && (documents.size >= MAX_DOCUMENTS || documentSourceBytes + bytes > MAX_DOCUMENT_SOURCE_BYTES)) {
+          const oldest = documents.keys().next().value!;
+          documentSourceBytes -= documents.get(oldest)!.bytes;
+          documents.delete(oldest);
+        }
+        documents.set(payload.query, { document, bytes });
+        documentSourceBytes += bytes;
+      }
       const result = await store.read(async (view): Promise<ExecutionResult> => {
         if (view.checkpoint.status !== "ready") throw new UnreadyError();
         return await execute({ schema, document, rootValue: root, contextValue: view, variableValues: payload.variables as Record<string, unknown> | undefined, operationName: payload.operationName as string | undefined });

@@ -120,3 +120,24 @@ test("response ceiling rejects oversized successful results", async (t) => {
 test("short server tokens are rejected before listening", () => {
   assert.throws(() => createChefServer({store:{},model,token:"short"}), /token/);
 });
+
+test("repeated documents retain fresh arguments, operation selection and snapshot gates", async (t) => {
+  const { request, view, calls } = await fixture(t);
+  const query = 'query Payment($id:ID!){ PaymentById(id:$id){id} _meta {height hash status} }';
+  assert.equal((await request(query, {payload:{variables:{id:"a"},operationName:"Payment"}})).body.data.PaymentById.id, "a");
+  view.checkpoint.height = 43; view.checkpoint.hash = "new-branch";
+  const changed = await request(query, {payload:{variables:{id:"b"},operationName:"Payment"}});
+  assert.equal(changed.body.data.PaymentById.id, "b");
+  assert.deepEqual(changed.body.data._meta, {height:43,hash:"new-branch",status:"ready"});
+  for (const payload of [{variables:{}}, {variables:{id:"a"},operationName:"Other"}, {variables:{id:""}}]) assert.equal((await request(query,{payload})).status,400);
+  for (const status of ["reconciling", "blocked"]) {
+    view.checkpoint.status = status;
+    assert.equal((await request(query,{payload:{variables:{id:"a"}}})).status,503);
+  }
+  view.checkpoint.status = "ready";
+  assert.equal((await request(query,{payload:{variables:{id:"c"}}})).body.data.PaymentById.id,"c");
+  assert.equal(calls.filter(([kind]) => kind === "read").length,8);
+  const before = calls.length;
+  assert.equal((await request(query,{headers:{authorization:"Bearer incorrect-token"}})).status,401);
+  assert.equal(calls.length,before);
+});

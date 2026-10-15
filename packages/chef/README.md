@@ -110,6 +110,16 @@ introspection, fragments or executable directives. A bearer token is required.
 See the example for request, response and concurrency bounds. No public
 production endpoint or Neon compatibility result is claimed.
 
+Each server instance reuses successfully parsed and validated GraphQL documents
+through an LRU bounded to 64 entries and 256 KiB of retained UTF-8 query source.
+That byte budget does not describe total AST heap. Invalid documents are never
+retained. Authentication, body/admission limits and request-shape checks still
+run before cache lookup; every request performs fresh variable/operation coercion,
+checkpoint/readiness checks and a repeatable-read database snapshot. Query results,
+variables and checkpoints are never cached. See the
+[request profiling harness](../../benchmarks/chef/profile/README.md) for separate
+instrumented attribution and ordinary HTTP comparisons.
+
 Field equality indexes are opt-in through one argument-free `@index` annotation
 in the entity schema. For example, a block transaction browser can declare
 `minedHeight: Int! @index`, and a block-summary projection can declare
