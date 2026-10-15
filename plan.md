@@ -1,6 +1,6 @@
 # Zeer planning entry point
 
-Updated: 2026-10-14 (Asia/Jakarta).
+Updated: 2026-10-15 (Asia/Jakarta).
 
 **Status: Prep supports admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. Chef implements a public-data writer and GraphQL API. Viewing-key scanning, whole-chain execution and public deployment remain deferred. All benchmark results and reports are local-only under `benchmarks/results/`; source, methodology and fixtures remain public.**
 
@@ -18,6 +18,31 @@ remains local. Authenticated organizer cutoff/form verification remains a
 separate submission gate; package publication and public deployment were not run.
 
 ### Current priority after the technical candidate
+
+User direction following O1-O3: implement bounded request admission and a safe
+disk-backed public metadata index before demo/public API work.
+
+- [x] Q1: keep active work bounded, add a small FIFO queue with finite wait,
+  explicit overload/retry guidance and disconnect/shutdown cleanup; verify fresh
+  snapshots after waiting and compare repeated same-profile load before/after.
+- [x] D1: build source-bound versioned metadata sidecars offline with explicit
+  disk limits and atomic no-overwrite publication. Validate against actual source
+  metadata during admission and authenticate each later read; missing/corrupt
+  caches must preserve the ordinary payload path and integrity checks.
+- [x] D2: demonstrate reduced retained row memory and efficient reads beyond the
+  previous RAM-row boundary, with exact output, corruption/restart/append/reorg
+  checks and explicit residual descriptor/IO/handle limits. Keep results local.
+
+No public endpoint, package publication, private scanning or unrelated database
+change is included. Reuse the bounded experiment envelope and verify each change
+before retaining it. Admission queue limits do not certify public ingress safety.
+
+Q1-D2 acceptance uses sequential repeated HTTP comparisons, source-verified disk
+profiles on real legacy/NU5 data, and synthetic default-cap boundary fixtures.
+RAM remains faster for indexed sparse queries when it fits; the disk path is an
+explicit capacity tradeoff, not a universal performance replacement. Detailed
+results, source identities and service cleanup evidence remain local in
+`benchmarks/results/reports/2026-10-15-capacity.md`.
 
 User direction on 15 October: execute the bounded optimization work below before
 the application demo. This authorization ends at Prep startup/index-limit
@@ -44,10 +69,10 @@ Chef ingestion are checked against independent public data. See the
 [request profiler](benchmarks/chef/profile/README.md).
 
 O3 adds opt-in diagnostics and synthetic default-cap proofs while preserving
-ordinary budgets and integrity checks. A future disk-backed or partition-aware
-index remains a separate design: persisting a cache alone does not remove the
-existing RAM cap. Its identity binding, atomic publication, corruption fallback
-and reorg invalidation must be verified before implementation. See the
+ordinary budgets and integrity checks. D1-D2 implement an optional disk projection
+with bounded in-memory block descriptors; the existing memory caps remain.
+Identity binding, atomic publication, corruption fallback and snapshot isolation
+are covered by targeted regressions. See the [disk index contract](docs/PREP_DISK_INDEX.md) and
 [admission/cap methodology](benchmarks/prep/profile/README.md). Detailed results
 and the final scoped acceptance record remain local; no public-service readiness
 or whole-chain claim follows from this work.

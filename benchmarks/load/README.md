@@ -7,6 +7,14 @@ Run Prep and Chef separately. Keep the VPS experiment within 3 CPU, 8 GiB RAM,
 only coordinates these harness invocations; the operator must check for other
 benchmarks and place the controller and services in bounded cgroups.
 
+For admission-queue comparisons keep active work at two in both variants. The
+candidate can wait up to eight requests for 250 ms; elapsed HTTP time already
+includes that wait. Rotate baseline/candidate order, preserve every rejection,
+and compare verified successes and latency together. A higher accepted fraction
+does not itself prove lower latency or more execution capacity. Test queue-full,
+deadline, disconnect and shutdown behavior separately; eight clients alone do not
+exceed a two-active/eight-waiting admission bound. No automatic retries are added.
+
 The Python runner uses only the standard library and the existing independent
 oracle loader. Numeric RFC1918/loopback HTTP endpoints are preferred; DNS must
 resolve entirely to those address classes and is frozen before requests begin.

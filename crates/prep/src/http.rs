@@ -37,6 +37,8 @@ use crate::transactions::{
 };
 
 pub const MAX_ACTIVE_QUERIES: usize = 2;
+pub const MAX_WAITING_QUERIES: usize = 8;
+pub const QUERY_QUEUE_TIMEOUT_MILLIS: u64 = 250;
 pub const MAX_REQUEST_BYTES: usize = 64 * 1024;
 pub const STATUS_MAX_AGE_SECONDS: u64 = 120;
 pub(crate) const QUERY_TIMEOUT_SECONDS: u64 = 30;
@@ -47,6 +49,7 @@ struct HttpState {
     root: PathBuf,
     token_hash: Option<[u8; 32]>,
     permits: Arc<Semaphore>,
+    waiting: Arc<Semaphore>,
     saw_status: Arc<AtomicBool>,
     stopping: Arc<AtomicBool>,
 }
@@ -61,7 +64,41 @@ fn error_response(error: QueryError) -> Response {
         "cache-control",
         axum::http::HeaderValue::from_static("no-store"),
     );
+    if error.status == 429 {
+        response
+            .headers_mut()
+            .insert("retry-after", axum::http::HeaderValue::from_static("1"));
+    }
     response
+}
+
+async fn admit(state: &HttpState) -> Result<OwnedSemaphorePermit, QueryError> {
+    let stopped = || QueryError::new(503, "SHUTTING_DOWN");
+    let capacity = || QueryError::new(429, "QUERY_CAPACITY_EXCEEDED");
+    if state.stopping.load(Ordering::Acquire) {
+        return Err(stopped());
+    }
+    if let Ok(permit) = state.permits.clone().try_acquire_owned() {
+        return Ok(permit);
+    }
+    // Tokio's semaphore enqueues acquisition futures FIFO; try_acquire cannot
+    // jump an existing waiter. This second semaphore bounds queued parsed bodies.
+    let _waiting = state
+        .waiting
+        .clone()
+        .try_acquire_owned()
+        .map_err(|_| capacity())?;
+    let permit = tokio::time::timeout(
+        Duration::from_millis(QUERY_QUEUE_TIMEOUT_MILLIS),
+        state.permits.clone().acquire_owned(),
+    )
+    .await
+    .map_err(|_| capacity())?
+    .map_err(|_| stopped())?;
+    if state.stopping.load(Ordering::Acquire) {
+        return Err(stopped());
+    }
+    Ok(permit)
 }
 fn authorize(state: &HttpState, headers: &HeaderMap) -> Result<(), QueryError> {
     if state.stopping.load(Ordering::Acquire) {
@@ -331,6 +368,7 @@ async fn query(
     if let Err(error) = validate_query(&request) {
         return error_response(error);
     }
+    drop(body);
     read_response(state, ReadRequest::Query(request)).await
 }
 
@@ -353,6 +391,7 @@ async fn transactions(
     if let Err(error) = validate_transactions(&request) {
         return error_response(error);
     }
+    drop(body);
     read_response(state, ReadRequest::Transactions(request)).await
 }
 
@@ -361,9 +400,9 @@ enum ReadRequest {
     Transactions(TransactionRequest),
 }
 async fn read_response(state: HttpState, request: ReadRequest) -> Response {
-    let permit = match state.permits.clone().try_acquire_owned() {
+    let permit = match admit(&state).await {
         Ok(permit) => Arc::new(permit),
-        Err(_) => return error_response(QueryError::new(429, "QUERY_CAPACITY_EXCEEDED")),
+        Err(error) => return error_response(error),
     };
     let worker_permit = permit.clone();
     let control = QueryControl {
@@ -378,6 +417,14 @@ async fn read_response(state: HttpState, request: ReadRequest) -> Response {
     let _cancel = CancelOnDrop(control.cancelled.clone());
     let task = tokio::task::spawn_blocking(move || {
         let _permit = worker_permit;
+        // A handler may disappear while this closure is still in the blocking
+        // pool's queue. Do not start archive work for an abandoned request.
+        if state.stopping.load(Ordering::Acquire) {
+            return Err(QueryError::new(503, "SHUTTING_DOWN"));
+        }
+        if control.cancelled.load(Ordering::Acquire) || Instant::now() >= control.deadline {
+            return Err(QueryError::new(408, "QUERY_CANCELLED_OR_TIMED_OUT"));
+        }
         let (archive, source) = coherent_snapshot(&state)?;
         // Epoch conflicts take precedence over range/source status, allowing clients
         // to distinguish a rollback from temporary source unavailability.
@@ -467,6 +514,7 @@ fn make_state(archive: Archive, token: Option<String>) -> Result<HttpState> {
         archive: Arc::new(Mutex::new(archive)),
         token_hash: token.map(|value| Sha256::digest(value.as_bytes()).into()),
         permits: Arc::new(Semaphore::new(MAX_ACTIVE_QUERIES)),
+        waiting: Arc::new(Semaphore::new(MAX_WAITING_QUERIES)),
         saw_status: Arc::new(AtomicBool::new(false)),
         stopping: Arc::new(AtomicBool::new(false)),
     })
@@ -486,6 +534,7 @@ where
 {
     let state = make_state(archive, token)?;
     let stopping = state.stopping.clone();
+    let permits = state.permits.clone();
     let (send, receive) = tokio::sync::oneshot::channel::<()>();
     let server = axum::serve(listener, build_router(state)).with_graceful_shutdown(async {
         let _ = receive.await;
@@ -497,6 +546,7 @@ where
         result = &mut server => { result?; },
         _ = &mut shutdown => {
             stopping.store(true, Ordering::Release);
+            permits.close();
             let _ = send.send(());
             if let Ok(result) = tokio::time::timeout(Duration::from_secs(2), &mut server).await { result?; }
         }
@@ -543,6 +593,182 @@ mod tests {
         add_segment(root.path(), &mut writer, 1);
         add_segment(root.path(), &mut writer, 2);
         (root, writer)
+    }
+
+    async fn wait_for_waiters(state: &HttpState, count: usize) {
+        tokio::time::timeout(Duration::from_millis(200), async {
+            while state.waiting.available_permits() != MAX_WAITING_QUERIES - count {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+    }
+
+    #[tokio::test]
+    async fn bounded_admission_is_fifo_and_cancelled_waiters_release_slots() {
+        let (_root, writer) = fixture();
+        let state = make_state(writer.snapshot(), None).unwrap();
+        let a = admit(&state).await.unwrap();
+        let b = admit(&state).await.unwrap();
+        let mut pending = vec![];
+        for count in 1..=MAX_WAITING_QUERIES {
+            let queued_state = state.clone();
+            pending.push(tokio::spawn(async move { admit(&queued_state).await }));
+            wait_for_waiters(&state, count).await;
+        }
+        let error = admit(&state).await.unwrap_err();
+        assert_eq!(error.code, "QUERY_CAPACITY_EXCEEDED");
+        assert_eq!(error_response(error).headers()["retry-after"], "1");
+        // Drop a future in the middle of the FIFO, then reclaim its queue slot.
+        pending.remove(3).abort();
+        wait_for_waiters(&state, MAX_WAITING_QUERIES - 1).await;
+        drop(a);
+        for task in pending {
+            let permit = tokio::time::timeout(Duration::from_millis(200), task)
+                .await
+                .unwrap()
+                .unwrap()
+                .unwrap();
+            // Only the next FIFO waiter may own the newly released permit.
+            assert_eq!(state.permits.available_permits(), 0);
+            drop(permit);
+        }
+        drop(b);
+        assert_eq!(state.permits.available_permits(), MAX_ACTIVE_QUERIES);
+        assert_eq!(state.waiting.available_permits(), MAX_WAITING_QUERIES);
+    }
+
+    #[tokio::test]
+    async fn queue_deadline_and_shutdown_release_all_waiting_slots() {
+        let (_root, writer) = fixture();
+        let state = make_state(writer.snapshot(), None).unwrap();
+        let a = admit(&state).await.unwrap();
+        let b = admit(&state).await.unwrap();
+        let started = Instant::now();
+        assert_eq!(
+            admit(&state).await.unwrap_err().code,
+            "QUERY_CAPACITY_EXCEEDED"
+        );
+        assert!(started.elapsed() >= Duration::from_millis(QUERY_QUEUE_TIMEOUT_MILLIS));
+        assert_eq!(state.waiting.available_permits(), MAX_WAITING_QUERIES);
+        let queued = {
+            let state = state.clone();
+            tokio::spawn(async move { admit(&state).await })
+        };
+        wait_for_waiters(&state, 1).await;
+        state.stopping.store(true, Ordering::Release);
+        state.permits.close();
+        assert_eq!(queued.await.unwrap().unwrap_err().code, "SHUTTING_DOWN");
+        assert_eq!(state.waiting.available_permits(), MAX_WAITING_QUERIES);
+        assert_eq!(admit(&state).await.unwrap_err().code, "SHUTTING_DOWN");
+        drop((a, b));
+    }
+
+    #[tokio::test]
+    async fn queued_reads_refresh_snapshot_and_source_only_after_admission() {
+        let (root, mut writer) = fixture();
+        let state = make_state(writer.snapshot(), None).unwrap();
+        let request = json!({"from_block":1,"to_block":3,"txids":["11".repeat(32)]});
+        let response = transactions(
+            State(state.clone()),
+            HeaderMap::new(),
+            Ok(Bytes::from(request.to_string())),
+        )
+        .await;
+        let result: Value = serde_json::from_slice(
+            &axum::body::to_bytes(response.into_body(), MAX_LOOKUP_BYTES)
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        let mut pinned = request.clone();
+        pinned["at"] = result["snapshot"].clone();
+        let a = admit(&state).await.unwrap();
+        let b = admit(&state).await.unwrap();
+        let queued = {
+            let state = state.clone();
+            tokio::spawn(async move {
+                transactions(
+                    State(state),
+                    HeaderMap::new(),
+                    Ok(Bytes::from(pinned.to_string())),
+                )
+                .await
+            })
+        };
+        wait_for_waiters(&state, 1).await;
+        writer.rollback_to(1).unwrap();
+        std::fs::write(
+            root.path().join("status.json"),
+            json!({"schema_version":1,"mode":"historical","ready":false,"updated_at_unix":1})
+                .to_string(),
+        )
+        .unwrap();
+        drop(a);
+        let conflict = queued.await.unwrap();
+        assert_eq!(conflict.status(), StatusCode::CONFLICT);
+        let error: Value = serde_json::from_slice(
+            &axum::body::to_bytes(conflict.into_body(), 1024)
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(error["error"]["code"], "REORG");
+        // A request without a pinned snapshot sees the newly unready source.
+        let archive = writer.snapshot();
+        let mut status = json!({"schema_version":1,"mode":"historical","ready":true,"updated_at_unix":1,"indexed_height":archive.head(),"epoch":archive.catalog().epoch,"revision":archive.catalog().revision});
+        std::fs::write(root.path().join("status.json"), status.to_string()).unwrap();
+        let a = admit(&state).await.unwrap();
+        let queued = {
+            let state = state.clone();
+            tokio::spawn(async move {
+                transactions(
+                    State(state),
+                    HeaderMap::new(),
+                    Ok(Bytes::from(request.to_string())),
+                )
+                .await
+            })
+        };
+        wait_for_waiters(&state, 1).await;
+        status["ready"] = json!(false);
+        std::fs::write(root.path().join("status.json"), status.to_string()).unwrap();
+        drop(a);
+        assert_eq!(
+            queued.await.unwrap().status(),
+            StatusCode::SERVICE_UNAVAILABLE
+        );
+        drop(b);
+        assert_eq!(state.permits.available_permits(), MAX_ACTIVE_QUERIES);
+    }
+
+    #[tokio::test]
+    async fn actual_http_disconnect_cancels_queued_handler_before_deadline() {
+        use std::io::Write;
+        let (_root, writer) = fixture();
+        let state = make_state(writer.snapshot(), None).unwrap();
+        let a = admit(&state).await.unwrap();
+        let b = admit(&state).await.unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let router = build_router(state.clone());
+        let server = tokio::spawn(async move { axum::serve(listener, router).await.unwrap() });
+        let mut socket = std::net::TcpStream::connect(address).unwrap();
+        let body = r#"{"from_block":1,"to_block":3}"#;
+        write!(socket, "POST /query HTTP/1.1\r\nHost: localhost\r\nContent-Length: {}\r\nContent-Type: application/json\r\n\r\n{}", body.len(), body).unwrap();
+        wait_for_waiters(&state, 1).await;
+        socket.shutdown(std::net::Shutdown::Both).unwrap();
+        drop(socket);
+        // Well before the 250ms queue timeout: prove transport cancellation,
+        // rather than eventual timeout cleanup, removes the queued request.
+        tokio::time::timeout(Duration::from_millis(150), wait_for_waiters(&state, 0))
+            .await
+            .unwrap();
+        drop((a, b));
+        tokio::task::yield_now().await;
+        assert_eq!(state.permits.available_permits(), MAX_ACTIVE_QUERIES);
+        server.abort();
     }
 
     #[tokio::test]

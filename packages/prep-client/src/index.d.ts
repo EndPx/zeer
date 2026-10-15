@@ -71,7 +71,7 @@ export interface Height {
 export interface Capabilities {
   api_version: 1;
   routes: string[];
-  limits: { max_request_bytes: number; max_active_queries: number; query_timeout_ms: number };
+  limits: { max_request_bytes: number; max_active_queries: number; query_timeout_ms: number; max_waiting_queries?: number; queue_timeout_ms?: number };
   query: {
     max_scan_blocks: number;
     max_response_bytes: number;

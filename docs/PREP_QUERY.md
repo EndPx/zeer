@@ -71,7 +71,8 @@ prefix are allowed. The server rechecks the prefix and source readiness before
 responding. This is archive-snapshot consistency, not independent consensus or
 a guarantee that a historical source matches today's public chain.
 
-The batch and scan routes share two active-query permits, a 30-second budget,
+The batch and scan routes share two active-query permits, up to eight FIFO
+waiters with a 250 ms admission deadline, and a 30-second work budget,
 authentication and `no-store` responses. Admission stays held while a worker or
 response allocation is retained. `GET /capabilities` reports these compiled
 limits and supported fields from the same implementation constants. Use `/height`
@@ -190,19 +191,22 @@ default field selections and old field names are unchanged.
 
 ## Optional transaction indexes
 
-During full-segment integrity admission, Prep derives an immutable in-memory
-transaction-ID index and public metadata projection. Compatible old archives use
-this path without migration or new files. A restart rebuilds the derived index;
-it is not a persisted disk index. Catalog refresh reuses unchanged segment
-caches and removes replaced segments from the new snapshot's lookup scope.
+During full-segment integrity admission, Prep prefers a valid optional disk
+metadata sidecar; otherwise it may derive an immutable in-memory transaction-ID
+index and public metadata projection when the budget permits. Compatible old
+archives need no migration. RAM indexes rebuild at restart. Disk sidecars require
+an explicit [offline build](PREP_DISK_INDEX.md) and remain source-verified on every
+fresh admission. Catalog refresh reuses unchanged segment caches and removes
+replaced segments from the new snapshot's lookup scope.
 
-Metadata-only queries can avoid payload reads. Exact-ID filters locate all
+Metadata-only queries can avoid payload reads. In-memory exact-ID filters locate all
 matching block positions, including repeated IDs, before fetching requested
 payloads. Raw/decoded block selections still return every scanned block, even
 when its transactions do not match. Header-only block selections remain available
 without reading full payloads. Cursor and epoch rules are unchanged: `limit`
 counts the logical whole-block window, including positions skipped by an index,
-and does not become a limit on matching transactions.
+and does not become a limit on matching transactions. Disk indexes filter metadata
+one block at a time with cancellation checks; they have no secondary ID index.
 
 Index allocation is capped at 16 MiB per segment and 64 MiB per archive snapshot,
 accounting for vector capacities and index/Arc structures. This does not cap total
@@ -287,14 +291,29 @@ skipped. `cursor: null` means the captured interval is complete.
 
 ## Bounds and errors
 
+An optional [disk metadata index](PREP_DISK_INDEX.md) reduces retained row memory
+for public transaction projections. It preserves payload verification and query
+cancellation boundaries; it does not add private-data filtering.
+
 The prototype limits requests to 64 KiB, scanning to 1,000 blocks per call, and the
 serialized JSON response to 32 MiB. Two queries/retained response byte allocations
-share admission permits. These are wire/work limits, **not peak-RSS guarantees**:
+share admission permits. `/query` and `/transactions` additionally share eight
+FIFO waiting slots. Authentication, JSON parsing and cheap shape validation run
+before queueing; raw body bytes are released before waiting. The body extractor
+buffers at most 64 KiB per request before admission, so the waiting-slot bound
+does not bound all incoming connections or concurrent body buffers. `/height`
+and `/ready` use the same active permits but return 429 immediately when busy.
+These are wire/work limits, **not peak-RSS guarantees**:
 protobuf decoding, exact-number JSON trees, serialization, and network buffers
 also consume memory. Deployment cgroup limits remain necessary.
 
-Blocking archive work runs off the async event loop. Queries have a 30-second
-budget, checked between blocks/transactions; cancellation does not interrupt an
+Blocking archive work runs off the async event loop. A full queue or a wait longer
+than 250 ms returns 429 `QUERY_CAPACITY_EXCEEDED` with `Retry-After: 1`; the service
+does not automatically retry or drop successful requests to make room. The
+30-second work budget starts after admission. Archive refresh, source readiness,
+cursor epoch and pinned snapshot checks happen after waiting, so a queued request
+cannot execute using a snapshot captured before admission. Work deadlines are
+checked between blocks/transactions; cancellation does not interrupt an
 already running filesystem system call. HTTP shutdown allows two seconds to drain.
 This private development service is not hardened against arbitrary hostile traffic.
 
@@ -315,7 +334,7 @@ contents, database credentials, or raw internal error messages.
 | 409 | `REORG`, `CURSOR_QUERY_MISMATCH`, `FULL_BLOCK_ARCHIVE_REQUIRED` |
 | 413 | Request too large or one selected block cannot fit the response cap |
 | 416 | Requested interval not contained in indexed archive |
-| 429 | Both admission slots are occupied |
+| 429 | `QUERY_CAPACITY_EXCEEDED`: waiting queue full or 250 ms queue deadline exceeded; metadata routes have no queue |
 | 503 | Source not ready, inconsistent status/catalog, corrupt/unavailable archive |
 
 The current implementation is a public-data query engine. Successful query or

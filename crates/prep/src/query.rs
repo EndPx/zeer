@@ -1323,6 +1323,97 @@ mod tests {
         }
     }
 
+    // Disk sidecars expose per-block metadata but deliberately decline the
+    // eager range-wide locations optimization so caller cancellation stays live.
+    struct PerBlockMetadataFixture {
+        indexed: IndexedFixture,
+        metadata_reads: std::cell::Cell<usize>,
+        cancel_after_first: Option<Arc<AtomicBool>>,
+    }
+    impl QueryArchive for PerBlockMetadataFixture {
+        fn query_meta(&self) -> QueryMeta {
+            self.indexed.query_meta()
+        }
+        fn query_block(&self, height: u64) -> Result<BlockRecord, QueryError> {
+            self.indexed.query_block(height)
+        }
+        fn query_header(&self, height: u64) -> Result<BlockHeader, QueryError> {
+            self.indexed.query_header(height)
+        }
+        fn query_transaction_metadata(
+            &self,
+            height: u64,
+        ) -> Result<Option<Vec<TransactionMetadata>>, QueryError> {
+            self.metadata_reads.set(self.metadata_reads.get() + 1);
+            let rows = self.indexed.query_transaction_metadata(height)?;
+            if self.metadata_reads.get() == 1 {
+                if let Some(cancelled) = &self.cancel_after_first {
+                    cancelled.store(true, Ordering::Release);
+                }
+            }
+            Ok(rows)
+        }
+        fn query_transaction_locations(
+            &self,
+            _ids: &[[u8; 32]],
+            _start: u64,
+            _end: u64,
+        ) -> Result<Option<Vec<u64>>, QueryError> {
+            Ok(None)
+        }
+    }
+
+    #[test]
+    fn per_block_metadata_without_locations_preserves_exact_id_filtering_and_pages() {
+        for ids in [
+            vec!["11".repeat(32)],
+            vec!["ff".repeat(32)],
+            vec!["11".repeat(32), "11".repeat(32), "ff".repeat(32)],
+        ] {
+            let archive = PerBlockMetadataFixture {
+                indexed: indexed_fixture(true),
+                metadata_reads: std::cell::Cell::new(0),
+                cancel_after_first: None,
+            };
+            let mut request = compact_request();
+            request.transaction_filter.txids = Some(ids);
+            for (expected_next, expected_reads) in [(12, 2), (13, 3)] {
+                let fast = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+                let slow =
+                    execute_query(&indexed_fixture(false), &request, &QueryControl::default())
+                        .unwrap();
+                assert_eq!(
+                    serde_json::to_value(&fast).unwrap(),
+                    serde_json::to_value(&slow).unwrap()
+                );
+                assert_eq!(fast.next_block, expected_next);
+                assert_eq!(archive.metadata_reads.get(), expected_reads);
+                assert_eq!(archive.indexed.payload_reads.get(), 0);
+                request.cursor = fast.cursor;
+            }
+        }
+    }
+
+    #[test]
+    fn per_block_metadata_cancellation_stops_before_the_next_read() {
+        let control = QueryControl::default();
+        let archive = PerBlockMetadataFixture {
+            indexed: indexed_fixture(true),
+            metadata_reads: std::cell::Cell::new(0),
+            cancel_after_first: Some(control.cancelled.clone()),
+        };
+        let mut request = compact_request();
+        request.transaction_filter.txids = Some(vec!["11".repeat(32)]);
+        assert_eq!(
+            execute_query(&archive, &request, &control)
+                .unwrap_err()
+                .status,
+            408
+        );
+        assert_eq!(archive.metadata_reads.get(), 1);
+        assert_eq!(archive.indexed.payload_reads.get(), 0);
+    }
+
     #[test]
     fn txid_index_skips_payloads_but_never_filters_selected_blocks() {
         for fields in [

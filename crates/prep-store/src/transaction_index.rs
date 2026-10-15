@@ -121,7 +121,7 @@ impl IndexBuilder {
         }
         let mut deserializer = serde_json::Deserializer::from_str(json);
         BlockSeed {
-            builder: self,
+            sink: &mut |row| self.push(row),
             height,
         }
         .deserialize(&mut deserializer)
@@ -149,6 +149,19 @@ impl IndexBuilder {
         };
         (index.bytes() <= self.budget).then_some(index)
     }
+}
+
+/// Stream the same strict projection used by the bounded RAM cache.
+pub(crate) fn stream_metadata(
+    height: u64,
+    json: &str,
+    sink: &mut dyn FnMut(TransactionMetadata) -> Option<()>,
+) -> Option<()> {
+    let mut deserializer = serde_json::Deserializer::from_str(json);
+    BlockSeed { sink, height }
+        .deserialize(&mut deserializer)
+        .ok()?;
+    deserializer.end().ok()
 }
 
 #[derive(Default)]
@@ -244,7 +257,7 @@ impl MetadataInput<'_> {
 }
 
 struct BlockSeed<'a> {
-    builder: &'a mut IndexBuilder,
+    sink: &'a mut dyn FnMut(TransactionMetadata) -> Option<()>,
     height: u64,
 }
 impl<'de> DeserializeSeed<'de> for BlockSeed<'_> {
@@ -254,7 +267,7 @@ impl<'de> DeserializeSeed<'de> for BlockSeed<'_> {
         deserializer: D,
     ) -> std::result::Result<(), D::Error> {
         struct BlockVisitor<'a> {
-            builder: &'a mut IndexBuilder,
+            sink: &'a mut dyn FnMut(TransactionMetadata) -> Option<()>,
             height: u64,
         }
         impl<'de> Visitor<'de> for BlockVisitor<'_> {
@@ -274,7 +287,7 @@ impl<'de> DeserializeSeed<'de> for BlockSeed<'_> {
                         }
                         found = true;
                         object.next_value_seed(TransactionsSeed {
-                            builder: self.builder,
+                            sink: self.sink,
                             height: self.height,
                         })?;
                     } else {
@@ -288,13 +301,13 @@ impl<'de> DeserializeSeed<'de> for BlockSeed<'_> {
             }
         }
         deserializer.deserialize_map(BlockVisitor {
-            builder: self.builder,
+            sink: self.sink,
             height: self.height,
         })
     }
 }
 struct TransactionsSeed<'a> {
-    builder: &'a mut IndexBuilder,
+    sink: &'a mut dyn FnMut(TransactionMetadata) -> Option<()>,
     height: u64,
 }
 impl<'de> DeserializeSeed<'de> for TransactionsSeed<'_> {
@@ -304,7 +317,7 @@ impl<'de> DeserializeSeed<'de> for TransactionsSeed<'_> {
         deserializer: D,
     ) -> std::result::Result<(), D::Error> {
         struct TransactionsVisitor<'a> {
-            builder: &'a mut IndexBuilder,
+            sink: &'a mut dyn FnMut(TransactionMetadata) -> Option<()>,
             height: u64,
         }
         impl<'de> Visitor<'de> for TransactionsVisitor<'_> {
@@ -321,7 +334,7 @@ impl<'de> DeserializeSeed<'de> for TransactionsSeed<'_> {
                     let row = transaction
                         .metadata(self.height, index)
                         .ok_or_else(|| serde::de::Error::custom("unsupported metadata"))?;
-                    self.builder.push(row).ok_or_else(|| {
+                    (self.sink)(row).ok_or_else(|| {
                         serde::de::Error::custom("metadata index budget exceeded")
                     })?;
                     index = index
@@ -337,7 +350,7 @@ impl<'de> DeserializeSeed<'de> for TransactionsSeed<'_> {
             }
         }
         deserializer.deserialize_seq(TransactionsVisitor {
-            builder: self.builder,
+            sink: self.sink,
             height: self.height,
         })
     }

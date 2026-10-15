@@ -8,6 +8,8 @@ pub(crate) fn document() -> Value {
         "limits": {
             "max_request_bytes": crate::http::MAX_REQUEST_BYTES,
             "max_active_queries": crate::http::MAX_ACTIVE_QUERIES,
+            "max_waiting_queries": crate::http::MAX_WAITING_QUERIES,
+            "queue_timeout_ms": crate::http::QUERY_QUEUE_TIMEOUT_MILLIS,
             "query_timeout_ms": crate::http::QUERY_TIMEOUT_SECONDS * 1000,
         },
         "query": {

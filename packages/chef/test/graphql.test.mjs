@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { request as httpRequest } from "node:http";
+import { once } from "node:events";
+import { RequestAdmission } from "../dist/admission.js";
 import { createChefServer } from "../dist/graphql.js";
 import { parseModel } from "../dist/schema.js";
 import { StoreNotReadyError } from "../dist/store.js";
@@ -28,8 +31,161 @@ async function fixture(t, overrides = {}) {
     const response = await fetch(url, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token}`, ...options.headers }, body: JSON.stringify({ query, ...options.payload }), ...options.fetch });
     return { status: response.status, body: await response.json() };
   };
-  return { request, calls, view, url };
+  return { request, calls, view, url, server };
 }
+
+function rawRequest(url, { authorization = `Bearer ${token}`, body = JSON.stringify({query:"{ _meta { height hash status } }"}), end = true } = {}) {
+  const request = httpRequest(url, { method:"POST", headers:{authorization,"content-type":"application/json"} });
+  const result = new Promise((resolve, reject) => {
+    request.on("error", reject);
+    request.on("response", (response) => {
+      let data = "";
+      response.on("data", (chunk) => { data += chunk; });
+      response.on("end", () => resolve({status:response.statusCode, headers:response.headers, body:JSON.parse(data)}));
+    });
+  });
+  // Cancellation tests deliberately close a request without consuming its result.
+  result.catch(() => {});
+  request.flushHeaders();
+  if (end) request.end(body);
+  return {request,result};
+}
+
+test("admission bounds FIFO waiters, removes cancellation, expires at 250ms, and closes", async (t) => {
+  t.mock.timers.enable({apis:["setTimeout"]});
+  const admission = new RequestAdmission();
+  const signal = new AbortController().signal;
+  const first = await admission.acquire(signal);
+  const second = await admission.acquire(signal);
+  const cancelled = new AbortController();
+  const removed = admission.acquire(cancelled.signal);
+  const rejected = assert.rejects(removed, /cancelled/);
+  cancelled.abort(new Error("cancelled"));
+  await rejected;
+  const order = [];
+  const waiting = Array.from({length:8}, (_,i) => admission.acquire(signal).then((release) => { order.push(i); return release; }));
+  await assert.rejects(admission.acquire(signal), /capacity/);
+  first(); first();
+  const third = await waiting[0];
+  assert.deepEqual(order,[0]);
+  second();
+  const fourth = await waiting[1];
+  assert.deepEqual(order,[0,1]);
+  const expired = waiting.slice(2).map((promise) => assert.rejects(promise,/deadline/));
+  t.mock.timers.tick(249);
+  assert.deepEqual(order,[0,1]);
+  t.mock.timers.tick(1);
+  await Promise.all(expired);
+  const closing = assert.rejects(admission.acquire(signal),/closing/);
+  admission.close();
+  await closing;
+  third(); fourth();
+  await assert.rejects(admission.acquire(signal),/closing/);
+});
+
+test("queued HTTP queries enter FIFO and acquire the current checkpoint/readiness", async (t) => {
+  const releases = [];
+  let reads = 0;
+  let started;
+  const both = new Promise((resolve) => { started = resolve; });
+  let thirdStarted;
+  const thirdRead = new Promise((resolve) => { thirdStarted = resolve; });
+  const state = {...checkpoint};
+  const {url,server} = await fixture(t,{store:{ async read(fn) {
+    reads++;
+    const snapshot = {...state};
+    if (reads <= 3) {
+      const gate = new Promise((resolve) => releases.push(resolve));
+      if (reads === 2) started(); if (reads === 3) thirdStarted(); await gate;
+    }
+    return fn({checkpoint:snapshot});
+  }}});
+  const first = rawRequest(url), second = rawRequest(url);
+  await both;
+  let arrived = once(server,"request"); const third = rawRequest(url); await arrived;
+  arrived = once(server,"request"); const fourth = rawRequest(url); await arrived;
+  assert.equal(reads,2);
+  state.height = 43; state.hash = "new-branch";
+  releases[0]();
+  await thirdRead;
+  state.status = "reconciling";
+  releases[1]();
+  assert.equal((await fourth.result).status,503);
+  releases[2]();
+  assert.equal((await third.result).body.data._meta.hash,"new-branch");
+  await Promise.all([first.result,second.result]);
+  assert.equal((await rawRequest(url).result).status,503);
+});
+
+test("full queue and expiry return Retry-After; unauthorized requests bypass admission", async (t) => {
+  const {url,server,calls} = await fixture(t);
+  const clients = [];
+  for (let i=0;i<10;i++) {
+    const arrived = once(server,"request"); const client = rawRequest(url,{end:false}); clients.push(client); await arrived;
+  }
+  const denied = await rawRequest(url,{authorization:"Bearer invalid"}).result;
+  assert.equal(denied.status,401);
+  const full = await rawRequest(url).result;
+  assert.equal(full.status,503); assert.equal(full.headers["retry-after"],"1");
+  for (const client of clients.slice(2)) {
+    const expired = await client.result;
+    assert.equal(expired.status,503); assert.equal(expired.headers["retry-after"],"1");
+  }
+  assert.equal(calls.length,0);
+  for (const client of clients) client.request.destroy();
+  assert.equal((await rawRequest(url).result).status,200);
+});
+
+test("disconnected queued and slow-body requests do no database work and release capacity", async (t) => {
+  const {url,server,calls} = await fixture(t);
+  const clients = [];
+  for (let i=0;i<3;i++) {
+    const arrived = once(server,"request"); const client = rawRequest(url,{end:false}); clients.push(client); await arrived;
+  }
+  for (const client of clients.reverse()) {
+    const closed = new Promise((resolve)=>client.request.once("close",resolve)); client.request.destroy(); await closed;
+  }
+  assert.equal(calls.length,0);
+  assert.equal((await rawRequest(url).result).status,200);
+  assert.equal(calls.filter(([kind])=>kind === "read").length,1);
+});
+
+test("server close drains waiters and cancels slow body readers without starting reads", async (t) => {
+  const {url,server,calls} = await fixture(t);
+  const clients = [];
+  for (let i=0;i<4;i++) {
+    const arrived = once(server,"request"); const client = rawRequest(url,{end:false}); clients.push(client); await arrived;
+  }
+  server.close();
+  for (const client of clients) {
+    const response = await client.result;
+    assert.equal(response.status,503);
+    assert.equal(response.headers["retry-after"],"1");
+    client.request.destroy();
+  }
+  assert.equal(calls.length,0);
+});
+
+test("disconnect does not free a permit while its store read is still running", async (t) => {
+  const releases = [];
+  let reads = 0;
+  let started;
+  const both = new Promise((resolve) => { started = resolve; });
+  const {url,server} = await fixture(t,{store:{ async read(fn) {
+    reads++;
+    if (reads <= 2) { const gate = new Promise((resolve) => releases.push(resolve)); if (reads === 2) started(); await gate; }
+    return fn({checkpoint});
+  }}});
+  const first = rawRequest(url), second = rawRequest(url);
+  await both;
+  const closed = new Promise((resolve)=>first.request.once("close",resolve)); first.request.destroy(); await closed;
+  const arrived = once(server,"request"); const third = rawRequest(url); await arrived;
+  assert.equal(reads,2);
+  releases[0]();
+  assert.equal((await third.result).status,200);
+  assert.equal(reads,3);
+  releases[1](); await second.result;
+});
 
 test("GraphQL shares one read view, returns exact integers and stable ID pagination", async (t) => {
   const { request, calls } = await fixture(t);

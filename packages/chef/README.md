@@ -110,6 +110,22 @@ introspection, fragments or executable directives. A bearer token is required.
 See the example for request, response and concurrency bounds. No public
 production endpoint or Neon compatibility result is claimed.
 
+Each GraphQL server admits two active requests and up to eight FIFO waiters.
+Authentication, route/method and content-type checks precede admission; waiting
+requests stay paused with no application body reader or database snapshot.
+The fixed queue deadline is 250 ms. A full queue or expired wait returns HTTP 503
+with `Retry-After: 1`; Chef does not automatically retry. Include queue waiting in
+the caller's overall latency and timeout budget. This bounded burst allowance is
+not a sustained-throughput guarantee. The existing 10-second body deadline starts
+only after admission, and the 64 KiB body and 2 MiB response limits still apply.
+
+Queued disconnects remove their waiter immediately. Once admitted, the request
+holds its active slot until application work completes and its response finishes
+or closes; a disconnected in-flight database read keeps its slot until it settles.
+Server close rejects waiters and cancels admitted body readers. A database snapshot
+and readiness check are acquired only after admission, so a queued request observes
+the checkpoint/read gate when its read starts, including reorg state changes.
+
 Each server instance reuses successfully parsed and validated GraphQL documents
 through an LRU bounded to 64 entries and 256 KiB of retained UTF-8 query source.
 That byte budget does not describe total AST heap. Invalid documents are never

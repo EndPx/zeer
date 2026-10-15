@@ -14,7 +14,10 @@ Prep supplies the ingredients; Chef applies the developer's recipe. Applications
 **Prep's full-data MVP and Chef's first public-data prototype are implemented and tested. Public production hosting, viewing-key scanning and npm publication remain out of scope.**
 
 Prep supports bounded transaction-ID lookup, snapshot pinning, capability
-discovery, immutable transaction indexes and direct metadata projection. See
+discovery, immutable transaction indexes and direct metadata projection. Optional
+[disk metadata sidecars](docs/PREP_DISK_INDEX.md) reduce retained row memory while
+preserving source verification. Prep and Chef use bounded request queues with
+explicit overload responses. See
 the [query contract](docs/PREP_QUERY.md) and
 [pinned CipherScan architecture review](docs/SL_CIPHERSCAN_RESEARCH.md).
 Chef uses bounded write coalescing while preserving atomic block/checkpoint commits.

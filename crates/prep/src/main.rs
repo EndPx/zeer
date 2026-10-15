@@ -59,6 +59,13 @@ enum Command {
         #[arg(long, default_value_t = 8)]
         max_source_retries: u32,
     },
+    /// Offline build of bounded metadata sidecars; stop sync/follow first and restart readers afterwards.
+    ArchiveIndexBuild {
+        #[arg(long)]
+        archive: PathBuf,
+        #[arg(long, default_value_t = 4)]
+        max_disk_gib: u64,
+    },
     /// Verify all referenced segments and print the durable archive catalog.
     ArchiveInspect {
         #[arg(long)]
@@ -160,6 +167,19 @@ async fn main() -> Result<()> {
                 },
             )
             .await?;
+        }
+        Command::ArchiveIndexBuild {
+            archive,
+            max_disk_gib,
+        } => {
+            let cap = max_disk_gib
+                .checked_mul(1024 * 1024 * 1024)
+                .ok_or_else(|| anyhow::anyhow!("disk_budget_overflow"))?;
+            let bytes = tokio::task::spawn_blocking(move || {
+                Archive::build_transaction_disk_indexes(archive, cap)
+            })
+            .await??;
+            println!("disk_metadata_bytes={bytes}; restart readers to discover sidecars");
         }
         Command::ArchiveInspect { archive } => {
             let archive = tokio::task::spawn_blocking(move || Archive::open(archive)).await??;

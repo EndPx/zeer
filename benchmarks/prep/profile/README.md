@@ -9,6 +9,16 @@ binaries without this feature. Profile admission times include instrumentation
 overhead; compare phase fractions within this instrumented build and retain the
 ordinary `archive_profile` measurements for uninstrumented timing.
 
+Profiles also support archives with optional [disk metadata sidecars](../../../docs/PREP_DISK_INDEX.md).
+Each admitted segment reports `index_kind` (`memory`, `disk`, `payload`), so
+`allocated_index_bytes` distinguishes retained row arrays from disk descriptors.
+`optional_disk_verify` measures source-to-sidecar verification; full source checks
+remain enabled. Compare sidecar-free and sidecar copies with identical catalog,
+payload and metadata digests, using alternating fresh opens under the same CPU
+and memory limits. Report the sidecar build cost and bytes separately. A reduced
+RAM budget is a counterfactual, not a release configuration. The synthetic
+archive-cap fixture additionally demonstrates the actual default-budget boundary.
+
 ```sh
 cargo test --locked -p prep-store --features admission-profile --lib -j 2
 cargo build --release --locked -p prep-store --features admission-profile \

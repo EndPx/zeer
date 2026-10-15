@@ -85,6 +85,7 @@ function validateCapabilities(value) {
   if (!object(value) || value.api_version !== 1
       || !list(value.routes, ["/health", "/ready", "/height", "/query", "/transactions", "/capabilities"])
       || !bounds(value.limits, ["max_request_bytes", "max_active_queries", "query_timeout_ms"])
+      || ["max_waiting_queries", "queue_timeout_ms"].some(key => object(value.limits) && Object.hasOwn(value.limits, key) && !integer(value.limits[key], 1, 0x100000000))
       || !bounds(value.query, ["max_scan_blocks", "max_response_bytes"])
       || !list(value.query.block_fields, BLOCK_FIELDS) || !list(value.query.transaction_fields, TRANSACTION_FIELDS)
       || !list(value.query.transaction_filters, ["txids", "versions", "has_sapling", "has_orchard", "transparent_output_addresses"])

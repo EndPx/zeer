@@ -32,10 +32,12 @@ macro_rules! profile_phase {
     };
 }
 mod archive;
+mod disk_index;
 #[cfg(feature = "admission-profile")]
 pub mod profiling;
 mod transaction_index;
 pub use archive::{Archive, ArchiveRangeReader, ArchiveWriter, Catalog, SegmentReference};
+pub use disk_index::MAX_DISK_INDEX_BYTES;
 pub use transaction_index::TransactionMetadata;
 use transaction_index::{IndexBuilder, TransactionIndex, SEGMENT_INDEX_BYTES};
 
@@ -595,6 +597,7 @@ pub struct Store {
     manifest: Arc<Manifest>,
     limits: StoreLimits,
     transaction_index: Option<Arc<TransactionIndex>>,
+    disk_index: Option<Arc<disk_index::DiskIndex>>,
 }
 
 impl Store {
@@ -653,7 +656,19 @@ impl Store {
             return Err(Error::Invalid("segment length differs from manifest"));
         }
         let mut digest = Sha256::new();
-        let mut transaction_builder = (manifest.payload_kind == FULL_KIND)
+        let mut disk_index = (manifest.payload_kind == FULL_KIND)
+            .then(|| {
+                disk_index::DiskIndex::candidate(
+                    &path,
+                    &json,
+                    manifest.start_height,
+                    manifest.blocks.len(),
+                    index_budget,
+                )
+            })
+            .flatten();
+        let disk_candidate = disk_index.is_some();
+        let mut transaction_builder = (manifest.payload_kind == FULL_KIND && !disk_candidate)
             .then(|| IndexBuilder::new(manifest.start_height, manifest.blocks.len(), index_budget))
             .flatten();
         for index in &manifest.blocks {
@@ -667,6 +682,20 @@ impl Store {
                 digest.update(index.length.to_le_bytes());
                 digest.update(&record.payload);
             });
+            if let Some(index) = disk_index.as_mut() {
+                let full = profile_phase!(
+                    "optional_protobuf_decode",
+                    prep_proto::prep::FullBlock::decode(record.payload.as_slice())
+                )?;
+                if profile_phase!(
+                    "optional_disk_verify",
+                    index.admit_block(record.height, &full.decoded_json)
+                )
+                .is_none()
+                {
+                    disk_index = None;
+                }
+            }
             if let Some(builder) = transaction_builder.as_mut() {
                 let full = profile_phase!(
                     "optional_protobuf_decode",
@@ -693,8 +722,11 @@ impl Store {
         }
         Ok(Self {
             path,
-            manifest: Arc::new(manifest),
+            manifest: Arc::new(manifest.clone()),
             limits,
+            disk_index: disk_index
+                .and_then(|index| index.finish(manifest.blocks.len()))
+                .map(Arc::new),
             transaction_index: transaction_builder
                 .and_then(|builder| profile_phase!("optional_index_finish", builder.finish()))
                 .map(Arc::new),
@@ -709,10 +741,14 @@ impl Store {
         self.transaction_index
             .as_ref()
             .map_or(0, |index| index.bytes())
+            + self.disk_index.as_ref().map_or(0, |index| index.bytes())
     }
 
     pub fn transaction_metadata(&self, height: u64) -> Result<Option<Vec<TransactionMetadata>>> {
         self.block_index(height)?;
+        if let Some(index) = &self.disk_index {
+            return Ok(index.block(height));
+        }
         Ok(self
             .transaction_index
             .as_ref()
@@ -731,6 +767,11 @@ impl Store {
         }
         self.block_index(start)?;
         self.block_index(end)?;
+        // Disk lookup belongs in the caller's per-block metadata loop, where
+        // cancellation/deadline controls run between bounded block reads.
+        if self.disk_index.is_some() {
+            return Ok(None);
+        }
         Ok(self
             .transaction_index
             .as_ref()
@@ -1361,6 +1402,120 @@ mod tests {
                 .is_none());
             assert!(store.read_block(1).is_ok());
         }
+    }
+
+    #[test]
+    fn disk_metadata_build_publish_reopen_fallback_and_bounds() {
+        let _guard = disk_index::TEST_LOCK.lock().unwrap();
+        let root = tempfile::tempdir().unwrap();
+        let json = format!(
+            r#"{{"tx":[{{"txid":"{}","hex":"0102","version":1,"locktime":0,"vin":[],"vout":[]}}]}}"#,
+            "ab".repeat(32)
+        );
+        let create = |name: &str| {
+            let path = root.path().join(name);
+            let mut writer = StoreWriter::create_full(
+                &path,
+                "regtest",
+                1,
+                1,
+                &display_hash(&hash(0)).unwrap(),
+                &display_hash(&hash(1)).unwrap(),
+            )
+            .unwrap();
+            writer
+                .push(full_record(json.clone(), vec![1, 2, 3]))
+                .unwrap();
+            writer.finish().unwrap();
+            path
+        };
+        let path = create("good");
+        let before = Store::open_with_index_budget(&path, 0).unwrap();
+        assert_eq!(disk_index::build(&before, 106).unwrap(), 106);
+        assert!(!path.join("transactions-v1.pending").exists());
+        assert!(before.transaction_metadata(1).unwrap().is_none());
+        let reopened = Store::open(&path).unwrap();
+        assert!(reopened.disk_index.is_some());
+        assert!(reopened.transaction_index.is_none());
+        assert_eq!(
+            reopened.transaction_metadata(1).unwrap().unwrap()[0].txid,
+            [0xab; 32]
+        );
+        assert_eq!(
+            reopened.transaction_locations(&[[0xab; 32]], 1, 1).unwrap(),
+            None
+        );
+        assert!(disk_index::build(&before, 106).is_err()); // Never clobbers published data.
+        let mut file = OpenOptions::new()
+            .write(true)
+            .open(path.join(disk_index::NAME))
+            .unwrap();
+        file.seek(SeekFrom::Start(84)).unwrap();
+        file.write_all(&2u32.to_le_bytes()).unwrap();
+        // Location selection performs no disk scan, leaving cancellation-aware
+        // callers to inspect one block at a time. It must not disable the cache.
+        assert!(reopened
+            .transaction_locations(&[[0xab; 32]], 1, 1)
+            .unwrap()
+            .is_none());
+        file.seek(SeekFrom::Start(84)).unwrap();
+        file.write_all(&1u32.to_le_bytes()).unwrap();
+        assert!(reopened.transaction_metadata(1).unwrap().is_some());
+        file.seek(SeekFrom::Start(84)).unwrap();
+        file.write_all(&2u32.to_le_bytes()).unwrap();
+        assert!(reopened.transaction_metadata(1).unwrap().is_none());
+        assert!(reopened.read_block(1).is_ok());
+        let fresh = Store::open(&path).unwrap();
+        assert!(fresh.disk_index.is_none()); // Poisoned rows never enter a cache.
+        assert!(fresh.transaction_metadata(1).unwrap().is_none());
+        let partial = create("partial");
+        let store = Store::open_with_index_budget(&partial, 0).unwrap();
+        assert!(disk_index::build(&store, 105).is_err());
+        assert!(!partial.join(disk_index::NAME).exists());
+        assert!(partial.join("transactions-v1.pending").exists());
+        assert!(Store::open(&partial).unwrap().disk_index.is_none());
+    }
+
+    #[test]
+    fn disk_projection_covers_rows_beyond_ram_budget_without_row_cache() {
+        let _guard = disk_index::TEST_LOCK.lock().unwrap();
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("large");
+        let tx = format!(
+            r#"{{"txid":"{}","hex":"0102","version":1,"locktime":0,"vin":[],"vout":[]}}"#,
+            "ab".repeat(32)
+        );
+        let json = format!(
+            "{{\"tx\":[{}]}}",
+            std::iter::repeat_n(tx, 2000).collect::<Vec<_>>().join(",")
+        );
+        let mut writer = StoreWriter::create_full(
+            &path,
+            "regtest",
+            1,
+            1,
+            &display_hash(&hash(0)).unwrap(),
+            &display_hash(&hash(1)).unwrap(),
+        )
+        .unwrap();
+        writer.push(full_record(json, vec![1, 2, 3])).unwrap();
+        writer.finish().unwrap();
+        let budget = 2048;
+        let fallback = Store::open_with_index_budget(&path, budget).unwrap();
+        assert!(fallback.transaction_metadata(1).unwrap().is_none());
+        assert_eq!(disk_index::build(&fallback, 132040).unwrap(), 132040);
+        let indexed = Store::open_with_index_budget(&path, budget).unwrap();
+        assert!(indexed.transaction_index.is_none());
+        assert!(indexed.disk_index.is_some());
+        assert!(indexed.transaction_index_bytes() <= budget);
+        assert_eq!(
+            indexed.transaction_metadata(1).unwrap().unwrap().len(),
+            2000
+        );
+        assert_eq!(
+            indexed.transaction_locations(&[[0xab; 32]], 1, 1).unwrap(),
+            None
+        );
     }
 
     #[test]

@@ -150,6 +150,21 @@ test("capabilities validates compiled support and bounds while allowing future a
   }
 });
 
+test("queue capabilities are optional for older servers and validated when present", async () => {
+  for (const limits of [{}, { max_waiting_queries: 8, queue_timeout_ms: 250 }]) {
+    const value = capabilities(); Object.assign(value.limits, limits);
+    const api = new PrepClient({ url: "http://localhost", fetch: async () => new Response(JSON.stringify(value)) });
+    assert.deepEqual((await api.getCapabilities()).limits, value.limits);
+  }
+  for (const field of ["max_waiting_queries", "queue_timeout_ms"]) {
+    for (const invalid of [0, -1, 1.5, true, "250"]) {
+      const value = capabilities(); value.limits[field] = invalid;
+      const api = new PrepClient({ url: "http://localhost", fetch: async () => new Response(JSON.stringify(value)) });
+      await assert.rejects(api.getCapabilities(), { code: "INVALID_CAPABILITIES_RESPONSE" });
+    }
+  }
+});
+
 test("real HTTP sparse/capabilities routes forward auth and reuse a snapshot", async () => {
   const calls = [];
   const server = createServer(async (req, res) => {

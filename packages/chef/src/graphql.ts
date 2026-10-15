@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { buildSchema, execute, GraphQLScalarType, Kind, parse, validate, visit, type DocumentNode, type ExecutionResult } from "graphql";
 import { decodeEntity, encodeEntity } from "./schema.js";
 import { StoreNotReadyError } from "./store.js";
+import { AdmissionError, RequestAdmission } from "./admission.js";
 import type { ChefStore, Model, ReadView } from "./types.js";
 
 class InputError extends Error {}
@@ -37,12 +38,13 @@ function checkDocument(document: DocumentNode): void {
   });
 }
 
-function readBody(request: IncomingMessage): Promise<Buffer> {
+function readBody(request: IncomingMessage, signal: AbortSignal): Promise<Buffer> {
   return new Promise((resolve, reject) => {
+    if (signal.aborted) { reject(signal.reason); return; }
     let size = 0;
     const chunks: Buffer[] = [];
     const timer = setTimeout(() => { cleanup(); request.resume(); reject(new InputError("Request body deadline exceeded")); }, 10000);
-    const cleanup = () => { clearTimeout(timer); request.off("data", onData); request.off("end", onEnd); request.off("error", onError); request.off("aborted", onAbort); };
+    const cleanup = () => { clearTimeout(timer); signal.removeEventListener("abort", onCancel); request.off("data", onData); request.off("end", onEnd); request.off("error", onError); request.off("aborted", onAbort); };
     const onData = (chunk: Buffer) => {
       size += chunk.length;
       if (size > MAX_BODY) { cleanup(); request.resume(); reject(new InputError("Request exceeds 64 KiB")); return; }
@@ -51,7 +53,10 @@ function readBody(request: IncomingMessage): Promise<Buffer> {
     const onEnd = () => { cleanup(); resolve(Buffer.concat(chunks)); };
     const onError = () => { cleanup(); reject(new InputError("Request interrupted")); };
     const onAbort = onError;
+    const onCancel = () => { cleanup(); reject(signal.reason); };
+    signal.addEventListener("abort", onCancel, { once: true });
     request.on("data", onData); request.once("end", onEnd); request.once("error", onError); request.once("aborted", onAbort);
+    request.resume();
   });
 }
 
@@ -97,7 +102,9 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
   // not total AST heap; arguments, results and read snapshots remain per request.
   const documents = new Map<string, { document: DocumentNode; bytes: number }>();
   let documentSourceBytes = 0;
-  let active = 0;
+  const admission = new RequestAdmission();
+  const pending = new Set<AbortController>();
+  let closing = false;
   const server = createServer(async (request, response) => {
     const send = (status: number, value: unknown) => {
       if (response.destroyed || response.writableEnded) return;
@@ -111,18 +118,42 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
     if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) { request.resume(); fail(401, "Unauthorized"); return; }
     if (request.url !== "/graphql" || request.method !== "POST") { request.resume(); fail(404, "Use POST /graphql"); return; }
     if (!(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) { request.resume(); fail(400, "Content-Type must be application/json"); return; }
-    if (active >= 2) { request.resume(); fail(503, "Query capacity reached"); return; }
-    active++;
+    request.pause();
+    const cancellation = new AbortController();
+    const cancel = () => cancellation.abort(new Error("Request interrupted"));
+    request.once("aborted", cancel);
+    response.once("close", cancel);
+    let permit: () => void;
+    try { permit = await admission.acquire(cancellation.signal); }
+    catch (error) {
+      request.off("aborted", cancel); response.off("close", cancel);
+      if (error instanceof AdmissionError && !cancellation.signal.aborted) {
+        response.setHeader("retry-after", "1");
+        fail(503, error.message);
+        request.resume();
+      }
+      return;
+    }
+    pending.add(cancellation);
+    // close() can run after a permit is granted but before this continuation.
+    if (closing) cancellation.abort(new Error("Server is closing"));
     let released = false;
     let workFinished = false;
     let responseFinished = false;
-    const release = () => { if (!released && workFinished && responseFinished) { released = true; active--; } };
+    const release = () => { if (!released && workFinished && responseFinished) {
+      released = true;
+      pending.delete(cancellation);
+      request.off("aborted", cancel); response.off("close", cancel);
+      response.off("finish", finishResponse); response.off("close", finishResponse);
+      permit();
+    } };
     // Keep capacity until the response buffer has left the server or the peer disconnects.
     const finishResponse = () => { responseFinished = true; release(); };
     response.once("finish", finishResponse); response.once("close", finishResponse);
+    if (response.destroyed || response.writableFinished) finishResponse();
     try {
       let body: unknown;
-      try { body = JSON.parse((await readBody(request)).toString("utf8")); } catch (error) { throw error instanceof InputError ? error : new InputError("Invalid JSON body"); }
+      try { body = JSON.parse((await readBody(request, cancellation.signal)).toString("utf8")); } catch (error) { throw error instanceof InputError ? error : new InputError("Invalid JSON body"); }
       if (!body || typeof body !== "object" || Array.isArray(body)) throw new InputError("Expected a GraphQL request object");
       const payload = body as Record<string, unknown>;
       if (Object.keys(payload).some((key) => !["query", "variables", "operationName"].includes(key)) || typeof payload.query !== "string" || (payload.operationName !== undefined && typeof payload.operationName !== "string")) throw new InputError("Invalid GraphQL request fields");
@@ -146,7 +177,9 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
         documents.set(payload.query, { document, bytes });
         documentSourceBytes += bytes;
       }
+      cancellation.signal.throwIfAborted();
       const result = await store.read(async (view): Promise<ExecutionResult> => {
+        cancellation.signal.throwIfAborted();
         if (view.checkpoint.status !== "ready") throw new UnreadyError();
         return await execute({ schema, document, rootValue: root, contextValue: view, variableValues: payload.variables as Record<string, unknown> | undefined, operationName: payload.operationName as string | undefined });
       });
@@ -155,7 +188,10 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
         else fail(500, "Query execution failed");
       } else send(200, result);
     } catch (error) {
-      if (error instanceof InputError) fail(400, error.message);
+      if (cancellation.signal.aborted) {
+        if (!response.destroyed) { response.setHeader("retry-after", "1"); fail(503, "Request interrupted"); request.resume(); }
+      }
+      else if (error instanceof InputError) fail(400, error.message);
       else if (error instanceof UnreadyError || error instanceof StoreNotReadyError) fail(503, "Indexer is not ready");
       else fail(500, "Query execution failed");
     } finally {
@@ -163,6 +199,13 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
       release();
     }
   });
+  const close = server.close.bind(server);
+  server.close = (...args: Parameters<Server["close"]>) => {
+    closing = true;
+    admission.close();
+    for (const controller of pending) controller.abort(new Error("Server is closing"));
+    return close(...args);
+  };
   server.headersTimeout = 10000;
   server.requestTimeout = 15000;
   server.keepAliveTimeout = 5000;

@@ -314,6 +314,91 @@ impl Archive {
         Self::load(&self.root, Some(self))
     }
 
+    /// Offline sidecar build, excluding a concurrent archive writer. Existing files
+    /// are never overwritten. Restart readers to discover newly built sidecars.
+    pub fn build_transaction_disk_indexes(root: impl AsRef<Path>, max_bytes: u64) -> Result<u64> {
+        if !cfg!(unix) {
+            return Err(Error::UnsupportedWritePlatform);
+        }
+        if max_bytes == 0 || max_bytes > crate::MAX_DISK_INDEX_BYTES {
+            return Err(Error::Limit("disk metadata build budget"));
+        }
+        let root = root.as_ref();
+        check_directory(root)?;
+        let lock_path = root.join(LOCK_NAME);
+        let lock = regular_file(&lock_path)?;
+        lock.try_lock()
+            .map_err(|_| Error::Invalid("archive writer lock is held or unavailable"))?;
+        let catalog = read_catalog(root)?;
+        if catalog.payload_kind != FULL_KIND {
+            return Err(Error::Invalid("disk metadata requires full archive"));
+        }
+        // Include retired/orphan directories retained by rollback. Stream the
+        // inventory rather than allocating it, and reject unsafe entries.
+        // Unresolved prior pending files require explicit operator inspection.
+        let mut bytes = 0u64;
+        check_directory(&root.join("segments"))?;
+        for (ordinal, entry) in fs::read_dir(root.join("segments"))?.enumerate() {
+            if ordinal >= 100_000 {
+                return Err(Error::Limit("retained segment inventory count"));
+            }
+            let entry = entry?;
+            let name = entry
+                .file_name()
+                .into_string()
+                .map_err(|_| Error::Invalid("unsafe retained segment directory name"))?;
+            let path = segment_path(root, &format!("segments/{name}"))?;
+            match fs::symlink_metadata(path.join(crate::disk_index::PENDING)) {
+                Ok(_) => {
+                    return Err(Error::Invalid(
+                        "pending disk metadata build requires operator inspection",
+                    ))
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(error) => return Err(error.into()),
+            }
+            let sidecar = path.join(crate::disk_index::NAME);
+            match fs::symlink_metadata(&sidecar) {
+                Ok(_) => {
+                    bytes = bytes
+                        .checked_add(regular_file(&sidecar)?.metadata()?.len())
+                        .ok_or(Error::Limit("disk metadata bytes"))?;
+                    if bytes > max_bytes {
+                        return Err(Error::Limit("disk metadata bytes"));
+                    }
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(error) => return Err(error.into()),
+            }
+        }
+        for reference in &catalog.segments {
+            let (observed, store) = reference_for_with_budget(root, &reference.directory, 0)?;
+            if observed != *reference {
+                return Err(Error::Invalid(
+                    "catalog reference differs from checked segment",
+                ));
+            }
+            check_segment_kind(&catalog, &store)?;
+            let sidecar = store.path.join(crate::disk_index::NAME);
+            // Never replace a corrupt published index automatically.
+            if fs::symlink_metadata(&sidecar).is_ok() {
+                crate::disk_index::validate_existing(&store)?;
+            } else {
+                let size = crate::disk_index::build(&store, max_bytes - bytes)?;
+                bytes = bytes
+                    .checked_add(size)
+                    .ok_or(Error::Limit("disk metadata bytes"))?;
+                if bytes > max_bytes {
+                    return Err(Error::Limit("disk metadata bytes"));
+                }
+            }
+        }
+        if read_catalog(root)? != catalog {
+            return Err(Error::Invalid("catalog changed during offline index build"));
+        }
+        Ok(bytes)
+    }
+
     pub fn root(&self) -> &Path {
         &self.root
     }
@@ -1043,6 +1128,169 @@ mod tests {
         assert!(archive.read_header(0).is_err());
         assert!(archive.read_header(5).is_err());
         assert!(archive.block_hash(5).is_err());
+    }
+
+    #[test]
+    fn offline_disk_builder_reserves_existing_files_and_excludes_writer() {
+        let _guard = crate::disk_index::TEST_LOCK.lock().unwrap();
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        for (name, height) in [("a", 1), ("b", 2)] {
+            writer
+                .append_segment(&indexed_segment(
+                    &root,
+                    name,
+                    height,
+                    height,
+                    &"ab".repeat(32),
+                ))
+                .unwrap();
+        }
+        assert!(Archive::build_transaction_disk_indexes(&root, 212).is_err());
+        drop(writer);
+        let second = Store::open_with_index_budget(root.join("segments/b"), 0).unwrap();
+        assert_eq!(crate::disk_index::build(&second, 106).unwrap(), 106);
+        // Reserve b before writing a even though b is later in catalog order.
+        assert!(Archive::build_transaction_disk_indexes(&root, 105).is_err());
+        assert!(!root.join("segments/a/transactions-v1.pending").exists());
+        assert_eq!(
+            Archive::build_transaction_disk_indexes(&root, 212).unwrap(),
+            212
+        );
+        assert_eq!(
+            Archive::build_transaction_disk_indexes(&root, 212).unwrap(),
+            212
+        );
+        let fresh = Archive::open(&root).unwrap();
+        assert!(fresh.stores.iter().all(|store| store.disk_index.is_some()));
+        assert_eq!(
+            fresh.transaction_locations(&[[0xab; 32]], 1, 2).unwrap(),
+            None
+        );
+        fs::write(
+            root.join("segments/b/transactions-v1.pending"),
+            b"interrupted",
+        )
+        .unwrap();
+        assert!(Archive::build_transaction_disk_indexes(&root, 212).is_err());
+        assert!(Archive::build_transaction_disk_indexes(&root, 0).is_err());
+        assert!(
+            Archive::build_transaction_disk_indexes(&root, crate::MAX_DISK_INDEX_BYTES + 1)
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn offline_disk_budget_includes_retired_sidecars_and_orphan_pending_files() {
+        let _guard = crate::disk_index::TEST_LOCK.lock().unwrap();
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        for (name, height) in [("a", 1), ("b", 2)] {
+            writer
+                .append_segment(&indexed_segment(
+                    &root,
+                    name,
+                    height,
+                    height,
+                    &"ab".repeat(32),
+                ))
+                .unwrap();
+        }
+        drop(writer);
+        assert_eq!(
+            Archive::build_transaction_disk_indexes(&root, 212).unwrap(),
+            212
+        );
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        writer.rollback_to(1).unwrap();
+        writer
+            .append_segment(&indexed_segment(&root, "c", 2, 2, &"cd".repeat(32)))
+            .unwrap();
+        drop(writer);
+        // Retired b consumes 106 bytes; only 40 remain for c under this cap.
+        assert!(Archive::build_transaction_disk_indexes(&root, 252).is_err());
+        assert!(!root.join("segments/c/transactions-v1.bin").exists());
+        // Build interruption is retained, so the next build rejects it before writing.
+        assert!(root.join("segments/c/transactions-v1.pending").exists());
+        fs::remove_file(root.join("segments/c/transactions-v1.pending")).unwrap();
+        assert_eq!(
+            Archive::build_transaction_disk_indexes(&root, 318).unwrap(),
+            318
+        );
+        fs::create_dir(root.join("segments/orphan")).unwrap();
+        fs::write(
+            root.join("segments/orphan/transactions-v1.pending"),
+            b"partial",
+        )
+        .unwrap();
+        assert!(Archive::build_transaction_disk_indexes(&root, 318).is_err());
+    }
+
+    #[test]
+    fn disk_snapshots_survive_rollback_replacement_and_reuse_unchanged_segments() {
+        let _guard = crate::disk_index::TEST_LOCK.lock().unwrap();
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        for (name, height) in [("a", 1), ("b", 2)] {
+            writer
+                .append_segment(&indexed_segment(
+                    &root,
+                    name,
+                    height,
+                    height,
+                    &"ab".repeat(32),
+                ))
+                .unwrap();
+        }
+        drop(writer);
+        Archive::build_transaction_disk_indexes(&root, 212).unwrap();
+        let old = Archive::open(&root).unwrap();
+        assert!(old.stores.iter().all(|store| store.disk_index.is_some()));
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        writer.rollback_to(1).unwrap();
+        writer
+            .append_segment(&indexed_segment(&root, "c", 2, 2, &"cd".repeat(32)))
+            .unwrap();
+        writer
+            .append_segment(&indexed_segment(&root, "d", 3, 3, &"ef".repeat(32)))
+            .unwrap();
+        drop(writer);
+        Archive::build_transaction_disk_indexes(&root, 424).unwrap();
+        let current = old.refresh().unwrap();
+        assert_eq!(old.head(), Some(2));
+        assert_eq!(current.head(), Some(3));
+        assert!(current.catalog().epoch > old.catalog().epoch);
+        assert_eq!(
+            old.transaction_metadata(2).unwrap().unwrap()[0].txid,
+            [0xab; 32]
+        );
+        assert_eq!(
+            current.transaction_metadata(2).unwrap().unwrap()[0].txid,
+            [0xcd; 32]
+        );
+        assert_eq!(
+            current.transaction_metadata(3).unwrap().unwrap()[0].txid,
+            [0xef; 32]
+        );
+        assert!(old.transaction_metadata(3).is_err());
+        assert!(current
+            .stores
+            .iter()
+            .all(|store| store.disk_index.is_some()));
+        assert!(Arc::ptr_eq(
+            old.stores[0].disk_index.as_ref().unwrap(),
+            current.stores[0].disk_index.as_ref().unwrap(),
+        ));
+        assert!(old.transaction_index_bytes() <= ARCHIVE_INDEX_BYTES);
+        assert!(current.transaction_index_bytes() <= ARCHIVE_INDEX_BYTES);
     }
 
     fn indexed_segment(root: &Path, name: &str, start: u64, end: u64, txid: &str) -> String {

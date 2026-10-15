@@ -23,6 +23,7 @@ pub struct AdmissionProfile {
 #[derive(Serialize)]
 pub struct SegmentAdmission {
     pub directory: String,
+    pub index_kind: &'static str,
     pub available_archive_bytes: usize,
     pub allocated_index_bytes: usize,
     pub start_height: u64,
@@ -71,6 +72,13 @@ pub(crate) fn segment(directory: &str, available: usize, store: &crate::Store) {
         if let Some(profile) = slot.borrow_mut().as_mut() {
             profile.segments.push(SegmentAdmission {
                 directory: directory.into(),
+                index_kind: if store.disk_index.is_some() {
+                    "disk"
+                } else if store.transaction_index.is_some() {
+                    "memory"
+                } else {
+                    "payload"
+                },
                 available_archive_bytes: available,
                 allocated_index_bytes: store.transaction_index_bytes(),
                 start_height: store.manifest().start_height,
