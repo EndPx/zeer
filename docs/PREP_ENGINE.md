@@ -153,6 +153,15 @@ snapshots. Existing public compact APIs and full-node APIs are distinct sources.
 
 ## Evidence and remaining limits
 
+The optional `prep-store/admission-profile` feature provides diagnostic phase
+timers and reduced-budget counterfactuals through dedicated examples. Ordinary
+builds retain the original integrity checks and 64 MiB archive / 16 MiB segment
+index caps, with no timers or budget override. No persisted index is introduced.
+The [admission and cap-boundary harness](../benchmarks/prep/profile/README.md)
+separates real archives from synthetic capacity fixtures and independently checks
+stored-data projections across budgets. Build serving binaries without the
+diagnostic feature; instrumented times are not uninstrumented service latency.
+
 Execution records and benchmark comparisons are local-only under
 `benchmarks/results/`. See the [harness](../benchmarks/README.md) for reproduction
 and the committed public fixtures for deterministic regression inputs.

@@ -21,6 +21,9 @@ fixture, not a performance result.
 - [Benchmark specification](../docs/BENCHMARK_SPEC.md)
 - [Public transaction lookup harness](transactions/README.md)
 - [Prep full-data verification](prep/full/README.md)
+- [Concurrent reads and paced ingestion](load/README.md)
+- [Chef request attribution and paired HTTP comparison](chef/profile/README.md)
+- [Prep admission phases and index-budget boundaries](prep/profile/README.md)
 - [Chef workload and reproduction](../docs/CHEF_BENCHMARK_PREFLIGHT.md)
 - [Candidate preflight](docs/CANDIDATE_PREFLIGHT.md) and [source pins](manifests/candidates.json)
 

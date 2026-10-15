@@ -19,6 +19,39 @@ separate submission gate; package publication and public deployment were not run
 
 ### Current priority after the technical candidate
 
+User direction on 15 October: execute the bounded optimization work below before
+the application demo. This authorization ends at Prep startup/index-limit
+profiling; it does not include public API hosting or private scanning.
+
+- [x] O1: measure concurrent Prep and Chef reads at 1/2/4/8 clients, distinguish
+  admitted throughput from capacity rejection, and verify snapshots during paced
+  ingestion. Retain sample counts, latency distributions and resource evidence.
+- [x] O2: profile Chef request phases, implement only an evidence-supported
+  bounded optimization, and compare ordinary HTTP before/after without weakening
+  authorization, fresh checkpoint/readiness checks or transactional snapshots.
+- [x] O3: attribute Prep startup costs and exercise archive/segment index-budget
+  boundaries. Preserve normal integrity checks, distinguish real archives from
+  synthetic capacity fixtures, and record a persistence decision from evidence.
+
+Keep resource-intensive experiments sequential inside the existing 3 CPU / 8 GiB
+/ 40 GiB envelope, with results local and ordinary applications undisturbed.
+
+O2 adds bounded per-server validated-document reuse; request data, variables and
+checkpoints remain uncached. O1 retains existing admission limits and distinguishes
+capacity/readiness rejection from verified responses. Actual paced Prep append and
+Chef ingestion are checked against independent public data. See the
+[load contract](benchmarks/load/README.md) and
+[request profiler](benchmarks/chef/profile/README.md).
+
+O3 adds opt-in diagnostics and synthetic default-cap proofs while preserving
+ordinary budgets and integrity checks. A future disk-backed or partition-aware
+index remains a separate design: persisting a cache alone does not remove the
+existing RAM cap. Its identity binding, atomic publication, corruption fallback
+and reorg invalidation must be verified before implementation. See the
+[admission/cap methodology](benchmarks/prep/profile/README.md). Detailed results
+and the final scoped acceptance record remain local; no public-service readiness
+or whole-chain claim follows from this work.
+
 User direction on 14 October: prioritize the three investigations below before
 submission/distribution work. Independent investigations may proceed together;
 resource-intensive runs remain sequential within the shared experiment budget.

@@ -6,6 +6,13 @@ license.workspace = true
 rust-version.workspace = true
 publish = false
 
+[features]
+admission-profile = ["prep-store/admission-profile"]
+
+[[example]]
+name = "admission_queries"
+required-features = ["admission-profile"]
+
 [dependencies]
 prep-proto.workspace = true
 prep-store.workspace = true

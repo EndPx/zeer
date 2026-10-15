@@ -413,4 +413,24 @@ mod tests {
         assert!(builder.block(1, &input).is_none());
         assert!(builder.finish().is_none());
     }
+
+    #[test]
+    fn exact_minimum_budget_boundary_is_all_or_nothing() {
+        let rows = 3;
+        let base = size_of::<TransactionIndex>() + 4 * size_of::<usize>();
+        let minimum = base + rows * (size_of::<TransactionMetadata>() + size_of::<u32>());
+        let tx = json(&"ab".repeat(32));
+        let tx = tx
+            .strip_prefix("{\"tx\":[")
+            .unwrap()
+            .strip_suffix("]}")
+            .unwrap();
+        let input = format!("{{\"tx\":[{}]}}", [tx; 3].join(","));
+        let mut exact = IndexBuilder::new(1, 1, minimum).unwrap();
+        exact.block(1, &input).unwrap();
+        assert_eq!(exact.finish().unwrap().bytes(), minimum);
+        let mut below = IndexBuilder::new(1, 1, minimum - 1).unwrap();
+        assert!(below.block(1, &input).is_none());
+        assert!(below.finish().is_none());
+    }
 }

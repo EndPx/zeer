@@ -17,7 +17,23 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use thiserror::Error;
 
+// Timing expands to the original expression in ordinary builds.
+#[cfg(feature = "admission-profile")]
+macro_rules! profile_phase {
+    ($name:expr, $body:expr) => {{
+        let _phase = crate::profiling::Phase::new($name);
+        $body
+    }};
+}
+#[cfg(not(feature = "admission-profile"))]
+macro_rules! profile_phase {
+    ($name:expr, $body:expr) => {
+        $body
+    };
+}
 mod archive;
+#[cfg(feature = "admission-profile")]
+pub mod profiling;
 mod transaction_index;
 pub use archive::{Archive, ArchiveRangeReader, ArchiveWriter, Catalog, SegmentReference};
 pub use transaction_index::TransactionMetadata;
@@ -605,6 +621,8 @@ impl Store {
         auto_kind: bool,
         index_budget: usize,
     ) -> Result<Self> {
+        #[cfg(feature = "admission-profile")]
+        let manifest_phase = profiling::Phase::new("store_manifest");
         let mut limits = limits.validate()?;
         let path = path.as_ref().to_path_buf();
         if !fs::symlink_metadata(&path)?.file_type().is_dir() {
@@ -628,6 +646,8 @@ impl Store {
             limits.max_block_bytes = MAX_FULL_BLOCK_BYTES;
         }
         validate_manifest_structure(&manifest, limits)?;
+        #[cfg(feature = "admission-profile")]
+        drop(manifest_phase);
         let mut segment = regular_file(&path.join(SEGMENT_NAME))?;
         if segment.metadata()?.len() != manifest.segment_bytes {
             return Err(Error::Invalid("segment length differs from manifest"));
@@ -643,16 +663,27 @@ impl Store {
                 limits.max_block_bytes,
                 &manifest.payload_kind,
             )?;
-            digest.update(index.length.to_le_bytes());
-            digest.update(&record.payload);
+            profile_phase!("segment_hash", {
+                digest.update(index.length.to_le_bytes());
+                digest.update(&record.payload);
+            });
             if let Some(builder) = transaction_builder.as_mut() {
-                let full = prep_proto::prep::FullBlock::decode(record.payload.as_slice())?;
-                if builder.block(record.height, &full.decoded_json).is_none() {
+                let full = profile_phase!(
+                    "optional_protobuf_decode",
+                    prep_proto::prep::FullBlock::decode(record.payload.as_slice())
+                )?;
+                if profile_phase!(
+                    "optional_metadata_build",
+                    builder.block(record.height, &full.decoded_json)
+                )
+                .is_none()
+                {
                     transaction_builder = None;
                 }
             }
         }
-        if hex::encode(digest.finalize()) != manifest.segment_sha256 {
+        if profile_phase!("segment_hash", hex::encode(digest.finalize())) != manifest.segment_sha256
+        {
             return Err(Error::Invalid("segment checksum mismatch"));
         }
         // Detect appended/truncated data during validation; block hashes and
@@ -665,7 +696,7 @@ impl Store {
             manifest: Arc::new(manifest),
             limits,
             transaction_index: transaction_builder
-                .and_then(IndexBuilder::finish)
+                .and_then(|builder| profile_phase!("optional_index_finish", builder.finish()))
                 .map(Arc::new),
         })
     }
@@ -838,6 +869,8 @@ fn read_record(
     max_bytes: u64,
     kind: &str,
 ) -> Result<BlockRecord> {
+    #[cfg(feature = "admission-profile")]
+    let io_phase = profiling::Phase::new("record_io");
     file.seek(SeekFrom::Start(entry.offset))?;
     let mut prefix = [0_u8; 4];
     file.read_exact(&mut prefix)?;
@@ -847,7 +880,9 @@ fn read_record(
     }
     let mut payload = vec![0_u8; length as usize];
     file.read_exact(&mut payload)?;
-    if sha256(&payload) != entry.payload_sha256 {
+    #[cfg(feature = "admission-profile")]
+    drop(io_phase);
+    if profile_phase!("payload_hash", sha256(&payload)) != entry.payload_sha256 {
         return Err(Error::Invalid("block payload checksum mismatch"));
     }
     let record = BlockRecord {
@@ -856,7 +891,7 @@ fn read_record(
         prev_hash: parse_hex_hash(&entry.prev_hash)?,
         payload,
     };
-    let decoded_time = check_record(&record, max_bytes, kind)?;
+    let decoded_time = profile_phase!("integrity_decode", check_record(&record, max_bytes, kind))?;
     if entry.time.is_some() && entry.time != decoded_time {
         return Err(Error::Invalid(
             "indexed header time differs from decoded payload",

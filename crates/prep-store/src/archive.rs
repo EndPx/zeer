@@ -162,6 +162,8 @@ fn reference_for_with_budget(
     directory: &str,
     budget: usize,
 ) -> Result<(SegmentReference, Store)> {
+    #[cfg(feature = "admission-profile")]
+    let manifest_phase = crate::profiling::Phase::new("reference_manifest");
     let path = segment_path(root, directory)?;
     let mut file = regular_file(&path.join(MANIFEST_NAME))?;
     if file.metadata()?.len() > MAX_MANIFEST_BYTES {
@@ -175,6 +177,8 @@ fn reference_for_with_budget(
         return Err(Error::Limit("segment manifest grew while reading"));
     }
     let observed: Manifest = serde_json::from_slice(&bytes)?;
+    #[cfg(feature = "admission-profile")]
+    drop(manifest_phase);
     let store = Store::open_with_index_budget(&path, budget)?; // Full integrity pass even when index budget is zero.
     let manifest = store.manifest();
     if *manifest != observed {
@@ -187,7 +191,7 @@ fn reference_for_with_budget(
         end_height: manifest.end_height,
         predecessor_hash: manifest.predecessor_hash.clone(),
         end_hash: manifest.end_hash.clone(),
-        manifest_sha256: sha256(&bytes),
+        manifest_sha256: profile_phase!("manifest_hash", sha256(&bytes)),
     };
     Ok((reference, store))
 }
@@ -218,7 +222,7 @@ impl Archive {
     }
 
     fn load(root: &Path, previous: Option<&Self>) -> Result<Self> {
-        let catalog = read_catalog(root)?;
+        let catalog = profile_phase!("catalog", read_catalog(root))?;
         if let Some(previous) = previous {
             if catalog == *previous.catalog {
                 return Ok(previous.clone());
@@ -265,7 +269,11 @@ impl Archive {
                     .map(|(_, store)| store.transaction_index_bytes())
             })
             .sum();
-        let mut remaining = ARCHIVE_INDEX_BYTES
+        #[cfg(feature = "admission-profile")]
+        let archive_budget = crate::profiling::archive_budget(ARCHIVE_INDEX_BYTES);
+        #[cfg(not(feature = "admission-profile"))]
+        let archive_budget = ARCHIVE_INDEX_BYTES;
+        let mut remaining = archive_budget
             .checked_sub(reused_bytes)
             .ok_or(Error::Limit("archive transaction index bytes"))?;
         for reference in &catalog.segments {
@@ -286,6 +294,8 @@ impl Archive {
                 ));
             }
             check_segment_kind(&catalog, &store)?;
+            #[cfg(feature = "admission-profile")]
+            crate::profiling::segment(&reference.directory, remaining, &store);
             remaining = remaining
                 .checked_sub(store.transaction_index_bytes())
                 .ok_or(Error::Limit("archive transaction index bytes"))?;
@@ -1060,6 +1070,48 @@ mod tests {
         }
         writer.finish().unwrap();
         relative
+    }
+
+    #[cfg(feature = "admission-profile")]
+    #[test]
+    fn profiling_budget_preserves_integrity_and_payloads() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 1, FULL_KIND).unwrap();
+        writer
+            .append_segment(&indexed_segment(&root, "a", 1, 2, &"ab".repeat(32)))
+            .unwrap();
+        drop(writer);
+        let (normal, profile) = crate::profiling::open(&root, None).unwrap();
+        let (zero, disabled) = crate::profiling::open(&root, Some(0)).unwrap();
+        assert!(normal.transaction_index_bytes() > 0);
+        assert_eq!(zero.transaction_index_bytes(), 0);
+        assert_eq!(disabled.archive_budget_bytes, 0);
+        assert_eq!(profile.phases["integrity_decode"].calls, 2);
+        assert_eq!(profile.phases["optional_metadata_build"].calls, 2);
+        assert!(!disabled.phases.contains_key("optional_metadata_build"));
+        assert!(profile.phases.values().map(|p| p.ns).sum::<u128>() <= profile.admission_ns);
+        for height in 1..=2 {
+            assert_eq!(
+                normal.read_block(height).unwrap(),
+                zero.read_block(height).unwrap()
+            );
+            assert_eq!(zero.transaction_metadata(height).unwrap(), None);
+        }
+        // The override ends with the profiling scope; the ordinary open retains its cap.
+        assert!(Archive::open(&root).unwrap().transaction_index_bytes() > 0);
+        assert!(crate::profiling::open(&root, Some(ARCHIVE_INDEX_BYTES + 1)).is_err());
+        let path = root.join("segments/a/segment.bin");
+        let original_mode = fs::metadata(&path).unwrap().permissions().mode();
+        fs::set_permissions(&path, fs::Permissions::from_mode(original_mode | 0o200)).unwrap();
+        let mut bytes = fs::read(&path).unwrap();
+        *bytes.last_mut().unwrap() ^= 1;
+        fs::write(path, bytes).unwrap();
+        assert!(crate::profiling::open(&root, Some(0)).is_err());
+        // Error cleanup must not leak a thread-local profiling override either.
+        assert!(crate::profiling::open(&root, None).is_err());
     }
 
     #[test]

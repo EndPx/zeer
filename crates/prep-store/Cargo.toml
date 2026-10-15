@@ -5,6 +5,13 @@ edition = "2021"
 license = "MIT"
 description = "Bounded immutable compact-block snapshots for Zeer Prep"
 
+[features]
+admission-profile = []
+
+[[example]]
+name = "admission_phases"
+required-features = ["admission-profile"]
+
 [dependencies]
 prep-proto = { path = "../prep-proto" }
 prost.workspace = true
