@@ -172,12 +172,41 @@ Use the existing connected recovery and reorg harnesses for those separate gates
 `ingest_chef.mjs` provides the prepared writer and loopback server for the Chef
 append experiment. It calls the real `PrepClient` and `syncStep`, imports the
 existing `examples/chef-public/chef.config.ts` handlers, creates a fresh random
-marked PostgreSQL namespace and warms only the initial 128 blocks before READY.
+marked PostgreSQL namespace and warms a bounded initial prefix before READY.
 It uses separate `PostgresStore` instances for the writer and HTTP reader. The
 source must be an already ready immutable private numeric IPv4 Prep endpoint
 covering the final range; its epoch/revision/head/network identity must match
 before and after writing. It uses no source RPC mutation and sends no blockchain
 transactions. `fsync`, `synchronous_commit` and `full_page_writes` must be enabled.
+
+The inclusive `oracle.range.from/to` determines the captured range, including
+modern ranges starting above height one. It must contain 2–32,768 contiguous
+blocks. By default the initial prefix contains at most 128 blocks and reserves
+at least half a short range for later ingestion. `--initial-height` overrides its
+absolute ending height. `--end-height`, when supplied, must equal the oracle end.
+
+`--follow-source true` explicitly permits a growing Prep archive. Startup then
+requires coverage through the initial prefix. The harness polls at 100 ms when
+the runtime reports `caught_up` or `source_unavailable`, and retries only errors
+classified by the existing runtime source-error helper. The overall deadline
+still applies. Generic database, authentication and request-timeout exceptions
+remain failures. A reconciling checkpoint can advance during catch-up; the
+GraphQL readiness gate and mandatory final ready checkpoint remain intact.
+Network, epoch and payload kind must remain unchanged; the final source head
+must cover the oracle end and its revision cannot decrease. This flag belongs to
+the experimental harness, not the Chef product CLI.
+
+For a combined historical replay experiment, publish captured source prefixes
+only after both Prep and Chef clients pass preflight. Run the actual Prep follower
+and Chef writer, retaining append/checkpoint timestamps, all HTTP outcomes and
+resource allocations. Include full raw/decoded probes on newly available blocks
+as well as the ordinary metadata workload. A source outage should produce explicit
+not-ready responses and recover; a follower restart is proven only after its new
+process appends a later canonical block. Compare each claimed active concurrency
+level's samples with observed head changes and Chef sync-step windows. Those
+windows include fetch, handler, transaction and checkpoint work, not just SQL
+commit time. Later queries against the completed archive are not active-ingest
+samples. Captured replay does not establish live public-node performance.
 
 Run this helper in its prepared allocation; after its READY event, run the Python
 client from a separately bounded controller. The helper intentionally keeps the

@@ -48,7 +48,7 @@ def classify(status, body):
     messages = [item.get('message') for item in body.get('errors', []) if isinstance(item, dict)] if isinstance(body, dict) else []
     if status == 429 and code == 'QUERY_CAPACITY_EXCEEDED':
         return 'capacity_429'
-    if status == 503 and 'Query capacity reached' in messages:
+    if status == 503 and any(message in ['Query capacity reached', 'Query admission deadline exceeded'] for message in messages):
         return 'capacity_503'
     if status == 503 and (code == 'SOURCE_NOT_READY' or 'Indexer is not ready' in messages):
         return 'unready_503'

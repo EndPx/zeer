@@ -203,3 +203,59 @@ active backend each have 1 CPU / 2 GiB ceilings. Start no parallel experiments.
 Retain failures, all observations, actual limits, and cleanup checks under ignored
 results. Source preparation, startup, warmup and independent equality checks are
 outside the measured retrieval interval.
+
+## Bounded contiguous NU5 dataset capture
+
+`modern_dataset.py` captures a contiguous historical mainnet range from
+CipherScan, without Prep or Chef producing the expected metadata. Keep its output
+under an ignored results directory; captured transaction bodies must not be
+committed.
+
+```powershell
+python benchmarks/prep/full/modern_dataset.py capture --out .deploy-local/modern256 --from-block 1687106 --blocks 256
+python -m unittest benchmarks/prep/full/test_modern_dataset.py
+```
+
+Capture performs sequential requests at least 0.7 seconds apart (below 90 per
+minute), with at most five attempts for HTTP 429 and transient server errors.
+`Retry-After` is honored within a 120-second retry wait and the overall deadline.
+Each invocation is limited to 1,800 seconds and 512 MiB of local capture files,
+including response caches, temporary writes and generated outputs. Responses are
+limited to 16 MiB each. The CLI accepts 2â€“1,024 blocks. Run only one capture
+process against this provider at a time so the request budget remains global.
+
+The same capture command resumes cached responses after checking their SHA-256
+and byte length. `responses/` preserves exact provider JSON and source metadata;
+`blocks/{height}.json` is atomically published only after validation, and
+`progress.json` records the validated contiguous prefix. An exception retains
+partial files and does not emit a completed fixture. A process-exclusive
+`.capture.lock` prevents two writers in one directory; after an abrupt kill,
+verify its recorded process is gone before manually removing a stale lock.
+Resume parameters must match `capture.json`. The assembled `fixture.json` and
+scale-compatible `oracle.json.gz` appear only after the full range validates.
+
+Header reconstruction checks double-SHA256 against the captured listing hash,
+header links, transaction count, transaction ordering, block membership and
+agreement between the verbose endpoint's hex and decoded hex. Provider listing
+sizes that differ from reconstructed raw byte length are recorded as observations.
+The oracle derives size from actual transaction hex and transparent counts from
+captured decoder arrays. The raw payload and decoder share one provider. These
+checks do not independently compute v5 transaction IDs, validate consensus, prove
+a live full-node connection, or establish modern-tip follow behavior.
+
+To expose a completed capture as a local historical replay, create an
+operator-owned control JSON such as `{"height":1687106,"online":true}` and run:
+
+```powershell
+python benchmarks/prep/full/modern_dataset.py serve --directory .deploy-local/modern256 --control .deploy-local/modern256-control.json --port 18232
+```
+
+The replay server binds loopback, whitelists `getblockchaininfo`, `getblockhash`
+and `getblock` (verbosity 0, 1 or 2), and reads the control file on every request.
+Changing `height` publishes a bounded captured prefix; requests above it fail.
+Only the immediate predecessor hash is available before the first captured block.
+Setting `online` to false returns HTTP 503 for an outage experiment. A hash index
+is built once at startup; block retrieval reads only the requested block, avoiding
+a full-dataset scan per RPC. Restart the server if additional captured block files
+are added after startup. This is a synthetic historical replay source whose head
+is controlled by the experiment operator.

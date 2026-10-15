@@ -224,6 +224,11 @@ def verify(path, prep, output):
         raise FileExistsError("proof output already exists")
     fixture_bytes = path.read_bytes()
     fixture = parse_json(fixture_bytes)
+    heights = [block['decoded']['height'] for block in fixture['blocks']]
+    if (not heights or len(heights) > 1024
+            or any(type(height) is not int or not 0 <= height <= 0xffffffff for height in heights)
+            or any(height != heights[0] + index for index, height in enumerate(heights))):
+        raise ValueError('verification requires 1..1024 contiguous captured blocks')
     expected_blocks, expected_txs = [], []
     for block in fixture["blocks"]:
         decoded = block["decoded"]
@@ -235,7 +240,7 @@ def verify(path, prep, output):
                                  "index": index, "version": tx["version"], "locktime": tx["locktime"],
                                  "raw": tx["hex"], "vin": lossless(tx["vin"]), "vout": lossless(tx["vout"]),
                                  "decoded": lossless(tx)})
-    query = {"from_block": HEIGHTS[0], "to_block": HEIGHTS[-1] + 1, "limit": 1,
+    query = {"from_block": heights[0], "to_block": heights[-1] + 1, "limit": 1,
              "field_selection": {"block": list(expected_blocks[0]), "transaction": list(expected_txs[0])}}
 
     def pages(request):
@@ -256,10 +261,10 @@ def verify(path, prep, output):
             blocks.extend(result["data"]["blocks"])
             txs.extend(result["data"]["transactions"])
             count += 1
-            assert count <= 3
+            assert count <= len(heights)
             cursor = result["cursor"]
             if cursor is None:
-                assert result["next_block"] == HEIGHTS[-1] + 1
+                assert result["next_block"] == heights[-1] + 1
                 return blocks, txs, count
 
     blocks, txs, page_count = pages(query)

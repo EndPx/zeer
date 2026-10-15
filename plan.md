@@ -19,6 +19,34 @@ separate submission gate; package publication and public deployment were not run
 
 ### Current priority after the technical candidate
 
+User direction: validate modern data and concurrent Prep/Chef ingestion before
+another engine optimization or application demo.
+
+- [x] N1: capture a bounded contiguous NU5-era dataset with source response hashes,
+  exact decimal tokens, independently prepared application projections and clear
+  historical replay versus live-node limitations. Enlarge only within measured
+  provider, time, memory and disk bounds.
+- [x] N2: run the current engine through growing-source replay, Prep follow,
+  Chef handlers/PostgreSQL and concurrent authenticated queries. Verify exact
+  results, checkpoints, restart/source-outage behavior and real read/write overlap.
+- [x] N3: measure preparation, admission, query and Chef fetch/handler/database
+  costs; record the next optimization decision from measured bottlenecks. Keep
+  all results local and preserve the existing 3 CPU / 8 GiB / 40 GiB envelope.
+
+This pass does not authorize public hosting, private scanning or speculative
+engine changes. Historical replay is not evidence of a synchronized modern node.
+
+N1-N3 are accepted through two bounded combined runs and an unloaded ingestion/
+admission baseline. The next investigation is finer-grained Chef write-path SQL
+profiling: current runtime attribution combines entity flushing, journal/checkpoint
+work, pruning and commit overhead, so it does not identify a single expensive
+statement. Preserve block atomicity and PostgreSQL durability. This modern sample
+does not establish a new Prep bottleneck or whole-chain scale. Detailed results
+and source provenance remain local under `benchmarks/results/`.
+
+Delivery preference: collect related changes and their verification into one
+reviewed batch, then commit and push once; do not push each small intermediate edit.
+
 User direction following O1-O3: implement bounded request admission and a safe
 disk-backed public metadata index before demo/public API work.
 

@@ -9,6 +9,7 @@ import { isIP } from 'node:net';
 import pg from 'pg';
 import { PrepClient } from '@zeer/prep-client';
 import { PostgresStore, parseModel, encodeEntity, syncStep } from '@zeer/chef';
+import { isSourceUnavailable } from '../../packages/chef/dist/runtime.js';
 import { check, hash, digest, publicFixture } from '../chef/query/fixture.mjs';
 
 export function privateOrigin(value) {
@@ -32,13 +33,58 @@ export function cleanupFailures(results, names) {
     ? [{ resource: names[index], errorName: /^[A-Za-z][A-Za-z0-9]*$/.test(result.reason?.name) ? result.reason.name : 'CleanupError' }] : []);
 }
 
+/** Inclusive captured range; a short range reserves at least half for active appends. */
+export function ingestRange(oracle, initialHeight, endHeight) {
+  const start = oracle?.range?.from, end = oracle?.range?.to;
+  check(Number.isSafeInteger(start) && Number.isSafeInteger(end) && start >= 1
+    && end <= 0xffff_fffe && end > start && end - start + 1 <= 32768, 'BOUNDED_ORACLE_RANGE_REQUIRED');
+  check(endHeight === undefined || endHeight === end, 'EXACT_ORACLE_RANGE_REQUIRED');
+  const initial = initialHeight ?? start + Math.min(128, Math.floor((end - start + 1) / 2)) - 1;
+  check(Number.isSafeInteger(initial) && initial >= start && initial < end, 'INITIAL_HEIGHT_OUTSIDE_ORACLE_PREFIX');
+  return { start, end, initial };
+}
+
+export function contiguousFixture(oracle) {
+  const { start, end } = ingestRange(oracle);
+  const fixture = publicFixture(oracle);
+  check(fixture.blocks.length === end - start + 1 && [...fixture.blocks].sort((a, b) => Number(a.id) - Number(b.id))
+    .every((row, index) => row.id === String(start + index)), 'CONTIGUOUS_ORACLE_BLOCKS_REQUIRED');
+  return fixture;
+}
+
+/** Follow mode retries only the runtime's classified source errors and idle states. */
+export function ingestDecision(step, followSource, error) {
+  if (error !== undefined) {
+    if (followSource && isSourceUnavailable(error)) return 'wait';
+    throw error;
+  }
+  if (step?.state === 'progress' && step.blocks > 0) return 'commit';
+  if (followSource && step?.blocks === 0 && ['caught_up', 'source_unavailable'].includes(step.state)) return 'wait';
+  throw new Error('INGEST_DID_NOT_ADVANCE');
+}
+
+export function verifyProgressCheckpoint(step, checkpoint, expectedBlock, followSource) {
+  check(checkpoint.height === step.height && (checkpoint.status === 'ready'
+    || (followSource && checkpoint.status === 'reconciling')), 'WRITER_CHECKPOINT_NOT_READY');
+  check(expectedBlock && checkpoint.hash === expectedBlock.hash, 'WRITER_CHECKPOINT_HASH_MISMATCH');
+}
+
+export function sameSource(before, after, followSource, end) {
+  if (!followSource) return digest(after) === digest(before);
+  return after.network === before.network && after.epoch === before.epoch
+    && after.payload_kind === before.payload_kind && after.ready === true
+    && Number.isSafeInteger(after.archive_height) && after.archive_height >= Math.max(end, before.archive_height)
+    && /^[0-9]+$/.test(String(before.revision)) && /^[0-9]+$/.test(String(after.revision))
+    && BigInt(after.revision) >= BigInt(before.revision);
+}
+
 async function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
   const flags = new Map();
   for (let i = 2; i < process.argv.length; i += 2) {
     const key = process.argv[i], value = process.argv[i + 1];
     check(['--oracle', '--out', '--start-file', '--prep-url', '--port', '--config', '--schema', '--source',
-      '--dsn-env', '--token-env', '--prep-token-env', '--initial-height', '--end-height', '--page-size', '--delay-ms', '--max-seconds', '--source-timeout-ms'].includes(key)
+      '--follow-source', '--dsn-env', '--token-env', '--prep-token-env', '--initial-height', '--end-height', '--page-size', '--delay-ms', '--max-seconds', '--source-timeout-ms'].includes(key)
       && !flags.has(key) && value && !value.startsWith('--'), 'INVALID_ARGUMENT');
     flags.set(key, value);
   }
@@ -47,7 +93,9 @@ async function main() {
     const value = flags.get(key) ?? String(fallback); check(/^(0|[1-9][0-9]*)$/.test(value), 'INVALID_INTEGER');
     const n = Number(value); check(Number.isSafeInteger(n) && n >= min && n <= max, 'INTEGER_OUTSIDE_BOUNDS'); return n;
   };
-  const initial = integer('--initial-height', 128, 1, 2047), end = integer('--end-height', 2048, initial + 1, 2048);
+  check(!flags.has('--follow-source') || ['true', 'false'].includes(flags.get('--follow-source')), 'INVALID_FOLLOW_SOURCE');
+  const followSource = flags.get('--follow-source') === 'true';
+  const sourcePollMs = 100;
   const pageSize = integer('--page-size', 16, 1, 100), delayMs = integer('--delay-ms', 50, 0, 1000);
   const maxSeconds = integer('--max-seconds', 120, 10, 600), port = integer('--port', 39380, 1024, 65535);
   const sourceTimeoutMs = integer('--source-timeout-ms', 30000, 100, 30000);
@@ -64,21 +112,23 @@ async function main() {
   const prepUrl = privateOrigin(flags.get('--prep-url'));
   const configPath = resolve(flags.get('--config') ?? resolve(root, 'examples/chef-public/chef.config.ts'));
   const configRaw = await readFile(configPath), config = (await import(pathToFileURL(configPath).href)).default;
-  check(config.network === 'mainnet' && config.startHeight === 1 && config.indexer && config.handlerVersion === '1', 'PUBLIC_MAINNET_CONFIG_REQUIRED');
+  check(config.network === 'mainnet' && Number.isSafeInteger(config.startHeight) && config.startHeight >= 1
+    && config.indexer && config.handlerVersion === '1', 'PUBLIC_MAINNET_CONFIG_REQUIRED');
   const schemaPath = resolve(flags.get('--schema') ?? resolve(dirname(configPath), config.schema));
   const schemaRaw = await readFile(schemaPath, 'utf8'), model = parseModel(schemaRaw);
   check(model.entities.Block && model.entities.PublicTransaction, 'PUBLIC_PROJECTION_MODEL_REQUIRED');
   const oracleRaw = await readFile(resolve(flags.get('--oracle')));
   const oracle = JSON.parse(flags.get('--oracle').endsWith('.gz') ? gunzipSync(oracleRaw) : oracleRaw);
-  check(oracle.range.from === 1 && oracle.range.to === end, 'EXACT_ORACLE_RANGE_REQUIRED');
-  const fixture = publicFixture(oracle);
-  check(fixture.blocks.length === end && [...fixture.blocks].sort((a, b) => Number(a.id) - Number(b.id))
-    .every((row, index) => row.id === String(index + 1)), 'CONTIGUOUS_ORACLE_BLOCKS_REQUIRED');
+  const { start, end, initial } = ingestRange(oracle,
+    flags.has('--initial-height') ? integer('--initial-height', 0, 1, 0xffff_fffe) : undefined,
+    flags.has('--end-height') ? integer('--end-height', 0, 1, 0xffff_fffe) : undefined);
+  const fixture = contiguousFixture(oracle);
+  const blockByHeight = new Map(fixture.blocks.map(row => [Number(row.id), row]));
   const expectedRows = [...fixture.blocks.map(data => ({ entity: 'Block', id: data.id, data: encodeEntity(model, 'Block', data) })),
     ...fixture.transactions.map(data => ({ entity: 'PublicTransaction', id: data.id, data: encodeEntity(model, 'PublicTransaction', data) }))]
     .sort((a, b) => a.entity < b.entity ? -1 : a.entity > b.entity ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
   const project = `ingest_${randomBytes(8).toString('hex')}`, namespace = `chef_${project}`;
-  const options = { project, network: 'mainnet', startHeight: 1, reorgWindow: config.reorgWindow,
+  const options = { project, network: 'mainnet', startHeight: start, reorgWindow: config.reorgWindow,
     model, fingerprint: digest({ schema: model.fingerprint, config: hash(configRaw), oracle: hash(oracleRaw), project }) };
   const source = resolve(flags.get('--source') ?? resolve(root, 'packages/chef/dist/graphql.js'));
   const { createChefServer } = await import(pathToFileURL(source).href);
@@ -91,8 +141,10 @@ async function main() {
     options: { ...options, model: undefined }, input: { oracleSha256: hash(oracleRaw), configSha256: hash(configRaw),
       schemaSha256: hash(schemaRaw), serverSourceSha256: hash(await readFile(source)), source: oracle.source,
       expectedEntityDigest: digest(expectedRows), blocks: fixture.blocks.length, transactions: fixture.transactions.length },
-    settings: { initialHeight: initial, endHeight: end, pageSize, delayMs, maxSeconds, sourceTimeoutMs }, steps: [],
-    limitations: ['Actual syncStep fetches full decoded public blocks from a prebuilt immutable private Prep source and invokes the existing public example handlers.',
+    settings: { startHeight: start, initialHeight: initial, endHeight: end, pageSize, delayMs, maxSeconds, sourceTimeoutMs, followSource, sourcePollMs }, steps: [],
+    limitations: [followSource
+      ? 'Actual syncStep follows an append-only private Prep source and invokes the existing public example handlers. Only known runtime source-unavailable errors and idle states are polled; all waits share the lifetime bound.'
+      : 'Actual syncStep fetches full decoded public blocks from a prebuilt immutable private Prep source and invokes the existing public example handlers.',
       'Delay paces real PostgreSQL page commits for an append-only consistency experiment; ingestion speed here is intentionally paced.',
       'Final all-row verification occurs after writer completion. Namespace is retained. No reorg, crash durability or public broadcast is asserted.',
       'AbortSignal bounds source requests and pacing, not every SQL/cleanup call. Run in an outer systemd unit with RuntimeMaxSec, TimeoutStopSec and KillMode=control-group for a hard complete-process bound.'] };
@@ -110,16 +162,30 @@ async function main() {
   });
   const sourceIdentity = meta => ({ network: meta.network, epoch: meta.epoch, revision: meta.revision, archive_height: meta.archive_height, payload_kind: meta.payload_kind, ready: meta.ready });
   const runTo = async (target, paced) => {
-    while ((await writer.checkpoint()).height < target) {
+    while (((await writer.checkpoint()).height ?? start - 1) < target) {
       signal.throwIfAborted();
       const startedUnixMs = Date.now();
-      const step = await syncStep({ client, store: writer, indexer: config.indexer, network: 'mainnet', startHeight: 1,
-        reorgWindow: options.reorgWindow, pageSize, signal }, target);
-      check(step.state === 'progress' && step.blocks > 0, 'INGEST_DID_NOT_ADVANCE');
+      let step, decision;
+      try {
+        step = await syncStep({ client, store: writer, indexer: config.indexer, network: 'mainnet', startHeight: start,
+          reorgWindow: options.reorgWindow, pageSize, signal }, target);
+      } catch (error) {
+        signal.throwIfAborted();
+        decision = ingestDecision(undefined, followSource, error);
+        step = { state: 'source_error', errorName: /^[A-Za-z][A-Za-z0-9]*$/.test(error?.name) ? error.name : 'SourceError' };
+      }
+      decision ??= ingestDecision(step, followSource);
+      if (step.sourceEpoch !== undefined) check(step.sourceEpoch === report.sourceBefore.epoch, 'PREP_SOURCE_CHANGED');
+      if (decision === 'wait') {
+        const event = { stage: paced ? 'active_wait' : 'warmup_wait', startedUnixMs, completedUnixMs: Date.now(), step,
+          checkpoint: await writer.checkpoint() };
+        report.steps.push(event); await save();
+        console.log(JSON.stringify({ event: 'WAITING_FOR_SOURCE', ...event }));
+        await pause(sourcePollMs);
+        continue;
+      }
       const checkpoint = await writer.checkpoint();
-      check(checkpoint.height === step.height && checkpoint.status === 'ready', 'WRITER_CHECKPOINT_NOT_READY');
-      const expectedBlock = fixture.blocks.find(row => Number(row.id) === checkpoint.height);
-      check(checkpoint.hash === expectedBlock.hash, 'WRITER_CHECKPOINT_HASH_MISMATCH');
+      verifyProgressCheckpoint(step, checkpoint, blockByHeight.get(checkpoint.height), followSource);
       const event = { stage: paced ? 'active_append' : 'warmup', startedUnixMs, completedUnixMs: Date.now(), step, checkpoint };
       report.steps.push(event); await save();
       console.log(JSON.stringify({ event: 'COMMITTED_PAGE', ...event }));
@@ -132,7 +198,7 @@ async function main() {
     report.databaseSettings = (await admin.query("SELECT name,setting FROM pg_settings WHERE name IN ('fsync','synchronous_commit','full_page_writes','server_version') ORDER BY name")).rows;
     for (const name of ['fsync', 'synchronous_commit', 'full_page_writes']) check(report.databaseSettings.find(row => row.name === name).setting === 'on', 'DURABLE_POSTGRES_SETTINGS_REQUIRED');
     const meta = await client.getHeight({ signal });
-    check(meta.ready && meta.network === 'mainnet' && meta.payload_kind === 'full-v1' && meta.start_block === 1 && meta.archive_height >= end, 'READY_COMPLETE_PREP_SOURCE_REQUIRED');
+    check(meta.ready && meta.network === 'mainnet' && meta.payload_kind === 'full-v1' && meta.start_block <= start && meta.archive_height >= (followSource ? initial : end), 'READY_COMPLETE_PREP_SOURCE_REQUIRED');
     report.sourceBefore = sourceIdentity(meta);
     await writer.migrate(); await writer.acquire();
     await runTo(initial, false);
@@ -156,7 +222,7 @@ async function main() {
     await runTo(end, true);
     report.activeCompletedUnixMs = Date.now();
     report.sourceAfter = sourceIdentity(await client.getHeight({ signal }));
-    check(digest(report.sourceAfter) === digest(report.sourceBefore), 'PREP_SOURCE_CHANGED');
+    check(sameSource(report.sourceBefore, report.sourceAfter, followSource, end), 'PREP_SOURCE_CHANGED');
     const verifyStart = performance.now();
     await admin.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
     try {

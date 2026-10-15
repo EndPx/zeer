@@ -78,6 +78,7 @@ class LoadTests(unittest.TestCase):
     def test_capacity_and_readiness_are_distinct(self):
         self.assertEqual(classify(429, {'error': {'code': 'QUERY_CAPACITY_EXCEEDED'}}), 'capacity_429')
         self.assertEqual(classify(503, {'errors': [{'message': 'Query capacity reached'}]}), 'capacity_503')
+        self.assertEqual(classify(503, {'errors': [{'message': 'Query admission deadline exceeded'}]}), 'capacity_503')
         self.assertEqual(classify(503, {'errors': [{'message': 'Indexer is not ready'}]}), 'unready_503')
         self.assertEqual(classify(503, {'error': {'code': 'SOURCE_NOT_READY'}}), 'unready_503')
         self.assertEqual(classify(503, {'error': {'code': 'ARCHIVE_READ_FAILED'}}), 'unexpected_http_503')

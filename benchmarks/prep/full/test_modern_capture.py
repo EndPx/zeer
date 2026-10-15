@@ -12,6 +12,16 @@ else:
 
 
 class CaptureTests(unittest.TestCase):
+    def test_large_or_invalid_height_gap_is_rejected_before_network(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            fixture = root / 'fixture.json'
+            for heights in ([1687106, 0xffffffff], [True], [1687106, 1687106]):
+                fixture.write_text(capture.exact_json({'blocks': [{'decoded': {'height': height}} for height in heights]}))
+                with self.assertRaisesRegex(ValueError, 'contiguous captured blocks'):
+                    capture.verify(fixture, 'http://unused', root / 'output.json')
+                self.assertFalse((root / 'output.json').exists())
+
     def test_predecessor_hash_is_available_but_earlier_history_is_not(self):
         by_height = {1687106: {"decoded": {"hash": "a" * 64, "previousblockhash": "b" * 64}}}
         self.assertEqual(capture.fixture_block_hash(by_height, 1687106), "a" * 64)
