@@ -95,6 +95,13 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
     if (!current || current.hash !== checkpoint.hash) {
       await store.markReconciling();
       const floor = Math.max(options.startHeight - 1, checkpoint.height - options.reorgWindow);
+      // Prep can publish a shorter prefix while rebuilding replacement segments.
+      // Wait if the follower's observed source can still supply our retained
+      // window; missing published history is not proof of an unrecoverable fork.
+      if (meta.source_mode === "follower" && meta.archive_height < floor
+        && uint(meta.source_height) && meta.source_height >= floor) {
+        return { ...base, fetchMs, state: "source_unavailable" };
+      }
       let ancestor: { height: number; hash: string } | null = null;
       for (let height = Math.min(checkpoint.height, meta.archive_height); height >= floor; height--) {
         signal?.throwIfAborted();

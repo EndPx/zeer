@@ -166,10 +166,10 @@ def main():
         target=head+2
         sql(f"CREATE FUNCTION chef_recovery_public.proof_pause() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.height={target} THEN PERFORM pg_sleep(12); END IF; RETURN NEW; END $$; CREATE TRIGGER proof_pause BEFORE INSERT ON chef_recovery_public.blocks FOR EACH ROW EXECUTE FUNCTION chef_recovery_public.proof_pause();")
         head=generate(2)
-        wait(lambda:pgwait("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE wait_event='PgSleep' AND query LIKE 'INSERT INTO %blocks%')"),'mid_block_barrier')
+        wait(lambda:pgwait("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE wait_event='PgSleep' AND query LIKE '%INSERT INTO %blocks%')"),'mid_block_barrier')
         assert checkpoint()['height']==head-1;equal(head-1)
         call(['docker','kill','--signal','KILL',worker]);event('worker_killed_during_uncommitted_block',durable_height=head-1)
-        wait(lambda:pgwait("SELECT NOT EXISTS(SELECT 1 FROM pg_stat_activity WHERE wait_event='PgSleep' AND query LIKE 'INSERT INTO %blocks%')"),'abandoned_transaction_rollback')
+        wait(lambda:pgwait("SELECT NOT EXISTS(SELECT 1 FROM pg_stat_activity WHERE wait_event='PgSleep' AND query LIKE '%INSERT INTO %blocks%')"),'abandoned_transaction_rollback')
         assert checkpoint()['height']==head-1;equal(head-1)
         sql('DROP TRIGGER proof_pause ON chef_recovery_public.blocks; DROP FUNCTION chef_recovery_public.proof_pause();')
         start(worker);wait(lambda:ready(head),'worker_restart');equal(head);event('worker_restart_exactly_once',height=head)

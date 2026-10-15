@@ -355,6 +355,42 @@ test("PostgreSQL: a database flush failure rolls back entities, undo and checkpo
   assert.equal((await client.query(`SELECT count(*)::int AS n FROM ${sql}.undo WHERE height=1`)).rows[0].n, 0);
 });
 
+for (const rejectedStage of ["checkpoint", "pruning"]) test(`PostgreSQL: ${rejectedStage} failure restores entities, journal and retained boundary`, { skip: !url }, async t => {
+  const { store, options } = await fixture(t);
+  for (let height = 0; height <= 3; height++) await store.apply(block(height), async entities => entities.set("Account", account("stable", BigInt(height))));
+  const client = new pg.Client({ connectionString: url }); await client.connect();
+  t.after(() => client.end());
+  const sql = `"chef_${options.project}"`;
+  const snapshot = async () => ({
+    state: (await client.query(`SELECT * FROM ${sql}.state`)).rows,
+    entities: (await client.query(`SELECT * FROM ${sql}.entities ORDER BY entity,id`)).rows,
+    blocks: (await client.query(`SELECT * FROM ${sql}.blocks ORDER BY height`)).rows,
+    undo: (await client.query(`SELECT * FROM ${sql}.undo ORDER BY height,entity,id`)).rows,
+  });
+  const before = await snapshot();
+  const table = rejectedStage === "checkpoint" ? "state" : "undo";
+  const operation = rejectedStage === "checkpoint" ? "UPDATE" : "DELETE";
+  const condition = rejectedStage === "checkpoint" ? "NEW.height = 4" : "OLD.height = 1";
+  const returned = rejectedStage === "checkpoint" ? "NEW" : "OLD";
+  await client.query(`CREATE FUNCTION ${sql}.reject_bookkeeping() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF ${condition} THEN RAISE EXCEPTION 'fixture bookkeeping rejection'; END IF; RETURN ${returned}; END $$`);
+  await client.query(`CREATE TRIGGER reject_bookkeeping BEFORE ${operation} ON ${sql}.${table} FOR EACH ROW EXECUTE FUNCTION ${sql}.reject_bookkeeping()`);
+  const mutate = async entities => {
+    await entities.set("Account", account("stable", 4n));
+    await entities.set("Account", account("new", 99n));
+  };
+  await assert.rejects(store.apply(block(4), mutate), /fixture bookkeeping rejection/);
+  assert.deepEqual(await snapshot(), before);
+  await client.query(`DROP TRIGGER reject_bookkeeping ON ${sql}.${table}`);
+  await store.apply(block(4), mutate);
+  assert.equal((await store.checkpoint()).height, 4);
+  assert.deepEqual((await client.query(`SELECT height FROM ${sql}.blocks ORDER BY height`)).rows.map(row => Number(row.height)), [1, 2, 3, 4]);
+  assert.deepEqual((await client.query(`SELECT DISTINCT height FROM ${sql}.undo ORDER BY height`)).rows.map(row => Number(row.height)), [2, 3, 4]);
+  await store.markReconciling(); await store.rollback(1, block(1).hash); await store.markReady();
+  assert.equal((await store.checkpoint()).height, 1);
+  assert.equal((await store.read(view => view.get("Account", "stable"))).balance, "1");
+  assert.equal(await store.read(view => view.get("Account", "new")), null);
+});
+
 test("PostgreSQL: cache bytes and entries are bounded and reject the whole block", { skip: !url }, async t => {
   const { store } = await fixture(t);
   await assert.rejects(store.apply(block(0), async entities => {

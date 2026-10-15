@@ -96,6 +96,12 @@ Reorg recovery uses retained block hashes and before-images. Reads are unavailab
 while the framework reconciles/replays or cannot validate its source, and deep
 reorgs enter a rebuild-required state. The caller starts a fresh project namespace
 for changed handlers/schema; automatic migration and replay cutover are deferred.
+If a Prep follower temporarily exposes a prefix below Chef's retained ancestor
+window while rebuilding replacement segments, Chef remains reconciling when the
+observed upstream tip can still supply that window. It resumes comparisons once
+the required history is published. A proven deeper fork, a permanently shorter
+source or an insufficient historical snapshot still requires a rebuild; missing
+temporary follower history does not itself establish that proof.
 Changes in imported helper modules must increment `handlerVersion` because the
 entry-file fingerprint does not discover the whole module dependency graph.
 

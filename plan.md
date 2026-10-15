@@ -19,6 +19,24 @@ separate submission gate; package publication and public deployment were not run
 
 ### Current priority after the technical candidate
 
+User direction: profile Chef write SQL, implement one measured optimization, and
+validate equivalent output, rollback/restart and GraphQL behavior before delivery.
+
+- [x] W1: attribute actual `PostgresStore.apply` query counts and client-observed
+  SQL durations in a measurement-only harness, separate from ordinary wall timing.
+- [x] W2: evaluate combined metadata and conservative pruning candidates against
+  performance and correctness acceptance gates. The original write SQL remains
+  the delivered default; measurements and the acceptance decision stay local.
+- [x] W2 recovery repair: preserve reconciling while a follower has not yet
+  republished the retained ancestor window after rollback. Defer only when its
+  observed upstream tip can supply that window; proven deep forks remain blocked.
+- [x] W3: retain all alternating uninstrumented modern/legacy comparisons, then
+  verify before/after concurrent ingestion and connected Regtest recovery. Accept
+  only scoped measured gains; modern shared-host noise is not a universal speedup.
+
+All related W1-W3 work is one delivery batch. Detailed profiles, failures and
+benchmark results remain local; no public endpoint or package publication is added.
+
 User direction: validate modern data and concurrent Prep/Chef ingestion before
 another engine optimization or application demo.
 
