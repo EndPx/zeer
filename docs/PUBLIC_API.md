@@ -3,11 +3,12 @@
 The developer preview serves actual Zcash testnet public data through:
 
 ```text
-https://zeer-ten.vercel.app/api/prep
+https://zeer.endpx.cloud/api/prep
 ```
 
 Always read `/height` first. `start_block` and `indexed_height` describe available
-coverage, not the whole chain by implication. Backfill from genesis is in progress.
+coverage, not the whole chain by implication. The hosted archive follows confirmed
+testnet blocks from genesis; Chef indexing progresses separately.
 `ready` means that the available snapshot can be read; it does not mean that
 every chain block has already been imported. Historical source mode does not
 provide a fresh network-tip observation.
@@ -15,9 +16,9 @@ provide a fresh network-tip observation.
 ## Query
 
 ```sh
-curl https://zeer-ten.vercel.app/api/prep/height
+curl https://zeer.endpx.cloud/api/prep/height
 
-curl https://zeer-ten.vercel.app/api/prep/query \
+curl https://zeer.endpx.cloud/api/prep/query \
   -H 'Content-Type: application/json' \
   -d '{"from_block":0,"to_block":2,"limit":2,"field_selection":{"block":["height","hash","time"],"transaction":[]}}'
 ```
@@ -33,7 +34,7 @@ The existing client works against this base URL after installation from the
 ```ts
 import { PrepClient } from "@zeer/prep-client";
 
-const client = new PrepClient({ url: "https://zeer-ten.vercel.app/api/prep" });
+const client = new PrepClient({ url: "https://zeer.endpx.cloud/api/prep" });
 const coverage = await client.getHeight();
 if (!coverage.ready || coverage.indexed_height === null) {
   throw new Error("Prep is not ready; retry after source recovery.");
@@ -54,9 +55,9 @@ change returns `409` with the `REORG` code so the client can restart safely.
 
 ## Playground examples
 
-The [Prep playground](https://zeer-ten.vercel.app/app/prep) defaults to the
-archive start (genesis for the hosted testnet archive) and its current available
-end. It supports task-oriented examples for transparent output payments,
+The [Prep playground](https://zeer.endpx.cloud/app/prep) starts at genesis with
+no end-height input. Prep captures the current archive end on the first request;
+subsequent cursor pages retain that snapshot. It offers transparent output payments,
 transaction IDs, Sapling/Orchard activity, block history and transaction metadata.
 The address and transaction presets are verified public testnet examples.
 
@@ -77,8 +78,9 @@ Chef GraphQL lists retain a 100-item maximum per response and return
 ## Preview bounds
 
 - No personal API token is needed for this public-data preview.
-- Global bridge allowance: 120 requests/minute and two concurrent requests,
-  shared with console traffic. This is not a dedicated throughput allocation.
+- VPS ingress: two requests/second globally with a burst of eight. The web
+  adapter allows two active upstream requests, shared with console traffic.
+  This is not a dedicated throughput allocation.
 - Input: 16,128 bytes. Response: 8 MiB. Request deadline: 15 seconds.
 - Query pages scan at most 1,000 blocks. Select fields and use smaller pages for
   large full-block payloads. Transaction-ID lookups cover at most 1,000 blocks

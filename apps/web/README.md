@@ -24,7 +24,8 @@ npm run start -w @zeer/web
 Open http://127.0.0.1:3000. Use `npm run dev:web` for development.
 
 - `/`: landing, product selector and query examples.
-- `/app`: actual backend status, with Unknown/Not connected when unavailable.
+- `/app`: actual backend status, with buffering placeholders while checking and
+  clear recovery messages when unavailable.
   A network panel separates full-history coverage from Chef completion within
   Prep's current window, shows both lag values and observation time, and displays
   eight real recent block headers with one-block query links. Visible tabs refresh

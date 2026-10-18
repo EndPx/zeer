@@ -2461,3 +2461,18 @@ svg {
   .query-explorer .fields, .query-explorer .match-field { grid-template-columns: minmax(0, 1fr); }
   .query-explorer .format-tabs { flex-basis: 100%; }
 }
+
+/* Indeterminate loading conveys a request in flight, never a fake percentage. */
+.metric-skeleton { display: inline-block; position: relative; overflow: hidden; width: 96px; max-width: 100%; height: 16px; vertical-align: middle; border-radius: 4px; background: var(--line); }
+.metric-skeleton.short { width: 64px; }
+.metric-skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--muted), transparent); opacity: .2; transform: translateX(-100%); animation: status-sheen 1.4s ease-in-out infinite; }
+.metric-unavailable { color: var(--muted); font-size: 12px; }
+.sync-track.is-buffering > .buffer-segment { width: 35%; opacity: .65; transform: translateX(-100%); animation: status-buffer 1.4s ease-in-out infinite; }
+.loading-blocks .block-tile { display: flex; flex-direction: column; gap: 12px; color: var(--muted); }
+@keyframes status-sheen { to { transform: translateX(100%); } }
+@keyframes status-buffer { to { transform: translateX(290%); } }
+@media (prefers-reduced-motion: reduce) {
+  .metric-skeleton::after, .sync-track.is-buffering > .buffer-segment, .source-state .spin { animation: none; }
+  .sync-track.is-buffering > .buffer-segment { transform: none; }
+}
+.query-range-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }

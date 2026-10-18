@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Code } from "./ui";
 import { CopyButton } from "./interactive";
+import type { Example } from "@/lib/content";
 
 type Row = Record<string, unknown>;
 function record(value: unknown): Row {
@@ -9,8 +10,8 @@ function record(value: unknown): Row {
     ? value as Row : {};
 }
 
-export function PrepResponse({ value, stale, duration, blocks }: {
-  value: unknown; stale: boolean; duration: number | null; blocks: boolean;
+export function PrepResponse({ value, stale, duration, blocks, scanFrom, example }: {
+  value: unknown; stale: boolean; duration: number | null; blocks: boolean; scanFrom: number; example: Example;
 }) {
   const [view, setView] = useState("Table");
   const response = record(value);
@@ -21,6 +22,7 @@ export function PrepResponse({ value, stale, duration, blocks }: {
   const columns = fields.filter(field => rows.some(row => field in row));
   const more = typeof response.cursor === "string" && response.cursor.length > 0;
   const complete = response.cursor === null || response.complete === true;
+  const scannedTo = typeof response.next_block === "number" ? response.next_block - 1 : null;
   const json = JSON.stringify(value, null, 2);
   return <section className="code-panel response-panel" aria-label="Prep response">
     <div className="panel-toolbar response-toolbar">
@@ -36,9 +38,10 @@ export function PrepResponse({ value, stale, duration, blocks }: {
       <span>{rows.length} {blocks ? "blocks" : "transactions"} returned</span>
       {duration !== null && <span>{Math.round(duration).toLocaleString("en-US")} ms round trip</span>}
       <span>{more ? "More pages available" : complete ? "Requested range complete" : "Inspect response coverage"}</span>
+      {scannedTo !== null && scannedTo >= scanFrom && <span>Scanned blocks {scanFrom.toLocaleString("en-US")}–{scannedTo.toLocaleString("en-US")}</span>}
     </div>
     {view === "JSON" ? <Code code={json} /> : rows.length === 0 ?
-      <div className="table-empty"><strong>No matching rows in this response.</strong><p>Review the range and filters. Shielded details remain encrypted.</p></div> :
+      <div className="table-empty"><strong>Query succeeded. No matches in this page.</strong><p>{(example === "orchard" || example === "sapling") && scanFrom === 0 ? `The first blocks predate ${example === "orchard" ? "Orchard" : "Sapling"}. Continue paging or use a recent block range to explore its activity.` : more ? "This page contains no matches. Continue to the next page to search more of the selected range." : "No transactions matched your filters in the scanned range."}</p></div> :
       <div className="result-table-scroll" role="region" aria-label="Query result table" tabIndex={0}>
         <table className="result-table"><caption className="sr-only">Public {blocks ? "block" : "transaction"} rows returned by Prep</caption>
           <thead><tr>{columns.map(field => <th scope="col" key={field}>{field}</th>)}</tr></thead>

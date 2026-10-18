@@ -14,7 +14,7 @@ import { NetworkStatus } from "./network-status";
 import type { ConsoleStatus } from "@/lib/sync-status";
 export function Overview() {
   const [status, setStatus] = useState<ConsoleStatus | null>(null),
-    [loading, setLoading] = useState(false),
+    [loading, setLoading] = useState(true),
     [error, setError] = useState("");
   const pending = useRef<AbortController | null>(null);
   const refresh = useCallback(async () => {
@@ -24,13 +24,19 @@ export function Overview() {
     setLoading(true);
     setError("");
     try {
-      const r = await fetch("/api/status", { signal: controller.signal, cache: "no-store" });
+      const r = await fetch("/api/status", { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(35000)]), cache: "no-store" });
       if (!r.ok) throw Error();
       const nextStatus = await r.json();
-      if (!controller.signal.aborted) setStatus(nextStatus);
+      if (!nextStatus.prep || !nextStatus.chef) throw Error();
+      if (!controller.signal.aborted) {
+        if ((nextStatus.prep.configured || nextStatus.chef.configured) && !nextStatus.prep.available && !nextStatus.chef.available) {
+          setStatus(previous => previous ?? nextStatus);
+          setError("The services did not respond. We will retry automatically; you can also press Refresh.");
+        } else setStatus(nextStatus);
+      }
     } catch {
       if (!controller.signal.aborted)
-        setError("Status could not be refreshed. Try again.");
+        setError("The status check could not finish. We will retry automatically; you can also press Refresh.");
     } finally {
       if (!controller.signal.aborted) setLoading(false);
       if (pending.current === controller) pending.current = null;

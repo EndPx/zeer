@@ -1,6 +1,6 @@
 export const repo = "https://github.com/EndPx/zeer";
 export const docs = "/docs";
-export const publicPrepApi = "https://zeer-ten.vercel.app/api/prep";
+export const publicPrepApi = "https://zeer.endpx.cloud/api/prep";
 export const chefQuery = `query {
   BlockSummaryList(first: 3) {
     items { height hash transactionCount }
@@ -66,13 +66,13 @@ export const testnetExample = {
 export function prepQuery(
   example: Example,
   from: number,
-  to: number,
+  to: number | undefined,
   match = "",
   limit = 100,
 ) {
   return {
     from_block: from,
-    to_block: to,
+    ...(to === undefined ? {} : { to_block: to }),
     limit,
     field_selection: {
       block: example === "headers" ? ["height", "hash", "time"] : [],

@@ -266,7 +266,8 @@ parameter-panel and code-panel layout from the supplied Envio reference. Example
 describe developer tasks: payments to a transparent address, finding a transaction,
 Sapling/Orchard activity, block history and transaction inspection. Do not imply
 EVM contracts, tokens, sender history or shielded decryption. Default to genesis
-height 0 and the currently available archive end (exclusive). Large query ranges
+height 0 and no end-height input. Prep selects the available archive end and pins
+it in the response cursor. Large query ranges
 are separate from the 1–1,000 blocks scanned per response. A labeled page-size
 control and explicit Next page action retain the server cursor and frozen query;
 editing parameters invalidates continuation. No automatic million-block scan.
@@ -346,6 +347,16 @@ coverage, authentication, loading, empty, failure and stale-source designs.
 Never embed private deployment tokens in browser JavaScript.
 
 ## 6. Motion and interaction
+
+19 October status-loading contract: the overview starts with indeterminate
+buffer bars, short metric skeletons and four non-interactive block placeholders.
+No percentage or height is invented. Refresh keeps the last response visible and
+shows a small Updating spinner. A failed refresh retains the last successful
+snapshot with an explicit stale/error message; a settled unavailable source shows
+plain recovery guidance instead of an endless loader. Client status requests time
+out after 35 seconds. Skeleton sheen uses transform only over 1.4 seconds; reduced
+motion uses static placeholders and readable Loading text. Existing layout sizes,
+surface tokens and typography remain unchanged.
 
 18 October motion update: the stack repeats a 6.4-second explanatory cycle
 while visible: Zcash (0ms), Prep (1100ms), Chef/direct branch (2200ms),
