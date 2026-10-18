@@ -12,6 +12,14 @@ For installation into a separate consumer project, use the
 Node 24.14+ is required
 for the validated native TypeScript config path. Use erasable TS syntax.
 
+For a standalone testnet project, use **[Run your own Chef project](https://github.com/EndPx/zeer/blob/main/docs/CHEF_QUICKSTART.md)**.
+After obtaining the local package artifacts, the installed CLI can scaffold a new
+directory with `zeer-chef init --dir ./my-indexer --project my_indexer --start-height 1000`.
+It creates config, schema, handlers, env files, optional local PostgreSQL and npm
+commands for the full GraphQL workflow. It never overwrites existing directories,
+installs dependencies or starts services automatically. A real Prep URL with matching
+testnet coverage must be supplied; no public hosted endpoint is assumed.
+
 ```sh
 node packages/chef/dist/cli.js codegen --config examples/chef-public/chef.config.ts
 node --env-file=.env packages/chef/dist/cli.js migrate --config examples/chef-public/chef.config.ts

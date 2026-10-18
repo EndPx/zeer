@@ -3,6 +3,11 @@ import type { Height, PrepClient } from "@zeer/prep-client";
 import type { Checkpoint, ChefStore } from "./types.js";
 
 const guidance: Record<string, string> = {
+  INIT_OPTIONS_REQUIRED: "Use init --dir NEW_DIRECTORY --project project_name --start-height FIRST_AVAILABLE_TESTNET_HEIGHT. No installation or service startup is automatic.",
+  INVALID_PROJECT_NAME: "Use a lowercase letter followed by lowercase letters, digits or underscores, at most 32 characters.",
+  INVALID_START_HEIGHT: "Choose an integer start height between 1 and 4294967294 covered by the testnet Prep archive.",
+  PROJECT_DIRECTORY_EXISTS: "Choose a new directory. Init never overwrites an existing directory, file or symlink.",
+  PROJECT_DIRECTORY_UNWRITABLE: "Use a new directory under an existing writable parent.",
   INVALID_OR_DUPLICATE_FLAG: "Use --help for supported flags; --json and --human are exclusive.",
   MISSING_FLAG_VALUE: "Supply the value after each flag shown in --help.",
   FOLLOW_AND_TO_ARE_EXCLUSIVE: "Choose --follow for polling or --to for a finite inclusive range.",
@@ -113,6 +118,8 @@ export function formatOutput(value: Record<string, unknown>, human: boolean): st
   }
   if (value.metricsScope === "completed_pages") lines.push(`Invocation totals for completed pages: ${value.blocks} blocks, ${value.transactions} transactions; persisted checkpoint includes any committed partial page.`);
   if (value.output) lines.push(`Generated file: ${value.output}`);
+  if (value.directory) lines.push(`Project directory: ${value.directory}`);
+  if (Array.isArray(value.nextSteps)) for (const step of value.nextSteps) lines.push(String(step));
   if (value.host) lines.push(`Listening: ${value.host}:${value.port}`);
   return `${lines.join("\n")}\n`;
 }

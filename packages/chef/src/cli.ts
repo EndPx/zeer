@@ -13,6 +13,7 @@ import { ChefError, isSourceUnavailable, syncStep } from "./runtime.js";
 import { createChefServer } from "./graphql.js";
 import { cliFailure, formatOutput, readStatus, sourceObservation } from "./cli-output.js";
 import type { ChefConfig, ChefStore } from "./types.js";
+import { ScaffoldError, scaffoldProject } from "./scaffold.js";
 
 class CliError extends Error { constructor(readonly code: string) { super(code); } }
 const help = "zeer-chef <codegen|migrate|sync|serve|status> [--config chef.config.ts] [--json | --human]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nOutput defaults to readable text on a terminal and JSON elsewhere. status observes Prep with a 5-second timeout without changing the database.\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
@@ -35,13 +36,13 @@ export async function main(args = process.argv.slice(2), dependencies: {
   store?: ChefStore; client?: Pick<PrepClient, "get" | "getHeight">;
   write?: (text: string) => void; tty?: boolean;
 } = {}): Promise<void> {
-  if (args.length === 0 || args[0] === "--help" || args[0] === "help") { process.stdout.write(`${help}\n`); return; }
+  if (args.length === 0 || args[0] === "--help" || args[0] === "help") { process.stdout.write(`${help}\ninit: --dir NEW_DIRECTORY --project project_name --start-height FIRST_AVAILABLE_TESTNET_HEIGHT\nCreates a standalone testnet project without installing dependencies or starting services.\n`); return; }
   const command = args[0]!;
-  if (!["codegen", "migrate", "sync", "serve", "status"].includes(command)) throw new CliError("UNKNOWN_COMMAND");
+  if (!["init", "codegen", "migrate", "sync", "serve", "status"].includes(command)) throw new CliError("UNKNOWN_COMMAND");
   const flags = new Map<string, string>();
   for (let index = 1; index < args.length; index++) {
     const name = args[index]!;
-    const allowed = ["--config", "--json", "--human", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : []), ...(command === "serve" ? ["--listen", "--port"] : [])];
+    const allowed = command === "init" ? ["--dir", "--project", "--start-height", "--json", "--human"] : ["--config", "--json", "--human", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : []), ...(command === "serve" ? ["--listen", "--port"] : [])];
     if (!allowed.includes(name) || flags.has(name)) throw new CliError("INVALID_OR_DUPLICATE_FLAG");
     const value = ["--follow", "--json", "--human"].includes(name) ? "true" : args[++index];
     if (!value || value.startsWith("--")) throw new CliError("MISSING_FLAG_VALUE");
@@ -50,6 +51,14 @@ export async function main(args = process.argv.slice(2), dependencies: {
   if (flags.has("--json") && flags.has("--human")) throw new CliError("INVALID_OR_DUPLICATE_FLAG");
   const human = flags.has("--human") || (!flags.has("--json") && (dependencies.tty ?? process.stdout.isTTY ?? false));
   const out = (value: Record<string, unknown>) => (dependencies.write ?? ((text: string) => { process.stdout.write(text); }))(formatOutput(value, human));
+  if (command === "init") {
+    const directory = flags.get("--dir"), project = flags.get("--project");
+    if (!directory || !project || !flags.has("--start-height")) throw new CliError("INIT_OPTIONS_REQUIRED");
+    const startHeight = integer(flags.get("--start-height"), 1, 0xffff_fffe, "INVALID_START_HEIGHT");
+    const result = await scaffoldProject({ directory, project, startHeight });
+    out({ command, status: "complete", project, network: "testnet", ...result });
+    return;
+  }
   const follow = flags.has("--follow");
   if (follow && flags.has("--to")) throw new CliError("FOLLOW_AND_TO_ARE_EXCLUSIVE");
   const pollSeconds = integer(flags.get("--poll-seconds") ?? "5", 1, 60, "INVALID_POLL_SECONDS");
@@ -204,7 +213,7 @@ function isCliEntry(): boolean {
 if (isCliEntry()) {
   main().catch((error: unknown) => {
     // Never print third-party errors: config, handlers and PostgreSQL may contain credentials or SQL.
-    const failure = cliFailure(error, error instanceof CliError || error instanceof ChefError ? error.code : undefined);
+    const failure = cliFailure(error, error instanceof CliError || error instanceof ChefError || error instanceof ScaffoldError ? error.code : undefined);
     const human = !process.argv.includes("--json") && (process.argv.includes("--human") || process.stdout.isTTY === true);
     process.stderr.write(formatOutput(failure, human));
     process.exitCode = 1;

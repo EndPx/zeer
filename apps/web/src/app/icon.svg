@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <title>Zeer</title>
+  <rect width="192" height="192" rx="36" fill="#0c0f12"/>
+  <g transform="translate(12 8)" fill="#c1f75b">
+    <path d="M11 0H158Q169 0 169 11V23Q169 30 163 34L0 127V103Q0 98 5 95L92 45H11Q0 45 0 34V11Q0 0 11 0Z"/>
+    <path d="M169 46V66Q169 72 163 76L69 132H158Q169 132 169 143V166Q169 177 158 177H11Q0 177 0 166V150Q0 143 6 140Z"/>
+  </g>
+</svg>

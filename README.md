@@ -2,12 +2,20 @@
 
 **Zcash data. Ready to build.**
 
-Zeer is an open-source project for Zcash data tooling, with two product layers:
+Zeer is open-source data infrastructure for Zcash, with two product layers.
 
-- **Zeer Prep** prepares and supplies complete Zcash blocks and transactions through a Rust archive, a range/filter HTTP API, and a typed client. Backfill, restart, source following and bounded reorg recovery are implemented.
-- **Zeer Chef** processes public Prep data through TypeScript handlers into developer-owned PostgreSQL entities and authenticated GraphQL. The public-data prototype is implemented; authorized private scanning remains deferred.
+**Zeer Chef** is a Zcash indexing framework that transforms public blockchain
+data into structured, queryable application data with GraphQL APIs. Developers
+define schemas and TypeScript handlers; Chef processes data from Prep and stores
+the resulting entities in PostgreSQL.
 
-Prep supplies the ingredients; Chef applies the developer's recipe. Applications may use Prep directly without Chef.
+**Zeer Prep** is the Rust data engine that powers Chef. It provides access to
+complete public Zcash blocks and transactions through a range/filter API and a
+typed client, with field selection, historical backfill and source following.
+
+Use Chef to build application data models and GraphQL APIs, or use Prep directly
+for custom data pipelines, analytics and specialized applications. Prep supplies
+the ingredients; Chef applies the developer's recipe.
 
 ## Status
 
@@ -38,6 +46,10 @@ nor the current public Chef slice decrypts private notes or validates consensus.
 This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
 ## Chef public developer experience
+
+Start with [Run your own Chef project](docs/CHEF_QUICKSTART.md): create a standalone
+testnet project with `zeer-chef init`, connect your Prep endpoint and PostgreSQL,
+then run codegen, migrate, sync and GraphQL. Packages remain local tarball installs.
 
 - One local unpublished package with CLI, TypeScript handlers and generated types.
 - Self-hosted operation with developer-owned PostgreSQL.

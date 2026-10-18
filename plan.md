@@ -1,6 +1,6 @@
 # Zeer planning entry point
 
-Updated: 2026-10-15 (Asia/Jakarta).
+Updated: 2026-10-18 (Asia/Jakarta).
 
 **Status: Prep supports admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. Chef implements a public-data writer and GraphQL API. Viewing-key scanning, whole-chain execution and public deployment remain deferred. All benchmark results and reports are local-only under `benchmarks/results/`; source, methodology and fixtures remain public.**
 
@@ -18,6 +18,131 @@ remains local. Authenticated organizer cutoff/form verification remains a
 separate submission gate; package publication and public deployment were not run.
 
 ### Current priority after the technical candidate
+
+**User correction, 18 October: the required Prep deliverable is real public
+testnet data from block 0 through the latest eligible block, followed continuously.
+The recent live window is integration evidence only, not completion of that
+deliverable. Prioritize genesis support, capacity-qualified full historical
+backfill and coverage verification ahead of more demo polish or optimization.**
+The application playgrounds must display actual backend responses or errors;
+recorded-response controls are removed from `/app/prep` and `/app/chef`.
+Landing-page examples remain explicitly labeled examples.
+
+**Network decision, 16 October: Zcash testnet only for the planned hosted Prep,
+Chef application demo and landing-page playground. Do not start mainnet sync or
+provision a mainnet service.** Existing mainnet fixtures and historical benchmark
+evidence retain their original network labels; they are not relabeled as testnet.
+
+Execution update, 18 October: Zebra 7.0.0-rc.0 completed initial testnet sync and
+continues accepting gossiped blocks. The node retains its 2 CPU / 4 GiB limit and
+internal cookie-authenticated RPC. The user approved a 35 GiB node / 60 GiB total
+Zeer storage budget; the guard stops at 34 / 59 GiB, while retaining the 25 GiB
+host-free-disk and 3 GiB available-memory floors. Aggregate VPS limits remain
+3 CPU / 8 GiB. Existing Zeer experiments still count toward the total.
+
+The next developer integration is now running: **VPS Zebra → VPS Prep → local
+Chef handlers → developer-owned PostgreSQL → local GraphQL/playground**.
+Prep starts at testnet block **4,515,038**, follows new blocks with a
+10-confirmation policy and has a separate 2 GiB archive cap. This is a recent
+live window, not whole-chain coverage. Prep's two systemd services are each
+capped at 0.5 CPU / 512 MiB within the aggregate slice; the guard stops both
+alongside Zebra on a budget violation. The authenticated Prep API remains
+loopback-only and is reached through a private SSH tunnel. Chef runs from
+independently installed package tarballs in WSL, with a separate project
+namespace in the developer's existing local PostgreSQL.
+
+Verified: three full-block/raw-transaction samples against Zebra; every block
+hash, timestamp and transaction count in the bounded Chef/Prep comparison;
+new-block advancement after initial catch-up; Prep and local Chef restart/resume; anonymous
+API rejection; actual browser queries through both playgrounds. Evidence and
+operational scripts stay local in `.deploy-local/live-20261018/`. Package
+publication, public API access and whole-testnet ingestion remain pending.
+
+Target coverage is the complete testnet history followed by new blocks. This is
+a delivery target, not current coverage. Prep currently accepts archive starts
+at height 1 or later; genesis/height-0 support must be implemented and verified
+before claiming `0 → latest`. Show actual network, indexed height, source height,
+lag and confirmation policy in the playground. Source sync and Prep backfill are
+separate stages; completion of the node does not mean Prep is caught up.
+
+Capacity reference: Zebra's official requirements page describes about 10 GB of
+cached testnet state (https://zebra.zfnd.org/user/requirements.html, checked
+2026-10-16). This is an approximate node-only figure, not a whole-stack budget.
+Measure node state, Prep raw/decoded archive and indexes, Chef/PostgreSQL and
+temporary storage separately. Stay within the approved aggregate 3 CPU / 8 GiB /
+60 GiB operational envelope, account for existing artifacts, and refresh host
+headroom before sustained sync. Do not infer a paid upgrade or data cleanup from
+the network change. Full testnet fit and public load capacity remain unverified.
+
+Website implementation was authorized and the local landing/console is working.
+Connected Prep defaults now come from actual ready testnet coverage; explicit
+user-entered ranges remain intact. Offline recorded examples retain their
+historical labels. The local console identifies its partial live window and
+confirmation policy. No public-hosting claim follows from the local preview.
+
+The private consumer restart procedure is recorded with the local evidence and
+was exercised against the existing checkpoint without duplicate processing.
+Next gates: measure archive growth on a representative window before expanding backfill;
+implement and verify genesis support before claiming block 0 coverage; then
+prepare a deliberately limited public developer endpoint with authentication,
+TLS, rate limits and an explicit coverage/status contract.
+
+User direction on 16 October: prioritize developer usability and a concrete
+application proof. Pause open-ended performance experiments; change engine code
+only for a demonstrated integration blocker, correctness issue or measured
+application requirement during this phase.
+
+### Developer alpha and application proof
+
+Reuse the existing CLI, typed client, package-installation checks and quickstart.
+The next deliverable is one complete developer journey using the current release
+candidate and one independent consumer application. Avoid rebuilding M1-M6.
+
+- [x] DX1: refresh the installation path on the current candidate. Install
+  versioned package artifacts in a separate clean consumer project, run its own
+  schema/TypeScript handlers and developer-owned PostgreSQL, then reach a verified
+  GraphQL response. Record prerequisites, commands, elapsed setup time and actual
+  failure guidance. Registry names/publication remain unverified until checked.
+  Verified on 16 October with installed local tarballs, a new `zeer-chef init`
+  testnet project outside the monorepo, strict types, actual PostgreSQL and a real
+  Prep archive replaying captured testnet blocks 1000–1002. GraphQL values matched
+  the independently captured blocks; unauthenticated requests failed, restart
+  resumed the remaining range, and repeated sync committed zero blocks. All 73
+  Chef tests passed with PostgreSQL integrations and no skips. New package source
+  is verified locally but not yet committed, pushed or published. See
+  [standalone quickstart](docs/CHEF_QUICKSTART.md); detailed output stays local in
+  `.deploy-local/chef-dx-20261016/evidence/`. This is historical onboarding proof,
+  not live tip following, full-chain coverage or private scanning.
+- [x] DX2: build a public-data **Zeer Developer Console**, replacing the Activity
+  Explorer after the user's 17 October direction. Scope: Overview, Prep Playground
+  and Chef Playground for one managed testnet demo. Use packaged interfaces and
+  real source responses; show dataset coverage, source mode and checkpoint separately.
+  Design: [console contract](docs/DEVELOPER_CONSOLE_DESIGN.md). Local Next.js
+  landing, Overview and both playgrounds are implemented. Browser execution
+  reaches actual Prep and PostgreSQL-backed Chef over historical testnet blocks
+  1000–1002. Prep has Table/JSON views, empty/stale states and bounded response
+  coverage; both playgrounds show actual request duration and copy controls.
+  Responsive result states pass at 1440/768/390/320px with no document overflow
+  or automated axe WCAG 2.1 AA findings. The preview is local, not a published
+  full-chain API. Detailed checks remain in `.deploy-local/web-20261018/`. No login,
+  billing, user deployment platform, private notes or viewing-key input in this slice.
+- [ ] DX3: make the example reproducible from a clean checkout and prepare a
+  short recorded walkthrough of installation, indexing, querying and restart.
+  Prove the app consumes the packaged interfaces without internal monorepo imports
+  or manually inserted demonstration rows. A recording is not complete until made.
+- [ ] DX4: prepare a bounded developer preview and distribution handoff: documented
+  API origin/token handling, coverage, quotas, health and support instructions.
+  Validate before any public release. Deployment and publication are explicit
+  delivery actions; this planning update creates neither a hosted API nor an npm
+  release. Capture an external developer's actual setup feedback when available.
+
+Acceptance is a usable application plus a repeatable consumer setup, not another
+throughput claim. Public example source and product documentation may explain the
+flow; benchmark measurements and raw reports remain local. Historical replay and
+live-node operation must remain visibly distinguished. External adoption is only
+claimed after an external developer has actually used the tooling.
+
+The completed optimization/reliability investigations below remain as history.
 
 User direction: profile Chef write SQL, implement one measured optimization, and
 validate equivalent output, rollback/restart and GraphQL behavior before delivery.

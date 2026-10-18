@@ -7,6 +7,11 @@ the package entrypoints or Prep HTTP API. Both npm packages remain private and
 unpublished. An npm organization, registry publication and hosted service are
 separate decisions.
 
+The package now includes `zeer-chef init` for independent testnet projects. Follow
+[the standalone Chef quickstart](CHEF_QUICKSTART.md) after producing tarballs.
+The generated project's installation must receive both local tarballs together
+while the packages remain unpublished.
+
 Use Linux x86_64, including the documented WSL2 Linux route. The combined consumer
 requires Node 24.14+, npm, and a clean source checkout. Run `npm ci` at the checkout
 root before packing. Chef's `prepack` builds JavaScript and declarations from
