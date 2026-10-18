@@ -110,6 +110,10 @@ observed upstream tip can still supply that window. It resumes comparisons once
 the required history is published. A proven deeper fork, a permanently shorter
 source or an insufficient historical snapshot still requires a rebuild; missing
 temporary follower history does not itself establish that proof.
+Run `migrate` when upgrading this candidate: reconciliation reason is an additive
+state column. A source outage reopens a verified prefix after recovery, including
+after restart; reorg replay remains gated until its target. Legacy unclassified
+reconciliation stays conservative, and an unmigrated state fails closed.
 Changes in imported helper modules must increment `handlerVersion` because the
 entry-file fingerprint does not discover the whole module dependency graph.
 

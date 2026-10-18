@@ -28,6 +28,10 @@ export async function POST(request: Request) {
     let count = 0;
     visit(document, {
       Field(node) {
+        const first = node.arguments?.find(argument => argument.name.value === "first")?.value;
+        if (node.name.value.endsWith("List") && first &&
+            (first.kind !== Kind.INT || Number(first.value) < 1 || Number(first.value) > 100))
+          throw new ApiError(400, "Use first: 1–100 per page. Request nextCursor, then pass it as after to continue.");
         if (++count > 100 || node.name.value.startsWith("__"))
           throw new ApiError(
             400,

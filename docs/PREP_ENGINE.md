@@ -1,8 +1,9 @@
 # Zeer Prep engine
 
-Updated 2026-10-13. The user requires complete blocks and transactions for the
+Updated 2026-10-19. The user requires complete blocks and transactions for the
 28 October delivery. [Delivery contract](PREP_DELIVERY.md) owns the active scope;
-[query contract](PREP_QUERY.md) owns the HTTP and SDK semantics. Chef is deferred.
+[query contract](PREP_QUERY.md) owns the HTTP and SDK semantics. Chef's public-data
+pipeline is implemented; private viewing-key scanning remains deferred.
 
 ## Implemented data paths
 
@@ -25,6 +26,13 @@ and 2. It stores the complete serialized block and node-decoded JSON, including
 all transaction objects and their raw hex. Unknown decoded source fields are
 retained. Shielded ciphertext remains ciphertext; no viewing or spending keys,
 private memo reading, transaction signing or broadcast are implemented.
+
+Use `--from 0` for complete-history backfill, including genesis. Genesis requires
+a zero predecessor and does not issue a negative-height RPC. The optional
+`--compress` mode changes disk encoding, not API payloads. Version-3 records
+can reference duplicated canonical JSON hex strings from their raw block bytes;
+the exact original protobuf payload is restored and checksum-verified on read.
+See [storage limits and conversion](PREP_STORAGE.md).
 
 The importer checks SHA256d of the serialized header, parent/time agreement,
 canonical CompactSize counts, and exact concatenation of every returned raw
@@ -113,10 +121,10 @@ SSE, automatic client rollback and npm publication are not implemented.
 - Linux/Unix writes; tested Linux x86_64 with Rust 1.99.0 and Cargo.lock.
 - Consensus raw block <=2,000,000 bytes; RPC JSON <=32 MiB; full envelope <=64 MiB;
   compact payload <=4 MiB. Oversized data is rejected rather than omitted.
-- Segment <=256 MiB; follower buffers up to 252 MiB of encoded records with metadata
+- Segment <=256 MiB; follower buffers at most 64 MiB plus framing of encoded records with metadata
   reserve; configurable disk allowance counts old/incomplete files too.
 - At most 10,000 referenced segments; configured segment range 1..1000 blocks;
-  archive begins at height 1 or later. No entire-mainnet archive was deployed.
+  archive may begin at height 0, including genesis. No entire-mainnet archive was deployed.
 - Query <=1000 scanned blocks and 32 MiB serialized response; 2 active queries.
   These are serialization/concurrency bounds, not a 32 MiB peak-memory claim.
 - Source HTTPS verifies certificates. Source Basic credentials come only from
@@ -125,7 +133,7 @@ SSE, automatic client rollback and npm publication are not implemented.
 - HTTP defaults to loopback. Non-loopback serving requires explicit opt-in plus
   PREP_API_TOKEN with at least 16 bytes. Use a TLS proxy for network deployments;
   the private prototype is not an audited public service.
-- Shared-VPS experiments stay within 3 aggregate CPU / 8 GiB / 40 GiB, without paid
+- Current shared-VPS operations stay within 3 aggregate CPU / 8 GiB / 60 GiB, without paid
   upgrades or changes to existing applications.
 
 ## Commands
@@ -135,15 +143,15 @@ cargo test --workspace --locked
 cargo build --release -p prep --locked
 
 # Parent directory must exist; the archive is created or safely resumed.
-target/release/prep sync --source http://127.0.0.1:8232 --network mainnet \
-  --archive ./data/mainnet --from 1000 --to 2023 --segment-blocks 128
+target/release/prep sync --source http://127.0.0.1:18232 --network testnet \
+  --archive ./data/testnet --from 0 --to 1023 --segment-blocks 128 --compress --allow-insecure
 
-target/release/prep archive-inspect --archive ./data/mainnet
-target/release/prep serve-http --archive ./data/mainnet
+target/release/prep archive-inspect --archive ./data/testnet
+target/release/prep serve-http --archive ./data/testnet
 
 # Follow mode has no fixed --to. Use the archive's original --from when resuming.
-target/release/prep sync --source http://127.0.0.1:8232 --network mainnet \
-  --archive ./data/mainnet --from 1000 --follow --confirmations 10
+target/release/prep sync --source http://127.0.0.1:18232 --network testnet \
+  --archive ./data/testnet --from 0 --follow --confirmations 10 --compress --allow-insecure
 
 node examples/prep-client/query.mjs
 ```
@@ -156,7 +164,9 @@ snapshots. Existing public compact APIs and full-node APIs are distinct sources.
 The optional `prep-store/admission-profile` feature provides diagnostic phase
 timers and reduced-budget counterfactuals through dedicated examples. Ordinary
 builds retain the original integrity checks and 64 MiB archive / 16 MiB segment
-index caps, with no timers or budget override. No persisted index is introduced.
+transaction-index caps, with no timers or budget override. Instrumentation itself
+does not change storage; optional persisted metadata indexes are described in
+[the disk-index contract](PREP_DISK_INDEX.md).
 The [admission and cap-boundary harness](../benchmarks/prep/profile/README.md)
 separates real archives from synthetic capacity fixtures and independently checks
 stored-data projections across budgets. Build serving binaries without the

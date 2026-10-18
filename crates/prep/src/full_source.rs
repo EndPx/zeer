@@ -379,10 +379,7 @@ pub fn validate_full_block(
 ) -> Result<FullBlock> {
     use prost::Message;
     check_hash(expected_hash)?;
-    ensure!(
-        height >= 1 && height <= u64::from(u32::MAX),
-        "invalid_full_block_height"
-    );
+    ensure!(height <= u64::from(u32::MAX), "invalid_full_block_height");
     ensure!(
         raw.len() >= 142 && raw.len() <= MAX_RAW_BLOCK_BYTES,
         "invalid_raw_block_size"
@@ -411,6 +408,10 @@ pub fn validate_full_block(
         "raw_header_hash_mismatch"
     );
     let previous = &raw[4..36];
+    ensure!(
+        height != 0 || previous.iter().all(|byte| *byte == 0),
+        "genesis_parent_must_be_zero"
+    );
     ensure!(
         decoded.get("previousblockhash").and_then(Value::as_str)
             == Some(rpc_hash(previous)?.as_str()),
@@ -581,6 +582,19 @@ pub(crate) mod tests {
             ]
         });
         (id, raw, decoded)
+    }
+
+    #[test]
+    fn genesis_requires_a_zero_predecessor() {
+        let (id, raw, decoded) = fixture(0, &[0; 32], 1);
+        assert!(validate_full_block(0, &id, raw, decoded).is_ok());
+        let (id, raw, decoded) = fixture(0, &[1; 32], 1);
+        assert_eq!(
+            validate_full_block(0, &id, raw, decoded)
+                .unwrap_err()
+                .to_string(),
+            "genesis_parent_must_be_zero"
+        );
     }
 
     #[test]

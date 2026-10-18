@@ -35,6 +35,7 @@ mod archive;
 mod disk_index;
 #[cfg(feature = "admission-profile")]
 pub mod profiling;
+mod raw_refs;
 mod transaction_index;
 pub use archive::{Archive, ArchiveRangeReader, ArchiveWriter, Catalog, SegmentReference};
 pub use disk_index::MAX_DISK_INDEX_BYTES;
@@ -58,6 +59,10 @@ fn default_payload_kind() -> String {
 
 fn is_compact_kind(kind: &str) -> bool {
     kind == COMPACT_KIND
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 fn check_payload_kind(kind: &str) -> Result<()> {
@@ -163,6 +168,11 @@ pub struct BlockIndex {
     /// omit it so their manifest serialization remains unchanged.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time: Option<u64>,
+    /// Present only for a zstd-compressed record in a version-2/3 full snapshot.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uncompressed_length: Option<u32>,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub raw_refs: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -190,7 +200,11 @@ pub struct Manifest {
 /// The serialized tuple is a versioned JSON array, not map-order-dependent JSON.
 pub fn dataset_id(manifest: &Manifest) -> Result<String> {
     check_payload_kind(&manifest.payload_kind)?;
-    let marker = if manifest.payload_kind == FULL_KIND {
+    let marker = if manifest.schema_version == 3 {
+        "zeer-prep-full-zstd-rawrefs-v3"
+    } else if manifest.schema_version == 2 {
+        "zeer-prep-full-zstd-snapshot-v2"
+    } else if manifest.payload_kind == FULL_KIND {
         "zeer-prep-full-snapshot-v1"
     } else {
         "zeer-prep-snapshot-v1"
@@ -266,6 +280,9 @@ fn check_record(record: &BlockRecord, max_bytes: u64, kind: &str) -> Result<Opti
     }
     if record.hash.len() != 32 || record.prev_hash.len() != 32 {
         return Err(Error::Invalid("record hashes must contain 32 bytes"));
+    }
+    if record.height == 0 && record.prev_hash.iter().any(|byte| *byte != 0) {
+        return Err(Error::Invalid("genesis predecessor must be zero"));
     }
     let indexed_time = match kind {
         COMPACT_KIND => {
@@ -347,6 +364,7 @@ pub struct StoreWriter {
     next_parent: Vec<u8>,
     digest: Sha256,
     poisoned: bool,
+    compress: bool,
 }
 
 impl StoreWriter {
@@ -470,6 +488,7 @@ impl StoreWriter {
             next_parent,
             digest: Sha256::new(),
             poisoned: false,
+            compress: false,
             manifest: Manifest {
                 schema_version: 1,
                 payload_kind: kind.to_owned(),
@@ -498,6 +517,16 @@ impl StoreWriter {
         result
     }
 
+    /// Opt-in storage encoding; decoded records and public API values are unchanged.
+    pub fn with_compression(mut self) -> Result<Self> {
+        if self.manifest.payload_kind != FULL_KIND || !self.manifest.blocks.is_empty() {
+            return Err(Error::Invalid("compression requires a new full snapshot"));
+        }
+        self.compress = true;
+        self.manifest.schema_version = 3;
+        Ok(self)
+    }
+
     fn push_checked(&mut self, record: BlockRecord) -> Result<()> {
         let indexed_time = check_record(
             &record,
@@ -519,8 +548,19 @@ impl StoreWriter {
         if record.prev_hash != self.next_parent {
             return Err(Error::Invalid("block parent mismatch"));
         }
-        let length =
-            u32::try_from(record.payload.len()).map_err(|_| Error::Limit("block length"))?;
+        let referenced = if self.compress {
+            raw_refs::encode(&record.payload)
+        } else {
+            None
+        };
+        let compressed = if self.compress {
+            let bytes = zstd::bulk::compress(referenced.as_deref().unwrap_or(&record.payload), 3)?;
+            (bytes.len() < record.payload.len()).then_some(bytes)
+        } else {
+            None
+        };
+        let stored = compressed.as_deref().unwrap_or(&record.payload);
+        let length = u32::try_from(stored.len()).map_err(|_| Error::Limit("block length"))?;
         let next_offset = self
             .manifest
             .segment_bytes
@@ -531,10 +571,12 @@ impl StoreWriter {
         }
         let prefix = length.to_le_bytes();
         self.segment.write_all(&prefix)?;
-        self.segment.write_all(&record.payload)?;
+        self.segment.write_all(stored)?;
         self.digest.update(prefix);
-        self.digest.update(&record.payload);
+        self.digest.update(stored);
         self.manifest.blocks.push(BlockIndex {
+            raw_refs: referenced.is_some() && compressed.is_some(),
+            uncompressed_length: compressed.as_ref().map(|_| record.payload.len() as u32),
             height: record.height,
             offset: self.manifest.segment_bytes,
             length,
@@ -598,6 +640,53 @@ pub struct Store {
     limits: StoreLimits,
     transaction_index: Option<Arc<TransactionIndex>>,
     disk_index: Option<Arc<disk_index::DiskIndex>>,
+    packed: Option<Arc<Vec<PackedIndex>>>,
+}
+
+/// Archives keep binary hashes instead of three heap-allocated hex strings per block.
+#[derive(Clone)]
+struct PackedIndex {
+    raw_refs: bool,
+    offset: u64,
+    length: u32,
+    uncompressed_length: Option<u32>,
+    hash: [u8; 32],
+    prev_hash: [u8; 32],
+    payload_hash: [u8; 32],
+    time: Option<u64>,
+}
+
+impl PackedIndex {
+    fn from_entry(entry: &BlockIndex) -> Result<Self> {
+        let bytes = |text: &str| -> Result<[u8; 32]> {
+            parse_hex_hash(text)?
+                .try_into()
+                .map_err(|_| Error::Invalid("index hash length"))
+        };
+        Ok(Self {
+            raw_refs: entry.raw_refs,
+            offset: entry.offset,
+            length: entry.length,
+            uncompressed_length: entry.uncompressed_length,
+            hash: bytes(&entry.hash)?,
+            prev_hash: bytes(&entry.prev_hash)?,
+            payload_hash: bytes(&entry.payload_sha256)?,
+            time: entry.time,
+        })
+    }
+    fn entry(&self, height: u64) -> Result<BlockIndex> {
+        Ok(BlockIndex {
+            raw_refs: self.raw_refs,
+            height,
+            offset: self.offset,
+            length: self.length,
+            uncompressed_length: self.uncompressed_length,
+            hash: display_hash(&self.hash)?,
+            prev_hash: display_hash(&self.prev_hash)?,
+            payload_sha256: display_hash(&self.payload_hash)?,
+            time: self.time,
+        })
+    }
 }
 
 impl Store {
@@ -656,6 +745,17 @@ impl Store {
             return Err(Error::Invalid("segment length differs from manifest"));
         }
         let mut digest = Sha256::new();
+        let mut buffer = [0_u8; 64 * 1024];
+        loop {
+            let n = segment.read(&mut buffer)?;
+            if n == 0 {
+                break;
+            }
+            digest.update(&buffer[..n]);
+        }
+        if hex::encode(digest.finalize()) != manifest.segment_sha256 {
+            return Err(Error::Invalid("segment checksum mismatch"));
+        }
         let mut disk_index = (manifest.payload_kind == FULL_KIND)
             .then(|| {
                 disk_index::DiskIndex::candidate(
@@ -678,10 +778,6 @@ impl Store {
                 limits.max_block_bytes,
                 &manifest.payload_kind,
             )?;
-            profile_phase!("segment_hash", {
-                digest.update(index.length.to_le_bytes());
-                digest.update(&record.payload);
-            });
             if let Some(index) = disk_index.as_mut() {
                 let full = profile_phase!(
                     "optional_protobuf_decode",
@@ -711,10 +807,6 @@ impl Store {
                 }
             }
         }
-        if profile_phase!("segment_hash", hex::encode(digest.finalize())) != manifest.segment_sha256
-        {
-            return Err(Error::Invalid("segment checksum mismatch"));
-        }
         // Detect appended/truncated data during validation; block hashes and
         // payload hashes are checked again on every later range read.
         if segment.metadata()?.len() != manifest.segment_bytes {
@@ -724,6 +816,7 @@ impl Store {
             path,
             manifest: Arc::new(manifest.clone()),
             limits,
+            packed: None,
             disk_index: disk_index
                 .and_then(|index| index.finish(manifest.blocks.len()))
                 .map(Arc::new),
@@ -735,6 +828,22 @@ impl Store {
 
     pub fn manifest(&self) -> &Manifest {
         &self.manifest
+    }
+
+    pub(crate) fn compact_manifest(mut self) -> Result<Self> {
+        if self.packed.is_none() {
+            let packed = self
+                .manifest
+                .blocks
+                .iter()
+                .map(PackedIndex::from_entry)
+                .collect::<Result<Vec<_>>>()?;
+            let mut summary = (*self.manifest).clone();
+            summary.blocks = Vec::new();
+            self.manifest = Arc::new(summary);
+            self.packed = Some(Arc::new(packed));
+        }
+        Ok(self)
     }
 
     pub fn transaction_index_bytes(&self) -> usize {
@@ -794,6 +903,7 @@ impl Store {
         Ok(RangeReader {
             file,
             manifest: self.manifest.clone(),
+            packed: self.packed.clone(),
             next,
             end_index,
             max_block_bytes: self.limits.max_block_bytes,
@@ -807,13 +917,20 @@ impl Store {
             .ok_or(Error::Invalid("missing block"))?
     }
 
-    fn block_index(&self, height: u64) -> Result<&BlockIndex> {
+    fn block_index(&self, height: u64) -> Result<BlockIndex> {
         if height < self.manifest.start_height || height > self.manifest.end_height {
             return Err(Error::Invalid("requested height is outside snapshot"));
+        }
+        if let Some(packed) = &self.packed {
+            return packed
+                .get((height - self.manifest.start_height) as usize)
+                .ok_or(Error::Invalid("missing packed index"))?
+                .entry(height);
         }
         self.manifest
             .blocks
             .get((height - self.manifest.start_height) as usize)
+            .cloned()
             .ok_or(Error::Invalid("missing block index"))
     }
 
@@ -846,7 +963,9 @@ impl Store {
 }
 
 fn validate_manifest_structure(manifest: &Manifest, limits: StoreLimits) -> Result<()> {
-    if manifest.schema_version != 1 {
+    if !matches!(manifest.schema_version, 1..=3)
+        || (manifest.schema_version >= 2 && manifest.payload_kind != FULL_KIND)
+    {
         return Err(Error::Invalid("unsupported manifest version"));
     }
     check_network(&manifest.network)?;
@@ -881,6 +1000,17 @@ fn validate_manifest_structure(manifest: &Manifest, limits: StoreLimits) -> Resu
         };
         if entry.length == 0 || u64::from(entry.length) > limits.max_block_bytes.min(kind_ceiling) {
             return Err(Error::Limit("manifest block length"));
+        }
+        if let Some(length) = entry.uncompressed_length {
+            if manifest.schema_version < 2
+                || length == 0
+                || u64::from(length) > limits.max_block_bytes.min(kind_ceiling)
+            {
+                return Err(Error::Limit("invalid uncompressed record length"));
+            }
+        }
+        if entry.raw_refs && (manifest.schema_version != 3 || entry.uncompressed_length.is_none()) {
+            return Err(Error::Invalid("invalid raw reference encoding"));
         }
         parse_hex_hash(&entry.hash)?;
         parse_hex_hash(&entry.prev_hash)?;
@@ -921,6 +1051,18 @@ fn read_record(
     }
     let mut payload = vec![0_u8; length as usize];
     file.read_exact(&mut payload)?;
+    if let Some(length) = entry.uncompressed_length {
+        if length == 0 || u64::from(length) > max_bytes {
+            return Err(Error::Limit("uncompressed record length"));
+        }
+        payload = zstd::bulk::decompress(&payload, length as usize)?;
+        if entry.raw_refs {
+            payload = raw_refs::decode(&payload, length as usize)?;
+        }
+        if payload.len() != length as usize {
+            return Err(Error::Invalid("decompressed record length mismatch"));
+        }
+    }
     #[cfg(feature = "admission-profile")]
     drop(io_phase);
     if profile_phase!("payload_hash", sha256(&payload)) != entry.payload_sha256 {
@@ -946,6 +1088,7 @@ fn read_record(
 pub struct RangeReader {
     file: File,
     manifest: Arc<Manifest>,
+    packed: Option<Arc<Vec<PackedIndex>>>,
     next: usize,
     end_index: usize,
     max_block_bytes: u64,
@@ -959,12 +1102,19 @@ impl Iterator for RangeReader {
         if self.done || self.next > self.end_index {
             return None;
         }
-        let record = read_record(
-            &mut self.file,
-            &self.manifest.blocks[self.next],
-            self.max_block_bytes,
-            &self.manifest.payload_kind,
-        );
+        let entry = if let Some(packed) = &self.packed {
+            packed[self.next].entry(self.manifest.start_height + self.next as u64)
+        } else {
+            Ok(self.manifest.blocks[self.next].clone())
+        };
+        let record = entry.and_then(|entry| {
+            read_record(
+                &mut self.file,
+                &entry,
+                self.max_block_bytes,
+                &self.manifest.payload_kind,
+            )
+        });
         self.next += 1;
         if record.is_err() {
             self.done = true;
@@ -1542,6 +1692,87 @@ mod tests {
         assert_eq!(manifest.payload_kind, FULL_KIND);
         assert_eq!(Store::open(&path).unwrap().read_block(1).unwrap(), record);
         assert!(Store::open_with_limits(&path, StoreLimits::default()).is_err());
+    }
+
+    #[test]
+    fn compressed_records_reopen_and_packed_headers_preserve_exact_payloads() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("compressed");
+        let record = full_record(
+            format!(r#"{{"pad":"{}"}}"#, "abc".repeat(10000)),
+            vec![1, 2, 3],
+        );
+        let mut writer = StoreWriter::create_full(
+            &path,
+            "regtest",
+            1,
+            1,
+            &display_hash(&hash(0)).unwrap(),
+            &display_hash(&hash(1)).unwrap(),
+        )
+        .unwrap()
+        .with_compression()
+        .unwrap();
+        writer.push(record.clone()).unwrap();
+        let manifest = writer.finish().unwrap();
+        assert_eq!(manifest.schema_version, 3);
+        assert!(manifest.blocks[0].uncompressed_length.is_some());
+        assert!(manifest.segment_bytes < record.payload.len() as u64);
+        let full = Store::open(&path).unwrap();
+        let header = full.read_header(1).unwrap();
+        let packed = full.compact_manifest().unwrap();
+        assert!(packed.manifest.blocks.is_empty());
+        assert_eq!(packed.read_header(1).unwrap(), header);
+        assert_eq!(packed.read_block(1).unwrap(), record);
+        assert_eq!(
+            packed.read_range(1, 1).unwrap().next().unwrap().unwrap(),
+            record
+        );
+        assert!(std::mem::size_of::<PackedIndex>() <= 144);
+        let mut corrupt = fs::read(path.join(SEGMENT_NAME)).unwrap();
+        *corrupt.last_mut().unwrap() ^= 1;
+        fs::write(path.join(SEGMENT_NAME), corrupt).unwrap();
+        assert!(packed.read_block(1).is_err());
+        assert!(Store::open(&path).is_err());
+    }
+
+    #[test]
+    fn raw_referenced_storage_reads_identically_with_packed_metadata() {
+        let temp = tempfile::tempdir().unwrap();
+        let path = temp.path().join("refs");
+        let raw: Vec<u8> = (0..=255).cycle().take(4096).collect();
+        let json = serde_json::json!({"solution":hex::encode(&raw[140..1484]),"tx":[{"hex":hex::encode(&raw[1500..2000])}]});
+        let record = full_record(serde_json::to_string(&json).unwrap(), raw);
+        let mut writer = StoreWriter::create_full(
+            &path,
+            "regtest",
+            1,
+            1,
+            &display_hash(&hash(0)).unwrap(),
+            &display_hash(&hash(1)).unwrap(),
+        )
+        .unwrap()
+        .with_compression()
+        .unwrap();
+        writer.push(record.clone()).unwrap();
+        let manifest = writer.finish().unwrap();
+        assert!(manifest.blocks[0].raw_refs);
+        let store = Store::open(&path).unwrap().compact_manifest().unwrap();
+        assert_eq!(store.read_block(1).unwrap(), record);
+    }
+
+    #[test]
+    fn compressed_declared_length_is_bounded_before_decode() {
+        let (_root, path, mut manifest) = full_snapshot();
+        manifest.schema_version = 2;
+        manifest.dataset_id = dataset_id(&manifest).unwrap();
+        manifest.blocks[0].uncompressed_length = Some(u32::MAX);
+        fs::write(
+            path.join(MANIFEST_NAME),
+            serde_json::to_vec(&manifest).unwrap(),
+        )
+        .unwrap();
+        assert!(Store::open(&path).is_err());
     }
 
     #[test]

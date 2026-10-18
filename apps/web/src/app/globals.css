@@ -7,6 +7,9 @@
   margin-bottom: 24px;
   font-variant-numeric: tabular-nums;
 }
+.public-endpoint { flex-wrap: wrap; gap: 12px; }
+.public-endpoint > span { flex: 1; min-width: 0; }
+.public-endpoint code { display: block; overflow-wrap: anywhere; font-size: 12px; color: var(--text); }
 .network-status-top, .network-identity, .network-actions, .source-state,
 .recent-blocks-heading, .block-tile-top, .sync-meter-label,
 .network-status-foot, .network-status-foot > span:last-child {
@@ -2446,4 +2449,15 @@ svg {
 }
 @media (max-width: 360px) {
   .capability-strip { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Query examples: preserve the large-range / bounded-page distinction. */
+.query-config .example-detail { max-width: 80ch; line-height: 1.6; }
+.match-field { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.query-pagination { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 16px; color: var(--muted); font-size: 12px; }
+.query-explorer .fields label { min-width: 0; }
+.query-explorer .panel-toolbar { flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .query-explorer .fields, .query-explorer .match-field { grid-template-columns: minmax(0, 1fr); }
+  .query-explorer .format-tabs { flex-basis: 100%; }
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Header } from "@/components/interactive";
 import { Action, Code } from "@/components/ui";
-import { repo } from "@/lib/content";
+import { repo, publicPrepApi } from "@/lib/content";
 export const metadata = { title: "Developer quickstart" };
 export default function Page() {
   return (
@@ -36,7 +36,7 @@ export default function Page() {
           </p>
           <Code
             code={
-              "node packages/chef/dist/cli.js init \\\n  --dir ../my-indexer \\\n  --project my_indexer \\\n  --start-height 1000\n\ncd ../my-indexer\nnpm install ../zeer/.tmp/chef-packages/zeer-prep-client-0.1.0.tgz \\\n  ../zeer/.tmp/chef-packages/zeer-chef-0.1.0.tgz\nnpm run codegen\nnpm run typecheck"
+              "node packages/chef/dist/cli.js init \\\n  --dir ../my-indexer \\\n  --project my_indexer \\\n  --start-height 0\n\ncd ../my-indexer\nnpm install ../zeer/.tmp/chef-packages/zeer-prep-client-0.1.0.tgz \\\n  ../zeer/.tmp/chef-packages/zeer-chef-0.1.0.tgz\nnpm run codegen\nnpm run typecheck"
             }
           />
         </section>
@@ -45,10 +45,12 @@ export default function Page() {
           <p>
             Edit the generated, git-ignored <code>.env</code>: set your actual{" "}
             <code>PREP_URL</code>, optional Prep token, and PostgreSQL{" "}
-            <code>DATABASE_URL</code>. The hosted public Prep endpoint is not
-            available yet. Use your own source or the repository&apos;s
-            explicitly labeled historical fixture quickstart.
+            <code>DATABASE_URL</code>. Use the public testnet endpoint below or
+            your own Prep source. Check its current coverage before indexing;
+            the preview requires no personal API token.
           </p>
+          <Code code={`PREP_URL=${publicPrepApi}\nPREP_API_TOKEN=`} />
+          <a className="text-link" href={`${publicPrepApi}/height`} target="_blank" rel="noreferrer">Check current coverage ↗</a>
           <p>
             The starter includes optional PostgreSQL via Docker Compose. Skip
             this command when using an existing database.

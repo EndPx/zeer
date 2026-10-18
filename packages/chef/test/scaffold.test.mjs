@@ -28,7 +28,8 @@ test('init creates a standalone testnet project without contacting services or p
   assert.match(await readFile(join(directory,'chef.config.ts'),'utf8'),/network: "testnet"/);
   assert.match(await readFile(join(directory,'compose.yaml'),'utf8'),/POSTGRES_PASSWORD: \$\{POSTGRES_PASSWORD:\?/);
   const second=join(parent,'second');
-  await scaffoldProject({directory:second,project:'second',startHeight:1});
+  await scaffoldProject({directory:second,project:'second',startHeight:0});
+  assert.match(await readFile(join(second,'chef.config.ts'),'utf8'),/startHeight: 0/);
   assert.equal((await readFile(join(second,'.env'),'utf8')).includes(token),false);
 });
 
@@ -42,7 +43,7 @@ test('init refuses existing files/directories and rejects invalid inputs before 
   await assert.rejects(scaffoldProject({directory:path,project:'good',startHeight:1}),{code:'PROJECT_DIRECTORY_EXISTS'});
   const invalid=join(parent,'invalid');
   await assert.rejects(scaffoldProject({directory:invalid,project:'bad-name',startHeight:1}),{code:'INVALID_PROJECT_NAME'});
-  await assert.rejects(scaffoldProject({directory:invalid,project:'good',startHeight:0}),{code:'INVALID_START_HEIGHT'});
+  await assert.rejects(scaffoldProject({directory:invalid,project:'good',startHeight:-1}),{code:'INVALID_START_HEIGHT'});
   await assert.rejects(lstat(invalid),{code:'ENOENT'});
   if(process.platform!=='win32') {
     const link=join(parent,'link'); await symlink(directory,link);
@@ -51,7 +52,7 @@ test('init refuses existing files/directories and rejects invalid inputs before 
 });
 
 test('init reports missing arguments and rejects conflicting flags',()=>{
-  for(const args of [['init'],['init','--dir','unused','--project','good','--start-height','0'],['init','--config','x']]) {
+  for(const args of [['init'],['init','--dir','unused','--project','good','--start-height','-1'],['init','--config','x']]) {
     const r=spawnSync(process.execPath,[cli,...args,'--json'],{encoding:'utf8'});
     assert.equal(r.status,1); assert.ok(JSON.parse(r.stderr).error.code);
   }

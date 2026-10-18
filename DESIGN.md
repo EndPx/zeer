@@ -2,6 +2,11 @@
 
 ## Live network status panel — 18 October
 
+The Prep playground includes a public endpoint row using the existing notice
+surface and CopyButton. The URL uses 12px mono text, wraps within its column and
+leaves the copy control usable on narrow screens. Generated cURL/SDK examples
+target the actual hosted public API and require no personal preview token.
+
 The console overview uses one compact network panel inspired by the user's
 sync-status reference. Reuse panel/bg/line/text/muted/lime/cream tokens, 24px
 panel padding, 12px radius, 24px gaps, 14px labels and 12px supporting text.
@@ -255,6 +260,20 @@ can collapse to two columns or be omitted on small screens because the next
 sections repeat its information. The architecture explanation remains present.
 
 ### Prep query examples
+
+19 October playground update: preserve the existing graphite/lime example-sidebar,
+parameter-panel and code-panel layout from the supplied Envio reference. Examples
+describe developer tasks: payments to a transparent address, finding a transaction,
+Sapling/Orchard activity, block history and transaction inspection. Do not imply
+EVM contracts, tokens, sender history or shielded decryption. Default to genesis
+height 0 and the currently available archive end (exclusive). Large query ranges
+are separate from the 1–1,000 blocks scanned per response. A labeled page-size
+control and explicit Next page action retain the server cursor and frozen query;
+editing parameters invalidates continuation. No automatic million-block scan.
+Provide JSON, cURL, fetch and TypeScript snippets from the same request, and a
+share link containing only public query parameters. Verified testnet address/txid
+presets fill inputs without sending a request. Empty filtered pages explain that
+later pages may contain matches. Use existing controls, spacing and motion tokens.
 
 Heading: `Zeer Prep`. Subheading: `Explore the query. See the code.` Supporting
 copy: `Choose an example, adjust the inputs, and copy it into your project.`

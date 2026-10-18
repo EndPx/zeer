@@ -17,8 +17,10 @@ import { PrepResponse } from "./prep-response";
 import {
   examples,
   prepQuery,
+  publicPrepApi,
   repo,
   sampleBlocks,
+  testnetExample,
   type Example,
 } from "@/lib/content";
 
@@ -26,9 +28,10 @@ export function PrepExplorer({
   embedded = false,
   enabled = false,
   initialExample = "headers",
-  initialFrom = "1000",
+  initialFrom = "0",
   initialTo = "1003",
   initialMatch = "",
+  initialLimit = "100",
 }: {
   embedded?: boolean;
   enabled?: boolean;
@@ -36,11 +39,14 @@ export function PrepExplorer({
   initialFrom?: string;
   initialTo?: string;
   initialMatch?: string;
+  initialLimit?: string;
 }) {
   const [selected, setSelected] = useState<Example>(initialExample),
     [from, setFrom] = useState(initialFrom),
     [to, setTo] = useState(initialTo),
     [match, setMatch] = useState(initialMatch),
+    [limit, setLimit] = useState(initialLimit),
+    [page, setPage] = useState(0),
     [language, setLanguage] = useState("JSON"),
     [result, setResult] = useState<unknown>(),
     [duration, setDuration] = useState<number | null>(null),
@@ -54,10 +60,10 @@ export function PrepExplorer({
   const rangeValid =
     /^\d+$/.test(from) &&
     /^\d+$/.test(to) &&
-    Number(from) >= 1 &&
+    Number(from) >= 0 &&
     Number(to) > Number(from) &&
-    Number(to) - Number(from) <= 1000 &&
-    Number(to) <= 4294967295;
+    Number(to) <= 4294967296;
+  const limitValid = /^\d+$/.test(limit) && Number(limit) >= 1 && Number(limit) <= 1000;
   const matchValid =
     selected === "ids"
       ? match.trim().split(/[\s,]+/).length <= 128 &&
@@ -68,9 +74,11 @@ export function PrepExplorer({
       : selected === "address"
         ? /^t[\x21-\x7e]{1,127}$/.test(match)
         : true;
-  const valid = rangeValid && matchValid;
-  const route = selected === "ids" ? "transactions" : "query";
-  const query = prepQuery(selected, Number(from), Number(to), match);
+  const valid = rangeValid && matchValid && limitValid;
+  const route = "query";
+  const query = prepQuery(selected, Number(from), Number(to), match, Number(limit));
+  const cursor = result && typeof result === "object" && "cursor" in result && typeof result.cursor === "string" ? result.cursor : null;
+  const shareUrl = `https://zeer-ten.vercel.app/app/prep?${new URLSearchParams({example: selected, from, to, match, limit})}`;
   const example =
     examples.find((entry) => entry.id === selected) ?? examples[0];
   const json = JSON.stringify(query, null, 2);
@@ -79,8 +87,10 @@ export function PrepExplorer({
     language === "JSON"
       ? json
       : language === "cURL"
-        ? `curl "$PREP_URL/${route}" \\\n  -H "Authorization: Bearer $PREP_API_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  --data '${shellJson}'`
-        : `import { PrepClient } from "@zeer/prep-client";\n\nconst client = new PrepClient({\n  url: process.env.PREP_URL!,\n  token: process.env.PREP_API_TOKEN,\n});\n\nconst page = await client.${selected === "ids" ? "getTransactions" : "get"}(${json});\nconsole.log(page);`;
+        ? `curl "${publicPrepApi}/${route}" \\\n  -H "Content-Type: application/json" \\\n  --data '${shellJson}'`
+        : language === "fetch"
+          ? `const response = await fetch("${publicPrepApi}/query", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify(${json}),\n});\nif (!response.ok) throw new Error(await response.text());\nconst page = await response.json();\nconsole.log(page); // Pass page.cursor with the same query to continue.`
+          : `import { PrepClient } from "@zeer/prep-client";\n\nconst client = new PrepClient({\n  url: "${publicPrepApi}",\n});\n\nconst page = await client.get(${json});\nconsole.log(page); // Use the returned cursor to continue.`;
   function changed() {
     abort.current?.abort();
     setBusy(false);
@@ -88,13 +98,14 @@ export function PrepExplorer({
     setSample(false);
     setError("");
   }
-  async function run() {
+  async function run(nextCursor?: string) {
+    if (!enabled || !valid || busy) return;
     abort.current?.abort();
     const controller = new AbortController();
     abort.current = controller;
     setBusy(true);
     setError("");
-    setResult(undefined);
+    if (!nextCursor) setResult(undefined);
     setSample(false);
     setStale(false);
     setDuration(null);
@@ -102,11 +113,11 @@ export function PrepExplorer({
     const started = performance.now();
     try {
       const response = await fetch(
-        selected === "ids" ? "/api/transactions" : "/api/prep",
+        "/api/prep",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: json,
+          body: JSON.stringify({ ...query, ...(nextCursor ? { cursor: nextCursor } : {}) }),
           signal: controller.signal,
         },
       );
@@ -114,6 +125,7 @@ export function PrepExplorer({
       if (!response.ok) throw Error(data.error || "Request failed");
       if (!controller.signal.aborted && abort.current === controller) {
         setResult(data);
+        setPage(previous => nextCursor ? previous + 1 : 1);
         setDuration(performance.now() - started);
       }
     } catch (e) {
@@ -135,6 +147,7 @@ export function PrepExplorer({
               onClick={() => {
                 changed();
                 setSelected(example.id);
+                setMatch(example.id === "address" ? testnetExample.address : example.id === "ids" ? testnetExample.txid : "");
               }}
             >
               {example.name}
@@ -147,6 +160,7 @@ export function PrepExplorer({
         <div className="query-config">
           <h3>{example.name}</h3>
           <p>{example.description}</p>
+          <p className="example-detail">{example.detail}</p>
           <div className="fields">
             <label>
               From block
@@ -170,13 +184,10 @@ export function PrepExplorer({
                 }}
               />
             </label>
-            <div className="field-static">
-              <span>Network</span>
-              <strong>
-                <span className="network-dot" />
-                Zcash Testnet
-              </strong>
-            </div>
+            <label>
+              Blocks scanned per page
+              <input inputMode="numeric" value={limit} onChange={e => { changed(); setLimit(e.target.value); }} />
+            </label>
           </div>
           {(selected === "ids" || selected === "address") && (
             <div className="fields match-field">
@@ -197,26 +208,31 @@ export function PrepExplorer({
                   }}
                 />
               </label>
+              <button className="button secondary compact" onClick={() => {
+                changed();
+                setMatch(selected === "ids" ? testnetExample.txid : testnetExample.address);
+              }}>Use testnet example</button>
             </div>
           )}
           {!valid ? (
             <p role="alert" className="field-error">
               {!rangeValid
-                ? "Choose a range of 1–1,000 blocks, starting at height 1 or later."
+                ? "Choose a start of 0 or later and an exclusive end greater than the start."
+                : !limitValid ? "Scan between 1 and 1,000 blocks per page. The full query range can be larger."
                 : selected === "ids"
                   ? "Enter up to 128 lowercase 64-character transaction IDs."
                   : "Enter an output address beginning with t. Matching does not validate the address checksum."}
             </p>
           ) : (
             <p className="field-hint">
-              Choose a range covered by your Prep archive.
+              Zcash Testnet · Large ranges are read page by page. The end must be within your available archive.
             </p>
           )}
         </div>
         <div className="code-panel">
           <div className="panel-toolbar">
             <div className="format-tabs" aria-label="Code format">
-              {["JSON", "cURL", "TypeScript"].map((lang) => (
+              {["JSON", "cURL", "fetch", "TypeScript"].map((lang) => (
                 <button
                   aria-pressed={language === lang}
                   onClick={() => setLanguage(lang)}
@@ -227,6 +243,7 @@ export function PrepExplorer({
               ))}
             </div>
             <CopyButton text={valid ? code : ""} />
+            <CopyButton text={valid ? shareUrl : ""} label="Share" />
             {!embedded && (
               <button
                 className="button compact"
@@ -238,7 +255,7 @@ export function PrepExplorer({
                         setBusy(false);
                         setError("Request cancelled.");
                       }
-                    : run
+                    : () => void run()
                 }
               >
                 {busy ? <Square size={13} /> : <Play size={13} />}{" "}
@@ -251,7 +268,7 @@ export function PrepExplorer({
             code={
               valid
                 ? code
-                : "// Enter a valid block range to generate the request."
+                : "// Complete the query inputs to generate the request."
             }
           />
           <div className="panel-foot">
@@ -284,7 +301,7 @@ export function PrepExplorer({
           )}
           {embedded ? (
             <Link
-              href={`/app/prep?example=${selected}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&match=${encodeURIComponent(match)}`}
+              href={`/app/prep?${new URLSearchParams({example: selected, from, to, match, limit})}`}
               className="text-link"
             >
               Open in Playground <ArrowUpRight size={14} />
@@ -340,7 +357,13 @@ export function PrepExplorer({
           </div>
         )}
         {result !== undefined && (
-          <PrepResponse value={result} stale={stale} duration={duration} blocks={resultBlocks} />
+          <>
+            <PrepResponse value={result} stale={stale} duration={duration} blocks={resultBlocks} />
+            <div className="query-pagination">
+              <span>{stale ? "Inputs changed. Run a new query to continue." : `Page ${page} · ${cursor ? "More of this range remains to be scanned" : "Selected range complete"}`}</span>
+              {cursor && <button className="button secondary compact" disabled={stale || busy || !valid} onClick={() => void run(cursor)}>Next page <ArrowRight size={14} /></button>}
+            </div>
+          </>
         )}
         <p className="privacy-note">
           <ShieldCheck size={15} /> Shielded recipients, amounts, and memos

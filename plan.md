@@ -1,6 +1,6 @@
 # Zeer planning entry point
 
-Updated: 2026-10-18 (Asia/Jakarta).
+Updated: 2026-10-19 (Asia/Jakarta).
 
 **Status: Prep supports admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. Chef implements a public-data writer and GraphQL API. Viewing-key scanning, whole-chain execution and public deployment remain deferred. All benchmark results and reports are local-only under `benchmarks/results/`; source, methodology and fixtures remain public.**
 
@@ -40,30 +40,42 @@ Zeer storage budget; the guard stops at 34 / 59 GiB, while retaining the 25 GiB
 host-free-disk and 3 GiB available-memory floors. Aggregate VPS limits remain
 3 CPU / 8 GiB. Existing Zeer experiments still count toward the total.
 
-The next developer integration is now running: **VPS Zebra → VPS Prep → local
-Chef handlers → developer-owned PostgreSQL → local GraphQL/playground**.
-Prep starts at testnet block **4,515,038**, follows new blocks with a
-10-confirmation policy and has a separate 2 GiB archive cap. This is a recent
-live window, not whole-chain coverage. Prep's two systemd services are each
-capped at 0.5 CPU / 512 MiB within the aggregate slice; the guard stops both
-alongside Zebra on a budget violation. The authenticated Prep API remains
-loopback-only and is reached through a private SSH tunnel. Chef runs from
-independently installed package tarballs in WSL, with a separate project
-namespace in the developer's existing local PostgreSQL.
+The hosted path is now **VPS Zebra → Prep → Chef → PostgreSQL**, with a
+Vercel frontend at https://zeer-ten.vercel.app. Source/database ports remain
+private. A dedicated, forced-command SSH account carries bounded API reads;
+its key cannot open a shell or forward ports. Combined service/API limits remain
+3 CPU / 8 GiB. The operator-only configuration and credentials stay local.
 
-Verified: three full-block/raw-transaction samples against Zebra; every block
-hash, timestamp and transaction count in the bounded Chef/Prep comparison;
-new-block advancement after initial catch-up; Prep and local Chef restart/resume; anonymous
-API rejection; actual browser queries through both playgrounds. Evidence and
-operational scripts stay local in `.deploy-local/live-20261018/`. Package
-publication, public API access and whole-testnet ingestion remain pending.
+Full-data ingestion now starts at **block 0**. Genesis handling is implemented
+and verified against real testnet raw blocks/transactions. The recent-height
+window was only the initial integration test and is no longer the active target.
+A historical prefix has been imported while lossless archive conversion and
+resource validation are completed. **Full-history catch-up is still pending.**
+Read current coverage/readiness from the API rather than relying on a fixed
+height in this document.
 
-Target coverage is the complete testnet history followed by new blocks. This is
-a delivery target, not current coverage. Prep currently accepts archive starts
-at height 1 or later; genesis/height-0 support must be implemented and verified
-before claiming `0 → latest`. Show actual network, indexed height, source height,
-lag and confirmation policy in the playground. Source sync and Prep backfill are
-separate stages; completion of the node does not mean Prep is caught up.
+Storage work adds bounded binary header metadata and opt-in compressed full
+records. Duplicated canonical JSON hex data can reference raw block bytes;
+restoration verifies original payload length and checksum. Offline conversion
+keeps the source, supports interrupted-run resume and compares every decoded
+record before operator cutover. Live API adoption requires the complete proof,
+independent node checks and preserved recovery metadata.
+
+Chef distinguishes a transient source outage from reorg replay durably. A
+verified prefix can resume reads after temporary recovery; reorg/unknown replay
+remains gated. Existing unclassified state is never forced open. The hosted
+upgrade uses a separate project namespace and retains its predecessor.
+
+The public Prep base is `/api/prep`, with SDK-compatible height, capability,
+range-query and transaction-lookup routes. CORS is limited to these public-chain
+read routes; console adapters retain origin checks. Preview quotas, payload
+bounds and current limitations are documented in `docs/PUBLIC_API.md`.
+
+Acceptance requires the entire testnet history through the configured
+confirmation boundary, continued source following, matching Chef checkpoints,
+public SDK/GraphQL reads, recovery checks and healthy shared-VPS budgets.
+Deployment READY or a successful partial query is not that acceptance.
+Evidence remains local under `.deploy-local/` and `benchmarks/results/`.
 
 Capacity reference: Zebra's official requirements page describes about 10 GB of
 cached testnet state (https://zebra.zfnd.org/user/requirements.html, checked
@@ -82,10 +94,10 @@ confirmation policy. No public-hosting claim follows from the local preview.
 
 The private consumer restart procedure is recorded with the local evidence and
 was exercised against the existing checkpoint without duplicate processing.
-Next gates: measure archive growth on a representative window before expanding backfill;
-implement and verify genesis support before claiming block 0 coverage; then
-prepare a deliberately limited public developer endpoint with authentication,
-TLS, rate limits and an explicit coverage/status contract.
+Next gates: finish verified storage conversion and cutover; resume the complete
+genesis-to-tip backfill within measured capacity; verify hosted SDK/GraphQL reads
+and follow/recovery behavior; then record full-history acceptance. Keep viewing-key
+scanning, registry publication and broader production guarantees separate.
 
 User direction on 16 October: prioritize developer usability and a concrete
 application proof. Pause open-ended performance experiments; change engine code

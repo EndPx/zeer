@@ -51,3 +51,5 @@ Thumbs.db
 
 # Quickstart code generation (created by the documented setup command).
 /examples/quickstart/chef.generated.ts
+
+.vercel

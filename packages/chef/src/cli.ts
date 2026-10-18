@@ -54,7 +54,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
   if (command === "init") {
     const directory = flags.get("--dir"), project = flags.get("--project");
     if (!directory || !project || !flags.has("--start-height")) throw new CliError("INIT_OPTIONS_REQUIRED");
-    const startHeight = integer(flags.get("--start-height"), 1, 0xffff_fffe, "INVALID_START_HEIGHT");
+    const startHeight = integer(flags.get("--start-height"), 0, 0xffff_fffe, "INVALID_START_HEIGHT");
     const result = await scaffoldProject({ directory, project, startHeight });
     out({ command, status: "complete", project, network: "testnet", ...result });
     return;
@@ -69,7 +69,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
   if (!loaded || typeof loaded !== "object" || Array.isArray(loaded)) throw new CliError("INVALID_CONFIG");
   const config = loaded as ChefConfig;
   if (!/^[a-z][a-z0-9_]{0,31}$/.test(config.project) || !["mainnet", "testnet", "regtest"].includes(config.network)
-    || !Number.isInteger(config.startHeight) || config.startHeight < 1 || config.startHeight > 0xffff_fffe
+    || !Number.isInteger(config.startHeight) || config.startHeight < 0 || config.startHeight > 0xffff_fffe
     || typeof config.schema !== "string" || !config.schema || typeof config.handlerVersion !== "string" || !config.handlerVersion.length || config.handlerVersion.length > 128
     || !config.indexer || typeof config.indexer !== "object" || ![config.indexer.block, config.indexer.transaction].some((handler) => typeof handler === "function")
     || [config.indexer.block, config.indexer.transaction].some((handler) => handler !== undefined && typeof handler !== "function")) throw new CliError("INVALID_CONFIG");

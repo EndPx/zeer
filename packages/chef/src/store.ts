@@ -2,7 +2,7 @@ import pg, { type PoolClient } from "pg";
 import { encodeEntity, decodeEntity, queryIndexes } from "./schema.js";
 import type { ChefStore, Checkpoint, EntityAccess, PublicBlock, ReadView, StoredEntity, StoreOptions } from "./types.js";
 
-type State = { fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reorg_window: number };
+type State = { fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reconcile_kind?: Checkpoint["reconcileKind"]; reorg_window: number };
 const MAX_MUTATIONS = 10_000;
 const MAX_CACHE_ENTRIES = 10_000;
 const MAX_CACHE_BYTES = 16 * 1024 * 1024;
@@ -42,17 +42,21 @@ export class PostgresStore implements ChefStore {
   }
 
   private ensureOpen(): void { if (this.closed) throw new Error("Chef store is closed"); }
-  private async state(client: PoolClient, lock = false): Promise<State> {
+  private async state(client: PoolClient, lock = false, allowLegacy = false): Promise<State> {
     const result = await client.query<State>(`SELECT * FROM ${this.sql}.state WHERE singleton = true${lock ? " FOR UPDATE" : ""}`);
     const row = result.rows[0];
     const value = row && { ...row, start_height: Number(row.start_height), height: row.height === null ? null : Number(row.height) };
     if (!value || value.fingerprint !== this.options.fingerprint || value.model !== this.options.model.fingerprint || value.network !== this.options.network || value.start_height !== this.options.startHeight || value.reorg_window !== this.options.reorgWindow) {
       throw new Error("Chef project identity mismatch; use a new project namespace");
     }
+    if ((!allowLegacy || value.reconcile_kind !== undefined) && !["source", "reorg", "unknown"].includes(value.reconcile_kind ?? "")) {
+      throw new Error("Chef state migration required; run migrate before restarting this version");
+    }
     return value;
   }
   private checkpointOf(state: State): Checkpoint {
-    return { height: state.height, hash: state.hash, anchorHash: state.anchor_hash, status: state.status };
+    return { height: state.height, hash: state.hash, anchorHash: state.anchor_hash, status: state.status,
+      ...(state.status === "reconciling" ? { reconcileKind: state.reconcile_kind ?? "unknown" } : {}) };
   }
   private entity(name: string): void {
     if (!Object.hasOwn(this.options.model.entities, name)) throw new Error(`Unknown entity: ${name}`);
@@ -72,7 +76,7 @@ export class PostgresStore implements ChefStore {
         if (!marker.rows[0]?.relation) throw new Error("Refusing existing unmarked database namespace");
         const version = await client.query(`SELECT version FROM ${this.sql}.chef_owned_namespace WHERE singleton = true`);
         if (version.rows[0]?.version !== 1) throw new Error("Unsupported Chef namespace version");
-        await this.state(client);
+        await this.state(client, false, true);
       } else {
         await client.query(`CREATE SCHEMA ${this.sql}`);
         await client.query(`CREATE TABLE ${this.sql}.chef_owned_namespace (singleton boolean PRIMARY KEY CHECK(singleton), version integer NOT NULL)`);
@@ -83,6 +87,9 @@ export class PostgresStore implements ChefStore {
         await client.query(`CREATE TABLE ${this.sql}.undo (height bigint NOT NULL, entity text NOT NULL, id text COLLATE "C" NOT NULL, previous jsonb, PRIMARY KEY(height,entity,id))`);
         await client.query(`INSERT INTO ${this.sql}.state (singleton,fingerprint,model,network,start_height,reorg_window,status) VALUES(true,$1,$2,$3,$4,$5,'ready')`, [this.options.fingerprint, this.options.model.fingerprint, this.options.network, this.options.startHeight, this.options.reorgWindow]);
       }
+      // Additive migration. Previously reconciling projects remain conservative:
+      // an unknown reason must not be treated as a temporary source outage.
+      await client.query(`ALTER TABLE ${this.sql}.state ADD COLUMN IF NOT EXISTS reconcile_kind text NOT NULL DEFAULT 'unknown' CHECK(reconcile_kind IN ('source','reorg','unknown'))`);
       for (const { name, entity, field } of this.indexes) {
         // Descriptor names are validated even for models supplied programmatically.
         // Native JSONB equality preserves scalar/null semantics and the ID cursor.
@@ -264,10 +271,15 @@ export class PostgresStore implements ChefStore {
   private async status(status: Checkpoint["status"]): Promise<void> {
     await this.write(async client => {
       await this.state(client);
-      await client.query(`UPDATE ${this.sql}.state SET status=$1 WHERE singleton=true`, [status]);
+      await client.query(`UPDATE ${this.sql}.state SET status=$1,reconcile_kind=CASE WHEN $1='ready' THEN 'unknown' ELSE reconcile_kind END WHERE singleton=true`, [status]);
     });
   }
-  async markReconciling(): Promise<void> { await this.status("reconciling"); }
+  async markReconciling(kind: "source" | "reorg" = "reorg"): Promise<void> {
+    await this.write(async client => {
+      await this.state(client);
+      await client.query(`UPDATE ${this.sql}.state SET reconcile_kind=CASE WHEN status='reconciling' AND reconcile_kind IN ('reorg','unknown') THEN reconcile_kind ELSE $1 END,status='reconciling' WHERE singleton=true`, [kind]);
+    });
+  }
   async markReady(): Promise<void> { await this.status("ready"); }
   async markBlocked(): Promise<void> { await this.status("blocked"); }
   async rollback(height: number, hash: string): Promise<void> {

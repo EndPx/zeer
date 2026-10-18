@@ -10,7 +10,7 @@ export class ScaffoldError extends Error {
 export async function scaffoldProject(options: { directory: string; project: string; startHeight: number }) {
   const { project, startHeight } = options;
   if (!/^[a-z][a-z0-9_]{0,31}$/.test(project)) throw new ScaffoldError("INVALID_PROJECT_NAME");
-  if (!Number.isInteger(startHeight) || startHeight < 1 || startHeight > 0xffff_fffe) throw new ScaffoldError("INVALID_START_HEIGHT");
+  if (!Number.isInteger(startHeight) || startHeight < 0 || startHeight > 0xffff_fffe) throw new ScaffoldError("INVALID_START_HEIGHT");
   const directory = resolve(options.directory);
   const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const password = randomBytes(24).toString("hex");

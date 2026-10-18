@@ -65,6 +65,25 @@ test("runtime/PostgreSQL catch-up and process restart never repeat committed han
   assert.deepEqual(await f.snapshot(restarted), initial);
 });
 
+test("temporary source recovery reopens a verified prefix before full catch-up, including after restart", { skip: !url }, async t => {
+  const f = await fixture(t);
+  await f.step(f.store, 1);
+  f.state.fail = true;
+  await assert.rejects(f.step(f.store, 1), /source offline/);
+  assert.equal((await f.store.checkpoint()).reconcileKind, "source");
+  await assert.rejects(f.snapshot(f.store), /reconciling/);
+  await f.store.release();
+  const restarted = await f.open();
+  assert.equal((await restarted.checkpoint()).reconcileKind, "source");
+  f.state.fail = false;
+  assert.equal((await f.step(restarted, 1)).height, 2);
+  const prefix = await f.snapshot(restarted);
+  assert.equal(prefix.checkpoint.status, "ready");
+  assert.equal(prefix.checkpoint.height, 2);
+  assert.equal(prefix.total.amount, "3");
+  assert.deepEqual(prefix.rows.map(row => row.height), [1, 2]);
+});
+
 test("runtime/PostgreSQL handler failure commits only its preceding block prefix and restarts at the failed block", { skip: !url }, async t => {
   const f = await fixture(t); f.failAt(3);
   await assert.rejects(f.step(f.store), /intentional handler failure/);
@@ -92,6 +111,7 @@ test("runtime/PostgreSQL reorg undoes old aggregates/rows, gates partial replay 
   f.state.blocks.splice(2, 2, { height: 3, hash: h(303), previous_hash: h(2), time: 1001, amount: "30", txid: h(203) }, { height: 4, hash: h(304), previous_hash: h(303), time: 1001, amount: "40", txid: h(204) });
   assert.equal((await f.step(f.store, 1)).height, 3);
   assert.equal((await f.store.checkpoint()).status, "reconciling");
+  assert.equal((await f.store.checkpoint()).reconcileKind, "reorg");
   await assert.rejects(f.snapshot(f.store), /reconciling/);
   assert.equal((await query()).status, 503);
   await f.step(f.store, 1);

@@ -50,6 +50,9 @@ enum Command {
         /// Poll for new confirmed blocks after catch-up; detects bounded reorgs.
         #[arg(long)]
         follow: bool,
+        /// Compress each immutable full-block record without changing query output.
+        #[arg(long)]
+        compress: bool,
         #[arg(long, default_value_t = 5)]
         poll_seconds: u64,
         /// Optional finite step budget for rehearsals. Not a complete-chain claim.
@@ -70,6 +73,17 @@ enum Command {
     ArchiveInspect {
         #[arg(long)]
         archive: PathBuf,
+    },
+    /// Offline lossless compression into a new archive, with complete payload comparison.
+    ArchiveRepack {
+        #[arg(long)]
+        archive: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 4)]
+        max_disk_gib: u64,
+        #[arg(long)]
+        resume: bool,
     },
     /// Serve full-block queries over HTTP; protect non-loopback binds with a token.
     ServeHttp {
@@ -121,6 +135,21 @@ enum Command {
 #[tokio::main]
 async fn main() -> Result<()> {
     match Cli::parse().command {
+        Command::ArchiveRepack {
+            archive,
+            out,
+            max_disk_gib,
+            resume,
+        } => {
+            let cap = max_disk_gib
+                .checked_mul(1024 * 1024 * 1024)
+                .ok_or_else(|| anyhow::anyhow!("disk_budget_overflow"))?;
+            let proof = tokio::task::spawn_blocking(move || {
+                prep::repack::repack_with_resume(&archive, &out, cap, resume)
+            })
+            .await??;
+            println!("{}", serde_json::to_string(&proof)?);
+        }
         Command::Sync {
             source,
             network,
@@ -134,6 +163,7 @@ async fn main() -> Result<()> {
             deadline_seconds,
             allow_insecure,
             follow,
+            compress,
             poll_seconds,
             max_steps,
             max_source_retries,
@@ -154,6 +184,7 @@ async fn main() -> Result<()> {
                 deadline_seconds,
                 allow_insecure,
                 follow_mode: follow,
+                compress,
             };
             prep::follow::run(
                 options,

@@ -6,6 +6,7 @@ pub mod full_source;
 pub mod http;
 pub mod importer;
 pub mod query;
+pub mod repack;
 pub mod server;
 pub mod transactions;
 

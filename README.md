@@ -19,7 +19,12 @@ the ingredients; Chef applies the developer's recipe.
 
 ## Status
 
-**Prep's full-data MVP and Chef's first public-data prototype are implemented and tested. Public production hosting, viewing-key scanning and npm publication remain out of scope.**
+**A public testnet developer preview is available at [zeer-ten.vercel.app](https://zeer-ten.vercel.app). It uses real blockchain data. Genesis-to-tip backfill is still in progress; deployment availability does not establish complete history. Viewing-key scanning and npm publication are not implemented.**
+
+Inspect current coverage in the [console](https://zeer-ten.vercel.app/app) or
+through the [limited public Prep API](docs/PUBLIC_API.md). The preview is bounded
+and can be unavailable during source recovery or maintenance. It is not a
+production availability commitment.
 
 Prep supports bounded transaction-ID lookup, snapshot pinning, capability
 discovery, immutable transaction indexes and direct metadata projection. Optional
@@ -42,6 +47,11 @@ input fixtures. No performance ranking is published here.
 
 Whole-chain execution and production readiness remain unproven. Neither Prep
 nor the current public Chef slice decrypts private notes or validates consensus.
+
+Full archives now support genesis, opt-in lossless compressed records and
+binary in-memory header indexes. An offline conversion can resume from a
+verified segment prefix while preserving the original archive. See
+[archive storage and recovery](docs/PREP_STORAGE.md).
 
 This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 

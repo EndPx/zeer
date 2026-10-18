@@ -5,8 +5,9 @@ over HTTP(S), processes public Zcash data with your TypeScript handlers, stores
 entities in your PostgreSQL database and exposes authenticated GraphQL. The Prep
 operator may be Zeer or you; running Chef does not require running Zebra locally.
 
-The current starter targets **Zcash testnet**. A hosted Zeer Prep URL is not yet
-available. Supply an actual full-data testnet Prep service with known coverage.
+The current starter targets **Zcash testnet**. Use the [limited public Prep
+preview](PUBLIC_API.md) or your own full-data testnet service with known coverage.
+Inspect `/height`; full-history backfill is still in progress.
 For a self-contained historical example without an existing source, see the
 [fixture quickstart](../examples/quickstart/README.md); that older example uses
 explicitly labeled mainnet fixtures and is not a live testnet service.
@@ -42,12 +43,12 @@ Using the built CLI from the checkout (or an already installed `zeer-chef` binar
 node packages/chef/dist/cli.js init \
   --dir /absolute/path/to/my-zcash-indexer \
   --project my_zcash_indexer \
-  --start-height 1000
+  --start-height 0
 ```
 
 The directory must not already exist. Its parent must exist and be writable.
-Choose a start height within your Prep archive; 1000 is an example, not promised
-hosted coverage. Genesis height 0 is not supported by this starter.
+Choose a start height within your Prep archive. The full-data starter supports
+genesis height 0; another provider may expose a later starting range.
 
 Init creates an independent package, testnet config, BlockSummary schema/handlers,
 strict TypeScript config, a query example, local Postgres Compose config and a
@@ -68,6 +69,9 @@ your project. Type stripping does not replace explicit typechecking.
 ## 3. Configure Prep and PostgreSQL
 
 Edit `.env`: set `PREP_URL`, optional `PREP_API_TOKEN`, and `DATABASE_URL`.
+For the shared public preview, use `https://zeer-ten.vercel.app/api/prep` and
+leave the Prep token blank. Its quotas are shared; use a dedicated/self-hosted
+endpoint for sustained high-throughput indexing.
 The generated database URL matches the optional local Postgres credentials.
 If using remote PostgreSQL, use that service's TLS configuration and skip the
 local database command. Keep all connection strings and tokens server-side.

@@ -55,7 +55,7 @@ export function ChefPlayground({ enabled }: { enabled: boolean }) {
       <div className="console-title">
         <span className="eyebrow">Zeer Chef</span>
         <h1>Your schema. Your playground.</h1>
-        <p>Explore application data through the GraphQL API.</p>
+        <p>Explore application data through the GraphQL API. Request up to 100 items per page; use nextCursor as after to continue.</p>
       </div>
       {!enabled && (
         <div className="notice">

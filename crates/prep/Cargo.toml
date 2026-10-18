@@ -14,6 +14,7 @@ name = "admission_queries"
 required-features = ["admission-profile"]
 
 [dependencies]
+zstd.workspace = true
 prep-proto.workspace = true
 prep-store.workspace = true
 prost.workspace = true

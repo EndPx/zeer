@@ -19,7 +19,7 @@ use serde_json::json;
 use crate::full_source::{rpc_hash, unix_seconds, ChainInfo, NodeRpc, MAX_FULL_ENVELOPE_BYTES};
 
 const ADMISSION_RESERVE: u64 = 256 * 1024 * 1024;
-const SEGMENT_PAYLOAD_BUDGET: u64 = ADMISSION_RESERVE - 4 * 1024 * 1024;
+const SEGMENT_PAYLOAD_BUDGET: u64 = prep_store::MAX_FULL_BLOCK_BYTES + 4096;
 static FILE_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 
 #[derive(Clone, Debug)]
@@ -37,6 +37,7 @@ pub struct SyncOptions {
     pub allow_insecure: bool,
     pub deadline_seconds: u64,
     pub follow_mode: bool,
+    pub compress: bool,
 }
 
 impl Default for SyncOptions {
@@ -54,6 +55,7 @@ impl Default for SyncOptions {
             allow_insecure: false,
             deadline_seconds: 120,
             follow_mode: false,
+            compress: false,
         }
     }
 }
@@ -158,10 +160,7 @@ fn validate_options(options: &SyncOptions) -> Result<()> {
         matches!(options.network.as_str(), "mainnet" | "testnet" | "regtest"),
         "invalid_network"
     );
-    ensure!(
-        options.from >= 1 && options.from <= u64::from(u32::MAX),
-        "invalid_start_height"
-    );
+    ensure!(options.from <= u64::from(u32::MAX), "invalid_start_height");
     ensure!(
         options
             .to
@@ -335,7 +334,7 @@ async fn sync_locked(
         "archive_disk_budget_exhausted"
     );
     let end_limit = target.min(next.saturating_add(options.segment_blocks - 1));
-    let predecessor = source.block_hash(next - 1).await?;
+    let predecessor = predecessor_hash(source, next).await?;
     if let Some(local_head_hash) = writer.head_hash() {
         ensure!(
             local_head_hash == predecessor,
@@ -399,6 +398,9 @@ async fn sync_locked(
             ..StoreLimits::default()
         },
     )?;
+    if options.compress {
+        segment = segment.with_compression()?;
+    }
     for record in records {
         segment.push(record)?;
     }
@@ -465,10 +467,17 @@ async fn recheck_source(
     ensure!(
         info.height >= end
             && source.block_hash(end).await? == end_hash
-            && source.block_hash(start - 1).await? == predecessor,
+            && predecessor_hash(source, start).await? == predecessor,
         "source_changed_during_segment"
     );
     Ok(())
+}
+
+async fn predecessor_hash(source: &NodeRpc, start: u64) -> Result<String> {
+    match start.checked_sub(1) {
+        Some(height) => source.block_hash(height).await,
+        None => Ok("00".repeat(32)),
+    }
 }
 
 async fn reconcile(
@@ -497,7 +506,7 @@ async fn reconcile(
     )?;
     let floor = head
         .saturating_sub(options.max_reorg_blocks)
-        .max(options.from - 1);
+        .max(options.from.saturating_sub(1));
     let mut height = head.min(info.height);
     ensure!(height >= floor, "deep_reorg_requires_operator_recovery");
     let snapshot = writer.snapshot();
@@ -509,7 +518,7 @@ async fn reconcile(
         .predecessor_hash
         .clone();
     loop {
-        let local_hash = if height == options.from - 1 {
+        let local_hash = if options.from.checked_sub(1) == Some(height) {
             first_parent.clone()
         } else {
             snapshot.block_hash(height)?
@@ -665,6 +674,56 @@ mod tests {
 
     fn status(path: &Path) -> Value {
         serde_json::from_slice(&fs::read(path.join("status.json")).unwrap()).unwrap()
+    }
+
+    #[tokio::test]
+    async fn genesis_backfill_restart_and_reorg_never_request_negative_height() {
+        let (node, endpoint, _stop) = node(0).await;
+        {
+            let mut blocks = node.blocks.lock().unwrap();
+            blocks[0] = crate::full_source::tests::fixture(0, &[0; 32], 1);
+            extend(&mut blocks, 4, 1);
+        }
+        let directory = tempfile::tempdir().unwrap();
+        let mut options = options(endpoint, directory.path());
+        options.from = 0;
+        options.to = Some(0);
+        assert_eq!(sync_once(&options).await.unwrap().head, Some(0));
+        let archive = Archive::open(&options.archive).unwrap();
+        assert_eq!(archive.catalog().start_height, 0);
+        assert_eq!(archive.read_block(0).unwrap().prev_hash, vec![0; 32]);
+        let genesis_hash = archive.block_hash(0).unwrap();
+        drop(archive);
+        options.to = None;
+        assert_eq!(sync_once(&options).await.unwrap().head, Some(2));
+        assert_eq!(sync_once(&options).await.unwrap().head, Some(4));
+        assert!(!sync_once(&options).await.unwrap().progress);
+        {
+            let mut blocks = node.blocks.lock().unwrap();
+            blocks.truncate(1);
+            extend(&mut blocks, 4, 9);
+        }
+        assert_eq!(sync_once(&options).await.unwrap().head, Some(2));
+        assert_eq!(sync_once(&options).await.unwrap().head, Some(4));
+        assert_eq!(
+            Archive::open(&options.archive)
+                .unwrap()
+                .block_hash(0)
+                .unwrap(),
+            genesis_hash
+        );
+        {
+            let mut blocks = node.blocks.lock().unwrap();
+            blocks.clear();
+            blocks.push(crate::full_source::tests::fixture(0, &[0; 32], 8));
+            extend(&mut blocks, 4, 8);
+        }
+        assert!(sync_once(&options)
+            .await
+            .unwrap_err()
+            .to_string()
+            .contains("deep_reorg_requires_operator_recovery"));
+        assert_eq!(status(&options.archive)["ready"], false);
     }
 
     #[tokio::test]

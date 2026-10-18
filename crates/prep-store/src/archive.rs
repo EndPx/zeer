@@ -93,13 +93,27 @@ fn segment_path(root: &Path, relative: &str) -> Result<PathBuf> {
 }
 
 fn validate_catalog(catalog: &Catalog) -> Result<()> {
+    // Bound resident binary header metadata before opening any segment.
+    let blocks = catalog
+        .segments
+        .last()
+        .map(|segment| {
+            segment
+                .end_height
+                .saturating_sub(catalog.start_height)
+                .saturating_add(1)
+        })
+        .unwrap_or(0);
+    if blocks.saturating_mul(std::mem::size_of::<crate::PackedIndex>() as u64) > 640 * 1024 * 1024 {
+        return Err(Error::Limit("archive header metadata bytes"));
+    }
     if catalog.schema_version != 1 {
         return Err(Error::Invalid("unsupported catalog schema"));
     }
     check_network(&catalog.network)?;
     check_payload_kind(&catalog.payload_kind)?;
-    if catalog.start_height == 0 || catalog.start_height > u64::from(u32::MAX) {
-        return Err(Error::Invalid("archive start must be in 1..=u32::MAX"));
+    if catalog.start_height > u64::from(u32::MAX) {
+        return Err(Error::Invalid("archive start must be in 0..=u32::MAX"));
     }
     if catalog.epoch > catalog.revision || catalog.segments.len() as u64 > catalog.revision {
         return Err(Error::Invalid("invalid catalog revision counters"));
@@ -299,7 +313,7 @@ impl Archive {
             remaining = remaining
                 .checked_sub(store.transaction_index_bytes())
                 .ok_or(Error::Limit("archive transaction index bytes"))?;
-            stores.push(store);
+            stores.push(store.compact_manifest()?);
         }
         Ok(Self {
             root: root.to_path_buf(),
@@ -579,8 +593,8 @@ impl ArchiveWriter {
         }
         check_network(network)?;
         check_payload_kind(kind)?;
-        if start == 0 || start > u64::from(u32::MAX) {
-            return Err(Error::Invalid("archive start must be in 1..=u32::MAX"));
+        if start > u64::from(u32::MAX) {
+            return Err(Error::Invalid("archive start must be in 0..=u32::MAX"));
         }
         let root = root.as_ref();
         match fs::create_dir(root) {
@@ -698,7 +712,7 @@ impl ArchiveWriter {
         catalog.catalog_sha256 = catalog_hash(&catalog)?;
         validate_catalog(&catalog)?;
         let mut stores = (*self.archive.stores).clone();
-        stores.push(store);
+        stores.push(store.compact_manifest()?);
         self.publish(catalog.clone(), stores)?;
         Ok(catalog)
     }

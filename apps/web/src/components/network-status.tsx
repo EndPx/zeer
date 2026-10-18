@@ -37,7 +37,7 @@ export function NetworkStatus({ status, loading, error, refresh }: {
         <div><dt>Source → Prep gap</dt><dd>{m.sourceLag === null ? "Unknown" : `${number(m.sourceLag)} blocks`}</dd></div>
         <div><dt>Prep → Chef gap</dt><dd>{m.chefLag === null ? "Unknown" : `${number(m.chefLag)} blocks`}</dd></div>
       </dl>
-      <div className="network-status-foot"><span className="coverage-note">{m.start !== null && m.start > 0 ? `Partial archive · blocks 0–${number(m.start - 1)} are not indexed.` : m.historyPercent === 100 ? "Complete history through the observed source tip." : "Full-history coverage has not been established."}</span><span><Clock3 size={13} />{status?.checkedAt ? `Checked ${new Date(status.checkedAt).toLocaleTimeString("en-GB")}` : "Awaiting first observation"}</span></div>
+      <div className="network-status-foot"><span className="coverage-note">{m.start !== null && m.start > 0 ? `Partial archive · blocks 0–${number(m.start - 1)} are not indexed.` : m.historyPercent === 100 ? "Complete history through the observed source tip." : m.sourceLag !== null ? `${number(m.sourceLag)} source blocks are not in the indexed range yet.` : "Indexed range shown above. A fresh source tip is not available."}</span><span><Clock3 size={13} />{status?.checkedAt ? `Checked ${new Date(status.checkedAt).toLocaleTimeString("en-GB")}` : "Awaiting first observation"}</span></div>
       {error && <p className="error-note" role="alert">{error} Values shown are from the last successful refresh.</p>}
     </section>
     <section className="recent-blocks" aria-labelledby="recent-blocks-title">

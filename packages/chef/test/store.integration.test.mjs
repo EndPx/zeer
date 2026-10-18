@@ -60,6 +60,20 @@ test("PostgreSQL: explicit opt-in indexes are partial, idempotent and identity-b
   assert.equal(ordinary, 1, "Unannotated models must not gain default field indexes");
 });
 
+test("PostgreSQL: legacy state requires additive migration and keeps unknown reconciliation closed", { skip: !url }, async t => {
+  const { store, options } = await fixture(t);
+  await store.markReconciling("reorg");
+  const inspect = new pg.Client({ connectionString: url }); await inspect.connect();
+  t.after(() => inspect.end());
+  await inspect.query(`ALTER TABLE "chef_${options.project}".state DROP COLUMN reconcile_kind`);
+  await assert.rejects(store.checkpoint(), /state migration required/);
+  await store.migrate();
+  assert.equal((await store.checkpoint()).reconcileKind, "unknown");
+  await store.markReconciling("source");
+  assert.equal((await store.checkpoint()).reconcileKind, "unknown");
+  await assert.rejects(store.read(async () => null), /reconciling/);
+});
+
 test("PostgreSQL: indexed exact/null scalar filters and ID pages track updates, failure and rollback", { skip: !url }, async t => {
   const indexed = parseModel("type Account { id: ID! balance: BigInt! @index count: Int @index active: Boolean @index owner: ID @index }");
   const { store } = await fixture(t, { model: indexed });

@@ -52,7 +52,7 @@ testnet network metadata. Chef must be the operator's testnet BlockSummary proje
 No arbitrary user-supplied upstream URLs, viewing keys or wallets are accepted.
 
 Adapters allow only fixed query/status routes, reject cross-origin writes,
-disable redirects, bound requests to 16 KiB/responses to 2 MiB, use 15-second
+disable redirects, bound requests to 16 KiB/responses to 8 MiB, use 15-second
 deadlines and two upstream requests per server module instance. This is a local
 demo control, not a distributed per-user quota. Public hosting still needs an
 operator-managed ingress quota/TLS policy and deployment review.

@@ -54,7 +54,7 @@ export function decodePage(page: QueryResult, from: number, to: number): { block
 /** One bounded page; PostgreSQL is the authoritative application checkpoint. */
 export async function syncStep<E extends object>(options: RuntimeOptions<E>, endHeight?: number): Promise<SyncResult> {
   const { client, store, signal } = options;
-  requireValue(uint(options.startHeight) && options.startHeight >= 1 && Number.isInteger(options.reorgWindow)
+  requireValue(uint(options.startHeight) && Number.isInteger(options.reorgWindow)
     && options.reorgWindow >= 1 && options.reorgWindow <= 1000, "INVALID_RUNTIME_OPTIONS");
   const limit = options.pageSize ?? 16;
   requireValue(Number.isInteger(limit) && limit >= 1 && limit <= 100, "INVALID_PAGE_SIZE");
@@ -64,7 +64,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   const fetched = async <T>(read: () => Promise<T>): Promise<T> => {
     const start = performance.now();
     try { return await read(); }
-    catch (error) { await store.markReconciling(); throw error; }
+    catch (error) { await store.markReconciling(error instanceof ReorgError ? "reorg" : "source"); throw error; }
     finally { fetchMs += performance.now() - start; }
   };
   signal?.throwIfAborted();
@@ -75,7 +75,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   const base = { blocks: 0, transactions: 0, height: checkpoint.height, sourceHeight: meta.archive_height,
     sourceEpoch: meta.epoch, fetchMs, handlerIncludingEntityIoMs: 0, transactionOverheadMs: 0 };
   if (!meta.ready || meta.archive_height === null || meta.archive_height < options.startHeight) {
-    await store.markReconciling();
+    await store.markReconciling("source");
     return { ...base, state: "source_unavailable" };
   }
   requireValue(meta.start_block <= options.startHeight, "SOURCE_HISTORY_UNAVAILABLE");
@@ -94,7 +94,9 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
     const current = checkpoint.height <= meta.archive_height ? await header(checkpoint.height) : null;
     if (!current || current.hash !== checkpoint.hash) {
       await store.markReconciling();
-      const floor = Math.max(options.startHeight - 1, checkpoint.height - options.reorgWindow);
+      // Genesis has no predecessor block to roll back to. A changed genesis is
+      // a source identity failure, not a reorg across a synthetic height -1.
+      const floor = Math.max(0, options.startHeight - 1, checkpoint.height - options.reorgWindow);
       // Prep can publish a shorter prefix while rebuilding replacement segments.
       // Wait if the follower's observed source can still supply our retained
       // window; missing published history is not proof of an unrecoverable fork.
@@ -147,7 +149,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
     transactionCount += transactions.length;
   }
   const finalHeight = batches.at(-1)!.block.height;
-  if (checkpoint.status === "reconciling" && finalHeight === target) {
+  if (checkpoint.status === "reconciling" && (finalHeight === target || checkpoint.reconcileKind === "source")) {
     requireValue((await header(finalHeight)).hash === batches.at(-1)!.block.hash, "SOURCE_CHANGED_DURING_REPLAY");
     await store.markReady();
   }

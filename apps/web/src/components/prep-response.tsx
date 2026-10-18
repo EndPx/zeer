@@ -51,6 +51,6 @@ export function PrepResponse({ value, stale, duration, blocks }: {
       <span>One response · public Zcash testnet data</span>
       {typeof response.next_block === "number" && <span>Next block: {response.next_block.toLocaleString("en-US")}</span>}
     </div>
-    {more && <p className="response-help">This is a partial page. Use the cursor in JSON with the Prep client to continue the same snapshot.</p>}
+    {more && <p className="response-help">Only this page has been scanned. {rows.length === 0 ? "Later pages may still contain matches. " : ""}Continue with Next page or pass the cursor with the same query in your client.</p>}
   </section>;
 }

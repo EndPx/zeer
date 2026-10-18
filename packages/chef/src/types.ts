@@ -16,7 +16,7 @@ export interface Indexer<E extends object = Record<string, Record<string, unknow
   block?: (args: { block: PublicBlock; context: HandlerContext<E> }) => Promise<void> | void;
   transaction?: (args: { block: PublicBlock; transaction: PublicTransaction; context: HandlerContext<E> }) => Promise<void> | void;
 }
-export interface Checkpoint { height: number | null; hash: string | null; anchorHash: string | null; status: "ready" | "reconciling" | "blocked" }
+export interface Checkpoint { height: number | null; hash: string | null; anchorHash: string | null; status: "ready" | "reconciling" | "blocked"; reconcileKind?: "source" | "reorg" | "unknown" }
 export interface ReadView {
   get(entity: string, id: string): Promise<StoredEntity | null>;
   list(entity: string, options: ListOptions): Promise<StoredEntity[]>;
@@ -29,7 +29,7 @@ export interface ChefStore {
   checkpoint(): Promise<Checkpoint>;
   blockHash(height: number): Promise<string | null>;
   apply(block: PublicBlock, handler: (entities: EntityAccess) => Promise<void>): Promise<void>;
-  markReconciling(): Promise<void>;
+  markReconciling(kind?: "source" | "reorg"): Promise<void>;
   rollback(height: number, hash: string): Promise<void>;
   markReady(): Promise<void>;
   markBlocked(): Promise<void>;
