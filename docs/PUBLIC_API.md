@@ -13,6 +13,13 @@ testnet blocks from genesis; Chef indexing progresses separately.
 every chain block has already been imported. Historical source mode does not
 provide a fresh network-tip observation.
 
+The hosted testnet follower uses `--confirmations 1 --poll-seconds 2`: its target
+is the observed Zebra tip, so the expected source-to-Prep gap after catch-up is
+zero. A new block, source recovery or processing delay can briefly produce a
+nonzero gap; the API reports the measured heights rather than hiding it. This
+policy admits recent blocks that can still be replaced by a reorganization.
+Clients must handle `409 REORG` and restart invalidated cursor queries.
+
 ## Query
 
 ```sh

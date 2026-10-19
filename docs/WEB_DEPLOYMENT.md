@@ -5,6 +5,13 @@ Prep and Chef. Nginx terminates HTTPS and proxies to a loopback-only Next.js
 standalone server. Its server-side source URLs use localhost, avoiding an SSH
 handshake on the public request path. Node RPC and PostgreSQL remain private.
 
+The primary testnet follower is configured with one confirmation and a two-second
+source poll interval, following the observed chain tip with a normal gap of zero.
+This is an operator deployment choice; the library's conservative default is not
+changed. The follower still checks canonical hashes, rolls back supported shallow
+reorganizations and invalidates affected cursors. Never replace the actual lag
+with a cosmetic zero in the dashboard.
+
 The web service runs as a dedicated unprivileged user with a 0.5 CPU / 512 MiB
 ceiling inside the existing aggregate Zeer resource slice. Builds run separately
 with 0.5 CPU / 1 GiB and two Next.js build workers. Both are covered by the
