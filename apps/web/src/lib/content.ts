@@ -34,13 +34,13 @@ export const examples = [
     id: "sapling",
     name: "Explore Sapling activity",
     description: "Find transactions containing Sapling spends or outputs.",
-    detail: "Build activity feeds from public bundle presence. Recipients, individual shielded values and memos stay encrypted. Early blocks before Sapling activation have no matches.",
+    detail: "Inspect public spend and output counts for Sapling activity. Recipients, individual shielded values and memos stay encrypted. Early blocks before activation have no matches.",
   },
   {
     id: "orchard",
     name: "Explore Orchard activity",
     description: "Find transactions containing Orchard actions.",
-    detail: "Follow public Orchard activity for network analytics. This does not decrypt payments. Blocks before Orchard activation have no matches.",
+    detail: "Inspect the public number of Orchard actions in each matching transaction. Actions do not reveal individual payments. Blocks before activation have no matches.",
   },
   {
     id: "headers",
@@ -51,10 +51,22 @@ export const examples = [
   },
   {
     id: "transactions",
-    name: "Inspect transactions",
+    name: "Transaction sizes & inputs",
     description:
-      "Read public transaction identifiers, positions, and serialized sizes.",
-    detail: "Feed an explorer or indexing pipeline with just the public metadata it needs. Request pages without downloading full raw blocks.",
+      "Compare transaction sizes, versions and transparent input/output counts.",
+    detail: "Build lightweight network analytics from metadata. This example omits full inputs, outputs and serialized transaction bodies.",
+  },
+  {
+    id: "versions",
+    name: "Filter by version",
+    description: "Find transactions using a specific transaction format version.",
+    detail: "Compare formats using a server-side version filter. A version number alone does not mean that a transaction contains shielded payments.",
+  },
+  {
+    id: "raw",
+    name: "Raw transaction bytes",
+    description: "Retrieve serialized transaction hex for parsers and verification tools.",
+    detail: "Inspect the actual wire payload, with no broadcast or wallet action. Raw shielded payloads remain encrypted. Start with one block per page to keep responses small.",
   },
 ] as const;
 export type Example = (typeof examples)[number]["id"];
@@ -75,9 +87,19 @@ export const transactionFieldOptions = [
   { key: "locktime", label: "Lock time", required: false },
   { key: "transparent_input_count", label: "Transparent input count", required: false },
   { key: "transparent_output_count", label: "Transparent output count", required: false },
+  { key: "decoded", label: "Decoded public transaction", required: false },
+  { key: "raw", label: "Raw transaction hex", required: false },
 ] as const;
 export function defaultPrepFields(example: Example): PrepFields {
-  return { block: ["height", "hash", "time"], transaction: example === "headers" ? [] : ["txid", "block_height", "vin", "vout"] };
+  switch (example) {
+    case "headers": return { block: ["height", "hash", "time"], transaction: [] };
+    case "address": return { block: ["height", "time"], transaction: ["txid", "block_height", "vout"] };
+    case "ids": return { block: ["height", "hash", "time"], transaction: ["txid", "block_height", "version", "locktime", "vin", "vout"] };
+    case "sapling": case "orchard": return { block: ["height", "time"], transaction: ["txid", "block_height", "decoded"] };
+    case "transactions": return { block: ["height", "time"], transaction: ["txid", "block_height", "version", "size_bytes", "transparent_input_count", "transparent_output_count"] };
+    case "versions": return { block: ["height", "time"], transaction: ["txid", "block_height", "version", "size_bytes"] };
+    case "raw": return { block: ["height"], transaction: ["txid", "block_height", "raw"] };
+  }
 }
 export function sharedPrepFields(example: Example, block: unknown, transaction: unknown): PrepFields {
   const fallback = defaultPrepFields(example);
@@ -94,6 +116,22 @@ export const testnetExample = {
   address: "t2UNzUUx8mWBCRYPRezvA363EYXyEpHokyi",
   txid: "42096f1b0d0ca49f42ca9e3fba73392378f02a9a3235bd361a1253e7ad613192",
 };
+export function defaultExampleMatch(example: Example): string {
+  return example === "address" ? testnetExample.address : example === "ids" ? testnetExample.txid : example === "versions" ? "5" : "";
+}
+// Verified public testnet ranges. Applying a sample fills inputs; it never substitutes a response.
+export function verifiedExample(example: Example, match = "") {
+  switch (example) {
+    case "address": return { from: 1000, limit: 3, match: testnetExample.address };
+    case "ids": return { from: 1000, limit: 1, match: testnetExample.txid };
+    case "sapling": return { from: 1000000, limit: 100, match: "" };
+    case "orchard": return { from: 4515166, limit: 1, match: "" };
+    case "headers": return { from: 0, limit: 3, match: "" };
+    case "transactions": return { from: 1000000, limit: 100, match: "" };
+    case "versions": return match === "4" ? { from: 1000000, limit: 3, match: "4" } : match === "6" ? { from: 4515166, limit: 1, match: "6" } : { from: 1842420, limit: 3, match: "5" };
+    case "raw": return { from: 1000, limit: 1, match: "" };
+  }
+}
 export function prepQuery(
   example: Example,
   from: number,
@@ -107,7 +145,9 @@ export function prepQuery(
     ...(to === undefined ? {} : { to_block: to }),
     limit,
     field_selection: fields,
-    ...(example === "ids"
+    ...(example === "versions"
+      ? { transaction_filter: { versions: [Number(match)] } }
+      : example === "ids"
       ? { transaction_filter: { txids: match.trim() ? match.trim().split(/[\s,]+/) : [] } }
       : example === "address"
       ? { transaction_filter: { transparent_output_addresses: [match] } }

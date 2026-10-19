@@ -20,7 +20,8 @@ import {
   publicPrepApi,
   repo,
   sampleBlocks,
-  testnetExample,
+  defaultExampleMatch,
+  verifiedExample,
   defaultPrepFields,
   blockFieldOptions,
   transactionFieldOptions,
@@ -74,6 +75,8 @@ export function PrepExplorer({
           .trim()
           .split(/[\s,]+/)
           .every((id) => /^[a-f0-9]{64}$/.test(id))
+      : selected === "versions"
+        ? /^\d+$/.test(match) && Number(match) >= 1 && Number(match) <= 4294967295
       : selected === "address"
         ? /^t[\x21-\x7e]{1,127}$/.test(match)
         : true;
@@ -85,6 +88,7 @@ export function PrepExplorer({
   const shareUrl = `${publicPrepApi.replace(/\/api\/prep$/, "")}/app/prep?${parameters}`;
   const example =
     examples.find((entry) => entry.id === selected) ?? examples[0];
+  const knownSample = verifiedExample(selected, match);
   const json = JSON.stringify(query, null, 2);
   const shellJson = json.replaceAll("'", "'\\''");
   const code =
@@ -155,7 +159,9 @@ export function PrepExplorer({
                 changed();
                 setSelected(example.id);
                 setFields(defaultPrepFields(example.id));
-                setMatch(example.id === "address" ? testnetExample.address : example.id === "ids" ? testnetExample.txid : "");
+                setMatch(defaultExampleMatch(example.id));
+                setFrom("0");
+                setLimit(example.id === "raw" ? "1" : "100");
               }}
             >
               {example.name}
@@ -186,17 +192,20 @@ export function PrepExplorer({
               <input inputMode="numeric" value={limit} onChange={e => { changed(); setLimit(e.target.value); }} />
             </label>
           </div>
-          {(selected === "ids" || selected === "address") && (
+          {(selected === "ids" || selected === "address" || selected === "versions") && (
             <div className="fields match-field">
               <label>
                 {selected === "ids"
                   ? "Transaction IDs (comma separated)"
+                  : selected === "versions" ? "Transaction version"
                   : "Transparent output address"}
                 <input
                   value={match}
+                  inputMode={selected === "versions" ? "numeric" : undefined}
                   placeholder={
                     selected === "ids"
                       ? "Paste a testnet transaction ID"
+                      : selected === "versions" ? "For example: 4, 5 or 6"
                       : "Paste a transparent t-address"
                   }
                   onChange={(e) => {
@@ -205,10 +214,6 @@ export function PrepExplorer({
                   }}
                 />
               </label>
-              <button className="button secondary compact" onClick={() => {
-                changed();
-                setMatch(selected === "ids" ? testnetExample.txid : testnetExample.address);
-              }}>Use testnet example</button>
             </div>
           )}
           {!valid ? (
@@ -218,6 +223,7 @@ export function PrepExplorer({
                 : !limitValid ? "Scan between 1 and 1,000 blocks per page. The full query range can be larger."
                 : selected === "ids"
                   ? "Enter up to 128 lowercase 64-character transaction IDs."
+                  : selected === "versions" ? "Enter a transaction version from 1 to 4,294,967,295."
                   : "Enter an output address beginning with t. Matching does not validate the address checksum."}
             </p>
           ) : (
@@ -225,6 +231,13 @@ export function PrepExplorer({
               Prep captures the latest indexed block when you run. Next page stays within that same snapshot.
             </p>
           )}
+          <div className="verified-example">
+            <button className="button secondary compact" onClick={() => {
+              changed(); setFrom(String(knownSample.from)); setLimit(String(knownSample.limit));
+              setMatch(knownSample.match); setFields(defaultPrepFields(selected));
+            }}>Use verified testnet sample <ArrowRight size={14} /></button>
+            <span>Starts at block {knownSample.from.toLocaleString("en-US")}. Run query to fetch the actual response.</span>
+          </div>
         </div>
         <details className="field-selection">
           <summary>Response fields <span>{fields.block.length + fields.transaction.length} selected</span></summary>

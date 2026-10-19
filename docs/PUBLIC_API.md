@@ -65,8 +65,10 @@ change returns `409` with the `REORG` code so the client can restart safely.
 The [Prep playground](https://zeer.endpx.cloud/app/prep) starts at genesis with
 no end-height input. Prep captures the current archive end on the first request;
 subsequent cursor pages retain that snapshot. It offers transparent output payments,
-transaction IDs, Sapling/Orchard activity, block history and transaction metadata.
-The address and transaction presets are verified public testnet examples.
+transaction IDs, Sapling/Orchard activity, block history, transaction metadata,
+version filters and raw serialized transactions. Each has a verified public
+testnet sample. **Use verified testnet sample** fills inputs only; **Run query**
+still calls the actual API. No captured response replaces that request.
 
 A range such as `from_block: 0, to_block: 1000000` is accepted when covered by
 the archive. `limit` is the number of blocks scanned per page, not the total
@@ -83,10 +85,24 @@ Chef GraphQL lists retain a 100-item maximum per response and return
 `nextCursor` for continuation through `after`.
 
 The playground's **Response fields** control selects existing API fields and
-keeps the snippets and share URL in sync. Transaction examples request block
-height/hash/time and transaction txid/block_height/vin/vout by default. The table
-joins block timestamps by height and distinguishes coinbase transactions from
-ordinary transactions using the actual coinbase input, never the position alone.
+keeps the snippets and share URL in sync. Defaults are specific to each example:
+
+| Example | Filter | Default result focus |
+| --- | --- | --- |
+| Payments to an address | Transparent output address | Public output addresses/scripts and values |
+| Find a transaction | Transaction IDs | Version, lock time, inputs and outputs |
+| Sapling activity | Sapling bundle presence | Public spend/output component counts from decoded data |
+| Orchard activity | Orchard action presence | Public action count from decoded data |
+| Block history | None | Headers only, without transaction records |
+| Transaction sizes & inputs | None | Version, bytes and transparent input/output entry counts |
+| Filter by version | Exact format version | Matching versions and serialized sizes |
+| Raw transaction bytes | None | Actual serialized hex; one block per page by default |
+
+Component counts are not payment counts and do not expose shielded recipients,
+individual values or memo plaintext. Full raw/decoded payloads can be larger;
+select fewer fields or smaller pages when needed. The table joins timestamps
+by block height. When inputs are selected, coinbase type comes from the actual
+coinbase input, never from the transaction position alone.
 `index` remains the zero-based position inside a block; it is available as
 **Position in block** but is not selected by default. Output addresses and values
 come only from transparent `vout` entries. Input references are not resolved into

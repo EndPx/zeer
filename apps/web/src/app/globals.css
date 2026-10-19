@@ -2495,3 +2495,7 @@ svg {
 .transaction-kind { font-family: "Manrope Variable", Manrope, sans-serif; white-space: nowrap; }
 .table-secondary { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
 @media (max-width: 640px) { .field-selection { padding: 12px 16px; } .field-selection-groups { grid-template-columns: 1fr; gap: 16px; } }
+.verified-example { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.verified-example > span { color: var(--muted); font-size: 12px; flex: 1; min-width: 180px; }
+.component-counts { display: flex; flex-direction: column; gap: 4px; }
+.raw-preview { display: block; max-width: 34ch; overflow: hidden; text-overflow: ellipsis; }

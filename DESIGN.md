@@ -1,14 +1,27 @@
 # Zeer website design system
 
+## Varied query examples — 19 October
+
+Eight runnable presets have purpose-specific filters, field projections and table
+results: address outputs, exact txid lookup, Sapling components, Orchard actions,
+block headers, transaction footprint, version filtering and serialized bytes.
+Keep From block at 0 by default; raw uses one block per page. A secondary
+Use verified testnet sample button fills known inputs/ranges without executing
+or substituting data. Switching examples restores their own defaults. Sapling
+and Orchard use decoded public fields to show component counts only; payment
+counts, recipients and memo plaintext must not be inferred. Raw payloads show a
+short hex preview plus byte length; complete content stays in JSON. Reuse the
+existing panel, secondary button, typography and responsive field primitives.
+
 ## Public transaction fields — 19 October
 
 Keep the established example/input/code layout. A native Response fields
 disclosure exposes block and transaction checkboxes, with mandatory identity
 fields disabled and checked. Labels explain API keys; selecting a field changes
 all snippets, invalidates old results/cursors and persists in the share URL.
-Defaults request block height/hash/time and transaction txid/block_height/vin/vout.
-The table shows Block (with block hash), UTC timestamp, transaction hash, type
-derived from coinbase input presence, and transparent output scripts/addresses.
+Defaults vary by example as specified above. When selected, the table shows Block
+(with block hash), UTC timestamp, transaction hash, type derived from coinbase
+input presence, and transparent output scripts/addresses.
 Position in block (API index, zero-based), size and other metadata are optional.
 Never manufacture EVM from/to identities: vin is input references, vout is public
 output data, and shielded recipients remain encrypted. Display at most two public
