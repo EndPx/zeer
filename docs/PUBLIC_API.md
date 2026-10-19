@@ -82,6 +82,17 @@ The share control copies a public URL containing those parameters, not a token.
 Chef GraphQL lists retain a 100-item maximum per response and return
 `nextCursor` for continuation through `after`.
 
+The playground's **Response fields** control selects existing API fields and
+keeps the snippets and share URL in sync. Transaction examples request block
+height/hash/time and transaction txid/block_height/vin/vout by default. The table
+joins block timestamps by height and distinguishes coinbase transactions from
+ordinary transactions using the actual coinbase input, never the position alone.
+`index` remains the zero-based position inside a block; it is available as
+**Position in block** but is not selected by default. Output addresses and values
+come only from transparent `vout` entries. Input references are not resolved into
+a universal sender address, and shielded recipients are not inferred. Full hashes,
+input/output data and all output entries remain available in the JSON response.
+
 ## Preview bounds
 
 - No personal API token is needed for this public-data preview.

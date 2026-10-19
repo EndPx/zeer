@@ -1,5 +1,5 @@
 import { PrepExplorer } from "@/components/prep-explorer";
-import { examples, publicPrepApi, testnetExample, type Example } from "@/lib/content";
+import { examples, publicPrepApi, testnetExample, sharedPrepFields, type Example } from "@/lib/content";
 import { CopyButton } from "@/components/interactive";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Prep Playground" };
@@ -36,6 +36,7 @@ export default async function Page({
           typeof params.match === "string" ? params.match.slice(0, 9000) : example === "address" ? testnetExample.address : example === "ids" ? testnetExample.txid : ""
         }
         initialLimit={typeof params.limit === "string" ? params.limit.slice(0, 5) : "100"}
+        initialFields={sharedPrepFields(example, params.blockFields, params.transactionFields)}
       />
     </>
   );

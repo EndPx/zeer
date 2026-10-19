@@ -58,6 +58,37 @@ export const examples = [
   },
 ] as const;
 export type Example = (typeof examples)[number]["id"];
+export type PrepFields = { block: string[]; transaction: string[] };
+export const blockFieldOptions = [
+  { key: "height", label: "Block number", required: true },
+  { key: "hash", label: "Block hash", required: false },
+  { key: "time", label: "Timestamp", required: false },
+] as const;
+export const transactionFieldOptions = [
+  { key: "txid", label: "Transaction hash", required: true },
+  { key: "block_height", label: "Block number", required: true },
+  { key: "vin", label: "Inputs / transaction type", required: false },
+  { key: "vout", label: "Transparent outputs", required: false },
+  { key: "index", label: "Position in block (starts at 0)", required: false },
+  { key: "size_bytes", label: "Size in bytes", required: false },
+  { key: "version", label: "Transaction version", required: false },
+  { key: "locktime", label: "Lock time", required: false },
+  { key: "transparent_input_count", label: "Transparent input count", required: false },
+  { key: "transparent_output_count", label: "Transparent output count", required: false },
+] as const;
+export function defaultPrepFields(example: Example): PrepFields {
+  return { block: ["height", "hash", "time"], transaction: example === "headers" ? [] : ["txid", "block_height", "vin", "vout"] };
+}
+export function sharedPrepFields(example: Example, block: unknown, transaction: unknown): PrepFields {
+  const fallback = defaultPrepFields(example);
+  if (typeof block !== "string" || typeof transaction !== "string") return fallback;
+  const fields = { block: block ? block.split(",") : [], transaction: transaction ? transaction.split(",") : [] };
+  if (!fields.block.includes("height") || fields.block.some(key => !blockFieldOptions.some(option => option.key === key)) ||
+      fields.transaction.some(key => !transactionFieldOptions.some(option => option.key === key)) ||
+      new Set(fields.block).size !== fields.block.length || new Set(fields.transaction).size !== fields.transaction.length ||
+      (example === "headers" ? fields.transaction.length > 0 : !fields.transaction.includes("txid") || !fields.transaction.includes("block_height"))) return fallback;
+  return fields;
+}
 // Verified through the live testnet API at block 1000 on 19 October 2026.
 export const testnetExample = {
   address: "t2UNzUUx8mWBCRYPRezvA363EYXyEpHokyi",
@@ -69,18 +100,13 @@ export function prepQuery(
   to: number | undefined,
   match = "",
   limit = 100,
+  fields = defaultPrepFields(example),
 ) {
   return {
     from_block: from,
     ...(to === undefined ? {} : { to_block: to }),
     limit,
-    field_selection: {
-      block: example === "headers" ? ["height", "hash", "time"] : [],
-      transaction:
-        example === "headers"
-          ? []
-          : ["txid", "block_height", "index", "size_bytes"],
-    },
+    field_selection: fields,
     ...(example === "ids"
       ? { transaction_filter: { txids: match.trim() ? match.trim().split(/[\s,]+/) : [] } }
       : example === "address"

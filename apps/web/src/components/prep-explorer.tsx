@@ -21,7 +21,11 @@ import {
   repo,
   sampleBlocks,
   testnetExample,
+  defaultPrepFields,
+  blockFieldOptions,
+  transactionFieldOptions,
   type Example,
+  type PrepFields,
 } from "@/lib/content";
 
 export function PrepExplorer({
@@ -31,6 +35,7 @@ export function PrepExplorer({
   initialFrom = "0",
   initialMatch = "",
   initialLimit = "100",
+  initialFields,
 }: {
   embedded?: boolean;
   enabled?: boolean;
@@ -38,11 +43,13 @@ export function PrepExplorer({
   initialFrom?: string;
   initialMatch?: string;
   initialLimit?: string;
+  initialFields?: PrepFields;
 }) {
   const [selected, setSelected] = useState<Example>(initialExample),
     [from, setFrom] = useState(initialFrom),
     [match, setMatch] = useState(initialMatch),
     [limit, setLimit] = useState(initialLimit),
+    [fields, setFields] = useState<PrepFields>(() => initialFields ?? defaultPrepFields(initialExample)),
     [page, setPage] = useState(0),
     [language, setLanguage] = useState("JSON"),
     [result, setResult] = useState<unknown>(),
@@ -72,9 +79,10 @@ export function PrepExplorer({
         : true;
   const valid = rangeValid && matchValid && limitValid;
   const route = "query";
-  const query = prepQuery(selected, Number(from), undefined, match, Number(limit));
+  const query = prepQuery(selected, Number(from), undefined, match, Number(limit), fields);
   const cursor = result && typeof result === "object" && "cursor" in result && typeof result.cursor === "string" ? result.cursor : null;
-  const shareUrl = `${publicPrepApi.replace(/\/api\/prep$/, "")}/app/prep?${new URLSearchParams({example: selected, from, match, limit})}`;
+  const parameters = new URLSearchParams({example: selected, from, match, limit, blockFields: fields.block.join(","), transactionFields: fields.transaction.join(",")});
+  const shareUrl = `${publicPrepApi.replace(/\/api\/prep$/, "")}/app/prep?${parameters}`;
   const example =
     examples.find((entry) => entry.id === selected) ?? examples[0];
   const json = JSON.stringify(query, null, 2);
@@ -146,6 +154,7 @@ export function PrepExplorer({
               onClick={() => {
                 changed();
                 setSelected(example.id);
+                setFields(defaultPrepFields(example.id));
                 setMatch(example.id === "address" ? testnetExample.address : example.id === "ids" ? testnetExample.txid : "");
               }}
             >
@@ -217,6 +226,23 @@ export function PrepExplorer({
             </p>
           )}
         </div>
+        <details className="field-selection">
+          <summary>Response fields <span>{fields.block.length + fields.transaction.length} selected</span></summary>
+          <p>Select what your application needs. Identity fields keep each result identifiable.</p>
+          <div className="field-selection-groups">
+            {(["block", "transaction"] as const).filter(group => group === "block" || selected !== "headers").map(group => <fieldset key={group}>
+              <legend>{group === "block" ? "Block" : "Transaction"}</legend>
+              {(group === "block" ? blockFieldOptions : transactionFieldOptions).map(option => <label key={option.key}>
+                <input type="checkbox" checked={fields[group].includes(option.key)} disabled={option.required} onChange={e => {
+                  changed();
+                  setFields(previous => ({ ...previous, [group]: e.target.checked ? [...previous[group], option.key] : previous[group].filter(key => key !== option.key) }));
+                }} />
+                <span>{option.label}<code>{option.key}{option.required ? " · required" : ""}</code></span>
+              </label>)}
+            </fieldset>)}
+          </div>
+          <p>Inputs are references to previous outputs; Zcash does not expose one universal sender address. Shielded recipients, amounts and memos stay encrypted.</p>
+        </details>
         <div className="code-panel">
           <div className="panel-toolbar">
             <div className="format-tabs" aria-label="Code format">
@@ -289,7 +315,7 @@ export function PrepExplorer({
           )}
           {embedded ? (
             <Link
-              href={`/app/prep?${new URLSearchParams({example: selected, from, match, limit})}`}
+              href={`/app/prep?${parameters}`}
               className="text-link"
             >
               Open in Playground <ArrowUpRight size={14} />

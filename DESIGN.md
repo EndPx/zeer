@@ -1,5 +1,21 @@
 # Zeer website design system
 
+## Public transaction fields — 19 October
+
+Keep the established example/input/code layout. A native Response fields
+disclosure exposes block and transaction checkboxes, with mandatory identity
+fields disabled and checked. Labels explain API keys; selecting a field changes
+all snippets, invalidates old results/cursors and persists in the share URL.
+Defaults request block height/hash/time and transaction txid/block_height/vin/vout.
+The table shows Block (with block hash), UTC timestamp, transaction hash, type
+derived from coinbase input presence, and transparent output scripts/addresses.
+Position in block (API index, zero-based), size and other metadata are optional.
+Never manufacture EVM from/to identities: vin is input references, vout is public
+output data, and shielded recipients remain encrypted. Display at most two public
+outputs per row with a remaining-count label; complete data stays in JSON.
+Use existing panel, line, muted, lime and type tokens; 44px checkbox labels and
+panel-local horizontal table scrolling. Reduced motion retains native disclosure.
+
 ## Live network status panel — 18 October
 
 The Prep playground includes a public endpoint row using the existing notice
