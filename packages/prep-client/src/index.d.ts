@@ -6,6 +6,8 @@ export interface Query {
   to_block?: number | null;
   /** Number of whole blocks scanned, not number of matching transactions. */
   limit?: number;
+  /** Opt-in time/byte-bounded scanning, up to 1,000,000 blocks. Requires advertised server support. */
+  scan_mode?: "adaptive" | null;
   field_selection?: { block?: BlockField[]; transaction?: TransactionField[] };
   transaction_filter?: { txids?: string[] | null; versions?: number[] | null; has_sapling?: boolean | null; has_orchard?: boolean | null; transparent_output_addresses?: string[] | null };
   cursor?: string | null;
@@ -74,6 +76,10 @@ export interface Capabilities {
   limits: { max_request_bytes: number; max_active_queries: number; query_timeout_ms: number; max_waiting_queries?: number; queue_timeout_ms?: number };
   query: {
     max_scan_blocks: number;
+    max_adaptive_scan_blocks?: number;
+    adaptive_scan_ms?: number;
+    max_adaptive_response_bytes?: number;
+    adaptive_target_response_bytes?: number;
     max_response_bytes: number;
     block_fields: string[];
     transaction_fields: string[];

@@ -93,11 +93,34 @@ test("sync configuration rejects unbounded or mistyped filters and batching befo
     { transactionFilter: { has_orchard: "true" } }, { transactionFilter: { versions: [1.5] } },
     { transactionFilter: { versions: Array(129).fill(5) } }]) assert.throws(() => validateSyncOptions(options));
   validateSyncOptions({ pageSize: 1000, batchSize: 100, transactionFilter: { txids: [], versions: null, has_sapling: false } });
+  validateSyncOptions({ pageSize: 1_000_000, adaptiveScan: true });
+  assert.throws(() => validateSyncOptions({ pageSize: 1_000_001, adaptiveScan: true }), /INVALID_PAGE_SIZE/);
+  assert.throws(() => validateSyncOptions({ adaptiveScan: "true" }), /INVALID_SCAN_MODE/);
 });
 
 test("runtime does not silently downgrade requested batch atomicity on custom stores", async () => {
   await assert.rejects(syncStep({ client: {}, store: {}, indexer: {}, network: "regtest", startHeight: 0,
     reorgWindow: 100, batchSize: 32 }), error => error.code === "BATCHING_UNSUPPORTED");
+});
+
+test("adaptive Chef requests retain full headers and accept a shorter time-bounded page", async () => {
+  const seen=[];
+  const result=await syncStep({
+    network:"regtest",startHeight:0,reorgWindow:100,pageSize:1_000_000,adaptiveScan:true,batchSize:32,
+    indexer:{block:({block})=>seen.push(block.height)},
+    store:{checkpoint:async()=>({height:null,hash:null,anchorHash:null,status:"ready"}),
+      applyBatch:async(blocks,handler)=>{for(const block of blocks)await handler(block,{});}},
+    client:{
+      getHeight:async()=>({network:"regtest",payload_kind:"full-v1",ready:true,archive_height:999999,start_block:0,epoch:"1"}),
+      get:async q=>{
+        assert.equal(q.scan_mode,"adaptive");assert.equal(q.limit,1_000_000);
+        assert.deepEqual(q.field_selection.block,["height","hash","previous_hash","time"]);
+        return {network:"regtest",epoch:"1",from_block:0,next_block:2,data:{
+          blocks:[0,1].map(height=>({height,hash:h(height+1),previous_hash:h(height),time:1000})),transactions:[]}};
+      },
+    },
+  });
+  assert.deepEqual(seen,[0,1]);assert.equal(result.height,1);assert.equal(result.blocks,2);
 });
 
 test("observed source outages, head regressions and header/page epoch races close the durable read gate", async () => {

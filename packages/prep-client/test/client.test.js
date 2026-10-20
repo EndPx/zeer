@@ -11,6 +11,22 @@ function page(next, to = 13, extra = {}) {
 }
 function json(value, status = 200) { return new Response(JSON.stringify(value), { status, headers: { "content-type": "application/json" } }); }
 
+test("adaptive scan explicitly admits larger bounded pages and forwards continuation unchanged", async () => {
+  const calls = [];
+  const client = new PrepClient({ url: "http://localhost", fetch: async (_url, options) => {
+    calls.push(JSON.parse(options.body)); return json(calls.length === 1 ? page(12) : page(13));
+  } });
+  await assert.rejects(client.get({ from_block: 10, limit: 1001 }), /1..1000/);
+  await assert.rejects(client.get({ from_block: 10, limit: 1000001, scan_mode: "adaptive" }), /1..1000000/);
+  await assert.rejects(client.get({ from_block: 10, scan_mode: "unlimited" }), /Unsupported scan_mode/);
+  const values = [];
+  for await (const value of client.stream({ from_block: 10, limit: 1000000, scan_mode: "adaptive" })) values.push(value);
+  assert.equal(values.length, 2);
+  assert.equal(calls[1].scan_mode, "adaptive");
+  assert.equal(calls[1].cursor, "aa");
+  assert.equal(calls[1].to_block, 13);
+});
+
 test("finite stream advances through empty filtered pages and freezes the first head", async () => {
   const calls = [];
   const client = new PrepClient({ url: "http://localhost:1234", fetch: async (_url, options) => {

@@ -12,6 +12,7 @@ export async function prepQueryResponse(request: Request, publicRead = false) {
             "from_block",
             "to_block",
             "limit",
+            "scan_mode",
             "field_selection",
             "transaction_filter",
             "cursor",
@@ -24,11 +25,12 @@ export async function prepQueryResponse(request: Request, publicRead = false) {
       !Number.isSafeInteger(q.from_block) ||
       q.from_block < 0 || q.from_block > 0xffffffff ||
       (hasEnd && (!Number.isSafeInteger(q.to_block) || q.to_block <= q.from_block || q.to_block > 0x100000000)) ||
-      (q.limit !== undefined && (!Number.isSafeInteger(q.limit) || q.limit < 1 || q.limit > 1000))
+      (q.scan_mode !== undefined && q.scan_mode !== null && q.scan_mode !== "adaptive") ||
+      (q.limit !== undefined && (!Number.isSafeInteger(q.limit) || q.limit < 1 || q.limit > (q.scan_mode === "adaptive" ? 1000000 : 1000)))
     )
       throw new ApiError(
         400,
-        "Use a valid range and a page limit of 1–1,000 blocks.",
+        "Use a valid range and a page limit of 1–1,000 blocks, or up to 1,000,000 with scan_mode: adaptive.",
       );
     return Response.json(await upstream("prep", "/query", q, request.signal), {
       headers: { "Cache-Control": "no-store" },

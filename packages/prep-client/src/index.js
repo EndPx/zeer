@@ -87,6 +87,7 @@ function validateCapabilities(value) {
       || !bounds(value.limits, ["max_request_bytes", "max_active_queries", "query_timeout_ms"])
       || ["max_waiting_queries", "queue_timeout_ms"].some(key => object(value.limits) && Object.hasOwn(value.limits, key) && !integer(value.limits[key], 1, 0x100000000))
       || !bounds(value.query, ["max_scan_blocks", "max_response_bytes"])
+      || ["max_adaptive_scan_blocks", "adaptive_scan_ms", "max_adaptive_response_bytes", "adaptive_target_response_bytes"].some(key => object(value.query) && Object.hasOwn(value.query, key) && !integer(value.query[key], 1, 0x100000000))
       || !list(value.query.block_fields, BLOCK_FIELDS) || !list(value.query.transaction_fields, TRANSACTION_FIELDS)
       || !list(value.query.transaction_filters, ["txids", "versions", "has_sapling", "has_orchard", "transparent_output_addresses"])
       || !bounds(value.transactions, ["max_ids", "max_range_blocks", "max_records", "max_response_bytes"])
@@ -233,7 +234,9 @@ export class PrepClient {
   async get(query, options = {}) {
     if (!object(query) || !integer(query.from_block, 0, 0xffffffff)) throw new TypeError("from_block must be a bounded integer");
     if (query.to_block !== undefined && query.to_block !== null && !integer(query.to_block, query.from_block, 0x100000000)) throw new TypeError("Invalid exclusive to_block");
-    if (query.limit !== undefined && !integer(query.limit, 1, 1000)) throw new TypeError("limit must be 1..1000 scanned blocks");
+    if (query.scan_mode !== undefined && query.scan_mode !== null && query.scan_mode !== "adaptive") throw new TypeError("Unsupported scan_mode");
+    const maxScan = query.scan_mode === "adaptive" ? 1000000 : 1000;
+    if (query.limit !== undefined && !integer(query.limit, 1, maxScan)) throw new TypeError(`limit must be 1..${maxScan} scanned blocks`);
     if (query.field_selection !== undefined) {
       if (!object(query.field_selection) || Object.keys(query.field_selection).some(key => !["block", "transaction"].includes(key))) throw new TypeError("Invalid field_selection");
       for (const [key, fields] of [["block", BLOCK_FIELDS], ["transaction", TRANSACTION_FIELDS]]) {

@@ -14,8 +14,10 @@ export interface PublicBlock { height: number; hash: string; previousHash: strin
 export interface PublicTransaction { txid: string; index: number; version: number; locktime: number; blockHeight: number; decoded: Record<string, unknown> }
 export type TransactionMetadata = Omit<PublicTransaction, "decoded">;
 export interface SyncOptions {
-  /** Blocks fetched per page, 1..1000. Defaults to 16. */
+  /** Blocks fetched per page, 1..1000, or up to 1,000,000 with adaptiveScan. Defaults to 16. */
   pageSize?: number;
+  /** Requires a Prep server advertising adaptive scans; checkpoints still verify all headers. */
+  adaptiveScan?: boolean;
   /** Blocks per atomic database commit, 1..100. Defaults to 1. */
   batchSize?: number;
   /** Public-data predicates applied by Prep before returning transactions. */

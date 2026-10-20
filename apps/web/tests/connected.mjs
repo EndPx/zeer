@@ -28,6 +28,11 @@ try{
  let r=await query();assert.equal(r.status,200);assert.equal((await r.json()).network,'testnet');
  const wide={from_block:0,to_block:1000000,limit:100,transaction_filter:{txids:['a'.repeat(64)]},cursor:'opaque-test-cursor'};
  r=await fetch('http://127.0.0.1:3107/api/prep',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(wide)});assert.equal(r.status,200);assert.deepEqual(lastBody,wide);
+ const adaptive={...wide,limit:1000000,scan_mode:'adaptive'};
+ r=await fetch('http://127.0.0.1:3107/api/prep',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(adaptive)});assert.equal(r.status,200);assert.deepEqual(lastBody,adaptive);
+ for(const invalid of [{...adaptive,limit:1000001},{...adaptive,scan_mode:'unlimited'}]) {
+  r=await fetch('http://127.0.0.1:3107/api/prep',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(invalid)});assert.equal(r.status,400);
+ }
  const status=await(await fetch('http://127.0.0.1:3107/api/status')).json();assert.equal(status.prep.available,true);assert.equal(status.chef.data.height,1002);
  const html=await(await fetch('http://127.0.0.1:3107/app/prep')).text();assert.ok(!html.includes(token));
  mode='mainnet';assert.equal((await query()).status,502);

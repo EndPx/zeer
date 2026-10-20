@@ -14,6 +14,10 @@ pub(crate) fn document() -> Value {
         },
         "query": {
             "max_scan_blocks": crate::query::MAX_SCAN_BLOCKS,
+            "max_adaptive_scan_blocks": crate::query::MAX_ADAPTIVE_SCAN_BLOCKS,
+            "adaptive_scan_ms": crate::query::ADAPTIVE_SCAN_MS,
+            "max_adaptive_response_bytes": crate::query::MAX_ADAPTIVE_RESPONSE_BYTES,
+            "adaptive_target_response_bytes": crate::query::ADAPTIVE_TARGET_RESPONSE_BYTES,
             "max_response_bytes": crate::query::MAX_RESPONSE_BYTES,
             "block_fields": crate::query::BLOCK_FIELDS,
             "transaction_fields": crate::query::TX_FIELDS,

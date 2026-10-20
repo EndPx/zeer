@@ -56,7 +56,8 @@ export function decodePage(page: QueryResult, from: number, to: number, selectio
 
 /** Validate before touching the database, including configs loaded from plain JavaScript. */
 export function validateSyncOptions(options: SyncOptions): void {
-  requireValue(Number.isInteger(options.pageSize ?? 16) && (options.pageSize ?? 16) >= 1 && (options.pageSize ?? 16) <= 1000, "INVALID_PAGE_SIZE");
+  requireValue(options.adaptiveScan === undefined || typeof options.adaptiveScan === "boolean", "INVALID_SCAN_MODE");
+  requireValue(Number.isInteger(options.pageSize ?? 16) && (options.pageSize ?? 16) >= 1 && (options.pageSize ?? 16) <= (options.adaptiveScan ? 1_000_000 : 1000), "INVALID_PAGE_SIZE");
   requireValue(Number.isInteger(options.batchSize ?? 1) && (options.batchSize ?? 1) >= 1 && (options.batchSize ?? 1) <= 100, "INVALID_BATCH_SIZE");
   const filter = options.transactionFilter;
   if (filter === undefined) return;
@@ -155,6 +156,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
     return { ...base, height: checkpoint.height, fetchMs, state: "caught_up" };
   }
   const page = await fetched(() => client.get({ from_block: next, to_block: target + 1, limit,
+    ...(options.adaptiveScan ? { scan_mode: "adaptive" as const } : {}),
     field_selection: { block: ["height", "hash", "previous_hash", "time"],
       transaction: mode === "none" ? [] : ["txid", "block_height", "index", "version", "locktime", ...(mode === "decoded" ? ["decoded" as TransactionField] : [])] },
     ...(options.transactionFilter ? { transaction_filter: options.transactionFilter } : {}) }, { signal }));

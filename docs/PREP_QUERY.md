@@ -28,6 +28,48 @@ deployment claim. Never put a private deployment token into a public browser bun
 
 `POST /query.bin` is not implemented in this slice. SDK and examples use JSON.
 
+## Adaptive historical scans
+
+Check `/capabilities` for `query.max_adaptive_scan_blocks` before using this
+opt-in extension. It requires the newer Prep server; deployment coverage is
+separate from source-code availability.
+
+```json
+{
+  "from_block": 0,
+  "limit": 1000000,
+  "scan_mode": "adaptive",
+  "field_selection": {
+    "block": [],
+    "transaction": ["txid", "block_height"]
+  },
+  "transaction_filter": { "has_orchard": true }
+}
+```
+
+`limit` still means the maximum number of blocks scanned, not a count of matching
+transactions. Fixed mode keeps its 1,000-block ceiling. Adaptive mode admits up
+to 1,000,000 blocks, targets a 500 ms work slice or 512 KiB response, and
+preserves a hard 4 MiB response ceiling plus existing deadline/cancellation/admission limits.
+The byte target finishes the current block and may therefore be exceeded;
+empty results do not accumulate an artificial per-block response charge.
+The soft time slice finishes the current bounded operation and is not an HTTP
+latency guarantee. One oversized block still fails rather than being omitted.
+
+An empty result with a non-null cursor means "no match in this scanned portion",
+not "no match in all history". Continue the same request with its returned
+cursor until it is null; the original end remains pinned even while the archive
+grows. Cursor fingerprints also bind the scan mode. Epoch changes, changed
+boundary hashes, cancellation and unavailable archive reads retain their existing
+error behavior.
+
+Exact-ID scans reuse admitted indexes in at most 1,000-block lookup windows.
+When no block fields are selected, proven nonmatching ranges within those windows
+can be skipped without reading their payloads. Missing indexes use the existing
+bounded payload fallback. Other filters can scan metadata when supported; this is
+not a new universal address index. Selecting block fields still returns every
+scanned block. Chef uses that complete header path for chain/reorg verification.
+
 ## Batch transaction lookup
 
 Use `POST /transactions` for a small set of IDs when scan-page continuation is
@@ -145,7 +187,10 @@ consensus trust remain explicit; status is operator-controlled metadata.
   It must not exceed the indexed range. Empty intervals are valid when the archive
   is ready. A cursor retains the captured end even if the follower later appends.
 - `limit` counts **scanned whole blocks**, not returned rows. Default 100; maximum
-  1,000. Filters may return empty transaction arrays while `next_block` advances.
+  1,000 in fixed mode or 1,000,000 with `scan_mode: "adaptive"`. Filters may return
+  empty transaction arrays while `next_block` advances.
+- `scan_mode` is optional. Omit it for existing fixed-page behavior; `"adaptive"`
+  enables the time/byte targets described above. Other values are rejected.
 - Unknown request, filter, or field-selection properties are rejected. Unsupported
   selected field names and duplicates are rejected; there is no silent fallback.
 - `field_selection.block` defaults to `height`, `hash`, `previous_hash`, `time`.
@@ -295,8 +340,9 @@ An optional [disk metadata index](PREP_DISK_INDEX.md) reduces retained row memor
 for public transaction projections. It preserves payload verification and query
 cancellation boundaries; it does not add private-data filtering.
 
-The prototype limits requests to 64 KiB, scanning to 1,000 blocks per call, and the
-serialized JSON response to 32 MiB. Two queries/retained response byte allocations
+The prototype limits requests to 64 KiB. Fixed pages scan up to 1,000 blocks with
+a 32 MiB response ceiling; opt-in adaptive pages use the bounds above.
+Two queries/retained response byte allocations
 share admission permits. `/query` and `/transactions` additionally share eight
 FIFO waiting slots. Authentication, JSON parsing and cheap shape validation run
 before queueing; raw body bytes are released before waiting. The body extractor

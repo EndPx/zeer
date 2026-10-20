@@ -6,6 +6,15 @@ the Prep full-block archive; it is not a wallet SDK or native Rust binding.
 
 Use this package locally from the repository. No public npm publication is implied.
 
+For large historical scans on a compatible server, inspect
+`(await client.getCapabilities()).query.max_adaptive_scan_blocks`, then pass
+`scan_mode: "adaptive"` and a `limit` up to 1,000,000 to `get` or `stream`.
+The server returns bounded partial pages after its soft time slice or byte
+ceiling; `stream` follows their cursors. This does not mean unlimited results or
+that an empty first page proves absence over the entire range.
+Keep the original query and its cursor together. Fixed queries retain the
+1,000-block limit. See [the scan contract](../../docs/PREP_QUERY.md).
+
 For one bounded lookup rather than paginating through a block range:
 
 ```ts

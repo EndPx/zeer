@@ -49,8 +49,10 @@ handlers, up to 1,000 headers per fetched page, and up to 100 blocks per commit.
 All headers are still validated; empty filtered blocks need no transaction handler
 or entity writes. Per-block undo remains available inside committed batches.
 See the [filtered example](../examples/chef-filtered/README.md). This does not
-implement adaptive million-block scans, speculative prefetch or a generic
-cross-block entity preload system.
+implement speculative prefetch or a generic cross-block entity preload system.
+Compatible Prep servers additionally support opt-in time/byte-bounded adaptive
+scans via `sync.adaptiveScan`; Chef still requests every header. See
+[the query contract](PREP_QUERY.md) for limits and continuation semantics.
 
 ## Benchmark separation
 

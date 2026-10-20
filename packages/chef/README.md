@@ -26,8 +26,12 @@ and `transparent_output_addresses`; predicates combine with AND and entries
 within an array with OR. Empty arrays match nothing. Filters do not expose
 encrypted shielded data. All headers remain present and contiguous: a page with
 zero matching transactions still advances the checkpoint after validation.
-Scanning remains bounded to 1,000 blocks per request; this is not a sparse
-million-block jump or an unlimited query.
+Fixed scans remain bounded to 1,000 blocks per request. With a Prep server
+advertising `max_adaptive_scan_blocks`, opt into `sync.adaptiveScan: true` and
+set `pageSize` up to 1,000,000. The server may return fewer blocks due to its
+500 ms soft work slice, 512 KiB target or 4 MiB hard response ceiling. Chef still verifies all headers
+and commits bounded batches; it does not replace chain checks with a sparse jump.
+Do not enable this against older servers, which reject the unknown scan mode.
 
 Existing configs retain defaults of 16 blocks per page and one block per commit.
 New scaffolded projects use metadata handlers and explicit 1,000/32 settings.

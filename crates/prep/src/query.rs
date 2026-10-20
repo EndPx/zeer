@@ -18,6 +18,10 @@ use sha2::{Digest, Sha256};
 
 pub const MAX_RESPONSE_BYTES: usize = 32 * 1024 * 1024;
 pub const MAX_SCAN_BLOCKS: u32 = 1000;
+pub const MAX_ADAPTIVE_SCAN_BLOCKS: u32 = 1_000_000;
+pub const ADAPTIVE_SCAN_MS: u64 = 500;
+pub const MAX_ADAPTIVE_RESPONSE_BYTES: usize = 4 * 1024 * 1024;
+pub const ADAPTIVE_TARGET_RESPONSE_BYTES: usize = 512 * 1024;
 pub const MAX_CURSOR_BYTES: usize = 2048;
 const RESPONSE_OVERHEAD: usize = 4096;
 const EMPTY_DATA_BYTES: usize = br#"{"blocks":[],"transactions":[]}"#.len();
@@ -77,6 +81,12 @@ pub struct TransactionFilter {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ScanMode {
+    Adaptive,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct QueryRequest {
     pub from_block: u64,
@@ -84,6 +94,9 @@ pub struct QueryRequest {
     pub to_block: Option<u64>,
     #[serde(default = "default_limit")]
     pub limit: u32,
+    /// Opt-in larger scan with a soft time slice and the existing hard bounds.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scan_mode: Option<ScanMode>,
     #[serde(default)]
     pub field_selection: FieldSelection,
     #[serde(default)]
@@ -452,7 +465,13 @@ fn fingerprint(request: &QueryRequest, to: u64) -> Result<String, QueryError> {
         &request.transaction_filter,
     ))
     .map_err(|_| QueryError::new(400, "INVALID_QUERY"))?;
-    Ok(hex::encode(Sha256::digest(bytes)))
+    let mut digest = Sha256::new();
+    digest.update(bytes);
+    // Preserve fingerprints of existing fixed-page cursors.
+    if request.scan_mode.is_some() {
+        digest.update(b"\0adaptive-v1");
+    }
+    Ok(hex::encode(digest.finalize()))
 }
 fn decode_cursor(value: &str) -> Result<Cursor, QueryError> {
     if value.len() > MAX_CURSOR_BYTES * 2 || !value.len().is_multiple_of(2) {
@@ -477,7 +496,12 @@ pub fn validate_query(request: &QueryRequest) -> Result<(), QueryError> {
             .to_block
             .is_some_and(|to| to > u64::from(u32::MAX) + 1 || to < request.from_block)
         || request.limit == 0
-        || request.limit > MAX_SCAN_BLOCKS
+        || request.limit
+            > if request.scan_mode.is_some() {
+                MAX_ADAPTIVE_SCAN_BLOCKS
+            } else {
+                MAX_SCAN_BLOCKS
+            }
     {
         return Err(QueryError::new(400, "INVALID_QUERY_RANGE_OR_LIMIT"));
     }
@@ -886,6 +910,12 @@ pub fn execute_query<A: QueryArchive>(
     {
         return Err(QueryError::new(500, "INVALID_RESPONSE_LIMIT"));
     }
+    let adaptive_control = request.scan_mode.as_ref().map(|_| QueryControl {
+        cancelled: control.cancelled.clone(),
+        deadline: control.deadline,
+        max_response_bytes: control.max_response_bytes.min(MAX_ADAPTIVE_RESPONSE_BYTES),
+    });
+    let control = adaptive_control.as_ref().unwrap_or(control);
     let meta = archive.query_meta();
     if meta.payload_kind != "full-v1" {
         return Err(QueryError::new(409, "FULL_BLOCK_ARCHIVE_REQUIRED"));
@@ -950,6 +980,7 @@ pub fn execute_query<A: QueryArchive>(
         next = cursor.next;
     }
     let page_start = next;
+    let scan_deadline = Instant::now() + Duration::from_millis(ADAPTIVE_SCAN_MS);
     let stop = to.min(next.saturating_add(u64::from(request.limit)));
     let mut data = QueryData {
         blocks: vec![],
@@ -973,39 +1004,73 @@ pub fn execute_query<A: QueryArchive>(
             .transaction_filter
             .transparent_output_addresses
             .is_none();
-    let candidates = if header_fields && !header_only && next < stop {
-        if let Some(ids) = &request.transaction_filter.txids {
-            let ids: Vec<[u8; 32]> = ids
-                .iter()
-                .map(|id| {
-                    let bytes = hex::decode(id).expect("validated txid");
-                    bytes.try_into().expect("validated 32-byte txid")
-                })
-                .collect();
-            let locations = archive.query_transaction_locations(&ids, next, stop - 1)?;
-            if locations.as_ref().is_some_and(|heights| {
-                heights.windows(2).any(|pair| pair[0] >= pair[1])
-                    || heights
-                        .iter()
-                        .any(|height| *height < next || *height >= stop)
-            }) {
-                return Err(QueryError::new(503, "INVALID_TRANSACTION_INDEX"));
+    // Keep the store lookup bounded even when the requested scan spans millions
+    // of blocks. No per-million-block candidate bitmap is allocated.
+    let lookup = |start: u64, end: u64| -> Result<Option<Vec<u64>>, QueryError> {
+        if header_fields && !header_only && start < end {
+            if let Some(ids) = &request.transaction_filter.txids {
+                let ids: Vec<[u8; 32]> = ids
+                    .iter()
+                    .map(|id| {
+                        let bytes = hex::decode(id).expect("validated txid");
+                        bytes.try_into().expect("validated 32-byte txid")
+                    })
+                    .collect();
+                let locations = archive.query_transaction_locations(&ids, start, end - 1)?;
+                if locations.as_ref().is_some_and(|heights| {
+                    heights.windows(2).any(|pair| pair[0] >= pair[1])
+                        || heights
+                            .iter()
+                            .any(|height| *height < start || *height >= end)
+                }) {
+                    return Err(QueryError::new(503, "INVALID_TRANSACTION_INDEX"));
+                }
+                Ok(locations)
+            } else {
+                Ok(None)
             }
-            locations
         } else {
-            None
+            Ok(None)
         }
-    } else {
-        None
     };
+    let mut candidate_end = stop.min(next.saturating_add(u64::from(MAX_SCAN_BLOCKS)));
+    let mut candidates = lookup(next, candidate_end)?;
     let mut records = if !header_only && !metadata_only && candidates.is_none() && next < stop {
-        Some(archive.query_range(next, stop - 1)?)
+        Some(archive.query_range(next, candidate_end - 1)?)
     } else {
         None
     };
     let mut record_next = next;
     while next < stop {
         control.check()?;
+        if request.scan_mode.is_some()
+            && next > page_start
+            && (Instant::now() >= scan_deadline || encoded_bytes >= ADAPTIVE_TARGET_RESPONSE_BYTES)
+        {
+            break;
+        }
+        if next >= candidate_end {
+            candidate_end = stop.min(next.saturating_add(u64::from(MAX_SCAN_BLOCKS)));
+            candidates = lookup(next, candidate_end)?;
+            records = if !header_only && !metadata_only && candidates.is_none() {
+                Some(archive.query_range(next, candidate_end - 1)?)
+            } else {
+                None
+            };
+            record_next = next;
+        }
+        // An admitted exact-ID index proves these blocks cannot contain matches.
+        // Header selections still require every header, including for Chef.
+        if request.field_selection.block.is_empty() {
+            if let Some(heights) = &candidates {
+                let at = heights.partition_point(|height| *height < next);
+                let matching = heights.get(at).copied().unwrap_or(candidate_end);
+                if matching > next {
+                    next = matching;
+                    continue;
+                }
+            }
+        }
         let remaining = control.max_response_bytes - encoded_bytes;
         let projection = if header_only
             || candidates
@@ -1037,7 +1102,7 @@ pub fn execute_query<A: QueryArchive>(
                         // Retain segment-handle reuse for legacy/unindexed ranges.
                         // A mixed indexed range may skip earlier iterator entries.
                         if records.is_none() || record_next != next {
-                            records = Some(archive.query_range(next, stop - 1)?);
+                            records = Some(archive.query_range(next, candidate_end - 1)?);
                         }
                         record_next = next + 1;
                         records
@@ -1071,7 +1136,12 @@ pub fn execute_query<A: QueryArchive>(
             Err(error) => return Err(error),
         };
         // A QueryData wrapper per block deliberately leaves room for metadata.
-        encoded_bytes += size;
+        // Empty sparse projections consume no growing response budget.
+        encoded_bytes += if request.scan_mode.is_some() {
+            appended_data_bytes(&data, &selected, size)?
+        } else {
+            size
+        };
         data_content_bytes = data_content_bytes
             .checked_add(appended_data_bytes(&data, &selected, size)?)
             .ok_or_else(|| QueryError::new(500, "RESPONSE_ENCODING_FAILED"))?;
@@ -1183,6 +1253,300 @@ mod tests {
     }
     fn request() -> QueryRequest {
         serde_json::from_value(json!({"from_block":10,"limit":2})).unwrap()
+    }
+
+    struct WideSparse {
+        lookups: std::cell::Cell<usize>,
+        slow: bool,
+        cancel: Option<Arc<AtomicBool>>,
+    }
+    impl QueryArchive for WideSparse {
+        fn query_meta(&self) -> QueryMeta {
+            QueryMeta {
+                network: "regtest".into(),
+                start_height: 0,
+                head: Some(999_999),
+                epoch: 1,
+                revision: 1,
+                payload_kind: "full-v1".into(),
+            }
+        }
+        fn query_block(&self, _: u64) -> Result<BlockRecord, QueryError> {
+            panic!("An indexed sparse scan must not load irrelevant payloads");
+        }
+        fn query_header(&self, height: u64) -> Result<BlockHeader, QueryError> {
+            let mut hash = vec![0; 32];
+            hash[..8].copy_from_slice(&height.to_le_bytes());
+            Ok(BlockHeader {
+                height,
+                hash,
+                prev_hash: vec![0; 32],
+                time: 1,
+            })
+        }
+        fn query_transaction_locations(
+            &self,
+            _: &[[u8; 32]],
+            start: u64,
+            end: u64,
+        ) -> Result<Option<Vec<u64>>, QueryError> {
+            assert!(end - start < 1000, "Store lookup must stay bounded");
+            self.lookups.set(self.lookups.get() + 1);
+            if self.slow {
+                std::thread::sleep(Duration::from_millis(ADAPTIVE_SCAN_MS + 10));
+            }
+            if let Some(cancel) = &self.cancel {
+                cancel.store(true, Ordering::Release);
+            }
+            Ok(Some(if (start..=end).contains(&1500) {
+                vec![1500]
+            } else {
+                vec![]
+            }))
+        }
+        fn query_transaction_metadata(
+            &self,
+            height: u64,
+        ) -> Result<Option<Vec<TransactionMetadata>>, QueryError> {
+            assert_eq!(height, 1500);
+            Ok(Some(vec![TransactionMetadata {
+                txid: [0x11; 32],
+                block_height: height,
+                index: 0,
+                version: 5,
+                locktime: 0,
+                size_bytes: 1,
+                transparent_input_count: 1,
+                transparent_output_count: 0,
+                has_sapling: false,
+                has_orchard: true,
+            }]))
+        }
+    }
+    fn wide_request() -> QueryRequest {
+        serde_json::from_value(json!({"from_block":0,"to_block":1_000_000,"limit":1_000_000,
+            "scan_mode":"adaptive","field_selection":{"block":[],"transaction":["txid","block_height"]},
+            "transaction_filter":{"txids":["11".repeat(32)]}})).unwrap()
+    }
+    #[test]
+    fn adaptive_sparse_scan_uses_bounded_index_windows_and_exact_continuation() {
+        let archive = WideSparse {
+            lookups: std::cell::Cell::new(0),
+            slow: false,
+            cancel: None,
+        };
+        let mut request = wide_request();
+        let mut ids = vec![];
+        let mut pages = 0;
+        loop {
+            let response = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+            pages += 1;
+            ids.extend(response.data.transactions);
+            if response.cursor.is_none() {
+                assert_eq!(response.next_block, 1_000_000);
+                break;
+            }
+            request.cursor = response.cursor;
+        }
+        // A time slice may resume inside an already inspected lookup window.
+        assert!((1000..=1000 + pages).contains(&archive.lookups.get()));
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0]["block_height"], 1500);
+        request.scan_mode = None;
+        assert_eq!(
+            validate_query(&request).unwrap_err().code,
+            "INVALID_QUERY_RANGE_OR_LIMIT"
+        );
+    }
+    #[test]
+    fn adaptive_time_slice_returns_progress_but_explicit_cancellation_never_returns_success() {
+        let archive = WideSparse {
+            lookups: std::cell::Cell::new(0),
+            slow: true,
+            cancel: None,
+        };
+        let response = execute_query(&archive, &wide_request(), &QueryControl::default()).unwrap();
+        assert_eq!(response.next_block, 1000);
+        assert!(response.cursor.is_some());
+        assert!(response.data.transactions.is_empty());
+        let control = QueryControl::default();
+        let cancelled = WideSparse {
+            lookups: std::cell::Cell::new(0),
+            slow: false,
+            cancel: Some(control.cancelled.clone()),
+        };
+        assert_eq!(
+            execute_query(&cancelled, &wide_request(), &control)
+                .unwrap_err()
+                .code,
+            "QUERY_CANCELLED_OR_TIMED_OUT"
+        );
+    }
+    #[test]
+    fn adaptive_mode_is_cursor_bound_and_preserves_fields_and_byte_limits() {
+        let archive = fixture(20);
+        let mut request = request();
+        request.scan_mode = Some(ScanMode::Adaptive);
+        request.limit = 1;
+        let first = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+        request.cursor = first.cursor;
+        let second = execute_query(&archive, &request, &QueryControl::default()).unwrap();
+        assert_eq!(second.next_block, 12);
+        let mut appended = fixture(20);
+        appended.meta.head = Some(13);
+        appended.meta.revision += 1;
+        let mut continuation = request.clone();
+        continuation.cursor = second.cursor;
+        let last = execute_query(&appended, &continuation, &QueryControl::default()).unwrap();
+        assert_eq!(last.to_block, 13);
+        assert_eq!(last.next_block, 13);
+        assert!(last.cursor.is_none());
+        appended.meta.epoch += 1;
+        assert_eq!(
+            execute_query(&appended, &continuation, &QueryControl::default())
+                .unwrap_err()
+                .code,
+            "REORG"
+        );
+        request.scan_mode = None;
+        assert_eq!(
+            execute_query(&archive, &request, &QueryControl::default())
+                .unwrap_err()
+                .code,
+            "CURSOR_QUERY_MISMATCH"
+        );
+        let mut large: QueryRequest =
+            serde_json::from_value(json!({"from_block":10,"limit":2})).unwrap();
+        large.scan_mode = Some(ScanMode::Adaptive);
+        large.limit = 1_000_000;
+        large.field_selection = FieldSelection {
+            block: vec!["raw".into()],
+            transaction: vec![],
+        };
+        let control = QueryControl {
+            max_response_bytes: RESPONSE_OVERHEAD + 500,
+            ..Default::default()
+        };
+        let huge = fixture(300);
+        assert_eq!(
+            execute_query(&huge, &large, &control).unwrap_err().status,
+            413
+        );
+    }
+
+    #[test]
+    fn adaptive_payload_fallback_keeps_store_reads_bounded_across_windows() {
+        struct Bounded(Fixture);
+        impl QueryArchive for Bounded {
+            fn query_meta(&self) -> QueryMeta {
+                self.0.query_meta()
+            }
+            fn query_block(&self, height: u64) -> Result<BlockRecord, QueryError> {
+                self.0.query_block(height)
+            }
+            fn query_range(
+                &self,
+                start: u64,
+                end: u64,
+            ) -> Result<Box<dyn Iterator<Item = Result<BlockRecord, QueryError>> + '_>, QueryError>
+            {
+                assert!(end - start < 1000);
+                self.0.query_range(start, end)
+            }
+        }
+        let mut source = fixture(20);
+        let template = FullBlock::decode(source.blocks[&10].payload.as_slice()).unwrap();
+        source.blocks.clear();
+        source.meta.head = Some(3009);
+        for height in 10..=3009 {
+            let mut full = template.clone();
+            full.height = height;
+            full.hash[..8].copy_from_slice(&height.to_le_bytes());
+            full.prev_hash[..8].copy_from_slice(&(height - 1).to_le_bytes());
+            source.blocks.insert(
+                height,
+                BlockRecord {
+                    height,
+                    hash: full.hash.clone(),
+                    prev_hash: full.prev_hash.clone(),
+                    payload: full.encode_to_vec(),
+                },
+            );
+        }
+        let archive = Bounded(source);
+        let mut q: QueryRequest = serde_json::from_value(
+            json!({"from_block":10,"limit":1_000_000,"scan_mode":"adaptive",
+            "field_selection":{"block":["height"],"transaction":["txid","decoded"]}}),
+        )
+        .unwrap();
+        let mut heights = vec![];
+        let mut transactions = 0;
+        loop {
+            let result = execute_query(&archive, &q, &QueryControl::default()).unwrap();
+            heights.extend(
+                result
+                    .data
+                    .blocks
+                    .into_iter()
+                    .map(|b| b["height"].as_u64().unwrap()),
+            );
+            transactions += result.data.transactions.len();
+            if result.cursor.is_none() {
+                assert_eq!(result.next_block, 3010);
+                break;
+            }
+            q.cursor = result.cursor;
+        }
+        assert_eq!(heights, (10..=3009).collect::<Vec<_>>());
+        assert_eq!(transactions, 3000);
+    }
+
+    #[test]
+    fn adaptive_response_ceiling_does_not_change_fixed_page_capacity() {
+        let source = fixture(3 * 1024 * 1024);
+        let mut q = request();
+        q.limit = 1;
+        q.field_selection = FieldSelection {
+            block: vec!["raw".into()],
+            transaction: vec![],
+        };
+        assert_eq!(
+            execute_query(&source, &q, &QueryControl::default())
+                .unwrap()
+                .next_block,
+            11
+        );
+        q.scan_mode = Some(ScanMode::Adaptive);
+        assert_eq!(
+            execute_query(&source, &q, &QueryControl::default())
+                .unwrap_err()
+                .status,
+            413
+        );
+    }
+
+    #[test]
+    fn adaptive_byte_target_finishes_the_block_and_preserves_continuation() {
+        let mut source = fixture(300_000);
+        source.meta.head = Some(13);
+        let mut q = request();
+        q.limit = MAX_ADAPTIVE_SCAN_BLOCKS;
+        q.scan_mode = Some(ScanMode::Adaptive);
+        q.field_selection = FieldSelection {
+            block: vec!["raw".into()],
+            transaction: vec![],
+        };
+        let first = execute_query(&source, &q, &QueryControl::default()).unwrap();
+        assert_eq!(first.next_block, 11);
+        assert_eq!(first.data.blocks.len(), 1);
+        assert!(first.cursor.is_some());
+        q.cursor = first.cursor;
+        assert_eq!(
+            execute_query(&source, &q, &QueryControl::default())
+                .unwrap()
+                .next_block,
+            12
+        );
     }
 
     struct IndexedFixture {
@@ -1750,7 +2114,7 @@ mod tests {
     #[test]
     fn counting_writer_matches_wire_bytes_and_checks_limits_and_cancellation() {
         let value: Value = serde_json::from_str(
-            r#"{"escaped":"\"\\\n\t\u0000","unicode":"Zcash 雪","nested":[0.123456789123456789,18446744073709551615,true,null]}"#,
+            r#"{"escaped":"\"\\\n\t\u0000","unicode":"Zcash é›ª","nested":[0.123456789123456789,18446744073709551615,true,null]}"#,
         )
         .unwrap();
         let control = QueryControl::default();
@@ -1777,7 +2141,7 @@ mod tests {
         let mut decoded: Value = serde_json::from_str(&full.decoded_json).unwrap();
         let mut tx = decoded["tx"][0].clone();
         tx["hex"] = json!("ABCDEF");
-        tx["extra"] = json!({"escaped":"\"\\\n\t\0", "unicode":"雪"});
+        tx["extra"] = json!({"escaped":"\"\\\n\t\0", "unicode":"é›ª"});
         decoded["tx"].as_array_mut().unwrap().push(tx);
         full.decoded_json = decoded.to_string();
         record.payload = full.encode_to_vec();
@@ -1934,7 +2298,7 @@ mod tests {
     #[test]
     fn aggregate_data_size_matches_json_across_empty_and_nonempty_groups() {
         let precise: Value = serde_json::from_str(
-            r#"{"amount":0.123456789123456789,"large":18446744073709551615,"escaped":"\n\"\\","unicode":"雪"}"#,
+            r#"{"amount":0.123456789123456789,"large":18446744073709551615,"escaped":"\n\"\\","unicode":"é›ª"}"#,
         )
         .unwrap();
         let precise = lossless_node_json(&precise);

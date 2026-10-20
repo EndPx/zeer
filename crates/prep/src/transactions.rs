@@ -71,6 +71,7 @@ fn page_request(request: &TransactionRequest) -> QueryRequest {
         from_block: request.from_block,
         to_block: Some(request.to_block),
         limit: 1000,
+        scan_mode: None,
         field_selection: FieldSelection {
             block: vec![],
             transaction: request.fields.clone(),

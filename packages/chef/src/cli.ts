@@ -75,7 +75,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
     || [config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata].some((handler) => handler !== undefined && typeof handler !== "function")
     || (config.indexer.transaction && config.indexer.transactionMetadata)) throw new CliError("INVALID_CONFIG");
   if (config.sync !== undefined && (!config.sync || typeof config.sync !== "object" || Array.isArray(config.sync)
-    || Object.keys(config.sync).some(key => !["pageSize", "batchSize", "transactionFilter"].includes(key)))) throw new CliError("INVALID_SYNC_OPTIONS");
+    || Object.keys(config.sync).some(key => !["pageSize", "batchSize", "transactionFilter", "adaptiveScan"].includes(key)))) throw new CliError("INVALID_SYNC_OPTIONS");
   validateSyncOptions(config.sync ?? {});
   if (config.sync?.transactionFilter && !config.indexer.transaction && !config.indexer.transactionMetadata) throw new CliError("FILTER_REQUIRES_TRANSACTION_HANDLER");
   const reorgWindow = config.reorgWindow ?? 100;
