@@ -61,6 +61,19 @@ node --env-file=.env packages/chef/dist/cli.js sync --config examples/chef-publi
 node --env-file=.env packages/chef/dist/cli.js serve --config examples/chef-public/chef.config.ts
 ```
 
+For an interactive demo, start `serve` before starting `sync` or `follow` in a
+second terminal. The API and writer can run as separate Node processes against
+the same project. Queries expose committed data with `_meta.height` as their
+coverage; source reconciliation may temporarily close the read gate. Run only
+one writer per project. This lets the first committed results appear before
+historical catch-up finishes.
+
+The starter's batch size of 32 is a starting configuration. Smaller batches add
+commits and do not automatically improve query latency. Measure indexing time and
+query latency together, sampling queries during active indexing. Separate Node
+processes can still share a CPU quota and PostgreSQL bottlenecks; process separation
+alone does not guarantee a lower p99. Keep comparable resource limits when tuning.
+
 Use `status` to compare the persisted checkpoint with one bounded Prep metadata
 observation. It reads PostgreSQL first and requests Prep metadata with a five-second
 timeout. It does not acquire a writer, migrate, reconcile, or change the read gate.

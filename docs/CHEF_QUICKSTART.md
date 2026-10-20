@@ -100,8 +100,6 @@ need distinct Compose names and host ports. The template's resource ceilings are
 ```sh
 npm run migrate
 npm run status
-npm run sync -- --to 1002
-npm run serve
 ```
 
 Use an available inclusive end height. Omit `--to` to capture Prep's current
@@ -109,11 +107,31 @@ indexed height. `migrate` creates a project namespace, not the database server.
 Status compares source coverage with the persisted checkpoint. A new empty
 project may be ready to backfill; it is not caught up merely because it connects.
 
-In a second terminal:
+Start the API in terminal A so it can serve each committed prefix immediately:
+
+```sh
+npm run serve
+```
+
+Start indexing in terminal B, using the same config and environment:
+
+```sh
+npm run sync -- --to 1002
+# Or follow new blocks after historical catch-up:
+# npm run follow
+```
+
+Run a query in terminal C while indexing is active:
 
 ```sh
 npm run query
 ```
+
+These are separate Node processes. Both use the same PostgreSQL project; only
+sync/follow acquires the writer lock. Do not run sync and follow concurrently for
+the same project. `_meta.height` identifies the committed prefix currently served.
+A prefix can be useful before catch-up finishes, but it is not complete history.
+The API may return a temporary unavailable response during source reconciliation.
 
 This executes `query.graphql` against `http://127.0.0.1:39370/graphql` with the
 generated token. Entity results must match the indexed source; `_meta` reports
@@ -136,7 +154,7 @@ replay; never reset existing data as a routine onboarding step. See
 
 `examples/chef-starter/verify.mjs` checks an installed starter outside the monorepo
 against a prepared testnet Prep service and a disposable PostgreSQL database.
-It compares all BlockSummary fields with captured source blocks 1000–1002,
+It compares all BlockSummary fields with captured source blocks 1000â€“1002,
 checks authentication, stops/restarts the API, resumes indexing and checks a
 repeat commits zero blocks. Evidence stays local. This small historical replay
 is onboarding proof, not whole-chain scale or live testnet-tip proof.

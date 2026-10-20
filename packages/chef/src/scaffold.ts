@@ -101,7 +101,7 @@ if (!response.ok || result.errors) {
   process.exitCode = 1;
 } else console.log(JSON.stringify(result, null, 2));
 `,
-    "README.md": `# ${project} — standalone Zeer Chef project
+    "README.md": `# ${project} â€” standalone Zeer Chef project
 
 Chef runs in your environment; Prep can run at your provider or on your own server.
 This starter uses **Zcash testnet public data**. No viewing keys or wallet are needed.
@@ -146,21 +146,36 @@ Use a unique Compose project name when running more than one copy of this starte
 \`\`\`sh
 npm run migrate
 npm run status
-npm run sync
+\`\`\`
+
+Start the API first in terminal A:
+
+\`\`\`sh
 npm run serve
 \`\`\`
 
-Migrate creates this project's namespace explicitly; it does not create the server/database.
-Sync captures Prep's currently indexed height. For a bounded first run:
-\`npm run sync -- --to AVAILABLE_HEIGHT\` (inclusive). For continuous indexing,
-run \`npm run follow\` in another terminal alongside serve. Initial history must
-already be present in Prep. HTTP availability alone does not establish source readiness.
+In terminal B, start indexing with the same config and environment:
 
-The API binds 127.0.0.1:39370. From a separate terminal:
+\`\`\`sh
+npm run sync -- --to AVAILABLE_HEIGHT
+# Or keep following after historical catch-up:
+# npm run follow
+\`\`\`
+
+AVAILABLE_HEIGHT is an inclusive height covered by Prep. Omit --to to capture
+Prep's current indexed height. Run either sync or follow, never both for the
+same project. Migrate creates the project namespace, not the database server.
+
+The API binds 127.0.0.1:39370. Query in terminal C while indexing is active:
 
 \`\`\`sh
 npm run query
 \`\`\`
+
+API and indexing run in separate Node processes. The API serves committed data;
+\`_meta.height\` shows its current coverage. A partial prefix is not full history.
+Source reconciliation may temporarily make reads unavailable. Initial history
+must already be present in Prep; HTTP availability alone does not establish readiness.
 
 Lists sort by entity ID, not numeric height. Use \`where: { height: N }\` for a
 specific block. query.graphql contains a larger example. The API is read-only:
