@@ -27,7 +27,7 @@ curl https://zeer.endpx.cloud/api/prep/height
 
 curl https://zeer.endpx.cloud/api/prep/query \
   -H 'Content-Type: application/json' \
-  -d '{"from_block":0,"to_block":2,"limit":2,"field_selection":{"block":["height","hash","time"],"transaction":[]}}'
+  -d '{"from_block":0,"to_block":2,"field_selection":{"block":["height","hash","time"],"transaction":[]}}'
 ```
 
 Supported routes are `GET /height`, `/health`, `/ready`, `/capabilities`, and
@@ -49,7 +49,6 @@ if (!coverage.ready || coverage.indexed_height === null) {
 const page = await client.get({
   from_block: coverage.start_block,
   to_block: Math.min(coverage.indexed_height + 1, coverage.start_block + 3),
-  limit: 3,
   field_selection: { block: ["height", "hash", "time"], transaction: [] },
 });
 console.log(page.data.blocks);
@@ -116,8 +115,11 @@ input/output data and all output entries remain available in the JSON response.
   adapter allows two active upstream requests, shared with console traffic.
   This is not a dedicated throughput allocation.
 - Input: 16,128 bytes. Response: 8 MiB. Request deadline: 15 seconds.
-- Query pages scan at most 1,000 blocks. Select fields and use smaller pages for
-  large full-block payloads. Transaction-ID lookups cover at most 1,000 blocks
+- Omit `limit` for automatic scan sizing. The query service targets 500 ms work
+  slices and 512 KiB responses, with up to 1,000,000 scanned blocks and a hard
+  4 MiB response ceiling. Continue through the returned cursor or use SDK
+  `stream()`; a partial response is not the full query result. Explicit fixed
+  limits remain supported for compatibility. Transaction-ID lookups cover at most 1,000 blocks
   and 128 IDs per request.
 - Overload, unavailable sources and invalid ranges return errors, never samples
   or fabricated empty success. Retry rate-limit/source failures with backoff.

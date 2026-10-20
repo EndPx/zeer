@@ -8,8 +8,8 @@ Start with the [isolated quickstart](../examples/quickstart/README.md) and the
 ## Identity and checkpoints
 
 Keep the node network, Prep archive network/range and Chef configuration aligned.
-Chef requires history from its configured start height; Prep currently starts at
-height one or later. Record the source head/hash and use the durable PostgreSQL
+Chef requires history from its configured start height; Prep supports genesis
+height zero when its archive covers genesis. Record the source head/hash and use the durable PostgreSQL
 checkpoint to determine progress. A process log or count from a partial invocation
 is not a replacement for that checkpoint.
 
@@ -104,3 +104,19 @@ If Docker's default subnet pool is exhausted, an operator can supply `--subnet`
 with an unused RFC1918 IPv4 /24–/28 after checking host/VPN routes and existing
 Docker networks. Docker also checks its own overlap; do not change global network
 configuration or delete another application's network to run the proof.
+
+## Hosted demo reader updates
+
+The public web adapter can switch to a separately admitted Prep HTTP reader
+while the original reader continues serving the existing Chef installation.
+Both readers use the same immutable archive segments; this does not reset Chef
+state or require a new blockchain backfill. Keep the old web runtime and protected
+upstream configuration available until the new public query path is verified.
+
+An active process may still be opening and verifying a large archive. Check
+readiness and a real bounded query before switching readers. Restarting a reader
+repeats admission work. Include every reader in the operator resource guard and
+keep all temporary startup allocations within the existing aggregate envelope.
+Serialize guard-policy changes against in-flight guard checks: an already-running
+Python guard keeps its loaded policy even after the source file changes. Restore
+normal service limits before completing the cutover, then verify the guard again.
