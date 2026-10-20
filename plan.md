@@ -1,10 +1,25 @@
 # Zeer planning entry point
 
-Updated: 2026-10-19 (Asia/Jakarta).
+Updated: 2026-10-20 (Asia/Jakarta).
 
-**Status: Prep supports admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. Chef implements a public-data writer and GraphQL API. Viewing-key scanning, whole-chain execution and public deployment remain deferred. All benchmark results and reports are local-only under `benchmarks/results/`; source, methodology and fixtures remain public.**
+**Status: Prep supports admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. Chef implements a public-data writer and GraphQL API. Viewing-key scanning and whole-chain Chef execution remain deferred; a bounded public testnet preview is deployed. All benchmark results and reports are local-only under `benchmarks/results/`; source, methodology and fixtures remain public.**
 
 Zeer is the umbrella brand and monorepo for **Zeer Prep**, the Zcash data preparation and delivery engine, and **Zeer Chef**, the application-indexing framework. Both have bounded public-data implementations. Accepted names and original architecture decisions are recorded in [the framework proposal](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
+
+## Current slice: public shielded data, 20 October
+
+The user chose public Sapling/Orchard queries before viewing-key scanning, then
+added Ironwood, coinbase/block-reward inspection and current mempool observations.
+The implementation and operator contract are in [Public shielded queries](docs/PUBLIC_SHIELDED.md).
+No private key import, memo decryption, transaction broadcast or private receipt
+indexing belongs to this slice. The supplied ZecBlock decrypt tool is a research
+reference for a later phase.
+
+The current hosted frontend is on the VPS at https://zeer.endpx.cloud. Prep stores
+testnet history from genesis; the Chef demo deliberately covers only blocks
+4,510,000–4,519,999 in its own namespace. Older deployment and roadmap notes below
+are historical decisions, not a statement that public hosting is still pending.
+Live observations do not extend archive coverage or advance Chef checkpoints.
 
 ## Active roadmap: public-data MVP to 28 October
 

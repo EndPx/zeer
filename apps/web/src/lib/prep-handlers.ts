@@ -1,4 +1,11 @@
 import { ApiError, input, upstream, failure } from "@/lib/upstream";
+export async function inspectTransaction(request:Request,publicRead=false) {
+  try {
+    const body=await input(request,publicRead);
+    if (!body || typeof body.txid!=="string" || !/^[0-9a-f]{64}$/.test(body.txid) || Object.keys(body).some(key=>key!=="txid")) throw new ApiError(400,"Enter one 64-character hexadecimal transaction ID.");
+    return Response.json(await upstream("prep","/transaction",{txid:body.txid},request.signal),{headers:{"Cache-Control":"no-store"}});
+  }catch(error){return failure(error,publicRead);}
+}
 export async function prepQueryResponse(request: Request, publicRead = false) {
   try {
     const q = await input(request, publicRead);

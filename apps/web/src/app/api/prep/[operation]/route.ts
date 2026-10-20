@@ -1,5 +1,5 @@
 import { failure, upstream } from "@/lib/upstream";
-import { prepQueryResponse, transactionResponse } from "@/lib/prep-handlers";
+import { prepQueryResponse, transactionResponse, inspectTransaction } from "@/lib/prep-handlers";
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ operation: string }> };
 function cors(response: Response) {
@@ -13,7 +13,7 @@ function cors(response: Response) {
 // Hostnames, credentials and upstream routes remain operator-controlled.
 export async function GET(_request: Request, context: Context) {
   const { operation } = await context.params;
-  if (!["height", "health", "ready", "capabilities"].includes(operation)) return cors(new Response(null, { status: 404 }));
+  if (!["height", "health", "ready", "capabilities", "mempool"].includes(operation)) return cors(new Response(null, { status: 404 }));
   try {
     const data = await upstream("prep", `/${operation}`);
     if (operation === "capabilities") {
@@ -32,9 +32,10 @@ export async function POST(request: Request, context: Context) {
   const { operation } = await context.params;
   if (operation === "query") return cors(await prepQueryResponse(request, true));
   if (operation === "transactions") return cors(await transactionResponse(request, true));
+  if (operation === "transaction") return cors(await inspectTransaction(request, true));
   return cors(new Response(null, { status: 404 }));
 }
 export async function OPTIONS(_request: Request, context: Context) {
   const { operation } = await context.params;
-  return cors(new Response(null, { status: ["height","health","ready","capabilities","query","transactions"].includes(operation) ? 204 : 404 }));
+  return cors(new Response(null, { status: ["height","health","ready","capabilities","query","transactions","transaction","mempool"].includes(operation) ? 204 : 404 }));
 }

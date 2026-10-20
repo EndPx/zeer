@@ -71,3 +71,18 @@ sync to the same target must not change the entity digest or checkpoint.
 The hosted service is shared testnet infrastructure, with response budgets,
 cursors and ingress quotas. Completion times depend on source, handlers and
 database; this example makes no seconds-for-all-history or production SLA claim.
+
+## Inspect public shielded structure and pending transactions
+
+Open [Shielded pool activity](https://zeer.endpx.cloud/app/prep?example=shielded&from=0).
+The default scan starts at genesis and uses server-selected response boundaries.
+An empty early page can predate pool activation; continue its cursor, or select
+Use verified testnet sample for a known modern start. Sapling, Orchard and
+Ironwood have separate component counts; these are not decrypted payment counts.
+
+Select a transaction ID to open its inspector. The real block-reward example
+recognizes coinbase from its input marker. Overview, Inputs / outputs and Raw
+show public metadata, exact zatoshis and encrypted shielded data. The mempool
+view observes the configured testnet node and refreshes while visible. A pending
+row can be mined or disappear between observations; no pending fixture is forced.
+See [field and privacy boundaries](PUBLIC_SHIELDED.md).

@@ -130,3 +130,28 @@ Run the offline and local HTTP client tests:
 ```sh
 node --test packages/prep-client/test/client.test.js
 ```
+
+## Public shielded structure and node observations
+
+On a compatible server, query `sapling_spend_count`, `sapling_output_count`,
+`orchard_action_count`, `ironwood_action_count`, `is_coinbase`,
+`transaction_type` and `expiry_height`. `shielded_pools` matches any pool in
+its Sapling/Orchard/Ironwood list; separate filter properties combine with AND.
+These counts describe public components, which can include dummy actions.
+See the [packaged-client example](../../examples/shielded-query/README.md).
+
+```ts
+const caps = await client.getCapabilities();
+if (caps.live?.configured) {
+  const pool = await client.getMempool();
+  if (pool.transactions.length) {
+    const observed = await client.getTransaction(pool.transactions[0].txid);
+    console.log(observed.status); // pending, mined, or not_observed
+  }
+}
+```
+
+Live methods require the optional protected testnet node source. Configuration
+presence is not a readiness guarantee. Mempool membership can change between
+requests. These are read-only observations, not wallet operations or Chef events;
+no viewing key is accepted. See [the live contract](../../docs/PUBLIC_SHIELDED.md).

@@ -390,7 +390,7 @@ export function PrepExplorer({
             <div className="query-pagination">
               <span>{stale ? "Inputs changed. Run a new query to continue." : `Page ${page} · ${cursor ? "More of this range remains to be scanned" : "Selected range complete"}`}</span>
               {cursor && <button className="button secondary compact" disabled={stale || busy || !valid} onClick={() => void run(cursor)}>Next page <ArrowRight size={14} /></button>}
-              {!stale && (resultExample === "sapling" || resultExample === "orchard") && result && typeof result === "object" && "to_block" in result && typeof result.to_block === "number" && <button className="text-link" disabled={busy} onClick={() => { changed(); setTo(""); setFrom(String(Math.max(0, (result.to_block as number) - 1000))); }}>Start near latest blocks <ArrowUpRight size={14} /></button>}
+              {!stale && ["sapling", "orchard", "ironwood", "shielded"].includes(resultExample) && result && typeof result === "object" && "to_block" in result && typeof result.to_block === "number" && <button className="text-link" disabled={busy} onClick={() => { changed(); setTo(""); setFrom(String(Math.max(0, (result.to_block as number) - 1000))); }}>Start near latest blocks <ArrowUpRight size={14} /></button>}
             </div>
           </>
         )}

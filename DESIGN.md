@@ -1,5 +1,42 @@
 # Zeer website design system
 
+## Public transaction inspector and pending observations
+
+The Transactions console route complements Prep/Chef with a transaction-ID lookup
+and the configured node's bounded mempool observation. Preserve Zeer's dark/lime
+identity; the supplied ZecBlock screenshots are functional references, not assets.
+Use existing search fields, notices, status pills, network panels and format tabs.
+Show Overview, Inputs / outputs and Raw views with real decoded JSON and hex.
+Source-reported pending, source-mined and not-observed are distinct. Missing archive
+rows never imply pending. Poll at 10s only while visible, with one owned request;
+preserve and explicitly label a previous observation when refresh fails.
+
+Classify coinbase from its actual input marker, with precedence over pool badges.
+Transparent/shielded/mixed classification describes public components. Distinguish
+Orchard and Ironwood; never infer pool use solely from transaction version.
+Public pool net movement and transparent output values use exact zatoshis, and
+are separate from encrypted individual note values. Show unavailable fees when
+previous transparent inputs would be required, rather than inventing zero.
+Display four fact columns, two below 800px; stack I/O and pool panels below 800px.
+Wrap transaction hashes and addresses, keep raw code inside its scroll panel and
+retain 44px mobile actions. A not-observed result explains its limited source view.
+Viewing-key decrypt and broadcast controls are outside this public inspector.
+
+## Public Sapling, Orchard and Ironwood queries
+
+Add Shielded pool activity alongside the existing pool-specific presets. Keep
+From block at 0 by default; verified samples fill a known range without running
+or substituting a response. Pool-specific responses select direct public counts
+instead of full decoded bodies. Reuse field checkboxes and table columns for
+Sapling Spend descriptions, Sapling Output descriptions and separate Orchard/Ironwood Actions.
+Zero comes only from an actual response; missing fields remain unavailable.
+Explain that these structural counts may include dummy components, and do not
+count payments or expose shielded recipients, note values or memo plaintext.
+The combined preset means Sapling OR Orchard OR Ironwood; the existing separate boolean
+predicates retain AND semantics. Empty early-history responses explain the
+pre-activation range and retain scan/cursor progress. Use existing tokens and
+responsive table behavior; no new controls for scan limits or viewing keys.
+
 ## First-visit recovery and query navigation
 
 An inspection link may pin a Prep query's exclusive end without restoring a

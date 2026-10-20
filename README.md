@@ -32,6 +32,12 @@ Start with the [public demo walkthrough](docs/HACKATHON_DEMO.md), then run the
 testnet blocks **4,510,000–4,519,999 inclusive** in a fresh namespace; its
 completion meter does not represent full-chain Chef indexing.
 
+Public [Sapling, Orchard and Ironwood queries](docs/PUBLIC_SHIELDED.md) expose
+component counts, pool filters and coinbase classification. The
+[transaction inspector](https://zeer.endpx.cloud/app/transactions) adds read-only
+node observations for mined transactions and the current mempool. Pending
+observations remain separate from archive coverage and Chef checkpoints.
+
 Prep supports bounded transaction-ID lookup, snapshot pinning, capability
 discovery, immutable transaction indexes and direct metadata projection. Optional
 [disk metadata sidecars](docs/PREP_DISK_INDEX.md) reduce retained row memory while

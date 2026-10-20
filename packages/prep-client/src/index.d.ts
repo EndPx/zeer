@@ -1,5 +1,5 @@
 export type BlockField = "height" | "hash" | "previous_hash" | "time" | "raw" | "decoded";
-export type TransactionField = "txid" | "block_height" | "index" | "version" | "locktime" | "size_bytes" | "transparent_input_count" | "transparent_output_count" | "raw" | "vin" | "vout" | "decoded";
+export type TransactionField = "txid" | "block_height" | "index" | "version" | "locktime" | "size_bytes" | "transparent_input_count" | "transparent_output_count" | "sapling_spend_count" | "sapling_output_count" | "orchard_action_count" | "ironwood_action_count" | "is_coinbase" | "transaction_type" | "expiry_height" | "raw" | "vin" | "vout" | "decoded";
 export interface Query {
   from_block: number;
   /** Exclusive. Omit to capture the indexed head on the first request. */
@@ -9,7 +9,7 @@ export interface Query {
   /** Opt-in time/byte-bounded scanning, up to 1,000,000 blocks. Requires advertised server support. */
   scan_mode?: "adaptive" | null;
   field_selection?: { block?: BlockField[]; transaction?: TransactionField[] };
-  transaction_filter?: { txids?: string[] | null; versions?: number[] | null; has_sapling?: boolean | null; has_orchard?: boolean | null; transparent_output_addresses?: string[] | null };
+  transaction_filter?: { txids?: string[] | null; versions?: number[] | null; has_sapling?: boolean | null; has_orchard?: boolean | null; has_ironwood?: boolean | null; is_coinbase?: boolean | null; shielded_pools?: ("sapling" | "orchard" | "ironwood")[] | null; transparent_output_addresses?: string[] | null };
   cursor?: string | null;
 }
 export interface QueryResult {
@@ -73,6 +73,7 @@ export interface Height {
 export interface Capabilities {
   api_version: 1;
   routes: string[];
+  live?: { source_required: boolean; configured: boolean; max_response_bytes: number; max_mempool_rows: number; scope: string };
   limits: { max_request_bytes: number; max_active_queries: number; query_timeout_ms: number; max_waiting_queries?: number; queue_timeout_ms?: number };
   query: {
     max_scan_blocks: number;
@@ -102,8 +103,24 @@ export class ProtocolError extends PrepError { constructor(code?: string) }
 export class PrepClient {
   constructor(options: { url: string; token?: string; timeoutMs?: number; fetch?: typeof globalThis.fetch });
   getHeight(options?: RequestOptions): Promise<Height>;
+  getTransaction(txid: string, options?: RequestOptions): Promise<TransactionObservation>;
+  getMempool(options?: RequestOptions): Promise<MempoolObservation>;
   getCapabilities(options?: RequestOptions): Promise<Capabilities>;
   get(query: Query, options?: RequestOptions): Promise<QueryResult>;
   getTransactions(request: TransactionsRequest, options?: RequestOptions): Promise<TransactionsResult>;
   stream(query: Query, options?: StreamOptions): AsyncGenerator<QueryResult, void, unknown>;
 }
+
+export interface LiveTransactionMetadata {
+  txid: string; version: number; size_bytes: number; is_coinbase: boolean;
+  transaction_type: "coinbase" | "transparent" | "shielded" | "mixed" | "unknown";
+  sapling_spend_count: number; sapling_output_count: number;
+  orchard_action_count: number; ironwood_action_count: number;
+}
+export interface TransactionObservation {
+  network: "testnet"; status: "pending" | "mined" | "not_observed"; txid: string; observed_at: number;
+  source_height?: number | null; block_height?: number | null; block_hash?: string | null;
+  confirmations?: number | null; source_first_seen_at?: number | null;
+  transaction: LiveTransactionMetadata | null; decoded?: Record<string, unknown>;
+}
+export interface MempoolObservation { network: "testnet"; observed_at: number; source_total: number; max_rows: number; has_more: boolean; raced_out: number; transactions: (LiveTransactionMetadata & { source_first_seen_at?: number | null })[]; }

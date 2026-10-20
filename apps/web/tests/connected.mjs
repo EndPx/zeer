@@ -17,6 +17,8 @@ const upstream=createServer(async(req,res)=>{
  if(mode==='large'){res.end(JSON.stringify({network:'testnet',blob:'x'.repeat(8500000)}));return;}
  if(req.url==='/height')res.end(JSON.stringify({network:mode==='mainnet'?'mainnet':'testnet',start_block:1000,indexed_height:1002,archive_height:1002,source_mode:'historical_snapshot',source_height:null,ready:true}));
  else if(req.url==='/graphql')res.end(JSON.stringify({data:{_meta:{height:1002,status:'ready'}}}));
+ else if(req.url==='/mempool')res.end(JSON.stringify({network:'testnet',observed_at:1792495000,source_total:0,max_rows:20,raced_out:0,has_more:false,transactions:[]}));
+ else if(req.url==='/transaction')res.end(JSON.stringify({network:'testnet',observed_at:1792495000,status:'not_observed',txid:lastBody.txid,transaction:null}));
  else res.end(JSON.stringify({network:mode==='mainnet'?'mainnet':'testnet',data:{blocks:[]},next_block:1003,cursor:null}));
 });
 await new Promise(r=>upstream.listen(39479,'127.0.0.1',r));
@@ -35,6 +37,9 @@ try{
  }
  const status=await(await fetch('http://127.0.0.1:3107/api/status')).json();assert.equal(status.prep.available,true);assert.equal(status.chef.data.height,1002);
  const html=await(await fetch('http://127.0.0.1:3107/app/prep')).text();assert.ok(!html.includes(token));
+ r=await fetch('http://127.0.0.1:3107/api/prep/mempool');assert.equal(r.status,200);assert.equal((await r.json()).source_total,0);
+ r=await fetch('http://127.0.0.1:3107/api/prep/transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({txid:'a'.repeat(64)})});assert.equal(r.status,200);assert.equal((await r.json()).status,'not_observed');assert.deepEqual(lastBody,{txid:'a'.repeat(64)});
+ for(const body of [{txid:'bad'},{txid:'a'.repeat(64),url:'http://invalid.example'}])assert.equal((await fetch('http://127.0.0.1:3107/api/prep/transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).status,400);
  const inspected=await(await fetch('http://127.0.0.1:3107/app/prep?example=headers&from=1000&to=1001')).text();
  assert.match(inspected,/Linked range: blocks 1,000–1,000 inclusive/);assert.match(inspected,/to_block/);
  const unbounded=await(await fetch('http://127.0.0.1:3107/app/prep?example=headers&from=1000')).text();

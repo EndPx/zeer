@@ -5,6 +5,7 @@ pub mod follower;
 pub mod full_source;
 pub mod http;
 pub mod importer;
+pub mod live;
 pub mod query;
 pub mod repack;
 pub mod server;

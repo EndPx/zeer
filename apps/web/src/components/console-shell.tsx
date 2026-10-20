@@ -11,6 +11,7 @@ import {
   Layers3,
   Menu,
   X,
+  Search,
 } from "lucide-react";
 import { Logo, Network } from "./ui";
 import { docs, repo } from "@/lib/content";
@@ -22,6 +23,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
     { path: "/app", name: "Overview", icon: LayoutDashboard },
     { path: "/app/prep", name: "Prep Playground", icon: Layers3 },
     { path: "/app/chef", name: "Chef Playground", icon: Braces },
+    { path: "/app/transactions", name: "Transactions", icon: Search },
   ];
   return (
     <div

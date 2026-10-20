@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const base=process.env.WEB_TEST_URL??'http://127.0.0.1:3000';
 const post=(path,body,headers={})=>fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
 test('all pages render, with landing and app separated',async()=>{
- for(const route of ['/','/app','/app/prep','/app/chef']){
+ for(const route of ['/','/app','/app/prep','/app/chef','/app/transactions']){
   const r=await fetch(base+route);assert.equal(r.status,200);const html=await r.text();
   assert.ok(html.includes(route==='/'?'Zcash data.':'Zcash Testnet'));
   assert.ok(!html.includes('react-grab/dist')&&!html.includes('react-scan/dist'));
@@ -11,6 +11,8 @@ test('all pages render, with landing and app separated',async()=>{
 });
 test('missing upstream is explicit, not a simulated successful query',async()=>{
  const r=await post('/api/prep',{from_block:1000,to_block:1003});assert.equal(r.status,503);assert.match((await r.json()).error,/not connected/);
+ const live=await post('/api/prep/transaction',{txid:'a'.repeat(64)});assert.equal(live.status,503);
+ assert.equal((await fetch(base+'/api/prep/mempool')).status,503);
  const c=await post('/api/chef',{query:'{ _meta { height } }'});assert.equal(c.status,503);
  const status=await(await fetch(base+'/api/status')).json();assert.equal(status.prep.configured,false);assert.equal(status.chef.configured,false);
 });

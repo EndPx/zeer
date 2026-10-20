@@ -4,7 +4,8 @@ use serde_json::{json, Value};
 pub(crate) fn document() -> Value {
     json!({
         "api_version": 1,
-        "routes": ["/health", "/ready", "/height", "/query", "/transactions", "/capabilities"],
+        "routes": ["/health", "/ready", "/height", "/query", "/transactions", "/capabilities", "/transaction", "/mempool"],
+        "live":{"source_required":true,"max_response_bytes":crate::live::MAX_LIVE_BYTES,"max_mempool_rows":crate::live::MAX_MEMPOOL_ROWS,"scope":"testnet_node_observations_not_archive_or_finality"},
         "limits": {
             "max_request_bytes": crate::http::MAX_REQUEST_BYTES,
             "max_active_queries": crate::http::MAX_ACTIVE_QUERIES,
@@ -21,7 +22,7 @@ pub(crate) fn document() -> Value {
             "max_response_bytes": crate::query::MAX_RESPONSE_BYTES,
             "block_fields": crate::query::BLOCK_FIELDS,
             "transaction_fields": crate::query::TX_FIELDS,
-            "transaction_filters": ["txids", "versions", "has_sapling", "has_orchard", "transparent_output_addresses"],
+            "transaction_filters": ["txids", "versions", "has_sapling", "has_orchard", "transparent_output_addresses", "shielded_pools", "has_ironwood", "is_coinbase"],
         },
         "transactions": {
             "max_ids": crate::transactions::MAX_LOOKUP_IDS,

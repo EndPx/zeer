@@ -176,3 +176,15 @@ test("unknown or duplicate selected fields fail before transport", async () => {
   }
   assert.equal(requests, 0);
 });
+
+test("public shielded counts remain bounded integers and pool union is explicit", async () => {
+  const result=page(13); result.data.transactions=[{sapling_spend_count:0,sapling_output_count:2,orchard_action_count:4}];
+  let calls=0;
+  const client=new PrepClient({url:"http://localhost",fetch:async(_url,options)=>{calls++;assert.deepEqual(JSON.parse(options.body).transaction_filter.shielded_pools,["sapling","orchard"]);return json(result);}});
+  const query={from_block:10,transaction_filter:{shielded_pools:["sapling","orchard"]},field_selection:{transaction:["sapling_spend_count","sapling_output_count","orchard_action_count"]}};
+  assert.deepEqual((await client.get(query)).data.transactions,result.data.transactions);
+  for(const bad of [-1,1.5,"2",null,4294967296]) {result.data.transactions[0].orchard_action_count=bad;await assert.rejects(client.get(query),{code:"INVALID_TRANSACTION_METADATA"});}
+  const previous=calls;
+  for(const pools of [["sprout"],["sapling","sapling"],["sapling","orchard","sapling"],"orchard"]) await assert.rejects(client.get({...query,transaction_filter:{shielded_pools:pools}}),TypeError);
+  assert.equal(calls,previous);
+});

@@ -12,11 +12,12 @@ export function transactionKind(vin: unknown): string {
   return vin.some(input => typeof publicRecord(input).coinbase === "string") ? "Coinbase · block reward" : "Transaction";
 }
 export function shieldedComponentCounts(decoded: unknown) {
-  const transaction = publicRecord(decoded), orchard = publicRecord(transaction.orchard);
+  const transaction = publicRecord(decoded), orchard = publicRecord(transaction.orchard), ironwood = publicRecord(transaction.ironwood);
   return {
     saplingSpends: Array.isArray(transaction.vShieldedSpend) ? transaction.vShieldedSpend.length : null,
     saplingOutputs: Array.isArray(transaction.vShieldedOutput) ? transaction.vShieldedOutput.length : null,
     orchardActions: Array.isArray(orchard.actions) ? orchard.actions.length : null,
+    ironwoodActions: Array.isArray(ironwood.actions) ? ironwood.actions.length : null,
   };
 }
 export function publicOutputPreview(vout: unknown) {

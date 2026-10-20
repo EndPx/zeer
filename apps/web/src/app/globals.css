@@ -2506,6 +2506,28 @@ svg {
 .demo-coverage code, .coverage-note code { overflow-wrap: anywhere; }
 .result-table td.table-spacer { padding: 0; border: 0; }
 .result-table-scroll { overflow-anchor: none; scroll-behavior: auto; }
+.transaction-search { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 16px; }
+.transaction-search label { flex: 1; min-width: 0; font-size: 14px; color: var(--muted); }
+.transaction-search input { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--font-mono), monospace; font-size: 12px; }
+.transaction-examples, .transaction-status-line, .transaction-badges, .transaction-id { display:flex; flex-wrap:wrap; gap:16px; align-items:center; margin-bottom:24px; }
+.transaction-status-line { justify-content:space-between; color:var(--muted); font-size:12px; }
+.transaction-id code, .transaction-hash, .transaction-reference, .transaction-output code { overflow-wrap:anywhere; word-break:break-word; }
+.transaction-id code { font-size:12px; }
+.transaction-flow { display:flex; gap:16px; align-items:flex-start; }
+.transaction-flow > svg { flex-shrink:0; color:var(--lime); }
+.transaction-flow[data-state="pending"] > svg { color:var(--cream); }
+.transaction-flow p, .transaction-io p { color:var(--muted); font-size:14px; line-height:1.7; margin-top:12px; }
+.transaction-tabs { margin-bottom:24px; }
+.transaction-facts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; margin:0 0 32px; }
+.transaction-facts dt { color:var(--muted); font-size:12px; margin-bottom:8px; }
+.transaction-facts dd { margin:0; font-family:var(--font-mono),monospace; font-size:12px; }
+.transaction-facts small { color:var(--muted); font-size:12px; }
+.transaction-pools, .transaction-io { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+.transaction-pools article { border:1px solid var(--line); padding:16px; border-radius:8px; margin-top:16px; }
+.transaction-pools p, .transaction-pools small { color:var(--muted); font-size:12px; line-height:1.7; }
+.transaction-io { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.transaction-output { display:grid; gap:8px; border-top:1px solid var(--line); padding:16px 0; font-size:12px; }
+@media(max-width:800px){.transaction-search{align-items:stretch;flex-direction:column;}.transaction-facts{grid-template-columns:repeat(2,minmax(0,1fr));}.transaction-pools,.transaction-io{grid-template-columns:1fr;}.transaction-tabs button,.transaction-examples button{min-height:44px;}}
 @media (max-width: 800px) {
   .copy, .button.compact, .format-tabs button { min-height: 44px; }
   .mobile-menu { min-width: 44px; min-height: 44px; }

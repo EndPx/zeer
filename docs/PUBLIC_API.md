@@ -31,7 +31,7 @@ curl https://zeer.endpx.cloud/api/prep/query \
 ```
 
 Supported routes are `GET /height`, `/health`, `/ready`, `/capabilities`, and
-`POST /query`, `/transactions`. Public Prep reads support CORS. The website's
+`GET /mempool` and `POST /query`, `/transactions`, `/transaction`. Public Prep reads support CORS. The website's
 console adapters retain their own origin checks; they are not the SDK base URL.
 No viewing key, spending key or wallet connection is required or accepted.
 
@@ -64,7 +64,7 @@ change returns `409` with the `REORG` code so the client can restart safely.
 The [Prep playground](https://zeer.endpx.cloud/app/prep) starts at genesis with
 no end-height input. Prep captures the current archive end on the first request;
 subsequent cursor pages retain that snapshot. It offers transparent output payments,
-transaction IDs, Sapling/Orchard activity, block history, transaction metadata,
+transaction IDs, Sapling/Orchard/Ironwood activity and pool unions, block history, transaction metadata,
 version filters and raw serialized transactions. Each has a verified public
 testnet sample. **Use verified testnet sample** fills inputs only; **Run query**
 still calls the actual API. No captured response replaces that request.
@@ -90,8 +90,8 @@ keeps the snippets and share URL in sync. Defaults are specific to each example:
 | --- | --- | --- |
 | Payments to an address | Transparent output address | Public output addresses/scripts and values |
 | Find a transaction | Transaction IDs | Version, lock time, inputs and outputs |
-| Sapling activity | Sapling bundle presence | Public spend/output component counts from decoded data |
-| Orchard activity | Orchard action presence | Public action count from decoded data |
+| Sapling activity | Sapling bundle presence | Direct public spend/output component counts |
+| Orchard activity | Orchard action presence | Direct public action count |
 | Block history | None | Headers only, without transaction records |
 | Transaction sizes & inputs | None | Version, bytes and transparent input/output entry counts |
 | Filter by version | Exact format version | Matching versions and serialized sizes |
@@ -128,3 +128,13 @@ The operator keeps node RPC, database ports and source credentials private.
 This preview does not provide an uptime or production-capacity commitment.
 Self-hosted deployments can connect the client directly to their own Prep API
 and use the server's advertised limits.
+
+## Live transaction inspector
+
+`POST /transaction` accepts only `{ "txid": "64-character-lowercase-hex" }`.
+`GET /mempool` returns at most 20 metadata rows plus the observed source total.
+These optional testnet node observations distinguish `pending`, `mined` and
+`not_observed`; they do not turn an archive miss into pending. Check
+`capabilities.live.configured` for configuration presence, then handle source
+unavailability and mempool races visibly. No viewing key or broadcast is exposed.
+See [public shielded and live contracts](PUBLIC_SHIELDED.md).

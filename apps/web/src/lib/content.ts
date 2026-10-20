@@ -19,6 +19,12 @@ export const chefCode = `async block({ block, context }) {
 }`;
 export const examples = [
   {
+    id: "shielded",
+    name: "Shielded pool activity",
+    description: "Find public activity across Sapling, Orchard and Ironwood.",
+    detail: "Match any of these three pools and select their component counts directly. These are public structural counts, including possible dummy components; they do not identify private payments or recipients. Legacy Sprout is outside this filter.",
+  },
+  {
     id: "address",
     name: "Payments to an address",
     description: "Find transactions with a transparent output to a specific Zcash address.",
@@ -41,6 +47,12 @@ export const examples = [
     name: "Explore Orchard activity",
     description: "Find transactions containing Orchard actions.",
     detail: "Inspect the public number of Orchard actions in each matching transaction. Actions do not reveal individual payments. Blocks before activation have no matches.",
+  },
+  {
+    id: "ironwood",
+    name: "Explore Ironwood activity",
+    description: "Find transactions containing an Ironwood-pool bundle.",
+    detail: "Ironwood is distinct from the Orchard pool, even though both use the Orchard shielded protocol. Request Ironwood Action counts separately; private recipients, individual note values and memos remain encrypted.",
   },
   {
     id: "headers",
@@ -87,17 +99,27 @@ export const transactionFieldOptions = [
   { key: "locktime", label: "Lock time", required: false },
   { key: "transparent_input_count", label: "Transparent input count", required: false },
   { key: "transparent_output_count", label: "Transparent output count", required: false },
+  { key: "sapling_spend_count", label: "Sapling Spend descriptions", required: false },
+  { key: "sapling_output_count", label: "Sapling Output descriptions", required: false },
+  { key: "orchard_action_count", label: "Orchard Actions", required: false },
+  { key: "ironwood_action_count", label: "Ironwood Actions", required: false },
+  { key: "transaction_type", label: "Transaction classification", required: false },
+  { key: "is_coinbase", label: "Block reward / coinbase flag", required: false },
+  { key: "expiry_height", label: "Transaction expiry height", required: false },
   { key: "decoded", label: "Decoded public transaction", required: false },
   { key: "raw", label: "Raw transaction hex", required: false },
 ] as const;
 export function defaultPrepFields(example: Example): PrepFields {
   switch (example) {
     case "headers": return { block: ["height", "hash", "time"], transaction: [] };
-    case "address": return { block: ["height", "time"], transaction: ["txid", "block_height", "vout"] };
+    case "address": return { block: ["height", "time"], transaction: ["txid", "block_height", "transaction_type", "vout"] };
     case "ids": return { block: ["height", "hash", "time"], transaction: ["txid", "block_height", "version", "locktime", "vin", "vout"] };
-    case "sapling": case "orchard": return { block: ["height", "time"], transaction: ["txid", "block_height", "decoded"] };
-    case "transactions": return { block: ["height", "time"], transaction: ["txid", "block_height", "version", "size_bytes", "transparent_input_count", "transparent_output_count"] };
-    case "versions": return { block: ["height", "time"], transaction: ["txid", "block_height", "version", "size_bytes"] };
+    case "sapling": return { block: ["height", "time"], transaction: ["txid", "block_height", "transaction_type", "version", "sapling_spend_count", "sapling_output_count"] };
+    case "orchard": return { block: ["height", "time"], transaction: ["txid", "block_height", "transaction_type", "version", "orchard_action_count"] };
+    case "ironwood": return { block: ["height", "time"], transaction: ["txid", "block_height", "transaction_type", "version", "ironwood_action_count"] };
+    case "shielded": return { block: ["height", "time"], transaction: ["txid", "block_height", "transaction_type", "version", "sapling_spend_count", "sapling_output_count", "orchard_action_count", "ironwood_action_count"] };
+    case "transactions": return { block: ["height", "time"], transaction: ["txid", "block_height", "transaction_type", "version", "size_bytes", "transparent_input_count", "transparent_output_count"] };
+    case "versions": return { block: ["height", "time"], transaction: ["txid", "block_height", "transaction_type", "version", "size_bytes"] };
     case "raw": return { block: ["height"], transaction: ["txid", "block_height", "raw"] };
   }
 }
@@ -126,6 +148,8 @@ export function verifiedExample(example: Example, match = "") {
     case "ids": return { from: 1000, limit: 1, match: testnetExample.txid };
     case "sapling": return { from: 1000000, limit: 100, match: "" };
     case "orchard": return { from: 4515166, limit: 1, match: "" };
+    case "ironwood": return { from: 4515166, limit: 1, match: "" };
+    case "shielded": return { from: 4515166, limit: 100, match: "" };
     case "headers": return { from: 0, limit: 3, match: "" };
     case "transactions": return { from: 1000000, limit: 100, match: "" };
     case "versions": return match === "4" ? { from: 1000000, limit: 3, match: "4" } : match === "6" ? { from: 4515166, limit: 1, match: "6" } : { from: 1842420, limit: 3, match: "5" };
@@ -151,10 +175,14 @@ export function prepQuery(
       ? { transaction_filter: { txids: match.trim() ? match.trim().split(/[\s,]+/) : [] } }
       : example === "address"
       ? { transaction_filter: { transparent_output_addresses: [match] } }
+      : example === "shielded"
+        ? { transaction_filter: { shielded_pools: ["sapling", "orchard", "ironwood"] } }
       : example === "sapling"
         ? { transaction_filter: { has_sapling: true } }
         : example === "orchard"
           ? { transaction_filter: { has_orchard: true } }
+        : example === "ironwood"
+          ? { transaction_filter: { has_ironwood: true } }
           : {}),
   };
 }

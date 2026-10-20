@@ -4,6 +4,10 @@ import { ReorgError } from "@zeer/prep-client";
 import { decodePage, syncStep, toZatoshis, validateSyncOptions } from "../dist/runtime.js";
 
 const h = n => BigInt(n).toString(16).padStart(64, "0");
+test("public pool union is admitted without accepting other pools or duplicate predicates",()=>{
+  for(const pools of [[],["sapling"],["orchard"],["ironwood"],["sapling","orchard","ironwood"]]) assert.doesNotThrow(()=>validateSyncOptions({transactionFilter:{shielded_pools:pools,has_ironwood:true}}));
+  for(const pools of [["sprout"],["orchard","orchard"],["sapling","orchard","sapling"],"orchard",[1]]) assert.throws(()=>validateSyncOptions({transactionFilter:{shielded_pools:pools}}),{code:"INVALID_TRANSACTION_FILTER"});
+});
 const page = () => ({ from_block: 1, next_block: 3, network: "regtest", epoch: "1", data: {
   blocks: [1, 2].map(height => ({ height, hash: h(height), previous_hash: h(height - 1), time: 1000 })),
   transactions: [1, 2].map(block_height => ({ block_height, index: 0, txid: h(100 + block_height), version: 5, locktime: 0, decoded: { amount: "1" } })),

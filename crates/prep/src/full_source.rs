@@ -211,7 +211,14 @@ impl NodeRpc {
 
     async fn call(&self, method: &'static str, params: Value) -> Result<Value> {
         ensure!(
-            matches!(method, "getblockchaininfo" | "getblockhash" | "getblock"),
+            matches!(
+                method,
+                "getblockchaininfo"
+                    | "getblockhash"
+                    | "getblock"
+                    | "getrawmempool"
+                    | "getrawtransaction"
+            ),
             "rpc_method_not_readonly_allowlisted"
         );
         let id = self.sequence.fetch_add(1, Ordering::Relaxed);
@@ -226,10 +233,17 @@ impl NodeRpc {
             .send()
             .await
             .map_err(|error| transport_error(error, "rpc_transport_failed"))?;
-        if response.status().is_server_error() || response.status().as_u16() == 429 {
+        let lookup_error_status =
+            method == "getrawtransaction" && response.status().as_u16() == 500;
+        if (response.status().is_server_error() || response.status().as_u16() == 429)
+            && !lookup_error_status
+        {
             return Err(TransientSourceError::HttpStatus.into());
         }
-        ensure!(response.status().is_success(), "rpc_http_status_failed");
+        ensure!(
+            response.status().is_success() || lookup_error_status,
+            "rpc_http_status_failed"
+        );
         ensure!(
             response
                 .content_length()
@@ -254,6 +268,16 @@ impl NodeRpc {
         }
         let mut reply: Value =
             serde_json::from_slice(&body).map_err(|_| anyhow!("rpc_invalid_json"))?;
+        if method == "getrawtransaction"
+            && reply.get("id").and_then(Value::as_u64) == Some(id)
+            && reply
+                .get("error")
+                .and_then(|e| e.get("code"))
+                .and_then(Value::as_i64)
+                == Some(-5)
+        {
+            return Ok(Value::Null);
+        }
         ensure!(
             reply.is_object()
                 && reply.get("id").and_then(Value::as_u64) == Some(id)
@@ -300,6 +324,23 @@ impl NodeRpc {
             height,
             hash,
         })
+    }
+
+    pub async fn mempool(&self) -> Result<Value> {
+        self.call("getrawmempool", json!([true])).await
+    }
+
+    pub async fn transaction(&self, txid: &str) -> Result<Option<Value>> {
+        check_hash(txid)?;
+        let result = self.call("getrawtransaction", json!([txid, 1])).await?;
+        if result.is_null() {
+            return Ok(None);
+        }
+        ensure!(
+            result.is_object() && result.get("txid").and_then(Value::as_str) == Some(txid),
+            "rpc_transaction_identity_mismatch"
+        );
+        Ok(Some(result))
     }
 
     pub async fn block_hash(&self, height: u64) -> Result<String> {

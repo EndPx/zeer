@@ -63,9 +63,10 @@ export function validateSyncOptions(options: SyncOptions): void {
   if (filter === undefined) return;
   requireValue(filter !== null && typeof filter === "object" && !Array.isArray(filter), "INVALID_TRANSACTION_FILTER");
   for (const [key, value] of Object.entries(filter)) {
-    requireValue(["txids", "versions", "has_sapling", "has_orchard", "transparent_output_addresses"].includes(key), "INVALID_TRANSACTION_FILTER");
+    requireValue(["txids", "versions", "has_sapling", "has_orchard", "has_ironwood", "is_coinbase", "transparent_output_addresses", "shielded_pools"].includes(key), "INVALID_TRANSACTION_FILTER");
     if (value === undefined || value === null) continue;
-    if (key === "has_sapling" || key === "has_orchard") requireValue(typeof value === "boolean", "INVALID_TRANSACTION_FILTER");
+    if (key === "has_sapling" || key === "has_orchard" || key === "has_ironwood" || key === "is_coinbase") requireValue(typeof value === "boolean", "INVALID_TRANSACTION_FILTER");
+    else if (key === "shielded_pools") requireValue(Array.isArray(value) && value.length <= 3 && new Set<unknown>(value).size === value.length && value.every(pool => pool === "sapling" || pool === "orchard" || pool === "ironwood"), "INVALID_TRANSACTION_FILTER");
     else {
       requireValue(Array.isArray(value) && value.length <= (key === "transparent_output_addresses" ? 64 : 128), "INVALID_TRANSACTION_FILTER");
       requireValue(value.every(item => key === "txids" ? hash(item) : key === "versions" ? uint(item)

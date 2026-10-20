@@ -36,6 +36,13 @@ pub(crate) const TX_FIELDS: &[&str] = &[
     "size_bytes",
     "transparent_input_count",
     "transparent_output_count",
+    "sapling_spend_count",
+    "sapling_output_count",
+    "orchard_action_count",
+    "ironwood_action_count",
+    "is_coinbase",
+    "transaction_type",
+    "expiry_height",
     "raw",
     "vin",
     "vout",
@@ -77,7 +84,31 @@ pub struct TransactionFilter {
     pub versions: Option<Vec<u32>>,
     pub has_sapling: Option<bool>,
     pub has_orchard: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub has_ironwood: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_coinbase: Option<bool>,
+    /// OR across selected pools, AND with the other predicates. Omit without
+    /// changing legacy cursor fingerprints; an empty list matches nothing.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shielded_pools: Option<Vec<ShieldedPool>>,
     pub transparent_output_addresses: Option<Vec<String>>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ShieldedPool {
+    Sapling,
+    Orchard,
+    Ironwood,
+}
+
+fn matches_pools(pools: &[ShieldedPool], sapling: bool, orchard: bool, ironwood: bool) -> bool {
+    pools.iter().any(|pool| match pool {
+        ShieldedPool::Sapling => sapling,
+        ShieldedPool::Orchard => orchard,
+        ShieldedPool::Ironwood => ironwood,
+    })
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -560,6 +591,11 @@ pub fn validate_query(request: &QueryRequest) -> Result<(), QueryError> {
     {
         return Err(QueryError::new(400, "INVALID_VERSION_FILTER"));
     }
+    if let Some(pools) = &request.transaction_filter.shielded_pools {
+        if pools.len() > 3 || pools.iter().collect::<HashSet<_>>().len() != pools.len() {
+            return Err(QueryError::new(400, "INVALID_SHIELDED_POOL_FILTER"));
+        }
+    }
     if let Some(addresses) = &request.transaction_filter.transparent_output_addresses {
         if addresses.len() > 64
             || addresses.iter().any(|address| {
@@ -644,7 +680,67 @@ fn transaction_array_count(tx: &Value, field: &str) -> Result<u32, QueryError> {
         .and_then(|values| u32::try_from(values.len()).ok())
         .ok_or_else(|| QueryError::new(503, "INVALID_STORED_TRANSACTION"))
 }
+
+/// Counts public descriptions only, never payments or decryptable notes.
+/// Missing/null bundles follow the existing presence-filter semantics (zero).
+fn optional_array_count(value: Option<&Value>) -> Result<u32, QueryError> {
+    match value {
+        None | Some(Value::Null) => Ok(0),
+        Some(Value::Array(values)) => u32::try_from(values.len())
+            .map_err(|_| QueryError::new(503, "INVALID_STORED_TRANSACTION")),
+        _ => Err(QueryError::new(503, "INVALID_STORED_TRANSACTION")),
+    }
+}
+
+fn action_count(tx: &Value, pool: &str) -> Result<u32, QueryError> {
+    match tx.get(pool) {
+        None | Some(Value::Null) => Ok(0),
+        Some(Value::Object(orchard)) => optional_array_count(orchard.get("actions")),
+        _ => Err(QueryError::new(503, "INVALID_STORED_TRANSACTION")),
+    }
+}
+
+pub(crate) fn is_coinbase(tx: &Value) -> Result<bool, QueryError> {
+    let inputs = tx
+        .get("vin")
+        .and_then(Value::as_array)
+        .ok_or_else(|| QueryError::new(503, "INVALID_STORED_TRANSACTION"))?;
+    Ok(inputs
+        .iter()
+        .any(|input| input.get("coinbase").is_some_and(Value::is_string)))
+}
+
+pub(crate) fn transaction_type(tx: &Value) -> Result<&'static str, QueryError> {
+    if is_coinbase(tx)? {
+        return Ok("coinbase");
+    }
+    let transparent =
+        transaction_array_count(tx, "vin")? > 0 || transaction_array_count(tx, "vout")? > 0;
+    let shielded = optional_array_count(tx.get("vShieldedSpend"))? > 0
+        || optional_array_count(tx.get("vShieldedOutput"))? > 0
+        || action_count(tx, "orchard")? > 0
+        || action_count(tx, "ironwood")? > 0
+        || optional_array_count(tx.get("vjoinsplit"))? > 0;
+    Ok(match (transparent, shielded) {
+        (true, true) => "mixed",
+        (true, false) => "transparent",
+        (false, true) => "shielded",
+        (false, false) => "unknown",
+    })
+}
+
+pub(crate) fn transaction_summary(tx: &Value) -> Result<Value, QueryError> {
+    Ok(
+        json!({"txid":hex_field(tx,"txid",Some(32))?,"version":node_u32(tx,"version")?,"size_bytes":transaction_size(tx)?,"is_coinbase":is_coinbase(tx)?,"transaction_type":transaction_type(tx)?,
+        "sapling_spend_count":optional_array_count(tx.get("vShieldedSpend"))?,"sapling_output_count":optional_array_count(tx.get("vShieldedOutput"))?,"orchard_action_count":action_count(tx,"orchard")?,"ironwood_action_count":action_count(tx,"ironwood")?}),
+    )
+}
 fn matches_tx(tx: &Value, filter: &TransactionFilter) -> Result<bool, QueryError> {
+    if let Some(wanted) = filter.is_coinbase {
+        if wanted != is_coinbase(tx)? {
+            return Ok(false);
+        }
+    }
     if let Some(ids) = &filter.txids {
         if !ids.contains(&hex_field(tx, "txid", Some(32))?) {
             return Ok(false);
@@ -664,6 +760,24 @@ fn matches_tx(tx: &Value, filter: &TransactionFilter) -> Result<bool, QueryError
     if let Some(wanted) = filter.has_orchard {
         let actual = has_array(tx.get("orchard").and_then(|value| value.get("actions")))?;
         if wanted != actual {
+            return Ok(false);
+        }
+    }
+    if let Some(pools) = &filter.shielded_pools {
+        let spends = optional_array_count(tx.get("vShieldedSpend"))?;
+        let outputs = optional_array_count(tx.get("vShieldedOutput"))?;
+        let sapling = spends > 0 || outputs > 0;
+        if !matches_pools(
+            pools,
+            sapling,
+            action_count(tx, "orchard")? > 0,
+            action_count(tx, "ironwood")? > 0,
+        ) {
+            return Ok(false);
+        }
+    }
+    if let Some(wanted) = filter.has_ironwood {
+        if wanted != (action_count(tx, "ironwood")? > 0) {
             return Ok(false);
         }
     }
@@ -770,6 +884,27 @@ fn project_block(
                     "transparent_output_count" => {
                         ProjectedValue::Owned(json!(transaction_array_count(tx, "vout")?))
                     }
+                    "sapling_spend_count" => ProjectedValue::Owned(json!(optional_array_count(
+                        tx.get("vShieldedSpend")
+                    )?)),
+                    "sapling_output_count" => ProjectedValue::Owned(json!(optional_array_count(
+                        tx.get("vShieldedOutput")
+                    )?)),
+                    "orchard_action_count" => {
+                        ProjectedValue::Owned(json!(action_count(tx, "orchard")?))
+                    }
+                    "ironwood_action_count" => {
+                        ProjectedValue::Owned(json!(action_count(tx, "ironwood")?))
+                    }
+                    "is_coinbase" => ProjectedValue::Owned(json!(is_coinbase(tx)?)),
+                    "transaction_type" => ProjectedValue::Owned(json!(transaction_type(tx)?)),
+                    "expiry_height" => {
+                        ProjectedValue::Owned(json!(if tx.get("expiryheight").is_some() {
+                            node_u32(tx, "expiryheight")?
+                        } else {
+                            0
+                        }))
+                    }
                     "raw" => ProjectedValue::HexText(valid_hex_field(tx, "hex", None)?),
                     "vin" | "vout" | "decoded" => {
                         let value = if field == "decoded" {
@@ -872,6 +1007,10 @@ fn project_transaction_metadata(
             || filter
                 .has_orchard
                 .is_some_and(|wanted| wanted != tx.has_orchard)
+            || filter
+                .shielded_pools
+                .as_ref()
+                .is_some_and(|pools| !matches_pools(pools, tx.has_sapling, tx.has_orchard, false))
         {
             continue;
         }
@@ -1017,11 +1156,26 @@ pub fn execute_query<A: QueryArchive>(
         .any(|field| field == "raw" || field == "decoded");
     let header_only = request.field_selection.transaction.is_empty() && header_fields;
     let metadata_only = header_fields
-        && request
-            .field_selection
-            .transaction
-            .iter()
-            .all(|field| !["raw", "vin", "vout", "decoded"].contains(&field.as_str()))
+        && request.transaction_filter.is_coinbase.is_none()
+        && request.transaction_filter.has_ironwood.is_none()
+        && !request
+            .transaction_filter
+            .shielded_pools
+            .as_ref()
+            .is_some_and(|pools| pools.contains(&ShieldedPool::Ironwood))
+        && request.field_selection.transaction.iter().all(|field| {
+            matches!(
+                field.as_str(),
+                "txid"
+                    | "block_height"
+                    | "index"
+                    | "version"
+                    | "locktime"
+                    | "size_bytes"
+                    | "transparent_input_count"
+                    | "transparent_output_count"
+            )
+        })
         && request
             .transaction_filter
             .transparent_output_addresses
@@ -1275,6 +1429,247 @@ mod tests {
     }
     fn request() -> QueryRequest {
         serde_json::from_value(json!({"from_block":10,"limit":2})).unwrap()
+    }
+    #[test]
+    fn coinbase_classification_uses_actual_inputs_not_position_or_transaction_version() {
+        for (tx, expected) in [
+            (
+                json!({"vin":[{"coinbase":"00"}],"vout":[],"ironwood":{"actions":[{}]}}),
+                "coinbase",
+            ),
+            (
+                json!({"index":0,"version":6,"vin":[{"txid":"11".repeat(32),"vout":0}],"vout":[{}]}),
+                "transparent",
+            ),
+            (
+                json!({"vin":[],"vout":[],"ironwood":{"actions":[{}]}}),
+                "shielded",
+            ),
+            (
+                json!({"vin":[],"vout":[{}],"orchard":{"actions":[{}]}}),
+                "mixed",
+            ),
+            (json!({"vin":[],"vout":[],"vjoinsplit":[{}]}), "shielded"),
+            (json!({"vin":[],"vout":[]}), "unknown"),
+        ] {
+            assert_eq!(transaction_type(&tx).unwrap(), expected);
+            assert_eq!(is_coinbase(&tx).unwrap(), expected == "coinbase");
+        }
+        assert!(transaction_type(&json!({"vout":[]})).is_err());
+        let source = indexed_fixture(true);
+        let q:QueryRequest=serde_json::from_value(json!({"from_block":10,"to_block":11,"transaction_filter":{"is_coinbase":false},"field_selection":{"block":["height"],"transaction":["is_coinbase","transaction_type"]}})).unwrap();
+        let result = execute_query(&source, &q, &QueryControl::default()).unwrap();
+        assert!(result.data.transactions.is_empty());
+        assert_eq!(result.data.blocks.len(), 1);
+        assert_eq!(source.payload_reads.get(), 1);
+    }
+
+    fn shielded_fixture() -> Fixture {
+        let mut source = fixture(10);
+        let record = source.blocks.get_mut(&10).unwrap();
+        let mut full = FullBlock::decode(record.payload.as_slice()).unwrap();
+        let mut decoded: Value = serde_json::from_str(&full.decoded_json).unwrap();
+        let base = decoded["tx"][0].clone();
+        let mut txs = vec![base.clone(); 6];
+        for (index, tx) in txs.iter_mut().enumerate() {
+            tx["txid"] = json!(format!("{index:064x}"));
+        }
+        txs[1]["vShieldedSpend"] = json!([{}, {}]);
+        txs[1]["vShieldedOutput"] = json!([{}]);
+        txs[2]["orchard"] = json!({"actions":[{}, {}, {}]});
+        txs[3]["vShieldedSpend"] = json!([{}]);
+        txs[3]["vShieldedOutput"] = json!([{}, {}]);
+        txs[3]["orchard"] = json!({"actions":[{}, {}]});
+        txs[4]["vShieldedSpend"] = Value::Null;
+        txs[4]["orchard"] = Value::Null;
+        txs[3]["ironwood"] = json!({"actions":[{},{}]});
+        txs[5]["ironwood"] = json!({"actions":[{}]});
+        decoded["tx"] = json!(txs);
+        full.decoded_json = decoded.to_string();
+        record.payload = full.encode_to_vec();
+        source
+    }
+
+    #[test]
+    fn public_shielded_counts_and_pool_union_preserve_projection_order_and_and_semantics() {
+        let source = shielded_fixture();
+        let mut q: QueryRequest = serde_json::from_value(json!({"from_block":10,"to_block":11,"field_selection":{"block":["height"],"transaction":["index","sapling_spend_count","sapling_output_count","orchard_action_count"]}})).unwrap();
+        let all = execute_query(&source, &q, &QueryControl::default()).unwrap();
+        let counts: Vec<_> = all
+            .data
+            .transactions
+            .iter()
+            .map(|t| {
+                (
+                    t["sapling_spend_count"].as_u64().unwrap(),
+                    t["sapling_output_count"].as_u64().unwrap(),
+                    t["orchard_action_count"].as_u64().unwrap(),
+                )
+            })
+            .collect();
+        assert_eq!(
+            counts,
+            vec![
+                (0, 0, 0),
+                (2, 1, 0),
+                (0, 0, 3),
+                (1, 2, 2),
+                (0, 0, 0),
+                (0, 0, 0)
+            ]
+        );
+        q.transaction_filter.shielded_pools =
+            Some(vec![ShieldedPool::Sapling, ShieldedPool::Orchard]);
+        let indices = |q: &QueryRequest| {
+            execute_query(&source, q, &QueryControl::default())
+                .unwrap()
+                .data
+                .transactions
+                .iter()
+                .map(|t| t["index"].as_u64().unwrap())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(indices(&q), vec![1, 2, 3]);
+        q.transaction_filter.shielded_pools = Some(vec![
+            ShieldedPool::Sapling,
+            ShieldedPool::Orchard,
+            ShieldedPool::Ironwood,
+        ]);
+        assert_eq!(indices(&q), vec![1, 2, 3, 5]);
+        q.transaction_filter.has_ironwood = Some(true);
+        assert_eq!(indices(&q), vec![3, 5]);
+        q.transaction_filter.has_orchard = Some(true);
+        assert_eq!(indices(&q), vec![3]);
+        q.transaction_filter.has_ironwood = None;
+        q.transaction_filter.has_orchard = None;
+        q.transaction_filter.shielded_pools =
+            Some(vec![ShieldedPool::Sapling, ShieldedPool::Orchard]);
+        q.transaction_filter.has_sapling = Some(true);
+        assert_eq!(indices(&q), vec![1, 3]);
+        q.transaction_filter.has_sapling = Some(false);
+        assert_eq!(indices(&q), vec![2]);
+        q.transaction_filter.shielded_pools = Some(vec![]);
+        assert!(indices(&q).is_empty());
+        assert_eq!(
+            execute_query(&source, &q, &QueryControl::default())
+                .unwrap()
+                .data
+                .blocks
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn shielded_counts_reject_malformed_bundles_and_use_payload_when_cache_lacks_counts() {
+        let source = indexed_fixture(true);
+        let q:QueryRequest=serde_json::from_value(json!({"from_block":10,"to_block":11,"field_selection":{"block":[],"transaction":["sapling_spend_count","orchard_action_count"]}})).unwrap();
+        let page = execute_query(&source, &q, &QueryControl::default()).unwrap();
+        assert_eq!(
+            page.data.transactions[0],
+            json!({"sapling_spend_count":0,"orchard_action_count":0})
+        );
+        assert_eq!(source.payload_reads.get(), 1);
+        for (field, value) in [
+            ("vShieldedSpend", json!(false)),
+            ("orchard", json!("bad")),
+            ("orchard", json!({"actions":{}})),
+        ] {
+            let mut source = shielded_fixture();
+            let record = source.blocks.get_mut(&10).unwrap();
+            let mut full = FullBlock::decode(record.payload.as_slice()).unwrap();
+            let mut decoded: Value = serde_json::from_str(&full.decoded_json).unwrap();
+            decoded["tx"][0][field] = value;
+            full.decoded_json = decoded.to_string();
+            record.payload = full.encode_to_vec();
+            assert_eq!(
+                execute_query(&source, &q, &QueryControl::default())
+                    .unwrap_err()
+                    .code,
+                "INVALID_STORED_TRANSACTION"
+            );
+        }
+    }
+
+    #[test]
+    fn ironwood_queries_never_infer_absence_from_legacy_metadata() {
+        for filter in [
+            json!({"has_ironwood":true}),
+            json!({"has_ironwood":false}),
+            json!({"shielded_pools":["ironwood"]}),
+        ] {
+            let source = indexed_fixture(true);
+            let q:QueryRequest=serde_json::from_value(json!({"from_block":10,"to_block":11,"transaction_filter":filter,"field_selection":{"block":[],"transaction":["txid"]}})).unwrap();
+            execute_query(&source, &q, &QueryControl::default()).unwrap();
+            assert_eq!(source.payload_reads.get(), 1);
+        }
+        let q:QueryRequest=serde_json::from_value(json!({"from_block":10,"to_block":11,"field_selection":{"block":[],"transaction":["index","ironwood_action_count"]}})).unwrap();
+        let rows = execute_query(&shielded_fixture(), &q, &QueryControl::default())
+            .unwrap()
+            .data
+            .transactions;
+        assert_eq!(
+            rows.iter()
+                .map(|t| t["ironwood_action_count"].as_u64().unwrap())
+                .collect::<Vec<_>>(),
+            vec![0, 0, 0, 2, 0, 1]
+        );
+    }
+
+    #[test]
+    fn pool_filter_cache_and_payload_match_and_legacy_cursor_fingerprints_are_preserved() {
+        for pools in [
+            vec![],
+            vec![ShieldedPool::Sapling],
+            vec![ShieldedPool::Orchard],
+            vec![ShieldedPool::Sapling, ShieldedPool::Orchard],
+        ] {
+            let mut q = compact_request();
+            q.transaction_filter.shielded_pools = Some(pools);
+            let cached = indexed_fixture(true);
+            let fallback = indexed_fixture(false);
+            let a = execute_query(&cached, &q, &QueryControl::default()).unwrap();
+            let b = execute_query(&fallback, &q, &QueryControl::default()).unwrap();
+            assert_eq!(a.data, b.data);
+            assert_eq!(cached.payload_reads.get(), 0);
+        }
+        let q = request();
+        let to = 13;
+        let legacy = json!({"txids":null,"versions":null,"has_sapling":null,"has_orchard":null,"transparent_output_addresses":null});
+        // Serialize the original field order, independently of the new struct.
+        let legacy_filter = r#"{"txids":null,"versions":null,"has_sapling":null,"has_orchard":null,"transparent_output_addresses":null}"#;
+        assert_eq!(
+            serde_json::from_str::<Value>(legacy_filter).unwrap(),
+            legacy
+        );
+        let old = format!(
+            "[{},{},{},{},{}]",
+            q.from_block,
+            to,
+            q.limit,
+            serde_json::to_string(&q.field_selection).unwrap(),
+            legacy_filter
+        );
+        assert_eq!(
+            fingerprint(&q, to).unwrap(),
+            hex::encode(Sha256::digest(old.as_bytes()))
+        );
+        let mut changed = q;
+        changed.transaction_filter.shielded_pools = Some(vec![ShieldedPool::Orchard]);
+        assert_ne!(
+            fingerprint(&changed, to).unwrap(),
+            hex::encode(Sha256::digest(old.as_bytes()))
+        );
+        for invalid in [
+            json!(["sapling", "sapling"]),
+            json!(["sprout"]),
+            json!(["sapling", "orchard", "sapling"]),
+        ] {
+            let wire = json!({"from_block":10,"transaction_filter":{"shielded_pools":invalid}});
+            if let Ok(parsed) = serde_json::from_value::<QueryRequest>(wire) {
+                assert!(validate_query(&parsed).is_err());
+            }
+        }
     }
 
     #[test]

@@ -24,6 +24,8 @@ deployment claim. Never put a private deployment token into a public browser bun
 | `GET /height` | Indexed coverage and latest available source-status metadata |
 | `POST /query` | Bounded JSON field projection and continuation |
 | `POST /transactions` | Complete bounded transaction-ID lookup under one snapshot |
+| `GET /mempool` | Optional read-only testnet mempool observation; at most 20 metadata rows |
+| `POST /transaction` | Optional live node lookup by TX ID; pending, mined or not observed |
 | `GET /capabilities` | Compiled routes, fields, filters and protocol limits; not live readiness |
 
 `POST /query.bin` is not implemented in this slice. SDK and examples use JSON.
@@ -391,3 +393,12 @@ contents, database credentials, or raw internal error messages.
 The current implementation is a public-data query engine. Successful query or
 payload round-trip evidence does not establish wallet interoperability, private
 note scanning, current full-node synchronization, or a performance win.
+
+## Public shielded structure and live observations
+
+See [Public shielded queries](PUBLIC_SHIELDED.md) for Sapling/Orchard/Ironwood
+counts, pool union predicates, coinbase classification, and the optional protected
+node source. `/transactions` remains a snapshot-scoped archive lookup;
+`/transaction` is a separate live node observation. Absence from an archive range
+does not mean pending. Live routes share authentication and request admission;
+they do not expose arbitrary RPC, signing or broadcast.

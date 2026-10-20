@@ -2,7 +2,8 @@
 const MAX_BODY_BYTES = 32 * 1024 * 1024;
 const MAX_CURSOR_CHARACTERS = 4096;
 const BLOCK_FIELDS = ["height", "hash", "previous_hash", "time", "raw", "decoded"];
-const TRANSACTION_FIELDS = ["txid", "block_height", "index", "version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count", "raw", "vin", "vout", "decoded"];
+const SHIELDED_COUNT_FIELDS = ["sapling_spend_count", "sapling_output_count", "orchard_action_count", "ironwood_action_count"];
+const TRANSACTION_FIELDS = [...SHIELDED_COUNT_FIELDS, "is_coinbase", "transaction_type", "expiry_height","txid", "block_height", "index", "version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count", "raw", "vin", "vout", "decoded"];
 const TRANSACTION_IDENTITIES = ["txid", "block_height", "index"];
 const DEFAULT_TRANSACTION_FIELDS = [...TRANSACTION_IDENTITIES, "version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count"];
 const MAX_TRANSACTIONS_BODY_BYTES = 4 * 1024 * 1024;
@@ -38,6 +39,16 @@ function snapshot(value, from, to) {
     && (to === value.archive_start ? value.boundary_hash === "" : hash(value.boundary_hash));
 }
 
+function classification(tx) {
+  return (!Object.hasOwn(tx,"is_coinbase") || typeof tx.is_coinbase === "boolean")
+    && (!Object.hasOwn(tx,"transaction_type") || ["coinbase","transparent","shielded","mixed","unknown"].includes(tx.transaction_type))
+    && (!(Object.hasOwn(tx,"is_coinbase") && Object.hasOwn(tx,"transaction_type")) || tx.is_coinbase === (tx.transaction_type === "coinbase"));
+}
+function liveMetadata(tx) {
+  return object(tx) && hash(tx.txid) && typeof tx.is_coinbase === "boolean" && typeof tx.transaction_type === "string" && classification(tx)
+    && integer(tx.version,1,0xffffffff) && integer(tx.size_bytes,1,0xffffffff)
+    && SHIELDED_COUNT_FIELDS.every(field=>integer(tx[field],0,0xffffffff));
+}
 function validateTransactionsResult(value, request, fields) {
   const fail = () => { throw new ProtocolError("INVALID_TRANSACTIONS_RESPONSE"); };
   if (!object(value) || !["mainnet", "testnet", "regtest"].includes(value.network)
@@ -61,10 +72,11 @@ function validateTransactionsResult(value, request, fields) {
         || !integer(tx.index, 0, 0xffffffff)
         || tx.block_height < previousHeight || (tx.block_height === previousHeight && tx.index <= previousIndex)) fail();
     previousHeight = tx.block_height; previousIndex = tx.index; found.add(tx.txid);
-    for (const field of ["version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count"]) {
+    for (const field of [...SHIELDED_COUNT_FIELDS, "expiry_height", "version", "locktime", "size_bytes", "transparent_input_count", "transparent_output_count"]) {
       if (Object.hasOwn(tx, field) && !integer(tx[field], field === "size_bytes" ? 1 : 0, 0xffffffff)) fail();
     }
     if (Object.hasOwn(tx, "raw") && (typeof tx.raw !== "string" || tx.raw.length === 0 || tx.raw.length % 2 !== 0 || !/^[0-9a-f]+$/.test(tx.raw))) fail();
+    if (!classification(tx)) throw new ProtocolError("INVALID_TRANSACTION_METADATA");
     for (const field of ["vin", "vout", "decoded"]) {
       if (Object.hasOwn(tx, field)) {
         if (field === "decoded" ? !object(tx[field]) : !Array.isArray(tx[field])) fail();
@@ -88,13 +100,18 @@ function validateCapabilities(value) {
       || ["max_waiting_queries", "queue_timeout_ms"].some(key => object(value.limits) && Object.hasOwn(value.limits, key) && !integer(value.limits[key], 1, 0x100000000))
       || !bounds(value.query, ["max_scan_blocks", "max_response_bytes"])
       || ["max_adaptive_scan_blocks", "adaptive_scan_ms", "max_adaptive_response_bytes", "adaptive_target_response_bytes"].some(key => object(value.query) && Object.hasOwn(value.query, key) && !integer(value.query[key], 1, 0x100000000))
-      || !list(value.query.block_fields, BLOCK_FIELDS) || !list(value.query.transaction_fields, TRANSACTION_FIELDS)
+      || !list(value.query.block_fields, BLOCK_FIELDS) || !list(value.query.transaction_fields, TRANSACTION_FIELDS.filter(field => ![...SHIELDED_COUNT_FIELDS, "is_coinbase", "transaction_type", "expiry_height"].includes(field)))
       || !list(value.query.transaction_filters, ["txids", "versions", "has_sapling", "has_orchard", "transparent_output_addresses"])
       || !bounds(value.transactions, ["max_ids", "max_range_blocks", "max_records", "max_response_bytes"])
       || !list(value.transactions.required_fields, TRANSACTION_IDENTITIES)
       || !list(value.transactions.default_fields, DEFAULT_TRANSACTION_FIELDS)
       || value.transactions.required_fields.some(field => !value.query.transaction_fields.includes(field))
       || value.transactions.default_fields.some(field => !value.query.transaction_fields.includes(field))) throw new ProtocolError("INVALID_CAPABILITIES_RESPONSE");
+  if (Object.hasOwn(value, "live") && (!object(value.live)
+      || typeof value.live.source_required !== "boolean" || typeof value.live.configured !== "boolean"
+      || !integer(value.live.max_response_bytes, 1, MAX_TRANSACTIONS_BODY_BYTES)
+      || !integer(value.live.max_mempool_rows, 1, 20)
+      || typeof value.live.scope !== "string" || !value.live.scope.length)) throw new ProtocolError("INVALID_CAPABILITIES_RESPONSE");
   return value;
 }
 function validateTimeout(value) {
@@ -120,9 +137,10 @@ function validateQueryResult(value, query) {
     throw new ProtocolError();
   }
   for (const tx of value.data.transactions) {
-    for (const field of ["size_bytes", "transparent_input_count", "transparent_output_count"]) {
+    for (const field of [...SHIELDED_COUNT_FIELDS, "expiry_height", "size_bytes", "transparent_input_count", "transparent_output_count"]) {
       if (Object.hasOwn(tx, field) && !integer(tx[field], field === "size_bytes" ? 1 : 0, 0xffffffff)) throw new ProtocolError("INVALID_TRANSACTION_METADATA");
     }
+    if (!classification(tx)) throw new ProtocolError("INVALID_TRANSACTION_METADATA");
     for (const field of ["vin", "vout", "decoded"]) {
       if (Object.hasOwn(tx, field)) ensureNestedNumbersAreStrings(tx[field]);
     }
@@ -244,7 +262,29 @@ export class PrepClient {
         if (selected !== undefined && (!Array.isArray(selected) || new Set(selected).size !== selected.length || selected.some(field => !fields.includes(field)))) throw new TypeError("Invalid selected fields");
       }
     }
+    const pools = query.transaction_filter?.shielded_pools;
+    if (pools !== undefined && pools !== null && (!Array.isArray(pools) || pools.length > 3 || new Set(pools).size !== pools.length || pools.some(pool => !["sapling", "orchard", "ironwood"].includes(pool)))) throw new TypeError("Invalid shielded_pools filter");
     return validateQueryResult(await this.#request("query", query, options), query);
+  }
+
+  /** Optional live-node observation, separate from archive queries. */
+  async getTransaction(txid, options = {}) {
+    if (!hash(txid)) throw new TypeError("Invalid transaction ID");
+    const value=await this.#request("transaction",{txid},options);
+    if (!object(value) || value.network!=="testnet" || value.txid!==txid || !integer(value.observed_at,1,Number.MAX_SAFE_INTEGER) || !["pending","mined","not_observed"].includes(value.status)) throw new ProtocolError("INVALID_LIVE_OBSERVATION");
+    if (value.status==="not_observed") { if(value.transaction!==null || value.block_height!=null || value.block_hash!=null || value.confirmations!=null) throw new ProtocolError("INVALID_LIVE_OBSERVATION");return value; }
+    if (!liveMetadata(value.transaction) || value.transaction.txid!==txid || !object(value.decoded)) throw new ProtocolError("INVALID_LIVE_OBSERVATION");
+    ensureNestedNumbersAreStrings(value.decoded);
+    if (value.status==="pending" ? value.block_height!==null || value.confirmations!==null || value.block_hash!==null || value.transaction.is_coinbase
+      : !integer(value.block_height,0,0xffffffff) || !hash(value.block_hash) || !integer(value.source_height,value.block_height,0xffffffff) || value.confirmations!==value.source_height-value.block_height+1) throw new ProtocolError("INVALID_LIVE_OBSERVATION");
+    return value;
+  }
+  async getMempool(options = {}) {
+    const value=await this.#request("mempool",undefined,options);
+    if (!object(value) || value.network!=="testnet" || !integer(value.observed_at,1,Number.MAX_SAFE_INTEGER) || !integer(value.source_total,0,50000)
+      || !integer(value.max_rows,1,100) || !integer(value.raced_out,0,100) || !Array.isArray(value.transactions) || value.transactions.length>Math.min(value.max_rows,value.source_total)
+      || value.has_more!==(value.source_total>value.max_rows) || value.transactions.some(tx=>!liveMetadata(tx)||tx.is_coinbase!==false) || new Set(value.transactions.map(tx=>tx.txid)).size!==value.transactions.length) throw new ProtocolError("INVALID_MEMPOOL_OBSERVATION");
+    return value;
   }
 
   /** Complete bounded sparse lookup. Rows are ordered by mined height and index. */

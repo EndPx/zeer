@@ -324,12 +324,82 @@ async fn capabilities(State(state): State<HttpState>, headers: HeaderMap) -> Res
     if let Err(error) = authorize(&state, &headers) {
         return error_response(error);
     }
-    let mut response = axum::Json(crate::capabilities::document()).into_response();
+    let mut document = crate::capabilities::document();
+    document["live"]["configured"] = json!(crate::live::configured());
+    let mut response = axum::Json(document).into_response();
     response.headers_mut().insert(
         "cache-control",
         axum::http::HeaderValue::from_static("no-store"),
     );
     response
+}
+
+async fn live_read(state: HttpState, headers: HeaderMap, txid: Option<String>) -> Response {
+    if let Err(error) = authorize(&state, &headers) {
+        return error_response(error);
+    }
+    if !crate::live::configured() {
+        return error_response(QueryError::new(503, "LIVE_SOURCE_NOT_CONFIGURED"));
+    }
+    let permit = match admit(&state).await {
+        Ok(permit) => Arc::new(permit),
+        Err(error) => return error_response(error),
+    };
+    let work = async {
+        match txid {
+            Some(txid) => crate::live::transaction(&txid).await,
+            None => crate::live::mempool().await,
+        }
+    };
+    match tokio::time::timeout(Duration::from_secs(12), work).await {
+        Ok(Ok(value)) => match serde_json::to_vec(&value) {
+            Ok(bytes) if bytes.len() <= crate::live::MAX_LIVE_BYTES => {
+                let mut response = Response::new(Body::from(Bytes::from_owner(PermitBytes {
+                    bytes,
+                    _permit: permit,
+                })));
+                response.headers_mut().insert(
+                    "content-type",
+                    axum::http::HeaderValue::from_static("application/json"),
+                );
+                response.headers_mut().insert(
+                    "cache-control",
+                    axum::http::HeaderValue::from_static("no-store"),
+                );
+                response
+            }
+            Ok(_) => error_response(QueryError::new(413, "LIVE_RESPONSE_TOO_LARGE")),
+            Err(_) => error_response(QueryError::new(503, "LIVE_SOURCE_UNAVAILABLE")),
+        },
+        _ => error_response(QueryError::new(503, "LIVE_SOURCE_UNAVAILABLE")),
+    }
+}
+async fn mempool(State(state): State<HttpState>, headers: HeaderMap) -> Response {
+    live_read(state, headers, None).await
+}
+async fn transaction(
+    State(state): State<HttpState>,
+    headers: HeaderMap,
+    body: Result<Bytes, BytesRejection>,
+) -> Response {
+    if let Err(error) = authorize(&state, &headers) {
+        return error_response(error);
+    }
+    #[derive(serde::Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Request {
+        txid: String,
+    }
+    let request = body
+        .ok()
+        .and_then(|b| serde_json::from_slice::<Request>(&b).ok());
+    let Some(request) = request else {
+        return error_response(QueryError::new(400, "INVALID_TRANSACTION_REQUEST"));
+    };
+    if crate::full_source::check_hash(&request.txid).is_err() {
+        return error_response(QueryError::new(400, "INVALID_TXID"));
+    }
+    live_read(state, headers, Some(request.txid)).await
 }
 
 struct CancelOnDrop(Arc<AtomicBool>);
@@ -501,6 +571,8 @@ fn build_router(state: HttpState) -> Router {
         .route("/height", get(height))
         .route("/query", post(query))
         .route("/transactions", post(transactions))
+        .route("/transaction", post(transaction))
+        .route("/mempool", get(mempool))
         .layer(DefaultBodyLimit::max(MAX_REQUEST_BYTES))
         .with_state(state)
 }

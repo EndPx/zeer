@@ -185,3 +185,14 @@ test("real HTTP sparse/capabilities routes forward auth and reuse a snapshot", a
     assert.deepEqual(calls[1].query.at, first.snapshot);
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });
+
+
+test("live capabilities remain optional and validate advertised observation budgets", async () => {
+  const value = capabilities();
+  value.live = {source_required:true,configured:true,max_response_bytes:4194304,max_mempool_rows:20,scope:"testnet_node_observations_not_archive_or_finality"};
+  assert.deepEqual((await client(value).getCapabilities()).live, value.live);
+  for (const mutate of [v => {v.configured="true";}, v => {v.max_mempool_rows=21;}, v => {v.max_response_bytes=0;}]) {
+    const changed=structuredClone(value);mutate(changed.live);
+    await assert.rejects(client(changed).getCapabilities(), {code:"INVALID_CAPABILITIES_RESPONSE"});
+  }
+});

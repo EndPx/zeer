@@ -150,3 +150,20 @@ hash, timestamp and transaction count against an independent Prep projection,
 and check that the committed prefix is unchanged. A repeat sync to the completed
 target must leave both checkpoint and entity digest unchanged. Save operational
 proofs locally; never publish deployment credentials or benchmark result files.
+
+## Optional read-only testnet node observations
+
+`PREP_LIVE_SOURCE_FILE` names an absolute file containing the private node RPC URL;
+`PREP_LIVE_COOKIE_FILE` names an absolute file containing its `user:password` cookie.
+Keep both outside the checkout, readable only by the service user. Private HTTP
+requires explicit `PREP_LIVE_ALLOW_INSECURE=true`; remote transport should use TLS.
+The process reads these bounded files for each observation, allowing an operator
+to refresh a rotated cookie atomically without reopening an admitted archive.
+Do not put either value in frontend bundles, public examples, or logs.
+
+The source identity must be Zcash testnet with the expected genesis. The source
+allowlist contains only blockchain info, block hash/block reads, raw transaction
+lookup and raw mempool lookup. `/transaction` and `/mempool` share the Prep HTTP
+authentication, two active request permits, bounded queue and work deadline.
+They return a visible unavailable response when the optional source cannot be
+verified; archive `/query` remains separate. See [live observation semantics](PUBLIC_SHIELDED.md).
