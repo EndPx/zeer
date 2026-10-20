@@ -36,9 +36,10 @@ and reduced-motion reflow. Evidence stays under ignored `.deploy-local/`.
 
 ## Content ownership
 
-`pages.mjs` explicitly lists published sources. New teaching pages live in
-`content/`; existing protocol, installation and scanner contracts remain in
-`docs/` and `examples/`. `scripts/prepare.mjs` generates Docusaurus inputs into
+`pages.mjs` explicitly lists published sources. Public chapters live in `content/`
+and focus on the topic named in their title. Full protocol, installation and
+scanner contracts remain in `docs/` and `examples/`, linked where relevant.
+`scripts/prepare.mjs` generates Docusaurus inputs into
 `.generated/docs`, rewrites published source links to docs routes, and points
 other repository links at their GitHub sources. It clears only the validated
 generated directory so retired pages cannot remain published.

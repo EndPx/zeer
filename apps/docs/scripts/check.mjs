@@ -43,6 +43,38 @@ try {
     await page.getByRole('heading', {level: 1, name: 'Quickstart with AI', exact: true}).waitFor();
   }
   report.interactions.push('Chef and Prep onboarding sidebar order and AI guide navigation');
+  for (const product of ['chef', 'prep']) {
+    await page.setViewportSize({width: 1440, height: 1000});
+    await page.emulateMedia({reducedMotion: 'no-preference'});
+    await page.goto(origin + `/docs/${product}/overview/`);
+    const image = page.locator('picture.overview-demo img');
+    await expect(image).toBeVisible();
+    await page.waitForFunction(() => document.querySelector('picture.overview-demo img')?.naturalWidth > 0);
+    assert.match(await image.evaluate(img => img.currentSrc), new RegExp(`${product}-query\\.gif$`));
+    await expect(page.locator('.theme-admonition-info')).toBeVisible();
+    await page.screenshot({path: path.join(evidence, `${product}-overview-desktop.png`), fullPage: true});
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    await page.waitForFunction(product => document.querySelector('picture.overview-demo img')?.currentSrc.endsWith(`${product}-query.png`), product);
+    await page.setViewportSize({width: 375, height: 900});
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    const overviewAxe = await new AxeBuilder({page}).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+    assert.equal(overviewAxe.violations.length, 0, JSON.stringify(overviewAxe.violations.map(v => v.id)));
+    await page.screenshot({path: path.join(evidence, `${product}-overview-mobile.png`), fullPage: true});
+  }
+  await page.emulateMedia({reducedMotion: 'no-preference'});
+  for (const width of [1024, 1440, 1920]) {
+    await page.setViewportSize({width, height: 900});
+    const alignment = await page.evaluate(() => ({
+      link: document.querySelector('.navbar__items > .navbar__link').getBoundingClientRect().left,
+      sidebar: document.querySelector('.theme-doc-sidebar-container').getBoundingClientRect().right,
+      logo: document.querySelector('.navbar__brand').getBoundingClientRect().left,
+      overflow: document.documentElement.scrollWidth > innerWidth,
+    }));
+    assert.ok(alignment.link >= alignment.sidebar - 1, JSON.stringify(alignment));
+    assert.equal(alignment.logo, 16);
+    assert.equal(alignment.overflow, false);
+  }
+  report.interactions.push('Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment');
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({width, height: 900});
     await page.goto(origin + '/docs/chef/shielded/memos/');

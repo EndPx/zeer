@@ -1,30 +1,26 @@
 # Zeer Prep
 
-Prep is Zeer's public Zcash data layer. Retrieve block headers, transaction metadata, transparent outputs and public shielded structures through HTTP queries.
+**Zeer Prep** is the public Zcash data API behind Chef. Query blocks and transactions by range, apply public filters, and select the fields your application needs.
 
-## Query exactly the public fields you need
+<picture class="overview-demo">
+  <source media="(prefers-reduced-motion: reduce)" srcset="/docs/demos/prep-query.png" />
+  <img src="/docs/demos/prep-query.gif" alt="A public Prep request returning testnet block headers 0 and 1." width="1040" height="600" />
+</picture>
 
-Use a starting block, optional transaction filters and field selection. Headers-only queries can suppress transaction records; metadata queries can avoid full decoded bodies. The response explains the scanned range and provides continuation when needed.
+*Recorded public testnet query.*
 
-| Task | Guide |
-| --- | --- |
-| Make your first request | [Quickstart](/docs/prep/quickstart/) |
-| Build the first integration with an assistant | [Quickstart with AI](/docs/prep/quickstart-ai/) |
-| Move from a request to an application | [Getting Started](/docs/prep/getting-started/) |
-| Install the JavaScript/TypeScript package | [Clients](/docs/prep/clients/) |
-| Understand every request and response field | [Query & response](/docs/prep/query/) |
-| Combine filters and choose fields | [Filters & field selection](/docs/prep/fields/) |
-| Finish a long historical scan | [Continuation](/docs/prep/continuation/) |
-| Inspect a pending or mined transaction | [Transaction lookup & mempool](/docs/prep/transactions/) |
+:::info Prep & Chef
+**Prep** provides public chain data for direct queries and custom pipelines. **[Chef](/docs/chef/overview/)** adds TypeScript handlers, PostgreSQL entities and GraphQL.
+:::
 
-## Shielded structure is public; note plaintext is private
+## Key features
 
-Prep can report public Sapling descriptions and separate Orchard/Ironwood action counts. Those are structural observations, not a count of payments. Shielded recipients, individual received amounts and memo text require authorized decryption in the [local Chef workflow](/docs/chef/shielded/local/).
+- **[Range queries](/docs/prep/query/)** — read available block history.
+- **[Fields & filters](/docs/prep/fields/)** — return the public records and fields you need.
+- **[Continuation](/docs/prep/continuation/)** — page through a captured historical range.
+- **[Public shielded activity](/docs/prep/shielded/)** — inspect Sapling, Orchard and Ironwood components.
+- **[JavaScript / TypeScript client](/docs/prep/clients/)** — integrate with native fetch and typed declarations.
 
-## Check coverage first
+## Quick links
 
-Read `/height` for the available start, indexed height and readiness. An unavailable source-tip observation does not mean the source tip is zero. The [public preview contract](/docs/prep/public-api/) explains the shared endpoint and its quotas.
-
-[Run your first query](/docs/prep/quickstart/) or [open Prep Playground](https://zeer.endpx.cloud/app/prep).
-
-Browse [cURL examples](/docs/prep/curl/), [API access & tokens](/docs/prep/tokens/), [Supported networks](/docs/prep/networks/) and [Troubleshooting](/docs/prep/troubleshooting/) as your integration grows.
+[Quickstart](/docs/prep/quickstart/) · [Quickstart with AI](/docs/prep/quickstart-ai/) · [Playground](https://zeer.endpx.cloud/app/prep) · [GitHub](https://github.com/EndPx/zeer)

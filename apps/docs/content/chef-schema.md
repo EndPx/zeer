@@ -1,6 +1,6 @@
 # Entity schema
 
-Define the application records you want to query. Each entity requires `id: ID!`. The current schema supports `ID`, `String`, `Boolean`, `Int` and `BigInt` scalar fields, with nullable fields where needed.
+Define entities in `schema.graphql`. Each requires `id: ID!`.
 
 ```graphql
 type OrchardTransaction {
@@ -11,28 +11,24 @@ type OrchardTransaction {
 }
 ```
 
-This matches the [filtered public example](https://github.com/EndPx/zeer/blob/main/examples/chef-filtered/schema.graphql). Stable IDs make replay and application lookups predictable. For a transaction entity, the transaction ID is useful; note observations need the scanner's stable note identity instead.
+| Scalar | Handler / GraphQL representation |
+| --- | --- |
+| `ID`, `String` | String |
+| `Boolean` | Boolean |
+| `Int` | Bounded integer |
+| `BigInt` | JavaScript `bigint` in handlers; decimal string in GraphQL |
+
+Use `!` for required fields. Lists and entity relationships are outside the current schema profile.
 
 ## Generate types
 
-From a checkout with Chef built:
+In a starter project:
 
 ```sh
-node packages/chef/dist/cli.js codegen --config examples/chef-filtered/chef.config.ts
+npm run codegen
+npm run typecheck
 ```
 
-Standalone projects created by the [quickstart](/docs/chef/quickstart/) provide `npm run codegen` and a TypeScript check. Generated types describe the configured model. Do not edit generated files to compensate for an incompatible schema.
+Use stable IDs and exact integer values. Optional [equality indexes](/docs/chef/indexes/) use `@index` on supported fields.
 
-## Exact values
-
-Use JavaScript `bigint` in handlers for `BigInt` fields. GraphQL returns those values as canonical decimal strings. Preserve zatoshi values as integers rather than converting them into floating-point amounts.
-
-The memo example deliberately uses `memoText: String` as a nullable field: not every 512-byte memo has a safe text representation. It also preserves `memoHex` and an explicit `memoKind`.
-
-## Query indexes
-
-Use an argument-free `@index` on supported fields only when it serves an actual equality query. There are bounds and identity implications; the [index reference](/docs/chef/indexes/) explains them. Chef does not automatically create arbitrary indexes from reader queries.
-
-## Current boundaries
-
-Lists, relationships, custom scalar types and schema-level directives are not part of this schema profile. Do not copy an Envio or Hasura schema unchanged and assume those features are supported. A model change requires [explicit evolution](/docs/chef/evolution/) into a new projection.
+**Notes:** Schema changes require [a new projection namespace](/docs/chef/evolution/); do not edit generated types to bypass a mismatch.

@@ -12,6 +12,16 @@ continues with Getting Started and Clients before query references. Sidebar labe
 can be concise while page titles stay descriptive. The shared introduction links
 directly to both product onboarding paths.
 
+Editorial update, 21 October: each page answers its chapter title. Supported
+networks contains a chain table and short notes only. Quickstarts contain steps
+and commands; references use formats/tables; troubleshooting pairs symptoms with
+actions. Keep implementation history and validation reports in repository references.
+Overview pages use a product introduction, a recorded public-query GIF, a short
+Prep/Chef callout, linked key features and quick links. GIFs play once for four
+seconds and use a still frame under reduced motion; never invent indexing metrics.
+On desktop, the logo occupies the sidebar-width header region; primary navigation
+starts to the right of that boundary. Mobile retains its compact navbar.
+
 Use the existing dark tokens, self-hosted Manrope and IBM Plex Mono. The UI/UX
 documentation lookup recommended readable sans/mono text and predictable navigation;
 its blue palette and FAQ landing were rejected in favor of Zeer's approved identity.

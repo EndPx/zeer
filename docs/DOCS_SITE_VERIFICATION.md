@@ -14,9 +14,9 @@ responsive product navigation, section headings, metadata, sitemap, self-hosted
 fonts and generated LLM references. Font notices accompany the static assets.
 Search index download starts on user action; search terms remain in the browser.
 
-`apps/docs/pages.mjs` is the publication allowlist. Existing API, quickstart,
-scanner, evolution and index contracts are rendered from their original repository
-sources. New explanatory content lives in `apps/docs/content`. Edit links point
+`apps/docs/pages.mjs` is the publication allowlist. Concise public chapters live
+in `apps/docs/content` and link to the full API, quickstart, scanner, evolution
+and index contracts in the repository. Edit links point
 at the actual source. The generator removes only its validated generated-docs
 directory before writing, preventing retired pages from remaining routable.
 
@@ -33,8 +33,9 @@ npm run typecheck -w @zeer/web
 npm run build:chef
 ```
 
-All completed successfully against the final source/build. The public browser
-check used real Chrome and verified:
+All commands passed during the initial publication/onboarding work. The current
+editorial revision reran the docs build and browser checks; unchanged web and Chef
+packages were not rebuilt for this docs-only revision. Real Chrome verified:
 
 - HTTP 200 and the correct heading for all 35 pages; no missing same-page anchors.
 - Explicit Overview, Quickstart and Quickstart with AI order in each product
@@ -46,6 +47,10 @@ check used real Chrome and verified:
 - Code clipboard copy and touch copy-control visibility without hover.
 - Mobile drawer navigation between products and long-reference reflow with
   reduced motion enabled.
+- Chef and Prep overview GIF loading, reduced-motion PNG selection, and zero
+  automated axe findings on both overviews at 375px.
+- Desktop primary navigation starts beyond the sidebar boundary at 1024, 1440
+  and 1920px, with the brand still at the original left inset.
 - The existing website's Get started link navigates into the new documentation.
 
 The real public Prep example returned genesis headers 0 and 1, with the requested
@@ -70,6 +75,10 @@ screenshots plus the search, font-preload and publication code. The rendered
 design verdict passed for those supplied views. These bounded reviews do not
 claim that all possible pages, devices, assistive technologies or upstream
 dependency behaviors have been manually tested.
+
+The concise-content review found one P2: optional Docker setup appeared to make
+namespace migration optional for existing PostgreSQL users. The guide now makes
+only `db:up` conditional and requires `migrate` and `status` for both choices.
 
 ## Supplementary diagnostics and limits
 
@@ -125,10 +134,14 @@ Detailed screenshots, browser reports, public query responses, Lighthouse output
 and deployment helpers remain local under `.deploy-local/docs-site-20261021/`.
 The additional client/cURL verification and publication helper are under
 `.deploy-local/docs-onboarding-20261021/`.
-The expanded Supported networks page lists Zcash Testnet, its `testnet`
-identifier, public Prep base URL and the height/capabilities/query routes.
-The source's network identifier and genesis coverage were checked directly.
-Its endpoint tables also passed desktop/mobile reflow and axe checks; supporting
-screenshots remain in the same onboarding evidence directory.
+The current revision keeps Supported networks to one chain/network/Prep-URL
+table plus notes. All 35 chapters were shortened around their named topic.
+Chef and Prep overviews include original four-second, single-play GIFs of real
+public query responses, relationship callouts, linked features and quick links.
+These recordings illustrate queries, not indexing throughput. Static result
+frames replace animation for reduced-motion preferences. Screenshot sources,
+query proofs and the docs-only release helper are under
+`.deploy-local/docs-concise-20261021/`; final browser screenshots are under the
+site verification directory above. The three cURL bodies were reverified.
 No viewing keys, local environment, private receipt output or third-party research
 corpus is part of the published static release or this commit.

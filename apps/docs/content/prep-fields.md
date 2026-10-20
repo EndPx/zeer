@@ -1,8 +1,6 @@
 # Filters & field selection
 
-Field selection controls returned data. Filters control which public transactions match. They are independent parts of a Prep query.
-
-## Start with a small projection
+## Field selection
 
 ```json
 {
@@ -14,36 +12,38 @@ Field selection controls returned data. Filters control which public transaction
 }
 ```
 
-| Field | Meaning |
+| Block field | Value |
 | --- | --- |
-| Block `height`, `hash`, `previous_hash`, `time` | Block identity, linkage and source timestamp |
-| Transaction `txid`, `block_height` | Transaction identity and containing block |
-| `index` | Zero-based position within its block; the first transaction has position 0 |
-| `version`, `locktime` | Public transaction metadata |
-| `size_bytes` | Validated serialized transaction length |
-| `vin`, `vout` | Public decoded transparent inputs and outputs |
-| `raw`, `decoded` | Complete stored serialization or node-decoded structure |
+| `height` | Block height |
+| `hash`, `previous_hash` | Block hashes |
+| `time` | Unix timestamp in seconds |
+| `raw`, `decoded` | Full serialized hex or stored node-decoded block |
 
-Use `block: []` or `transaction: []` to suppress a collection. Direct count fields avoid downloading entire decoded transactions. See [the complete field tables](/docs/prep/query/) and [shielded structure reference](/docs/prep/shielded/) for the supported projection names.
+| Transaction field | Value |
+| --- | --- |
+| `txid`, `block_height` | ID and containing height |
+| `index` | Zero-based position within the block |
+| `version`, `locktime`, `expiry_height` | Public format metadata |
+| `size_bytes` | Serialized byte length |
+| `transparent_input_count`, `transparent_output_count` | Input/output array lengths |
+| `sapling_spend_count`, `sapling_output_count` | Public Sapling component counts |
+| `orchard_action_count`, `ironwood_action_count` | Public action counts |
+| `is_coinbase`, `transaction_type` | Block-reward flag and public classification |
+| `vin`, `vout` | Decoded transparent inputs/outputs |
+| `raw`, `decoded` | Full transaction hex or node-decoded object |
 
-## Combine predicates deliberately
+An empty selection array omits that collection. Selecting block `decoded` returns the full stored block, including its nested transactions.
 
-```json
-{
-  "from_block": 0,
-  "field_selection": {"block": [], "transaction": ["txid", "block_height"]},
-  "transaction_filter": {"has_orchard": true, "versions": [5, 6]}
-}
-```
+## Filters
 
-Properties within `transaction_filter` combine with **AND**. The version array above matches either selected version. An empty predicate array matches nothing.
+| Filter | Matches |
+| --- | --- |
+| `txids`, `versions` | Any listed ID or version |
+| `transparent_output_addresses` | Any listed public output address |
+| `has_sapling`, `has_orchard`, `has_ironwood` | Presence/absence of that pool's public components |
+| `shielded_pools` | Any listed pool: `sapling`, `orchard`, `ironwood` |
+| `is_coinbase` | The actual block-reward input marker |
 
-Use `shielded_pools: ["sapling", "orchard", "ironwood"]` for a union of the named pools. Setting separate `has_sapling` and `has_orchard` booleans to true instead requires both predicates. Keep pool names and boolean presence predicates distinct.
+Different filter properties combine with AND; values within a list combine with OR. An empty list matches nothing. Transaction filters do not remove selected block headers.
 
-Other public filters include transaction IDs and transparent output addresses. A transparent output match is not universal sender history. Encrypted recipient addresses and memo text are not public filter fields.
-
-## Preserve exact values
-
-Top-level bounded metadata fields are JSON numbers. Numbers nested inside decoded objects are strings to preserve their source representation. Keep zatoshis as integer values and use appropriate decimal handling when interpreting source amounts; avoid floating-point accounting.
-
-Full decoded and raw payloads can be large. Select only fields needed by your application and honor continuation and response errors.
+**Notes:** Nested numbers in decoded JSON are strings; preserve exact values. Pool component counts do not count payments. Unknown or duplicate selections are rejected. See [the full contract](https://github.com/EndPx/zeer/blob/main/docs/PREP_QUERY.md) for field and filter bounds.

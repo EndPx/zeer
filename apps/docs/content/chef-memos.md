@@ -1,16 +1,10 @@
 # Reading receipts & memos
 
-Chef's local shielded inbox turns notes readable with your viewing key into queryable entities. Complete [local viewing-key setup](/docs/chef/shielded/local/) first. This is an experimental testnet workflow for Sapling, Orchard and Ironwood, using a separately built local scanner.
-
-## Query your local inbox
-
-After migrating, syncing and serving the example, run:
+After [local setup](/docs/chef/shielded/local/), run the included authenticated query client:
 
 ```sh
 node --env-file=/protected/inbox.env examples/shielded-inbox/query.mjs
 ```
-
-The included client targets a loopback Chef endpoint and reads its bearer token from your local environment. It refuses remote endpoints and redirects. The result is private note data; keep it in your environment.
 
 ```graphql
 query ReadShieldedMemos {
@@ -22,27 +16,15 @@ query ReadShieldedMemos {
 }
 ```
 
-Add `where: { txid: "YOUR_64_HEX_TX_ID" }` to `ReadableNoteList` for a known transaction. Pass `nextCursor` as `after` to continue the list. Replace the placeholder with an actual testnet transaction ID before running it.
-
-## Understand the fields
-
 | Field | Meaning |
 | --- | --- |
-| `txid`, `pool`, `outputIndex` | Public transaction and receipt location |
-| `valueZat` | Actual decrypted note value, returned as an exact decimal string |
-| `receiver` | Receiver reconstructed by the authorized scanner |
-| `memoHex` | Original full 512-byte memo value as hex |
-| `memoKind`, `memoText` | Conservative display classification and optional readable text |
-| `scope`, `origin`, `coinbase` | Receipt context that helps avoid treating every note as a payment |
+| `txid`, `pool`, `outputIndex` | Transaction and note location |
+| `valueZat` | Exact received note value as a decimal string |
+| `receiver` | Authorized receiver component |
+| `memoHex` | Original 512-byte memo |
+| `memoKind`, `memoText` | Format classification and optional text |
+| `scope`, `origin`, `coinbase` | Note context |
 
-`memoKind` distinguishes `text`, `empty_text`, `no_memo`, `non_text`, `invalid_utf8` and `text_with_nul`. Non-text and invalid encodings are not guessed as text. Add `memoHex` to the query when you need the original bytes.
+`memoKind` distinguishes `text`, `empty_text`, `no_memo`, `non_text`, `invalid_utf8` and `text_with_nul`. Add `memoHex` when you need original bytes. Use `where: {txid: "YOUR_64_HEX_TX_ID"}` for a known ID and `after: nextCursor` for another page.
 
-## Interpret empty results
-
-No returned notes can mean no readable notes in the scanned range, an unrelated viewing key, a birthday that skips earlier receipts, or a narrower query filter. Check `_meta.height`, configuration and the known transaction before drawing conclusions.
-
-## Use receipts in your application
-
-The example provides received-note observations. It does not track a spendable wallet balance or decide that an order is paid. An application must validate the actual value, receiver, intended reference, confirmation policy and its own idempotent state. A valid-looking memo alone is insufficient.
-
-The public Prep and Chef playgrounds do not accept viewing keys and do not expose this private entity. Keep this feature inside your own Chef deployment.
+**Notes:** Keep results local. If the list is empty, check the key, birthday, filter and `_meta.height`. Memo text alone does not establish a received payment.

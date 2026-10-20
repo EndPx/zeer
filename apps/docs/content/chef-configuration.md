@@ -1,8 +1,6 @@
 # Configuration
 
-Chef loads an operator-controlled TypeScript configuration. `PREP_URL` selects the public-data source; `DATABASE_URL` selects your PostgreSQL database. Keep those environment values and API tokens outside committed source.
-
-The [filtered Orchard example](https://github.com/EndPx/zeer/blob/main/examples/chef-filtered/chef.config.ts) illustrates a lightweight public projection:
+Define the project in `chef.config.ts`. Source and database connections come from `PREP_URL`, optional `PREP_API_TOKEN`, and `DATABASE_URL`.
 
 ```ts
 import { defineConfig } from "@zeer/chef";
@@ -16,11 +14,7 @@ export default defineConfig<{
   schema: "./schema.graphql",
   handlerVersion: "1",
   reorgWindow: 100,
-  sync: {
-    pageSize: 1000,
-    batchSize: 32,
-    transactionFilter: { has_orchard: true },
-  },
+  sync: { pageSize: 1000, batchSize: 32, transactionFilter: { has_orchard: true } },
   indexer: {
     async transactionMetadata({ transaction, context }) {
       await context.entities.set("OrchardTransaction", {
@@ -34,18 +28,15 @@ export default defineConfig<{
 });
 ```
 
-## Identity and range
+| Option | Purpose |
+| --- | --- |
+| `project` | PostgreSQL project namespace |
+| `network`, `startHeight` | Source network and inclusive historical start |
+| `schema` | Entity schema path |
+| `handlerVersion` | Handler generation, including imported helper changes |
+| `reorgWindow` | Retained recovery window |
+| `sync.pageSize` | Source page size |
+| `sync.batchSize` | Blocks per atomic commit group |
+| `sync.transactionFilter` | Public Prep predicates |
 
-`project` owns a marked PostgreSQL namespace. `network` and `startHeight` define the intended source history. A start of zero requires an archive that includes genesis. `schema` resolves the entity definition file. `handlerVersion` records behavioral changes, including imported helpers that are not recursively fingerprinted.
-
-These values bind the projection's identity. Changing configuration, schema or handler behavior is not a routine restart: use the [new-namespace evolution procedure](/docs/chef/evolution/).
-
-## Fetching and committing are separate
-
-`pageSize` controls a source page; `batchSize` controls how many blocks may commit atomically. The example fetches up to 1,000 blocks and commits at most 32 at a time. A failed group advances no checkpoint for that group. Chef still validates all headers, including ranges whose transaction filter matches nothing.
-
-Compatible newer Prep servers also support opt-in `sync.adaptiveScan: true`. Check source capabilities before enabling it and read the [package contract](https://github.com/EndPx/zeer/blob/main/packages/chef/README.md) for the independent page, commit and response bounds.
-
-## Local shielded configuration
-
-An explicit `shielded` configuration identifies a watch-only account and viewing-key fingerprint. The native scanner executable and UFVK file are protected local environment settings. Follow [local viewing-key setup](/docs/chef/shielded/local/) rather than adding keys to public query requests.
+**Notes:** A failed commit group advances no checkpoint. Changing project identity requires [a new namespace](/docs/chef/evolution/). See the [complete filtered example](https://github.com/EndPx/zeer/tree/main/examples/chef-filtered) for its matching schema.

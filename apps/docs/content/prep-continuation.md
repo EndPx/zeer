@@ -1,20 +1,6 @@
 # Continuation & historical scans
 
-Prep responses are bounded. A large requested history can span multiple responses even when no explicit `limit` is supplied.
-
-## A cursor pins the scan
-
-The first request captures the scan's available end when `to_block` is omitted. Continue with **the same original request plus the returned cursor**. Keep the original `from_block`, fields and filters. Do not replace `from_block` with `next_block` while retaining that cursor.
-
-`next_block` reports scan progress. A non-null `cursor` means the captured range still has work; `cursor: null` means that range has completed.
-
-## An empty page can still make progress
-
-A transaction filter may match nothing in early history or in a quiet range. Empty `data.transactions` is not evidence that the whole history has no matches. Check the scanned range and cursor.
-
-## Fetch pages in JavaScript
-
-This plain HTTP example keeps the original query intact. Use Node's built-in `fetch` or a compatible browser environment. The public preview has shared request quotas, so it pauses between continuation requests.
+Keep the original query unchanged and add the returned cursor for each next page:
 
 ```js
 const query = {
@@ -37,10 +23,10 @@ do {
 } while (cursor);
 ```
 
-Use a bounded range first. After installing the unpublished client through the documented local-tarball workflow, `PrepClient.stream()` can handle continuation over a fixed available range. See the [public API example](/docs/prep/public-api/).
+The [client's](/docs/prep/clients/) `stream()` method handles these cursor pages through one finite captured range.
 
-## Snapshot changes and failures
+**Notes:**
 
-An epoch change or invalidated pinned snapshot can return HTTP 409 with `REORG`. Discard the old cursor, re-read coverage, and restart or reconcile the scan according to your application's persistence policy. Do not append a restarted scan blindly to already stored rows without stable identities and reconciliation.
-
-Respect rate-limit and source-recovery responses with backoff. The raw query contract specifies the [transport bounds and error codes](/docs/prep/query/).
+- `cursor: null` completes the captured range. Empty transaction results do not end a scan by themselves.
+- Do not change fields, filters or the original start while retaining a cursor.
+- After `REORG`, reconcile persisted results before starting a new scan.

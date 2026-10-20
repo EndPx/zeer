@@ -1,25 +1,18 @@
 # Transaction lookup & mempool
 
-Prep has two distinct read paths: queries over its stored archive, and optional live observations from the configured node. Use the source and status fields to interpret the result.
+Use [Prep's transaction inspector](https://zeer.endpx.cloud/app/prep?view=transaction) or the optional live observation routes:
 
-## Inspect a transaction
+| Route | Input / output |
+| --- | --- |
+| `POST /transaction` | A body with `txid`: a 64-character lowercase hex ID |
+| `GET /mempool` | Up to 20 metadata rows plus the observed source total |
 
-Open [transaction inspection inside Prep Playground](https://zeer.endpx.cloud/app/prep?view=transaction). Enter a public transaction ID. The inspector presents available overview, inputs/outputs and raw views.
+| Status | Meaning |
+| --- | --- |
+| `pending` | Currently observed in the configured node's mempool |
+| `mined` | Observed in a source block |
+| `not_observed` | Not returned by that source lookup |
 
-The optional `POST /transaction` route observes a TX ID through the configured source. Its supported states distinguish pending in that node's mempool, source-mined, and not observed. A source-mined transaction can precede its publication in the Prep archive.
+The inspector shows available overview, inputs/outputs and raw data. Coinbase classification uses the actual input marker. Public pool components remain distinct from private note data.
 
-An absent archive row does **not** mean pending. A not-observed result describes that source's view, not proof that the transaction never existed.
-
-## Coinbase and public pool activity
-
-Coinbase is identified from its actual input marker. Transaction position zero alone is not the classification rule. A block reward may have transparent outputs or public activity involving a shielded pool.
-
-Public transparent output value and pool net movement differ from encrypted individual note amounts. Fees may be unavailable when resolving previous transparent inputs would be required. Do not invent a zero fee from missing information.
-
-## Observe the mempool
-
-The optional `GET /mempool` endpoint returns a bounded observation, with at most 20 metadata rows. It is not a complete persistent pending-transaction history. Source availability and observation time matter; transactions can be mined, evicted or replaced between observations.
-
-Use [the existing Prep playground](https://zeer.endpx.cloud/app/prep) to switch to its mempool view. Live observation support depends on the deployment and node, so inspect `/capabilities` and handle source-unavailable responses.
-
-See [the full transaction/observation contract](/docs/prep/query/) for request shapes and [coverage and access](/docs/prep/public-api/) for the hosted preview.
+**Notes:** An archive miss does not imply pending. Live observations can change between requests and require a configured, available node source. See [the live contract](https://github.com/EndPx/zeer/blob/main/docs/PUBLIC_SHIELDED.md) for response details.

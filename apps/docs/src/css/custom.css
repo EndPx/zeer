@@ -77,7 +77,14 @@ body { letter-spacing: -0.01em; }
 .docs-search-results a > span:last-child { color: var(--zeer-muted); font-size: 12px; }
 .docs-search-section { color: var(--zeer-lime); font-size: 12px; }
 :where(a, button, input, summary):focus-visible { outline: 2px solid var(--zeer-text); outline-offset: 4px; }
-@media (min-width: 997px) { .theme-doc-markdown { margin-inline: auto; } main > .container { padding: 32px 24px; } }
+.overview-demo { display: block; border: 1px solid var(--zeer-line); border-radius: 8px; overflow: hidden; }
+.overview-demo img { display: block; width: 100%; height: auto; }
+.theme-admonition-info { --ifm-alert-background-color: var(--zeer-panel); --ifm-alert-border-color: var(--zeer-lime); --ifm-alert-foreground-color: var(--zeer-text); }
+@media (min-width: 997px) {
+  .navbar__brand { width: calc(var(--doc-sidebar-width) - 16px); margin-inline-end: 0; flex-shrink: 0; }
+  .theme-doc-markdown { margin-inline: auto; }
+  main > .container { padding: 32px 24px; }
+}
 @media (max-width: 996px) {
   .theme-doc-markdown h1 { font-size: 30px; }
   .navbar__items--right .navbar__link { display: none; }

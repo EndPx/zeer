@@ -1,30 +1,26 @@
 # Zeer Chef
 
-Chef turns Prep data into an application-specific database and GraphQL API. Write TypeScript handlers, define your entities, and run the indexer on your machine or server.
+**Zeer Chef** turns Zcash data into application entities with TypeScript handlers, PostgreSQL storage and a GraphQL API.
 
-## You own the application model
+<picture class="overview-demo">
+  <source media="(prefers-reduced-motion: reduce)" srcset="/docs/demos/chef-query.png" />
+  <img src="/docs/demos/chef-query.gif" alt="A public Chef GraphQL query returning the genesis block." width="1040" height="600" />
+</picture>
 
-| File | Responsibility |
-| --- | --- |
-| `chef.config.ts` | Project identity, source range, schema and handlers |
-| `schema.graphql` | Entity names, scalar fields and optional equality indexes |
-| Handler code | Deterministic entity updates from blocks, transactions or authorized receipts |
+*Recorded public testnet query.*
 
-Chef validates source headers and commits application entities, the checkpoint and undo information together. The API can serve a committed prefix while historical indexing continues. It reports the checkpoint so consumers can distinguish partial history from catch-up.
+:::info Chef & Prep
+**Chef** defines and stores your application model. **[Prep](/docs/prep/overview/)** supplies the public block and transaction data; applications can also query Prep directly.
+:::
 
-## Choose your data path
+## Key features
 
-- **Blocks:** summaries and per-block application state.
-- **Transaction metadata:** filtered, lightweight public projections.
-- **Decoded transactions:** handlers that need the full stored public structure.
-- **Authorized receipts:** the opt-in local watch-only testnet scanner and private memo workflow.
+- **[TypeScript handlers](/docs/chef/handlers/)** — transform blocks, transactions and authorized receipts.
+- **[Entity schemas](/docs/chef/schema/)** — define the records stored in PostgreSQL.
+- **[GraphQL](/docs/chef/graphql/)** — query committed entities and checkpoint metadata.
+- **[Recovery](/docs/chef/recovery/)** — resume checkpoints and handle supported reorgs.
+- **[Shielded & Memos](/docs/chef/shielded/overview/)** — read authorized notes through a local testnet scanner.
 
-Shielded & Memos is a Chef feature. The public hosted Chef playground demonstrates public entities; it does not accept viewing keys or expose a developer's private inbox.
+## Quick links
 
-## Start locally
-
-The quickstart creates an independent project with optional local PostgreSQL configuration. Node 24.14+ and Linux x86_64 or WSL2 are required for the documented path. Packages currently install from tarballs built from the repository.
-
-[Run your first Chef project](/docs/chef/quickstart/) or [choose an example](/docs/chef/examples/).
-
-Working with a coding assistant? Use [Quickstart with AI](/docs/chef/quickstart-ai/) for a starter prompt, actual installation steps and explicit verification outcomes. Use [Performance & benchmarks](/docs/chef/benchmarks/) to measure the resulting workload.
+[Quickstart](/docs/chef/quickstart/) · [Quickstart with AI](/docs/chef/quickstart-ai/) · [Playground](https://zeer.endpx.cloud/app/chef) · [GitHub](https://github.com/EndPx/zeer)

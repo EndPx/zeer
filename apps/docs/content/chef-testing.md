@@ -1,8 +1,8 @@
 # Testing your indexer
 
-Verify what your handlers store, not only that a process starts. Use a small pinned range and compare entity values and checkpoints with independently read source data.
+## Framework checks
 
-## Run framework checks from the checkout
+From the repository root:
 
 ```sh
 npm ci
@@ -10,23 +10,15 @@ npm run build:chef
 npm run test:chef
 ```
 
-The suite includes unit and integration cases. Database/native cases require explicit environment configuration; skipped cases are not live integration evidence. Review the [package test files](https://github.com/EndPx/zeer/tree/main/packages/chef/test) before providing a database, and use isolated test namespaces.
+Database/native integration cases require explicit environment configuration. Skipped cases are not execution evidence.
 
-## Validate your application projection
+## Application checks
 
-1. Record the source network, coverage and a target height/hash.
-2. Generate types and run the project's TypeScript check.
-3. Migrate a fresh project namespace and index a bounded range.
-4. Query every expected entity and compare exact IDs, values and checkpoint metadata.
-5. Restart the same compatible configuration and confirm that committed work is not duplicated.
-6. Exercise failure/recovery and any reorg behavior your deployment relies on.
+1. Pin a small source range and target hash.
+2. Generate types and typecheck the project.
+3. Index into a fresh namespace.
+4. Compare complete entity values and checkpoint hashes with independent source data.
+5. Restart and verify that committed work is not duplicated.
+6. Exercise relevant failure and reorg recovery cases.
 
-Do not use the same handler implementation as its own expected-output oracle. A matching row count alone can miss wrong values or duplicate identities.
-
-## Private receipt tests
-
-The shielded inbox contains memo classification tests and native/SQL integration instructions. Use [the documented local commands](/docs/chef/shielded/local/) and your own isolated key/database configuration. Public fixture keys and seeds are test material, never accounts for funds.
-
-## Performance evidence
-
-Separate raw Prep reads from Chef's durable entity commits and GraphQL query latency during ingest. Record source range, selected fields, handlers, database, memory/CPU ceilings and exact output checks. A small historical test or a UI response time does not establish a whole-chain indexing duration.
+Use isolated test databases/namespaces. See the [test suite](https://github.com/EndPx/zeer/tree/main/packages/chef/test) and [shielded example](https://github.com/EndPx/zeer/tree/main/examples/shielded-inbox) for setup.
