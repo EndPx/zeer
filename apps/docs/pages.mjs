@@ -3,7 +3,7 @@ export default [
   ['intro', 'Build with Zeer', 'Query public Zcash data with Prep. Build your application indexer with Chef.', 'apps/docs/content/intro.md', 'Overview'],
   ['architecture', 'From source to API', 'Understand the responsibilities of Prep, Chef, PostgreSQL and GraphQL.', 'apps/docs/content/architecture.md'],
   ['prep/overview', 'Zeer Prep', 'Select the public Zcash blocks, transactions and fields your application needs.', 'apps/docs/content/prep-overview.md', 'Overview'],
-  ['prep/quickstart', 'Your first Prep query', 'Check testnet coverage and retrieve real genesis block headers with curl.', 'apps/docs/content/prep-quickstart.md', 'Quickstart'],
+  ['prep/quickstart', 'Your first Prep query', 'Install the Prep client and stream testnet block headers in your first script.', 'apps/docs/content/prep-quickstart.md', 'Quickstart'],
   ['prep/quickstart-ai', 'Quickstart with AI', 'Give your coding assistant a bounded, verifiable first Zeer Prep integration.', 'apps/docs/content/prep-quickstart-ai.md'],
   ['prep/getting-started', 'Getting started with Prep', 'Move from a first request to a repeatable integration with coverage, fields and continuation.', 'apps/docs/content/prep-getting-started.md', 'Getting Started'],
   ['prep/clients', 'Prep clients', 'Install the JavaScript ESM and TypeScript client from local artifacts and choose the correct read method.', 'apps/docs/content/prep-clients.md', 'Clients'],

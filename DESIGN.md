@@ -16,11 +16,22 @@ Editorial update, 21 October: each page answers its chapter title. Supported
 networks contains a chain table and short notes only. Quickstarts contain steps
 and commands; references use formats/tables; troubleshooting pairs symptoms with
 actions. Keep implementation history and validation reports in repository references.
-Overview pages use a product introduction, a recorded public-query GIF, a short
-Prep/Chef callout, linked key features and quick links. GIFs play once for four
-seconds and use a still frame under reduced motion; never invent indexing metrics.
+Overview pages use a product introduction, an original explanatory GIF, a short
+Prep/Chef callout, linked key features and quick links. The GIFs illustrate Prep's
+block selection and Chef's handler/entity/GraphQL pipeline; no playground screenshots.
+Use a 1040×600 canvas, the existing graphite/lime/cream palette, Manrope headings
+and IBM Plex Mono data labels. Product title is 56px, stage labels 24px, secondary
+copy 20–24px. Prep shows block records flowing through selection to JSON; Chef
+shows Prep, TypeScript handlers, PostgreSQL and GraphQL with a persistent schema
+example below. Lime follows the data path; keep all text stable. Each GIF plays
+once for 4.8 seconds and settles on the complete diagram. Native picture sources
+select the final PNG under reduced motion. Captions identify these as illustrations;
+real benchmark figures have their own table, workload, date and evidence.
 On desktop, the logo occupies the sidebar-width header region; primary navigation
-starts to the right of that boundary. Mobile retains its compact navbar.
+starts to the right of that boundary in Chef, Prep, Playground order. Mobile retains
+its compact navbar. Quickstarts follow prerequisites, initialize/run, expected
+result, generated files or query concepts, and next steps, using actual supported
+commands. Clients lists only implemented clients and their working resources.
 
 Use the existing dark tokens, self-hosted Manrope and IBM Plex Mono. The UI/UX
 documentation lookup recommended readable sans/mono text and predictable navigation;

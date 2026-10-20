@@ -50,11 +50,11 @@ try {
     const image = page.locator('picture.overview-demo img');
     await expect(image).toBeVisible();
     await page.waitForFunction(() => document.querySelector('picture.overview-demo img')?.naturalWidth > 0);
-    assert.match(await image.evaluate(img => img.currentSrc), new RegExp(`${product}-query\\.gif$`));
+    assert.match(await image.evaluate(img => img.currentSrc), new RegExp(`${product}-flow\\.gif$`));
     await expect(page.locator('.theme-admonition-info')).toBeVisible();
     await page.screenshot({path: path.join(evidence, `${product}-overview-desktop.png`), fullPage: true});
     await page.emulateMedia({reducedMotion: 'reduce'});
-    await page.waitForFunction(product => document.querySelector('picture.overview-demo img')?.currentSrc.endsWith(`${product}-query.png`), product);
+    await page.waitForFunction(product => document.querySelector('picture.overview-demo img')?.currentSrc.endsWith(`${product}-flow.png`), product);
     await page.setViewportSize({width: 375, height: 900});
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     const overviewAxe = await new AxeBuilder({page}).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
@@ -62,6 +62,7 @@ try {
     await page.screenshot({path: path.join(evidence, `${product}-overview-mobile.png`), fullPage: true});
   }
   await page.emulateMedia({reducedMotion: 'no-preference'});
+  assert.deepEqual(await page.locator('.navbar__items:not(.navbar__items--right) > .navbar__link').allTextContents(), ['Chef', 'Prep', 'Playground']);
   for (const width of [1024, 1440, 1920]) {
     await page.setViewportSize({width, height: 900});
     const alignment = await page.evaluate(() => ({
@@ -75,6 +76,24 @@ try {
     assert.equal(alignment.overflow, false);
   }
   report.interactions.push('Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment');
+  for (const pathname of ['/docs/chef/quickstart/', '/docs/prep/quickstart/', '/docs/prep/clients/', '/docs/chef/benchmarks/']) {
+    for (const width of [375, 1440]) {
+      await page.setViewportSize({width, height: 900});
+      await page.goto(origin + pathname);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), pathname);
+      const result = await new AxeBuilder({page}).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+      assert.equal(result.violations.length, 0, JSON.stringify({pathname, width, violations: result.violations.map(v => v.id)}));
+      await page.screenshot({path: path.join(evidence, `${pathname.split('/').filter(Boolean).slice(1).join('-')}-${width}.png`), fullPage: true});
+    }
+  }
+  const samplesUrl = await page.getByRole('link', {name: 'Download recorded samples and provenance', exact: true}).getAttribute('href');
+  assert.equal(samplesUrl, '/docs/benchmarks/2026-10-20-testnet.json');
+  const samplesResponse = await context.request.get(origin + samplesUrl);
+  assert.equal(samplesResponse.status(), 200);
+  const samples = await samplesResponse.json();
+  assert.equal(samples.prep.runs.length, 18);
+  assert.equal(samples.chef.fixed.blocks, 10000);
+  report.interactions.push('Quickstart, client and benchmark page reflow/accessibility plus downloadable benchmark evidence');
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({width, height: 900});
     await page.goto(origin + '/docs/chef/shielded/memos/');

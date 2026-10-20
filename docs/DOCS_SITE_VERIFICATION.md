@@ -51,6 +51,10 @@ packages were not rebuilt for this docs-only revision. Real Chrome verified:
   automated axe findings on both overviews at 375px.
 - Desktop primary navigation starts beyond the sidebar boundary at 1024, 1440
   and 1920px, with the brand still at the original left inset.
+- Chef precedes Prep in desktop product navigation. The quickstart, client and
+  benchmark pages pass reflow and automated axe checks at 375px and 1440px.
+- The benchmark evidence link returns the actual JSON snapshot with 18 Prep
+  samples and both recorded Chef runs.
 - The existing website's Get started link navigates into the new documentation.
 
 The real public Prep example returned genesis headers 0 and 1, with the requested
@@ -136,12 +140,58 @@ The additional client/cURL verification and publication helper are under
 `.deploy-local/docs-onboarding-20261021/`.
 The current revision keeps Supported networks to one chain/network/Prep-URL
 table plus notes. All 35 chapters were shortened around their named topic.
-Chef and Prep overviews include original four-second, single-play GIFs of real
-public query responses, relationship callouts, linked features and quick links.
-These recordings illustrate queries, not indexing throughput. Static result
-frames replace animation for reduced-motion preferences. Screenshot sources,
-query proofs and the docs-only release helper are under
-`.deploy-local/docs-concise-20261021/`; final browser screenshots are under the
+Chef and Prep overviews now use original explanatory diagrams rendered by
+`apps/docs/scripts/render-overviews.py`, replacing the playground captures.
+Each GIF plays once for 4.8 seconds and settles on the complete diagram. Prep
+shows block selection and JSON; Chef shows handlers, entities and GraphQL.
+These are illustrations, not execution or throughput measurements. Static
+frames replace animation for reduced-motion preferences. The earlier screenshot
+evidence remains under `.deploy-local/docs-concise-20261021/`; final browser screenshots are under the
 site verification directory above. The three cURL bodies were reverified.
 No viewing keys, local environment, private receipt output or third-party research
 corpus is part of the published static release or this commit.
+
+## Quickstart, wording and npm release preparation
+
+Envio's HyperIndex quickstart was opened in the user's browser and copied with
+its Copy page control. It informed the prerequisites → installation →
+configuration → run/query → generated files → next steps structure. Its EVM
+import wizard, videos and performance claims are not Zeer features.
+
+All 35 chapter sources were reviewed from the perspective of a new developer.
+The manual and AI paths now agree, basic entity/checkpoint/reorg terms are
+explained where introduced, the core schema/handler/GraphQL examples share the
+starter's BlockSummary entity, and standalone recovery/evolution commands use
+the generated environment-loading npm scripts. Two independent review axes
+identified setup/release consistency issues; their fixes were checked in source.
+Both final review verdicts passed. This was a developer-perspective review and
+browser walkthrough, not a study with outside users.
+
+Both npm manifests are prepared for public release with package-specific source,
+license, registry and documentation metadata. The SDK's 33 tests and the 31
+selected Chef CLI/schema/scaffold tests passed; the final scaffold wording change
+also passed its three tests. Local tarballs were installed in a fresh Windows
+consumer, both public client-guide scripts returned actual heights 0 and 1,
+and an independent generated project passed codegen and strict typechecking.
+This is package/source validation, not a new database or Linux integration run.
+
+Registry publication is **not complete**. The signed-in account is `endpx`;
+the requested `@zeer` scope belongs to the separate `zeer` npm account. The
+browser lists `adelos` and `atfi` as the signed-in account's organizations.
+The real publication attempt stopped at npm's WebAuthn/security-key challenge;
+no package version was published. No 2FA settings, passwords or permissions were
+changed. A scope decision and user-controlled passkey verification remain.
+The public quickstarts therefore retain working source/tarball installation
+instead of advertising unverified registry commands. Prepared registry-based
+drafts and release verification stay in `.deploy-local/docs-release-20261021/`.
+
+## Published historical benchmark evidence
+
+The owner's 21 October request authorizes publication of the sanitized
+20 October testnet snapshot. All 18 Prep samples and both Chef result objects
+were matched to their original local files; four source SHA-256 values also
+match. `node apps/docs/scripts/verify-benchmarks.mjs` recomputes the displayed
+aggregates. Prep reports three-run medians; Chef reports one run per profile.
+Worker/support-process quotas, prepared archive, loopback transport, empty
+Orchard scan and timing exclusions are stated alongside the tables.
+No benchmark process was relaunched for this documentation revision.

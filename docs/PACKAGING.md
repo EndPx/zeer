@@ -1,11 +1,12 @@
-# Local release package verification
+# Release package verification
 
 The local candidate versions are `@zeer/prep-client@0.1.0`, `@zeer/chef@0.1.0`
 and Rust Prep `0.1.0`. They implement the current public-data contracts. This
 candidate adds build-on-pack and public Node typings for Chef; it does not change
-the package entrypoints or Prep HTTP API. Both npm packages remain private and
-unpublished. An npm organization, registry publication and hosted service are
-separate decisions.
+the package entrypoints or Prep HTTP API. Both npm packages are configured for
+public publication under `@zeer`. Registry publication is a separate final step:
+verify it with `npm view @zeer/prep-client@0.1.0 version` and
+`npm view @zeer/chef@0.1.0 version` before relying on registry installation.
 
 The package now includes `zeer-chef init` for independent testnet projects. Follow
 [the standalone Chef quickstart](CHEF_QUICKSTART.md) after producing tarballs.

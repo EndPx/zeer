@@ -1,7 +1,11 @@
 {
   "name": "@zeer/chef",
   "version": "0.1.0",
-  "private": true,
+  "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
+  "repository": {"type": "git", "url": "git+https://github.com/EndPx/zeer.git", "directory": "packages/chef"},
+  "homepage": "https://zeer.endpx.cloud/docs/chef/overview/",
+  "bugs": {"url": "https://github.com/EndPx/zeer/issues"},
+  "keywords": ["zcash", "indexer", "graphql", "postgresql", "typescript"],
   "type": "module",
   "description": "Experimental TypeScript indexing over Zeer Prep with optional local shielded receipts",
   "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}},

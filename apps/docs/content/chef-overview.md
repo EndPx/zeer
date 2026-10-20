@@ -3,11 +3,11 @@
 **Zeer Chef** turns Zcash data into application entities with TypeScript handlers, PostgreSQL storage and a GraphQL API.
 
 <picture class="overview-demo">
-  <source media="(prefers-reduced-motion: reduce)" srcset="/docs/demos/chef-query.png" />
-  <img src="/docs/demos/chef-query.gif" alt="A public Chef GraphQL query returning the genesis block." width="1040" height="600" />
+  <source media="(prefers-reduced-motion: reduce)" srcset="/docs/demos/chef-flow.png" />
+  <img src="/docs/demos/chef-flow.gif" alt="Chef processes Prep data through TypeScript handlers, stores entities in PostgreSQL and serves committed data through GraphQL." width="1040" height="600" />
 </picture>
 
-*Recorded public testnet query.*
+*How Chef turns chain data into your application API.*
 
 :::info Chef & Prep
 **Chef** defines and stores your application model. **[Prep](/docs/prep/overview/)** supplies the public block and transaction data; applications can also query Prep directly.
@@ -23,4 +23,4 @@
 
 ## Quick links
 
-[Quickstart](/docs/chef/quickstart/) · [Quickstart with AI](/docs/chef/quickstart-ai/) · [Playground](https://zeer.endpx.cloud/app/chef) · [GitHub](https://github.com/EndPx/zeer)
+[Quickstart](/docs/chef/quickstart/) · [Quickstart with AI](/docs/chef/quickstart-ai/) · [Benchmarks](/docs/chef/benchmarks/) · [Playground](https://zeer.endpx.cloud/app/chef) · [GitHub](https://github.com/EndPx/zeer)

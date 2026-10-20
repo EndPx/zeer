@@ -1,16 +1,16 @@
 # Quickstart with AI
 
-Open the Zeer checkout in your coding assistant and paste this prompt. You need Node 24.14+, Linux/WSL2 and PostgreSQL for the runtime steps.
+Open a working directory in your coding assistant and paste this prompt. You need Node 24.14+, Linux/WSL2 and PostgreSQL. The assistant should follow the same [Quickstart](/docs/chef/quickstart/) you would use manually.
 
 ```text
 Create a standalone Zeer Chef testnet project in a fresh directory.
 
-Read docs/CHEF_QUICKSTART.md, docs/PACKAGING.md, packages/chef/README.md
-and the actual starter before writing code.
+Read https://zeer.endpx.cloud/docs/chef/quickstart/ and
+https://zeer.endpx.cloud/docs/chef/configuration/ before writing code.
 
-1. Build and pack the local Prep client and Chef tarballs, then run Chef init
-   with start-height 0 and a fresh project namespace.
-2. Install both tarballs in the new project. Generate types and typecheck.
+1. Follow the Quickstart's installation method and run Chef init with
+   start-height 0, a fresh directory and a new project name.
+2. Install the generated project's dependencies, generate types and typecheck.
 3. Configure the public testnet Prep URL and the intended PostgreSQL database.
    Keep credentials in the generated private environment file.
 4. If the database is available, migrate the new namespace, serve GraphQL,

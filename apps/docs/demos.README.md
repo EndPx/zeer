@@ -1,13 +1,15 @@
-# Overview recordings
+# Overview illustrations
 
-`static/demos/chef-query.gif` and `prep-query.gif` use before/after captures of the
-actual public testnet playground on 21 October 2026. Chef queries its genesis
-BlockSummary; Prep returns block headers 0 and 1. Responses were HTTP 200 and
-their requested identities were checked before encoding. No result was mocked.
+`static/demos/chef-flow.gif` and `prep-flow.gif` are original diagrams rendered
+from `scripts/render-overviews.py`. They use Zeer's colors and the installed
+Manrope / IBM Plex Mono fonts. No screenshots or third-party illustrations are used.
 
-Each GIF plays once for four seconds, ending on the response. These are query
-demonstrations, not indexing throughput measurements. Matching PNG result frames
+Prep shows block records, selection and JSON. Chef shows Prep, TypeScript
+handlers, PostgreSQL entities and GraphQL. These are explanatory illustrations,
+not execution results or throughput measurements. Each GIF plays once for 4.8
+seconds, ending on the complete diagram. Matching PNG frames
 are selected through native picture sources for `prefers-reduced-motion`.
 
-Recordings and encoding helpers remain in the local verification evidence. Build
-requires only the committed GIF/PNG assets, not a capture service or Python.
+To regenerate, install the normal workspace dependencies and use Python with
+Pillow, fonttools and Brotli, then run `python apps/docs/scripts/render-overviews.py`.
+Build requires only the committed GIF/PNG assets, not Python or a capture service.

@@ -1,13 +1,17 @@
 {
   "name": "@zeer/prep-client",
   "version": "0.1.0",
-  "private": true,
+  "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
+  "repository": {"type": "git", "url": "git+https://github.com/EndPx/zeer.git", "directory": "packages/prep-client"},
+  "homepage": "https://zeer.endpx.cloud/docs/prep/clients/",
+  "bugs": {"url": "https://github.com/EndPx/zeer/issues"},
+  "keywords": ["zcash", "blockchain", "api-client", "typescript"],
   "type": "module",
   "description": "Experimental native-fetch client for Zeer Prep historical full-block queries",
   "engines": { "node": ">=22.18.0" },
   "exports": { ".": { "types": "./src/index.d.ts", "import": "./src/index.js" } },
   "types": "./src/index.d.ts",
-  "files": ["src", "README.md"],
+  "files": ["src", "README.md", "LICENSE"],
   "scripts": { "test": "node --test test/*.test.js" },
   "license": "MIT"
 }

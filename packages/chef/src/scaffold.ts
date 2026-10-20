@@ -109,17 +109,18 @@ Initialization does not contact Prep/Postgres, install packages, start Docker or
 
 ## Install
 
-Use Node 24.14+ on Linux x86_64 or WSL2. Packages are currently unpublished.
-Install BOTH versioned release tarballs together (replace paths):
+Use Node 24.14+ on Linux x86_64 or WSL2. Install the dependencies declared in package.json:
 
 \`\`\`sh
-npm install /absolute/path/zeer-prep-client-${manifest.dependencies["@zeer/prep-client"]}.tgz /absolute/path/zeer-chef-${manifest.version}.tgz
+npm install
 npm run codegen
 npm run typecheck
 \`\`\`
 
-If producing the tarballs yourself, follow https://github.com/EndPx/zeer/blob/main/docs/PACKAGING.md.
-Do not rely on public npm availability or monorepo imports. Retain the generated lockfile.
+Registry packages must be published before using npm install. For an unpublished
+candidate or source build, install BOTH local release tarballs together instead;
+follow https://github.com/EndPx/zeer/blob/main/docs/PACKAGING.md.
+Retain the generated lockfile. Do not use monorepo imports in this project.
 
 ## Connect
 
@@ -210,5 +211,5 @@ Codegen and strict typechecking are both needed: Node type stripping does not ty
   for (const [name, body] of Object.entries(files)) {
     await writeFile(resolve(directory, name), body, { flag: "wx", mode: name === ".env" ? 0o600 : 0o644 });
   }
-  return { directory, files: Object.keys(files), nextSteps: ["Install the two local release tarballs together (see README.md).", "Set PREP_URL and database settings in .env.", "Run codegen, typecheck, migrate, sync, then serve."] };
+  return { directory, files: Object.keys(files), nextSteps: ["Install the generated project's dependencies (see README.md).", "Set PREP_URL and database settings in .env.", "Run codegen, typecheck, migrate, sync, then serve."] };
 }

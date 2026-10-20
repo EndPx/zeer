@@ -1,13 +1,14 @@
 # Entity schema
 
-Define entities in `schema.graphql`. Each requires `id: ID!`.
+An entity is a record type Chef stores for your application. Define it in `schema.graphql`; each entity needs a unique `id: ID!`. The quickstart creates this block summary:
 
 ```graphql
-type OrchardTransaction {
+type BlockSummary {
   id: ID!
-  height: Int!
-  version: Int!
-  transactionIndex: Int!
+  height: Int! @index
+  hash: String!
+  time: BigInt!
+  transactionCount: Int!
 }
 ```
 
@@ -31,4 +32,4 @@ npm run typecheck
 
 Use stable IDs and exact integer values. Optional [equality indexes](/docs/chef/indexes/) use `@index` on supported fields.
 
-**Notes:** Schema changes require [a new projection namespace](/docs/chef/evolution/); do not edit generated types to bypass a mismatch.
+**Notes:** To change an existing indexer's schema, use [a new project and replay its data](/docs/chef/evolution/). Regenerate types from the schema rather than editing them by hand.

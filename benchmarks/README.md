@@ -12,6 +12,13 @@ public READMEs, plans or candidate manifests. Publication requires a new explici
 request from the project owner. This storage policy does not change where an
 authorized experiment runs; remote working copies remain operational state.
 
+Publication exception, approved 21 October 2026: the documentation publishes a
+sanitized snapshot of the 20 October testnet Prep and Chef runs at
+`apps/docs/static/benchmarks/2026-10-20-testnet.json`. It includes all samples for
+the displayed workloads and original evidence hashes. Raw logs, credentials and
+unrelated comparison results remain local. This is a historical measurement,
+not a current hosted-service benchmark.
+
 A fresh checkout has no result directory; create it when starting an experiment.
 Keep failures and successful runs together locally. Commit source, configuration,
 methodology and deterministic public-chain input fixtures needed to reproduce tests.

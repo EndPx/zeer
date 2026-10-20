@@ -2,6 +2,10 @@
 
 Zeer provides public Zcash data through **Prep** and application indexing through **Chef**.
 
+An indexer turns blockchain activity into records your application can query.
+Use Chef to define those records and build an API, or Prep to read public chain
+data directly.
+
 | Product | Use it to | Start |
 | --- | --- | --- |
 | Prep | Query blocks and public transactions | [Quickstart](/docs/prep/quickstart/) · [With AI](/docs/prep/quickstart-ai/) |

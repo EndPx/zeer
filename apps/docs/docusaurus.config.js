@@ -39,8 +39,8 @@ const config = {
       title: 'zeer',
       logo: {src: 'generated/zeer.svg', alt: '', width: 32, height: 32},
       items: [
-        {type: 'docSidebar', sidebarId: 'prep', label: 'Prep', position: 'left'},
         {type: 'docSidebar', sidebarId: 'chef', label: 'Chef', position: 'left'},
+        {type: 'docSidebar', sidebarId: 'prep', label: 'Prep', position: 'left'},
         {href: 'https://zeer.endpx.cloud/app', label: 'Playground', position: 'left'},
         {href: 'https://github.com/EndPx/zeer', label: 'GitHub', position: 'right'},
         {type: 'search', position: 'right'},

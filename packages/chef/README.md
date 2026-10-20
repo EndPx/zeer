@@ -2,11 +2,30 @@
 
 Chef reads complete public Zcash data from Prep, invokes trusted TypeScript
 handlers, commits application entities to developer-owned PostgreSQL, and serves
-an authenticated read-only GraphQL API. This private workspace package is not
-published to npm. The default profile reads public data. An explicit local
+an authenticated read-only GraphQL API. The default profile reads public data. An explicit local
 [watch-only receipt profile](../../docs/SHIELDED_RECEIPTS.md) adds a native scanner
 and `receipt` handlers for authorized testnet notes. It is not enabled on the
 hosted public demo. See the [shielded inbox](../../examples/shielded-inbox/README.md).
+
+## Quickstart
+
+The registry release is pending. Until it is available, use the
+[source installation](https://zeer.endpx.cloud/docs/chef/quickstart/).
+After publication, initialize directly with:
+
+Requires Node 24.14+ on Linux x86_64 or WSL2, npm and PostgreSQL.
+
+```sh
+npx @zeer/chef@0.1.0 init --dir my-indexer --project my_indexer --start-height 0
+cd my-indexer
+npm install
+npm run codegen
+npm run typecheck
+```
+
+Set `PREP_URL` and database settings in the generated `.env`, then migrate before
+running sync and serve. Follow the [complete quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/)
+for source coverage, database setup and your first GraphQL query.
 
 For filtered indexing from block 0, see the
 [Orchard metadata example](../../examples/chef-filtered/README.md).

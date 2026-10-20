@@ -1,6 +1,6 @@
 # Self-hosting & troubleshooting
 
-Run one writer and a separate authenticated reader against your PostgreSQL project. Use the same frozen configuration, schema, handlers and dependencies for both.
+Run the indexer (`npm run follow`) and API (`npm run serve`) as separate processes against the same PostgreSQL project. The indexer writes records; the API reads committed records. Keep their configuration, schema, handlers and dependency versions identical.
 
 | Symptom | First check |
 | --- | --- |

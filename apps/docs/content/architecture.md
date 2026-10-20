@@ -14,4 +14,6 @@ Zcash → Prep → your application
 
 Use Prep directly for raw-data queries. Add Chef when you need your own persistent application model.
 
+Entities are the records your handlers create. A checkpoint records the last block Chef fully saved, so a restart can continue from that point.
+
 For authorized shielded notes, Chef uses a local scanner and the developer's viewing key before passing readable receipts to the handler. See [Shielded & Memos](/docs/chef/shielded/overview/).

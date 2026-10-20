@@ -2,6 +2,8 @@
 
 Define the project in `chef.config.ts`. Source and database connections come from `PREP_URL`, optional `PREP_API_TOKEN`, and `DATABASE_URL`.
 
+The generated starter already has a working block-summary configuration. This example shows a different project that stores only transactions with Orchard activity; use its [matching entity schema](https://github.com/EndPx/zeer/blob/main/examples/chef-filtered/schema.graphql).
+
 ```ts
 import { defineConfig } from "@zeer/chef";
 
