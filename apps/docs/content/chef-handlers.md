@@ -1,35 +1,45 @@
-# TypeScript handlers
+# Transaction handlers
 
-Chef calls your handlers as it reads each block. Handlers turn that source data into the entities defined in your schema.
+Choose `transactionMetadata` when identity, version and position are enough. Use `transaction` when your handler needs decoded public transaction fields. Configure one of these inside `indexer` in `chef.config.ts`.
 
 | Handler | Input |
 | --- | --- |
-| `block` | Every scanned block |
 | `transactionMetadata` | Public identity, height, version and position metadata |
 | `transaction` | Stored decoded public transaction data |
-| `receipt` | An authorized note from the configured local scanner |
 
-## Write entities
+## Store transaction metadata
+
+This handler matches the [Orchard transaction configuration](/docs/chef/configuration/) and its `OrchardTransaction` schema:
 
 ```ts
-async block({ block, context }) {
-  await context.entities.set("BlockSummary", {
-    id: String(block.height),
-    height: block.height,
-    hash: block.hash,
-    time: BigInt(block.time),
-    transactionCount: 0,
+async transactionMetadata({ transaction, context }) {
+  await context.entities.set("OrchardTransaction", {
+    id: transaction.txid,
+    height: transaction.blockHeight,
+    version: transaction.version,
+    transactionIndex: transaction.index,
   });
 }
 ```
 
-This is the quickstart's block handler. Its `transactionMetadata` handler then increments `transactionCount` for each transaction in that block.
+| Metadata field | Meaning |
+| --- | --- |
+| `txid` | Transaction ID; a useful stable entity ID |
+| `blockHeight` | Containing block's height |
+| `index` | Zero-based transaction position within the block |
+| `version`, `locktime` | Public format fields |
+
+For decoded input, replace `transactionMetadata` with `transaction` and read `transaction.decoded`. Nested numeric values in decoded data are strings; preserve exact amounts rather than converting them to floating point. The same block, context and metadata fields remain available.
+
+## Handler order and writes
+
+Chef runs the [block handler](/docs/chef/block-handlers/) first, then the selected transaction handler for each matching transaction in source order. If local receipt scanning is enabled, its receipt handlers follow the transaction handler for that transaction.
 
 `context.entities.get`, `set` and `delete` run inside Chef's database transaction. A read sees earlier writes in the same transaction. Await every operation; if a handler fails, the current commit group is not saved.
 
 **Notes:**
 
-- `transaction` and `transactionMetadata` are mutually exclusive. Block handlers still run on filtered-empty blocks.
+- `transaction` and `transactionMetadata` are mutually exclusive. A transaction filter narrows their input; it does not remove block headers or skip the block handler.
 - The same input should produce the same entity changes when replayed. External payments, requests or messages cannot be undone by database rollback.
 - Receipt handlers require [local scanner setup](/docs/chef/shielded/local/).
 

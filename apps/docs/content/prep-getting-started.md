@@ -22,3 +22,5 @@ Choose a starting block, optional exclusive end, public transaction filters and 
 Read `data.blocks` and `data.transactions`. Continue with the same request plus its returned cursor until `cursor` is null. Empty matches can still advance the scan.
 
 See [Query & response](/docs/prep/query/) for the format and [Troubleshooting](/docs/prep/troubleshooting/) for failures.
+
+For a complete script, start with [Analyzing Address Outputs](/docs/prep/tutorials/address-outputs/) or [Inspecting Transactions](/docs/prep/tutorials/inspect-transaction/).

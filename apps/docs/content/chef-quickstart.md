@@ -87,3 +87,4 @@ To index through Prep's available history and follow new blocks, run `npm run fo
 - [Define your own entities](/docs/chef/schema/) and [query them](/docs/chef/graphql/).
 - [Read shielded receipts and memos locally](/docs/chef/shielded/local/).
 - [Use Quickstart with AI](/docs/chef/quickstart-ai/).
+- [Explore block handlers](/docs/chef/block-handlers/) or look up [CLI commands](/docs/chef/cli-commands/).

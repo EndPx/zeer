@@ -4,6 +4,12 @@ Docusaurus documentation at `https://zeer.endpx.cloud/docs/`. Prep and Chef have
 separate sidebars; Shielded & Memos is inside Chef. The existing public playground
 keeps its Overview / Prep / Chef navigation.
 
+Chef's Guides group contains configuration, schema, transaction/block handlers,
+testing, GraphQL, environment variables, CLI commands and equality indexes. Prep's
+Tutorials group contains runnable public-data walkthroughs. Keep tutorial scopes
+aligned with actual filters: transparent output matching does not establish all
+incoming/outgoing transfers or a wallet balance.
+
 ## Run from the repository root
 
 ```sh

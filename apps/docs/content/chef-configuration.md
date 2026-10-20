@@ -1,4 +1,4 @@
-# Configuration
+# Configuration file
 
 Define the project in `chef.config.ts`. Source and database connections come from `PREP_URL`, optional `PREP_API_TOKEN`, and `DATABASE_URL`.
 
@@ -40,5 +40,17 @@ export default defineConfig<{
 | `sync.pageSize` | Source page size |
 | `sync.batchSize` | Blocks per atomic commit group |
 | `sync.transactionFilter` | Public Prep predicates |
+| `sync.adaptiveScan` | Opt into adaptive pages when the Prep server advertises support |
+| `shielded` | Local receipt-scanner account and fingerprint; see [local setup](/docs/chef/shielded/local/) |
+
+`schema` is resolved relative to the config file. Without explicit sync settings,
+Chef uses 16 blocks per source page and one block per commit; the generated starter
+sets 1,000 and 32 respectively. Fixed source pages allow 1–1,000 blocks, adaptive
+pages allow up to 1,000,000, and commit groups allow 1–100 blocks. `reorgWindow`
+defaults to 100 and allows 1–1,000 retained blocks.
+
+Use [block handlers](/docs/chef/block-handlers/) for per-block entities, or choose
+one of the [transaction handlers](/docs/chef/handlers/) for transaction input.
+Connection settings are covered in [Environment Variables](/docs/chef/environment-variables/).
 
 **Notes:** A failed commit group advances no checkpoint. Changing project identity requires [a new namespace](/docs/chef/evolution/). See the [complete filtered example](https://github.com/EndPx/zeer/tree/main/examples/chef-filtered) for its matching schema.

@@ -4,7 +4,7 @@ Verified 21 October 2026. Public URL: [zeer.endpx.cloud/docs](https://zeer.endpx
 
 ## Delivered scope
 
-The Docusaurus workspace publishes 35 English pages: shared introduction and
+The Docusaurus workspace publishes 40 English pages: shared introduction and
 architecture, Prep query/data guides, Chef application-indexing guides, and
 Shielded & Memos nested under Chef. No additional console product/menu or public
 viewing-key form was added. Existing website `/docs` links enter the new site.
@@ -37,7 +37,7 @@ All commands passed during the initial publication/onboarding work. The current
 editorial revision reran the docs build and browser checks; unchanged web and Chef
 packages were not rebuilt for this docs-only revision. Real Chrome verified:
 
-- HTTP 200 and the correct heading for all 35 pages; no missing same-page anchors.
+- HTTP 200 and the correct heading for all 40 pages; no missing same-page anchors.
 - Explicit Overview, Quickstart and Quickstart with AI order in each product
   sidebar, with Getting Started and Clients next in Prep; AI guide navigation.
 - No document-level overflow at 375, 768 and 1440px on the memo guide.
@@ -61,6 +61,28 @@ The real public Prep example returned genesis headers 0 and 1, with the requeste
 exclusive end of 2 and a completed cursor. The public Chef genesis entity's hash
 matched the Prep genesis hash. This validates those public read examples; it is
 not a new private memo-decryption or whole-chain performance experiment.
+
+## Guides, tutorials and CLI reference
+
+Chef's Guides category now groups configuration, schema, transaction handlers,
+block handlers, testing, GraphQL, environment variables, CLI commands and indexes.
+Prep's Tutorials category adds transparent-output analysis and public transaction
+inspection. Existing product and onboarding order remains intact.
+
+The tutorial JavaScript and block-guide TypeScript/schema/GraphQL were extracted
+from their Markdown fences and run in a separate consumer with registry-installed
+`@zeer-dev/prep-client@0.1.0` and `@zeer-dev/chef@0.1.0`; neither was a workspace
+symlink. The address example matched the known coinbase transaction in block
+4515166. Transaction inspection distinguished that reward from the mined Ironwood
+demo and did not expose the demo's private memo plaintext.
+
+The block-header guide passed codegen and strict typechecking, then migrated a
+fresh generated test namespace and indexed genesis/height 1. Its authenticated
+GraphQL returned both exact headers and checkpoint 1. Restart retained two entities.
+The temporary reader, SSH tunnel and owned test namespace were removed afterward.
+No live application namespace or indexer was reset. CLI `--help` and command
+execution agree with the reference page. This does not qualify full-history
+address-analysis latency or a public source's future availability.
 
 Build checks reject broken internal links. A regression check planted a retired
 generated page, ran the actual generator, and confirmed the retired page was gone

@@ -43,6 +43,24 @@ try {
     await page.getByRole('heading', {level: 1, name: 'Quickstart with AI', exact: true}).waitFor();
   }
   report.interactions.push('Chef and Prep onboarding sidebar order and AI guide navigation');
+  for (const [product, chapter, category, labels] of [
+    ['chef', 'cli-commands', 'Guides', ['Configuration File (chef.config.ts)', 'Entity Schema (schema.graphql)', 'Transaction Handlers', 'Block Handlers', 'Testing', 'Querying with GraphQL', 'Environment Variables', 'CLI Commands', 'Equality query indexes']],
+    ['prep', 'tutorials/address-outputs', 'Tutorials', ['Analyzing Address Outputs', 'Inspecting Transactions']],
+  ]) {
+    await page.goto(origin + `/docs/${product}/${chapter}/`);
+    const menu = page.locator('.theme-doc-sidebar-menu').first();
+    const label = menu.locator('a.menu__link--sublist').filter({hasText: new RegExp(`^${category}$`)});
+    await expect(label).toHaveAttribute('aria-expanded', 'true');
+    const group = label.locator('xpath=ancestor::li[1]');
+    assert.deepEqual(await group.locator(':scope > ul > li > a.menu__link').allTextContents(), labels);
+    await label.click();
+    await expect(label).toHaveAttribute('aria-expanded', 'false');
+    await expect(group.getByRole('link', {name: labels[0], exact: true})).not.toBeVisible();
+    await label.click();
+    await group.getByRole('link', {name: labels[0], exact: true}).click();
+    await page.screenshot({path: path.join(evidence, `${product}-${category.toLowerCase()}-sidebar.png`), fullPage: true});
+  }
+  report.interactions.push('Chef Guides and Prep Tutorials: order, collapse/expand and chapter navigation');
   for (const product of ['chef', 'prep']) {
     await page.setViewportSize({width: 1440, height: 1000});
     await page.emulateMedia({reducedMotion: 'no-preference'});
@@ -76,7 +94,7 @@ try {
     assert.equal(alignment.overflow, false);
   }
   report.interactions.push('Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment');
-  for (const pathname of ['/docs/chef/quickstart/', '/docs/prep/quickstart/', '/docs/prep/clients/', '/docs/chef/benchmarks/']) {
+  for (const pathname of ['/docs/chef/quickstart/', '/docs/prep/quickstart/', '/docs/prep/clients/', '/docs/chef/benchmarks/', '/docs/chef/block-handlers/', '/docs/chef/cli-commands/', '/docs/prep/tutorials/address-outputs/']) {
     for (const width of [375, 1440]) {
       await page.setViewportSize({width, height: 900});
       await page.goto(origin + pathname);
@@ -86,6 +104,7 @@ try {
       await page.screenshot({path: path.join(evidence, `${pathname.split('/').filter(Boolean).slice(1).join('-')}-${width}.png`), fullPage: true});
     }
   }
+  await page.goto(origin + '/docs/chef/benchmarks/');
   const samplesUrl = await page.getByRole('link', {name: 'Download recorded samples and provenance', exact: true}).getAttribute('href');
   assert.equal(samplesUrl, '/docs/benchmarks/2026-10-20-testnet.json');
   const samplesResponse = await context.request.get(origin + samplesUrl);
@@ -93,7 +112,7 @@ try {
   const samples = await samplesResponse.json();
   assert.equal(samples.prep.runs.length, 18);
   assert.equal(samples.chef.fixed.blocks, 10000);
-  report.interactions.push('Quickstart, client and benchmark page reflow/accessibility plus downloadable benchmark evidence');
+  report.interactions.push('Quickstart, client, guide, tutorial and benchmark page reflow/accessibility plus downloadable benchmark evidence');
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({width, height: 900});
     await page.goto(origin + '/docs/chef/shielded/memos/');

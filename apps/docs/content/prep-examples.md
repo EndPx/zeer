@@ -13,3 +13,5 @@ Choose a preset in [Prep Playground](https://zeer.endpx.cloud/app/prep), then se
 | Raw transaction bytes | Serialized transaction hex |
 
 For copyable HTTP requests, use [cURL examples](/docs/prep/curl/).
+
+For scripts with setup, execution and result interpretation, follow [Analyzing Address Outputs](/docs/prep/tutorials/address-outputs/) or [Inspecting Transactions](/docs/prep/tutorials/inspect-transaction/).
