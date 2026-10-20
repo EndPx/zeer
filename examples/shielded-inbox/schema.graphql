@@ -7,6 +7,8 @@ type ReadableNote {
   valueZat: BigInt!
   receiver: String!
   memoHex: String!
+  memoKind: String!
+  memoText: String
   scope: String!
   origin: String!
   coinbase: Boolean!

@@ -24,3 +24,14 @@ test('incompatible or unavailable checkpoints never become demo completion',()=>
  const shortSource=make(4519999);shortSource.prep.data.indexed_height=4519998;
  assert.equal(syncMetrics(shortSource).chefPercent,null);
 });
+test('following coverage starts at genesis and grows with the observed Prep head',()=>{
+ const following={project:'hosted_genesis_testnet_v2',fromBlock:0,toBlock:null};
+ assert.deepEqual(parseChefDemo(JSON.stringify(following)),following);
+ const state=make(4520000);state.chef.demo=following;
+ const current=syncMetrics(state);assert.equal(current.fixedDemo,false);
+ assert.equal(current.chefStart,0);assert.equal(current.chefEnd,4520000);
+ assert.equal(current.chefCount,4520001);assert.equal(current.chefPercent,100);
+ state.prep.data.indexed_height+=10;
+ const behind=syncMetrics(state);assert.equal(behind.chefLag,10);assert.ok(behind.chefPercent<100);
+ assert.equal(behind.chefTotal,4520011);
+});

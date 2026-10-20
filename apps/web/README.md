@@ -32,8 +32,9 @@ Open http://127.0.0.1:3000. Use `npm run dev:web` for development.
   every 15 seconds; failures retain explicitly labeled last-known observations.
 - `/app/prep`: bounded range/field examples, request runner, Table/JSON results,
   explicit empty/stale states and response coverage.
-- `/app/chef`: editable GraphQL query, example model, copyable results and
-  Ctrl/Cmd+Enter execution.
+- `/app/chef`: six runnable BlockSummary presets, actual genesis-to-latest Chef
+  coverage, editable GraphQL, copyable results and Ctrl/Cmd+Enter execution.
+  A collapsed local memo example links the developer-owned viewing-key workflow.
 - `/docs`: local developer quickstart and installation boundaries.
 
 ## Data modes

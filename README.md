@@ -19,7 +19,7 @@ the ingredients; Chef applies the developer's recipe.
 
 ## Status
 
-**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the Chef hackathon demo indexes a separate, fixed modern range. An opt-in local watch-only receipt preview is available separately; npm publication remains deferred.**
+**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the public Chef indexes block summaries from block 0 and follows the latest Prep blocks. An opt-in local watch-only receipt preview is available separately; npm publication remains deferred.**
 
 Inspect current coverage in the [console](https://zeer.endpx.cloud/app) or
 through the [limited public Prep API](docs/PUBLIC_API.md). The preview is bounded
@@ -28,9 +28,9 @@ production availability commitment.
 
 Start with the [public demo walkthrough](docs/HACKATHON_DEMO.md), then run the
 [bounded Chef example](examples/chef-hackathon/README.md) or the
-[developer quickstart](docs/CHEF_QUICKSTART.md). The fixed Chef demo covers
-testnet blocks **4,510,000–4,519,999 inclusive** in a fresh namespace; its
-completion meter does not represent full-chain Chef indexing.
+[developer quickstart](docs/CHEF_QUICKSTART.md). The public Chef uses the genesis-following `hosted_genesis_testnet_v2` namespace.
+Its coverage and progress come from the committed checkpoint. The separate local
+bounded example covers **4,510,000–4,519,999 inclusive** for reproducible tests.
 
 Public [Sapling, Orchard and Ironwood queries](docs/PUBLIC_SHIELDED.md) expose
 component counts, pool filters and coinbase classification. The

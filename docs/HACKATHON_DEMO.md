@@ -1,10 +1,11 @@
 # Public testnet demo walkthrough
 
-Open [the console](https://zeer.endpx.cloud/app). Its two meters have different
-denominators: Prep reports its observed archive coverage against the source;
-Chef reports only the fixed **4,510,000–4,519,999** demonstration range in
-namespace `hackathon_testnet_20261020`. A stored checkpoint supplies Chef's
-progress. Source freshness and gaps remain visible separately.
+Open [the console](https://zeer.endpx.cloud/app). Prep reports its observed archive
+coverage against the source. Chef indexes public BlockSummary entities from
+**block 0 through the latest available Prep block**, using namespace
+`hosted_genesis_testnet_v2`. Both ranges and their gaps come from actual observed
+heights. `_meta.height` is Chef's committed checkpoint; it can trail Prep while
+indexing catches up.
 
 ## 1. Search public data from genesis
 
@@ -28,14 +29,21 @@ continue; do not silently substitute a later range or a recorded response.
 ## 2. Read application entities
 
 Open [Chef Playground](https://zeer.endpx.cloud/app/chef) and run the default
-GraphQL query. Its notice states the namespace and inclusive bounds. Inspect
+GraphQL query. Its notice states the namespace, following mode and observed indexed range. Inspect
 the returned heights, hashes, transaction counts and `_meta.height`.
 Use **Next example page** to continue the built-in list without editing its
 cursor manually. **Restore example** fills the original query again without
 running it. A custom query retains its own paging behavior. A field typo in the
 hosted demo names the invalid field and suggests a supported spelling when possible.
 
-For a direct comparison, query an existing block in the demo range:
+Use the built-in **Browse block entities**, **Genesis block**, **Filter by block
+height**, **Compare two heights**, **Indexer checkpoint**, and **Latest indexed
+block** examples. Select one to fill the editor, then Run query. The latest-block
+example captures a real checkpoint when selected; Restore example captures a new
+one. It never overwrites an edited query as the chain advances. Lists use entity
+ID order, rather than promising numeric block order.
+
+For a direct comparison, query a stored modern block:
 
 ```graphql
 query {
@@ -56,8 +64,8 @@ links preserve that range and response-field selection on the current app.
 The flow is **Prep → Chef → PostgreSQL → GraphQL**: Prep reads archived public
 chain data; deterministic TypeScript handlers shape it; PostgreSQL persists
 entities and a checkpoint atomically; GraphQL reads the committed state.
-During indexing, `_meta.height` is a committed prefix. A completed hosted demo
-does not continuously replay merely to animate the meter.
+During indexing, `_meta.height` is a committed prefix. The public Chef follows new
+Prep blocks; the local bounded example remains a finite restart/replay exercise.
 
 ## 3. Reproduce live reads and restart locally
 
@@ -86,3 +94,13 @@ show public metadata, exact zatoshis and encrypted shielded data. The mempool
 view observes the configured testnet node and refreshes while visible. A pending
 row can be mined or disappear between observations; no pending fixture is forced.
 See [field and privacy boundaries](PUBLIC_SHIELDED.md).
+
+## Read shielded memos on your own machine
+
+In Chef Playground, expand **Read shielded memos locally** for a copyable
+ReadableNote query and the [local inbox quickstart](../examples/shielded-inbox/README.md).
+It decrypts account-owned notes with a testnet UFVK in a protected local file,
+then exposes `memoText`, `memoKind` and original `memoHex` through authenticated
+loopback GraphQL. The public BlockSummary service does not accept viewing keys
+or expose these private receipt entities. Run this example locally with your own
+wallet birthday, key fingerprint and database namespace.

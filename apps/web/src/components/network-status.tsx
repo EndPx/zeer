@@ -33,15 +33,16 @@ export function NetworkStatus({ status, loading, error, refresh }: {
       </div>
       <div className="network-meters">
         <Meter label="History available" value={m.historyPercent} loading={loading} detail={m.total === null ? (loading ? "Reading archive coverage and the latest source tip…" : "A fresh source tip is unavailable. Stored coverage is shown below when reported.") : `${number(m.count)} of ${number(m.total)} chain blocks available`} />
-        <Meter label={m.demo ? "Chef demo indexing" : "Chef indexing"} value={m.chefPercent} loading={loading} detail={m.chefCount === null ? (loading ? "Reading the saved Chef checkpoint…" : "Chef has not reported a comparable checkpoint. Retrying automatically.") : `${number(m.chefCount)} of ${number(m.chefTotal)} ${m.demo ? "demo" : "available Prep"} blocks processed`} />
+        <Meter label={m.fixedDemo ? "Chef demo indexing" : "Chef indexing"} value={m.chefPercent} loading={loading} detail={m.chefCount === null ? (loading ? "Reading the saved Chef checkpoint…" : "Chef has not reported a comparable checkpoint. Retrying automatically.") : `${number(m.chefCount)} of ${number(m.chefTotal)} ${m.fixedDemo ? "demo" : "available Prep"} blocks processed`} />
       </div>
       <dl className="network-facts">
         <div><dt>Prep range</dt><dd>{m.count === null ? <PendingValue loading={loading} /> : `${number(m.start)} – ${number(m.head)}`}</dd></div>
         <div><dt>Source tip</dt><dd>{m.tip === null ? <PendingValue loading={loading} /> : number(m.tip)}</dd></div>
         <div><dt>Source → Prep gap</dt><dd>{m.sourceLag === null ? <PendingValue loading={loading} /> : `${number(m.sourceLag)} blocks`}</dd></div>
-        <div><dt>{m.demo ? "Remaining demo blocks" : "Prep → Chef gap"}</dt><dd>{m.chefLag === null ? <PendingValue loading={loading} /> : `${number(m.chefLag)} blocks`}</dd></div>
+        <div><dt>{m.fixedDemo ? "Remaining demo blocks" : "Prep → Chef gap"}</dt><dd>{m.chefLag === null ? <PendingValue loading={loading} /> : `${number(m.chefLag)} blocks`}</dd></div>
       </dl>
-      {m.demo && <p className="coverage-note">Chef demo · blocks {number(m.chefStart)}–{number(m.chefEnd)} inclusive · namespace <code>{m.demo.project}</code>. This is a fixed demonstration range; Prep coverage is shown separately above.</p>}
+      {m.fixedDemo && m.demo && <p className="coverage-note">Chef demo · blocks {number(m.chefStart)}–{number(m.chefEnd)} inclusive · namespace <code>{m.demo.project}</code>. This is a fixed demonstration range; Prep coverage is shown separately above.</p>}
+      {m.demo && !m.fixedDemo && <p className="coverage-note">Chef range · {number(m.chefStart)}–{number(m.checkpoint)} indexed · follows the latest Prep block · namespace <code>{m.demo.project}</code>.</p>}
       <div className="network-status-foot"><span className="coverage-note">{!status && loading ? "Connecting to Prep and Chef. Saved data will appear here shortly." : m.start !== null && m.start > 0 ? `Partial archive · blocks 0–${number(m.start - 1)} are not indexed.` : m.historyPercent === 100 ? "Complete history through the observed source tip." : m.sourceLag !== null ? `${number(m.sourceLag)} source blocks are not in the indexed range yet.` : "Waiting for the services to report their current state."}</span><span><Clock3 size={13} />{status?.checkedAt ? `${error ? "Last response" : "Checked"} ${new Date(status.checkedAt).toLocaleTimeString("en-GB")}` : loading ? "Checking now…" : "No response yet"}</span></div>
       {error && <p className="error-note" role="alert">{error}{m.count !== null ? " Values shown are from the last successful refresh." : ""}</p>}
     </section>

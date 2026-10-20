@@ -15,6 +15,8 @@ From the repository root, with Rust 1.99+, Node 24.14+ and protoc available
 npm ci
 npm run build:chef
 cargo build --release --locked -p zeer-scanner
+npx tsc -p examples/shielded-inbox/tsconfig.json
+node --experimental-strip-types --test examples/shielded-inbox/memo.test.mjs
 ```
 
 Export a UFVK from an operator-owned **testnet** wallet to an absolute protected
@@ -68,13 +70,53 @@ node --env-file=/protected/inbox.env packages/chef/dist/cli.js sync --config exa
 In a separate terminal:
 
 ```sh
-node --env-file=/protected/inbox.env packages/chef/dist/cli.js serve --config examples/shielded-inbox/chef.config.ts --listen 127.0.0.1 --port 39370
+node --env-file=/protected/inbox.env packages/chef/dist/cli.js serve --config examples/shielded-inbox/chef.config.ts --listen 127.0.0.1 --port 39375
 ```
 
 For a bounded verification instead of following, use `sync --to HEIGHT` with an
 **inclusive** available end. Restart the same command to resume its checkpoint.
 Changing schema, handler behavior, account, key fingerprint or birthday requires
 the explicit [evolution procedure](../../docs/SCHEMA_EVOLUTION.md).
+This memo-enabled example uses the fresh `shielded_inbox_memos` namespace and
+`readable-memos-v1` handler generation. Preserve an existing `shielded_inbox`
+projection; do not reset it or reuse its identity for this changed schema.
+
+## Read shielded memos
+
+Run the included authenticated, loopback-only query client:
+
+```sh
+node --env-file=/protected/inbox.env examples/shielded-inbox/query.mjs
+```
+
+It runs [query.graphql](query.graphql) against `CHEF_LOCAL_URL`, defaulting to
+`http://127.0.0.1:39375/graphql`. Its token stays in the local environment; it
+refuses remote endpoints and redirects. The output contains private received
+note data. Keep it on your machine and do not upload it to the public playground.
+
+```graphql
+query ReadShieldedMemos {
+  ReadableNoteList(first: 10) {
+    items { txid pool blockHeight valueZat memoKind memoText }
+    nextCursor
+  }
+  _meta { height status }
+}
+```
+
+Only notes decryptable with the configured account's viewing key appear. For a
+known TX ID, add `where: { txid: "YOUR_64_HEX_TX_ID" }` to the list. To continue,
+pass the returned `nextCursor` as `after`. An empty result can mean no readable
+notes in the scanned range, an unrelated viewing key, or no matching filter;
+inspect `_meta.height` and your wallet birthday before drawing conclusions.
+
+The display projection follows [ZIP 302](https://zips.z.cash/zip-0302): text
+removes trailing zero padding and uses strict UTF-8. `memoKind` distinguishes
+`text`, `empty_text`, `no_memo`, `non_text`, `invalid_utf8` and `text_with_nul`.
+Binary/reserved formats are not guessed as text. Invalid UTF-8 is reported by
+kind, while the original `memoHex` remains intact. PostgreSQL text cannot store
+embedded U+0000, so that case also retains only its raw hex plus explicit kind.
+Add `memoHex` to the query when you need the complete 512-byte value.
 
 ```graphql
 {

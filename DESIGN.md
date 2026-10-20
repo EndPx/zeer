@@ -67,6 +67,21 @@ presentation only and introduces no request limit or server paging control.
 
 ## Bounded hackathon Chef demo
 
+The public Chef now follows genesis through the latest Prep block. A coverage
+descriptor with `toBlock: null` denotes following mode; show its actual committed
+range and checkpoint on Overview and Chef Playground. Keep fixed-range descriptors
+supported for isolated examples. Never label an observed prefix as future coverage.
+Offer six query presets inside Chef Playground using the existing panel, format-tab,
+field and stale-response primitives: browse, genesis, exact height, compare heights,
+checkpoint and latest observed block. Selecting a preset fills the editor; Run query
+executes it. Only the built-in browse query receives automatic cursor continuation.
+Capture the latest-block ID when selected; later polling must not rewrite the editor.
+Show that captured height and a refresh-example action. Keep 44px preset targets,
+wrapping tabs, and the existing mobile editor/result stack; no new sidebar menu.
+Provide a collapsed local memo example within Chef. Its copied query targets the
+developer's ReadableNote schema, with a local quickstart link and no public run
+action or viewing-key form. Use native details/summary and the existing code panel.
+
 Reuse the notice, coverage-note, network-facts and progress-meter primitives.
 An operator-configured fixed Chef range is distinct from whole-chain Prep
 coverage. Show its inclusive bounds and namespace on Overview and Chef Playground.

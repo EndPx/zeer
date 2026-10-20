@@ -1,0 +1,7 @@
+query ReadShieldedMemos {
+  ReadableNoteList(first: 10) {
+    items { txid pool blockHeight valueZat memoKind memoText }
+    nextCursor
+  }
+  _meta { height status }
+}

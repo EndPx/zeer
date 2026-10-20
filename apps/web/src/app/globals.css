@@ -2504,6 +2504,13 @@ svg {
 .demo-coverage strong { color: var(--text); }
 .demo-coverage p { margin: 8px 0 0; }
 .demo-coverage code, .coverage-note code { overflow-wrap: anywhere; }
+.chef-examples .format-tabs { margin:16px 0; }
+.chef-examples .format-tabs button { min-height:44px; font-size:12px; padding:10px 12px; }
+.chef-height-field { display:block; margin-top:16px; font-size:12px; color:var(--muted); }
+.chef-height-field input { display:block; margin-top:8px; padding:12px; max-width:100%; width:240px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; }
+.chef-private-example summary { display:flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; font-size:14px; }
+.chef-private-example .field-hint { margin:12px 0; }
+.chef-private-example > .text-link { margin-top:16px; }
 .result-table td.table-spacer { padding: 0; border: 0; }
 .result-table-scroll { overflow-anchor: none; scroll-behavior: auto; }
 .transaction-search { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 16px; }
