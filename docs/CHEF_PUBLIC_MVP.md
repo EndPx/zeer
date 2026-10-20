@@ -7,7 +7,7 @@ slice; it does not certify the older shielded/two-store/outbox gates.
 
 ## Delivery
 
-- One local, unpublished `@zeer-dev/chef` package with TypeScript handlers and generated
+- The `@zeer-dev/chef` npm package with TypeScript handlers and generated
   entity types; CLI `codegen`, `migrate`, `sync`, `serve`, `status`.
 - Existing Prep HTTP/SDK as source; ordered block then transaction handlers.
 - Developer-supplied PostgreSQL, one marked namespace per project, one writer.

@@ -17,7 +17,7 @@ the combined release gates are owned by the [active roadmap](../plan.md#active-r
   reorg, and fail visibly when safe recovery exceeds the configured bounds.
 - [x] Native HTTP queries: range, supported public filters, field selection,
   bounded responses, pagination and continuation tied to chain epoch.
-- [x] A local, unpublished TypeScript-friendly client supporting typed `get`,
+- [x] A published TypeScript-friendly npm client supporting typed `get`,
   finite `stream`, cancellation and explicit reorg errors; runnable examples.
 - [x] Correctness, failure/recovery and integration tests, plus reproducible
   real-node evidence. Distinguish local tests from observed live network events.

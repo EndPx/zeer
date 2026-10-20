@@ -136,8 +136,8 @@ payments. It does not calculate a spendable balance or mark a business order pai
 
 ## Independent consumer
 
-Packages remain unpublished. Use the existing [local tarball workflow](../../docs/PACKAGING.md)
-to pack/install both `@zeer-dev/prep-client` and `@zeer-dev/chef`, then copy this example's
+Install `@zeer-dev/prep-client` and `@zeer-dev/chef` from npm, or use the
+[local tarball workflow](../../docs/PACKAGING.md) for a source-built candidate. Copy this example's
 config, schema and package metadata into your project. Run the installed
 `zeer-chef` executable. The native scanner is a separately built local executable;
 its absolute path is selected through `ZEER_SCANNER_EXECUTABLE`.

@@ -6,17 +6,15 @@ Use the JavaScript client for typed queries and cursor handling, or call Prep's 
 
 | Client | Resources |
 | --- | --- |
-| **Node.js / TypeScript** | [API reference](https://github.com/EndPx/zeer/blob/main/packages/prep-client/README.md) · [GitHub](https://github.com/EndPx/zeer/tree/main/packages/prep-client) · [Quickstart](/docs/prep/quickstart/) |
+| **Node.js / TypeScript** | [API reference](https://github.com/EndPx/zeer/blob/main/packages/prep-client/README.md) · [npm](https://www.npmjs.com/package/@zeer-dev/prep-client) · [GitHub](https://github.com/EndPx/zeer/tree/main/packages/prep-client) · [Quickstart](/docs/prep/quickstart/) |
 | **HTTP JSON** | [Query reference](/docs/prep/query/) · [cURL examples](/docs/prep/curl/) · [Playground](https://zeer.endpx.cloud/app/prep) |
 
 ## Node.js / TypeScript
 
 Requires **Node.js 22.18+**. The ESM package uses native `fetch` and includes TypeScript declarations.
 
-The npm release is pending. Follow the [source installation](/docs/prep/quickstart/#1-install-the-client) to create the tarball, then install its actual file path in your project:
-
 ```sh
-npm install /absolute/path/to/zeer-dev-prep-client-0.1.0.tgz
+npm install @zeer-dev/prep-client@0.1.0
 ```
 
 ```js

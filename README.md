@@ -23,7 +23,7 @@ Chef quickstarts, API contracts and the local Shielded & Memos workflow. The
 
 ## Status
 
-**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the public Chef indexes block summaries from block 0 and follows the latest Prep blocks. An opt-in local watch-only receipt preview is available separately; npm publication remains deferred.**
+**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the public Chef indexes block summaries from block 0 and follows the latest Prep blocks. An opt-in local watch-only receipt preview is available separately. Chef and the Prep client are available on npm.**
 
 Inspect current coverage in the [console](https://zeer.endpx.cloud/app) or
 through the [limited public Prep API](docs/PUBLIC_API.md). The preview is bounded
@@ -80,9 +80,11 @@ This is the core Zeer monorepo. See [accepted product responsibilities and plann
 
 Start with [Run your own Chef project](docs/CHEF_QUICKSTART.md): create a standalone
 testnet project with `zeer-chef init`, connect your Prep endpoint and PostgreSQL,
-then run codegen, migrate, sync and GraphQL. Packages remain local tarball installs.
+then run codegen, migrate, sync and GraphQL. Both packages are available on npm:
+[`@zeer-dev/chef`](https://www.npmjs.com/package/@zeer-dev/chef) and
+[`@zeer-dev/prep-client`](https://www.npmjs.com/package/@zeer-dev/prep-client).
 
-- One local unpublished package with CLI, TypeScript handlers and generated types.
+- An npm package with CLI, TypeScript handlers and generated types.
 - Self-hosted operation with developer-owned PostgreSQL.
 - Historical processing followed by live block tracking.
 - Public chain facts from Prep; optional local testnet receipt scanning; webhooks remain deferred.
@@ -97,7 +99,7 @@ Zeer does not require spending keys. Viewing keys and decoded private data remai
 crates/prep/              Rust full-node source, follower, HTTP queries, compact API
 crates/prep-store/        Immutable segments, atomic archive catalog, header index
 crates/prep-proto/        Pinned upstream protocol and experimental Prep API
-packages/prep-client/     Typed native-fetch client; unpublished local npm package
+packages/prep-client/     Typed native-fetch client, published on npm
 packages/chef/            Public TS handlers, PostgreSQL runtime, GraphQL and CLI
 examples/prep-client/     Runnable client example
 examples/chef-public/     Runnable public-data application schema and handlers

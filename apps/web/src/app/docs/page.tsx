@@ -15,34 +15,21 @@ export default function Page() {
           data into your own GraphQL API.
         </p>
         <div className="notice">
-          Preview release · Linux / WSL2 · Node 24.14+ · packages installed from
-          local tarballs
+          Developer preview · Linux / WSL2 · Node 24.14+ · install from npm
         </div>
         <p><Link className="text-link" href={`${repo}/blob/main/docs/HACKATHON_DEMO.md`}>Public demo walkthrough ↗</Link>{" · "}<Link className="text-link" href={`${repo}/tree/main/examples/chef-hackathon`}>Run the bounded testnet demo ↗</Link></p>
         <section>
-          <h2>1. Prepare your packages</h2>
+          <h2>1. Create your indexer</h2>
           <p>
-            Clone the repository and pack both packages. Chef builds during
-            packing; the packages are not yet published to npm.
+            Choose a new directory and project name. This command creates the
+            schema, TypeScript handlers and example GraphQL query.
           </p>
           <Code
-            code={`git clone ${repo}.git\ncd zeer\nnpm ci\nmkdir -p .tmp/chef-packages\nnpm pack ./packages/prep-client --pack-destination .tmp/chef-packages\nnpm pack ./packages/chef --pack-destination .tmp/chef-packages`}
+            code={"npx @zeer-dev/chef@0.1.0 init --dir my-indexer --project my_indexer --start-height 0\ncd my-indexer\nnpm install\nnpm run codegen\nnpm run typecheck"}
           />
         </section>
         <section>
-          <h2>2. Create an independent project</h2>
-          <p>
-            Choose a start height your testnet Prep archive covers. The target
-            directory must not already exist.
-          </p>
-          <Code
-            code={
-              "node packages/chef/dist/cli.js init \\\n  --dir ../my-indexer \\\n  --project my_indexer \\\n  --start-height 0\n\ncd ../my-indexer\nnpm install ../zeer/.tmp/chef-packages/zeer-dev-prep-client-0.1.0.tgz \\\n  ../zeer/.tmp/chef-packages/zeer-dev-chef-0.1.0.tgz\nnpm run codegen\nnpm run typecheck"
-            }
-          />
-        </section>
-        <section>
-          <h2>3. Connect your data</h2>
+          <h2>2. Connect your data</h2>
           <p>
             Edit the generated, git-ignored <code>.env</code>: set your actual{" "}
             <code>PREP_URL</code>, optional Prep token, and PostgreSQL{" "}
@@ -56,10 +43,12 @@ export default function Page() {
             The starter includes optional PostgreSQL via Docker Compose. Skip
             this command when using an existing database.
           </p>
-          <Code code={"npm run db:up\nnpm run migrate\nnpm run status"} />
+          <Code code={"npm run db:up"} />
+          <p>With either database option, initialize the project's tables:</p>
+          <Code code={"npm run migrate\nnpm run status"} />
         </section>
         <section>
-          <h2>4. Serve while indexing</h2>
+          <h2>3. Serve while indexing</h2>
           <p>
             Set an end height available in Prep. Sync uses an inclusive end;
             Prep queries use an exclusive end. Start the API first, then index
@@ -68,7 +57,7 @@ export default function Page() {
           </p>
           <Code
             code={
-              "# Terminal 1\nnpm run serve\n\n# Terminal 2\nnpm run sync -- --to 1002\n\n# Terminal 3\nnpm run query"
+              "# Terminal 1\nnpm run serve\n\n# Terminal 2: blocks 0 and 1\nnpm run sync -- --to 1\n\n# Terminal 3\nnpm run query"
             }
           />
           <p>

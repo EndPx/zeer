@@ -471,7 +471,7 @@ copy: `Choose an example, adjust the inputs, and copy it into your project.`
 Desktop: 248px example sidebar, 24px gap, flexible main column. Main column has
 a description/input panel followed by the code panel. Language tabs: JSON,
 cURL and TypeScript. Show only implemented client usage; TypeScript uses the
-local unpublished `@zeer-dev/prep-client`, with setup linked from the example.
+published `@zeer-dev/prep-client`, with setup linked from the example.
 
 | Example | Actual Prep capability | Copy boundary |
 | --- | --- | --- |

@@ -112,7 +112,7 @@ HTTP 413 when it cannot fit in an empty page. The stored envelope and node JSON
 are still decoded first; this does not establish a peak-memory cap equal to the
 serialized response limit.
 
-The unpublished `packages/prep-client` exposes `getHeight()`, `get()`, and finite
+The published `@zeer-dev/prep-client` exposes `getHeight()`, `get()`, and finite
 `stream()` with cancellation, deadlines, bounds and explicit reorg errors. It
 uses native fetch rather than a Rust native addon. HTTP/binary, Arrow, Parquet,
 SSE, automatic client rollback and npm publication are not implemented.

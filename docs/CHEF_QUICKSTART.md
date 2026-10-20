@@ -21,29 +21,14 @@ explicitly labeled mainnet fixtures and is not a live testnet service.
 - A compatible Prep endpoint and token if the operator requires one.
 - Your own PostgreSQL database; the starter also includes optional local Docker
   Compose configuration. Docker Engine and Compose v2 are needed only for that option.
-- Both Zeer package tarballs. They are **unpublished**; plain `npm install
-  @zeer-dev/chef` is not the current installation path.
+- The published `@zeer-dev/chef` CLI and its Prep client dependency, installed below.
 
-## 1. Prepare the package artifacts
+## 1. Create a standalone project
 
-From the Zeer checkout:
-
-```sh
-npm ci
-mkdir -p .tmp/chef-packages
-npm pack ./packages/prep-client --pack-destination .tmp/chef-packages
-npm pack ./packages/chef --pack-destination .tmp/chef-packages
-```
-
-Chef builds during packing. Record the absolute paths of both tarballs. The
-[packaging verifier](PACKAGING.md) checks package contents and standalone imports.
-
-## 2. Create a standalone project
-
-Using the built CLI from the checkout (or an already installed `zeer-chef` binary):
+Run the published CLI through npx:
 
 ```sh
-node packages/chef/dist/cli.js init \
+npx @zeer-dev/chef@0.1.0 init \
   --dir /absolute/path/to/my-zcash-indexer \
   --project my_zcash_indexer \
   --start-height 0
@@ -66,16 +51,22 @@ For an application that only needs matching transactions, use the
 [filtered genesis example](../examples/chef-filtered/README.md). It applies the
 public filter at Prep and stores only matches, while validating every header.
 
-Inside the new project, install the two tarballs together:
+## 2. Install dependencies
+
+Inside the new project:
 
 ```sh
-npm install /absolute/path/to/zeer-dev-prep-client-0.1.0.tgz /absolute/path/to/zeer-dev-chef-0.1.0.tgz
+cd /absolute/path/to/my-zcash-indexer
+npm install
 npm run codegen
 npm run typecheck
 ```
 
 No files are imported from the Zeer checkout. Keep the generated lockfile with
 your project. Type stripping does not replace explicit typechecking.
+
+For an unpublished source candidate, the [packaging verifier](PACKAGING.md)
+describes building and installing both local tarballs together.
 
 ## 3. Configure Prep and PostgreSQL
 

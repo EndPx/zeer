@@ -4,14 +4,15 @@ The local candidate versions are `@zeer-dev/prep-client@0.1.0`, `@zeer-dev/chef@
 and Rust Prep `0.1.0`. They implement the current public-data contracts. This
 candidate adds build-on-pack and public Node typings for Chef; it does not change
 the package entrypoints or Prep HTTP API. Both npm packages are configured for
-public publication under `@zeer-dev`. Registry publication is a separate final step:
-verify it with `npm view @zeer-dev/prep-client@0.1.0 version` and
-`npm view @zeer-dev/chef@0.1.0 version` before relying on registry installation.
+public publication under `@zeer-dev`. Both `0.1.0` releases were published and
+verified from the public registry on 21 October 2026. Prefer the
+[Chef quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) or
+[Prep quickstart](https://zeer.endpx.cloud/docs/prep/quickstart/) for npm installation.
 
 The package now includes `zeer-chef init` for independent testnet projects. Follow
 [the standalone Chef quickstart](CHEF_QUICKSTART.md) after producing tarballs.
-The generated project's installation must receive both local tarballs together
-while the packages remain unpublished.
+The remaining instructions verify source-built release candidates. When testing
+tarballs, install both together so the candidate's client dependency resolves locally.
 
 Use Linux x86_64, including the documented WSL2 Linux route. The combined consumer
 requires Node 24.14+, npm, and a clean source checkout. Run `npm ci` at the checkout

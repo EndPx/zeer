@@ -8,35 +8,21 @@ Create a Zcash indexer with a schema, TypeScript handlers and a GraphQL API. Thi
 - **Linux x86_64**, or **WSL2** on Windows.
 - **PostgreSQL**, or Docker Engine with Compose v2 for the generated local database.
 
-## 1. Prepare the packages
-
-The npm release is pending. For now, build the installable packages from the repository in a POSIX shell, such as WSL on Windows:
-
-```sh
-git clone https://github.com/EndPx/zeer.git
-cd zeer
-npm ci
-ZEER_CHECKOUT="$(pwd)"
-mkdir -p .tmp/chef-packages
-npm pack ./packages/prep-client --pack-destination .tmp/chef-packages
-npm pack ./packages/chef --pack-destination .tmp/chef-packages
-```
-
-## 2. Initialize your indexer
+## 1. Initialize your indexer
 
 Run this in a directory where `my-indexer` does not already exist:
 
 ```sh
-node packages/chef/dist/cli.js init --dir ../my-indexer --project my_indexer --start-height 0
-cd ../my-indexer
-npm install "$ZEER_CHECKOUT/.tmp/chef-packages/zeer-dev-prep-client-0.1.0.tgz" "$ZEER_CHECKOUT/.tmp/chef-packages/zeer-dev-chef-0.1.0.tgz"
+npx @zeer-dev/chef@0.1.0 init --dir my-indexer --project my_indexer --start-height 0
+cd my-indexer
+npm install
 npm run codegen
 npm run typecheck
 ```
 
 The `my_indexer` project name creates an isolated PostgreSQL schema named `chef_my_indexer` for this indexer's records and progress. Choose a fresh name for each independent indexer.
 
-## 3. Connect Prep and PostgreSQL
+## 2. Connect Prep and PostgreSQL
 
 In the generated `.env`, set:
 
@@ -60,7 +46,7 @@ npm run migrate
 npm run status
 ```
 
-## 4. Run and query
+## 3. Run and query
 
 Run the API in terminal A:
 

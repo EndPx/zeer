@@ -35,8 +35,8 @@ Supported routes are `GET /height`, `/health`, `/ready`, `/capabilities`, and
 console adapters retain their own origin checks; they are not the SDK base URL.
 No viewing key, spending key or wallet connection is required or accepted.
 
-The existing client works against this base URL after installation from the
-[local package tarball](PACKAGING.md); it is not published on npm yet:
+Install the published client with `npm install @zeer-dev/prep-client@0.1.0`,
+then connect it to this base URL:
 
 ```ts
 import { PrepClient } from "@zeer-dev/prep-client";

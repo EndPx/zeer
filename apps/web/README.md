@@ -61,7 +61,7 @@ operator-managed ingress quota/TLS policy and deployment review.
 
 Prep runs one bounded page. Inspect `cursor`/`next_block`; a page is not complete
 history. The client does not silently drain unlimited pages. The TypeScript
-example refers to the currently unpublished local Prep-client package.
+example uses the published `@zeer-dev/prep-client` npm package.
 Chef serves existing read-only operations; no introspection/subscriptions are added.
 Displayed round-trip duration measures the browser request through the adapter
 until JSON decoding finishes; it is not an engine benchmark. Recorded samples

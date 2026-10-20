@@ -175,13 +175,13 @@ consumer, both public client-guide scripts returned actual heights 0 and 1,
 and an independent generated project passed codegen and strict typechecking.
 This is package/source validation, not a new database or Linux integration run.
 
-Registry publication is **not complete**. The signed-in account is `endpx`;
+At the initial release-preparation stage, registry publication was incomplete. The signed-in account was `endpx`;
 the requested `@zeer` scope belongs to the separate `zeer` npm account. The
 browser lists `adelos` and `atfi` as the signed-in account's organizations.
 The real publication attempt stopped at npm's WebAuthn/security-key challenge;
 no package version was published. No 2FA settings, passwords or permissions were
-changed. A scope decision and user-controlled passkey verification remain.
-The public quickstarts therefore retain working source/tarball installation
+changed. A scope decision and user-controlled passkey verification were still required.
+The public quickstarts at that stage retained working source/tarball installation
 instead of advertising unverified registry commands. Prepared registry-based
 drafts and release verification stay in `.deploy-local/docs-release-20261021/`.
 
@@ -214,5 +214,36 @@ its generated types passed strict typechecking, and the installed client returne
 verified public testnet heights 0 and 1. Evidence remains in
 `.deploy-local/npm-zeer-dev-20261021/`.
 
-Registry publication still requires npm's user-controlled passkey verification.
-Organization creation and package preparation do not establish publication.
+At the conclusion of the scope check, registry publication still required npm's
+user-controlled passkey verification. The completed release is recorded below.
+
+## Completed npm release and public update, 21 October 2026
+
+The owner completed npm verification separately for both packages. The public
+registry serves `@zeer-dev/prep-client@0.1.0` and `@zeer-dev/chef@0.1.0` under
+the `latest` tag. Their registry tarball integrity values match the local release
+artifacts. Initial 404 responses during npm processing were preserved; no second
+publication of the same version was attempted.
+
+Fresh public-registry consumers were verified on Windows and Linux Node 24.14.
+The installed CLI initialized a new project; plain `npm install`, codegen and
+strict typechecking passed. Linux also exercised the actual installed executable.
+Both lockfiles resolve the Zeer dependencies to `registry.npmjs.org`, and the
+installed client independently checked testnet block heights 0–1 and genesis hash.
+The exact public Prep quickstart and Clients JavaScript blocks also ran successfully.
+This verifies package distribution and the source-read path; no new database,
+wallet or private-receipt experiment was performed.
+
+Only after registry installation passed, the website was built on Linux inside
+the existing 0.5 CPU / 1 GiB build limits and activated with rollback available.
+The web runtime environment was not changed. Prep headers, Chef genesis and a
+non-regressing application checkpoint passed before/after activation; only the
+web service restarted. The resource guard passed. Static docs were then activated
+as release `20261021-npm-v7` and all 35 pages reverified publicly.
+
+Quickstarts and Clients now use registry commands and link the npm package.
+The public Prep playground's TypeScript snippet imports `@zeer-dev/prep-client`.
+Public browser checks executed the Prep headers and Chef genesis presets and
+confirmed the live npm quickstart. Screenshots, registry metadata/integrity,
+consumer lockfiles, Linux acceptance and activation evidence remain under
+`.deploy-local/npm-zeer-dev-20261021/`.

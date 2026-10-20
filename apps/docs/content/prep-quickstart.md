@@ -8,22 +8,15 @@ Fetch Zcash block headers with the JavaScript client. This example reads testnet
 
 ## Prerequisites
 
-**Node.js 24.14+**, npm and Git for the source installation below. Use a POSIX shell, such as WSL on Windows. The public testnet preview requires no personal API token.
+**Node.js 22.18+** and npm. The public testnet preview requires no personal API token.
 
 ## 1. Install the client
 
-The npm release is pending. Build the client package from the repository:
-
 ```sh
-git clone https://github.com/EndPx/zeer.git
-cd zeer
-ZEER_CHECKOUT="$(pwd)"
-mkdir -p .tmp/prep-packages
-npm pack ./packages/prep-client --pack-destination .tmp/prep-packages
-mkdir ../prep-quickstart
-cd ../prep-quickstart
+mkdir prep-quickstart
+cd prep-quickstart
 npm init -y
-npm install "$ZEER_CHECKOUT/.tmp/prep-packages/zeer-dev-prep-client-0.1.0.tgz"
+npm install @zeer-dev/prep-client@0.1.0
 ```
 
 ## 2. Write your query
