@@ -2,15 +2,17 @@
 
 Recorded **20 October 2026** on real **Zcash Testnet** data. These runs use a prepared historical archive on a shared VPS, with requests over loopback.
 
+All durations below are shown in **seconds (s)**.
+
 ## Prep retrieval
 
 Range: **0–99,023 inclusive**. Each value is the median of **three alternating runs** per mode. All runs completed the range and matched row counts and digests.
 
 | Query | Returned rows | Fixed scan median | Adaptive scan median |
 | --- | ---: | ---: | ---: |
-| Block headers (`height`, `hash`) | 99,024 | 967.156 ms | 689.918 ms |
-| Genesis transaction ID | 1 | 234.639 ms | 4.171 ms |
-| Orchard filter | 0 | 418.542 ms | 108.843 ms |
+| Block headers (`height`, `hash`) | 99,024 | 0.967156 s | 0.689918 s |
+| Genesis transaction ID | 1 | 0.234639 s | 0.004171 s |
+| Orchard filter | 0 | 0.418542 s | 0.108843 s |
 
 Fixed mode used 1,000-block pages. Adaptive mode allowed up to 1,000,000 scanned blocks per response, subject to time and byte bounds. Header scans used 100 versus 18 pages; the two filtered scans used 100 versus 1.
 
