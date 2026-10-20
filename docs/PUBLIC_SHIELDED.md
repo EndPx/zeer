@@ -97,7 +97,7 @@ it; otherwise the UI labels the time of this observation. The public ingress and
 shared two-request admission/deadline/body budgets still apply. A live observation
 requires no viewing key and does not produce an application indexing event.
 
-The [transaction inspector](https://zeer.endpx.cloud/app/transactions) distinguishes
+The [transaction inspector](https://zeer.endpx.cloud/app/prep?view=transaction) distinguishes
 block rewards, transparent/shielded/mixed structure, pool components and public
 net pool movements. Coinbase is recognized from its input marker, never from
 index 0 or version 6 alone. A shielded coinbase can have zero transparent outputs;

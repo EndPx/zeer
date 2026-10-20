@@ -47,7 +47,7 @@ export function PrepResponse({ value, stale, duration, blocks, scanFrom, example
       return <div className="public-output-list">{preview.items.map((output, index) => <div key={index}><span className="output-destination" title={output.destination}>{output.destination}</span><small>{output.amount}</small></div>)}{preview.total > 2 && <small>+{preview.total - 2} more · see JSON</small>}</div>;
     }
     if (field === "block_height" || field === "height") return <>{String(row[field] ?? "—")}{!blocks && typeof block?.hash === "string" && <small className="table-block-hash" title={block.hash}>{block.hash.slice(0, 12)}…</small>}</>;
-    if (field === "txid") return <Link className="table-hash text-link" href={`/app/transactions?txid=${String(row.txid)}`} title={String(row.txid)}>{String(row.txid)}</Link>;
+    if (field === "txid") return <Link className="table-hash text-link" href={`/app/prep?view=transaction&txid=${String(row.txid)}`} title={String(row.txid)}>{String(row.txid)}</Link>;
     if (field === "hash") return <span className="table-hash" title={String(row[field] ?? "")}>{String(row[field] ?? "—")}</span>;
     return row[field] === undefined || row[field] === null ? "—" : String(row[field]);
   }

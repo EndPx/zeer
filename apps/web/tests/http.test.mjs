@@ -3,11 +3,25 @@ import assert from 'node:assert/strict';
 const base=process.env.WEB_TEST_URL??'http://127.0.0.1:3000';
 const post=(path,body,headers={})=>fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
 test('all pages render, with landing and app separated',async()=>{
- for(const route of ['/','/app','/app/prep','/app/chef','/app/transactions']){
+ for(const route of ['/','/app','/app/prep','/app/prep?view=transaction','/app/prep?view=mempool','/app/chef']){
   const r=await fetch(base+route);assert.equal(r.status,200);const html=await r.text();
   assert.ok(html.includes(route==='/'?'Zcash data.':'Zcash Testnet'));
   assert.ok(!html.includes('react-grab/dist')&&!html.includes('react-scan/dist'));
  }
+});
+test('Prep owns inspection and mempool, and old links preserve their transaction ID',async()=>{
+ const id='AB'.repeat(32);
+ for(const [suffix,target] of [['','/app/prep?view=mempool'],['?txid='+id,'/app/prep?view=transaction&txid='+id.toLowerCase()],['?txid=invalid%26id','/app/prep?view=transaction&txid=invalid%26id']]) {
+  const r=await fetch(base+'/app/transactions'+suffix,{redirect:'manual'});
+  assert.equal(r.status,307);assert.equal(r.headers.get('location'),target);
+ }
+ const html=await(await fetch(base+'/app/prep?view=transaction')).text();
+ assert.match(html,/Inspect a transaction\./);assert.match(html,/Enter a transaction ID or choose/);
+ assert.ok(!html.includes('href="/app/transactions"'));
+ assert.match(html,/<a(?=[^>]*href="\/app\/prep\?view=transaction")(?=[^>]*aria-current="page")[^>]*>/);
+ const pool=await(await fetch(base+'/app/prep?view=mempool')).text();
+ assert.match(pool,/Watch pending transactions\./);
+ assert.match(pool,/<a(?=[^>]*href="\/app\/prep\?view=mempool")(?=[^>]*aria-current="page")[^>]*>/);
 });
 test('missing upstream is explicit, not a simulated successful query',async()=>{
  const r=await post('/api/prep',{from_block:1000,to_block:1003});assert.equal(r.status,503);assert.match((await r.json()).error,/not connected/);

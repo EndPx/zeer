@@ -2518,6 +2518,10 @@ svg {
 .transaction-flow[data-state="pending"] > svg { color:var(--cream); }
 .transaction-flow p, .transaction-io p { color:var(--muted); font-size:14px; line-height:1.7; margin-top:12px; }
 .transaction-tabs { margin-bottom:24px; }
+.prep-tools { margin-bottom:24px; }
+.prep-tools a { display:inline-flex; align-items:center; font-size:12px; padding:8px 12px; border-radius:4px; color:var(--muted); min-height:44px; }
+.prep-tools a[aria-current="page"] { color:var(--lime); background:#25311c; }
+.prep-tools a:hover { color:var(--text); }
 .transaction-facts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; margin:0 0 32px; }
 .transaction-facts dt { color:var(--muted); font-size:12px; margin-bottom:8px; }
 .transaction-facts dd { margin:0; font-family:var(--font-mono),monospace; font-size:12px; }

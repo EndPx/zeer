@@ -34,7 +34,7 @@ completion meter does not represent full-chain Chef indexing.
 
 Public [Sapling, Orchard and Ironwood queries](docs/PUBLIC_SHIELDED.md) expose
 component counts, pool filters and coinbase classification. The
-[transaction inspector](https://zeer.endpx.cloud/app/transactions) adds read-only
+[transaction inspector](https://zeer.endpx.cloud/app/prep?view=transaction) adds read-only
 node observations for mined transactions and the current mempool. Pending
 observations remain separate from archive coverage and Chef checkpoints.
 

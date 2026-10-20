@@ -2,8 +2,12 @@
 
 ## Public transaction inspector and pending observations
 
-The Transactions console route complements Prep/Chef with a transaction-ID lookup
-and the configured node's bounded mempool observation. Preserve Zeer's dark/lime
+Prep Playground contains query building, transaction inspection and the configured
+node's bounded mempool observation. Keep only Overview, Prep and Chef in the main
+sidebar. Reuse format-tab styling for links within Prep, with an accessible current
+page indicator; legacy transaction links redirect into Prep and preserve the ID.
+An empty transaction lookup waits for an ID; mempool observation runs only in its
+selected view. Preserve Zeer's dark/lime
 identity; the supplied ZecBlock screenshots are functional references, not assets.
 Use existing search fields, notices, status pills, network panels and format tabs.
 Show Overview, Inputs / outputs and Raw views with real decoded JSON and hex.
