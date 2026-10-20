@@ -1,0 +1,6 @@
+type OrchardTransaction {
+  id: ID!
+  height: Int! @index
+  version: Int!
+  transactionIndex: Int!
+}

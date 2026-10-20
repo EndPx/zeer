@@ -1,3 +1,4 @@
+import type { Query } from "@zeer/prep-client";
 export type Scalar = "ID" | "String" | "Boolean" | "Int" | "BigInt";
 export interface Field { name: string; scalar: Scalar; required: boolean; indexed?: true }
 export interface EntityDefinition { name: string; fields: Record<string, Field> }
@@ -11,12 +12,23 @@ export interface EntityAccess<E extends object = Record<string, Record<string, u
 }
 export interface PublicBlock { height: number; hash: string; previousHash: string; time: number }
 export interface PublicTransaction { txid: string; index: number; version: number; locktime: number; blockHeight: number; decoded: Record<string, unknown> }
+export type TransactionMetadata = Omit<PublicTransaction, "decoded">;
+export interface SyncOptions {
+  /** Blocks fetched per page, 1..1000. Defaults to 16. */
+  pageSize?: number;
+  /** Blocks per atomic database commit, 1..100. Defaults to 1. */
+  batchSize?: number;
+  /** Public-data predicates applied by Prep before returning transactions. */
+  transactionFilter?: NonNullable<Query["transaction_filter"]>;
+}
 export interface HandlerContext<E extends object> { entities: EntityAccess<E> }
 export interface Indexer<E extends object = Record<string, Record<string, unknown>>> {
   block?: (args: { block: PublicBlock; context: HandlerContext<E> }) => Promise<void> | void;
   transaction?: (args: { block: PublicBlock; transaction: PublicTransaction; context: HandlerContext<E> }) => Promise<void> | void;
+  /** Lightweight alternative to transaction; the two handlers are mutually exclusive. */
+  transactionMetadata?: (args: { block: PublicBlock; transaction: TransactionMetadata; context: HandlerContext<E> }) => Promise<void> | void;
 }
-export interface Checkpoint { height: number | null; hash: string | null; anchorHash: string | null; status: "ready" | "reconciling" | "blocked"; reconcileKind?: "source" | "reorg" | "unknown" }
+export interface Checkpoint { height: number | null; hash: string | null; anchorHash: string | null; status: "ready" | "reconciling" | "blocked"; reconcileKind?: "source" | "reorg" | "unknown"; undoFloor?: number }
 export interface ReadView {
   get(entity: string, id: string): Promise<StoredEntity | null>;
   list(entity: string, options: ListOptions): Promise<StoredEntity[]>;
@@ -29,6 +41,7 @@ export interface ChefStore {
   checkpoint(): Promise<Checkpoint>;
   blockHash(height: number): Promise<string | null>;
   apply(block: PublicBlock, handler: (entities: EntityAccess) => Promise<void>): Promise<void>;
+  applyBatch?(blocks: PublicBlock[], handler: (block: PublicBlock, entities: EntityAccess) => Promise<void>): Promise<void>;
   markReconciling(kind?: "source" | "reorg"): Promise<void>;
   rollback(height: number, hash: string): Promise<void>;
   markReady(): Promise<void>;
@@ -47,5 +60,6 @@ export interface ChefConfig<E extends object = Record<string, Record<string, unk
   prepTokenEnv?: string;
   databaseUrlEnv?: string;
   reorgWindow?: number;
+  sync?: SyncOptions;
   indexer: Indexer<E>;
 }

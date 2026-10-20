@@ -12,7 +12,8 @@ slice; it does not certify the older shielded/two-store/outbox gates.
 - Existing Prep HTTP/SDK as source; ordered block then transaction handlers.
 - Developer-supplied PostgreSQL, one marked namespace per project, one writer.
 - Entity writes, first before-images, canonical block journal and checkpoint in
-  one transaction per block. Handler failure never silently advances that block.
+  one transaction per block by default, or one bounded transaction per configured
+  batch. A failed batch never silently advances its checkpoint.
 - Bounded application undo/replay on a changed source branch; unavailable reads
   during reconciliation or observed source unavailability. This conservative
   first-slice policy supersedes the earlier proposed stale-read outage behavior.
@@ -28,8 +29,8 @@ a new project namespace when identity changes; automatic migration/replay cutove
 is not implemented. Namespace ownership is a guard against accidental writes,
 not database credential isolation from the operator.
 
-Prep currently admits histories starting at height1, so the first Chef source
-adapter also requires startHeight>=1. Do not label its runs genesis-inclusive.
+Prep and Chef admit histories starting at height 0 when the archive covers genesis.
+Older bounded fixtures starting later are not genesis-inclusive evidence.
 Unsupported source ranges, deep reorgs, malformed batches and oversized entities
 fail visibly. Private wallet data, hosted services, npm publication, subscriptions,
 joins, dashboards and arbitrary SQL handlers are deferred.
@@ -42,6 +43,14 @@ in the [package contract](../packages/chef/README.md); exceeding them rejects th
 block rather than advancing a partial checkpoint. SQL flush time is accounted
 under transaction overhead, so compare complete durable elapsed time when judging
 performance changes.
+
+Filtered backfill supports explicit public Prep predicates, lightweight metadata
+handlers, up to 1,000 headers per fetched page, and up to 100 blocks per commit.
+All headers are still validated; empty filtered blocks need no transaction handler
+or entity writes. Per-block undo remains available inside committed batches.
+See the [filtered example](../examples/chef-filtered/README.md). This does not
+implement adaptive million-block scans, speculative prefetch or a generic
+cross-block entity preload system.
 
 ## Benchmark separation
 

@@ -12,6 +12,12 @@ const guidance: Record<string, string> = {
   MISSING_FLAG_VALUE: "Supply the value after each flag shown in --help.",
   FOLLOW_AND_TO_ARE_EXCLUSIVE: "Choose --follow for polling or --to for a finite inclusive range.",
   INVALID_CONFIG: "Check the project, network, startHeight, schema, handlerVersion and handler functions in the config.",
+  INVALID_SYNC_OPTIONS: "Use sync.pageSize (1..1000), sync.batchSize (1..100), and optional sync.transactionFilter.",
+  INVALID_BATCH_SIZE: "Choose an integer sync.batchSize from 1 to 100. A failed batch is rolled back in full.",
+  BATCHING_UNSUPPORTED: "Use a store with atomic applyBatch support or set sync.batchSize to 1.",
+  INVALID_TRANSACTION_FILTER: "Use supported Prep public transaction predicates with bounded arrays and valid values.",
+  CONFLICTING_TRANSACTION_HANDLERS: "Choose either transaction or transactionMetadata, not both.",
+  FILTER_REQUIRES_TRANSACTION_HANDLER: "Configure a transaction or transactionMetadata handler when filtering transactions. Block handlers still run for every block.",
   CONFIG_FILE_UNREADABLE: "Create the configuration file or pass its location with --config.",
   SCHEMA_FILE_UNREADABLE: "Check the schema path relative to the configuration file.",
   PREP_URL_AND_DATABASE_URL_REQUIRED: "Set PREP_URL and DATABASE_URL, or the environment names selected by the config.",
@@ -44,7 +50,8 @@ export function cliFailure(error: unknown, knownCode?: string): { error: { code:
   if (!code && error instanceof DOMException && error.name === "TimeoutError") code = "SOURCE_UNAVAILABLE";
   if (!code && error && typeof error === "object") {
     const detail = error as { code?: unknown; message?: unknown };
-    if (detail.code === "42P01" || detail.code === "3F000") code = "MIGRATION_REQUIRED";
+    if (detail.code === "42P01" || detail.code === "3F000"
+      || detail.message === "Chef state migration required; run migrate before restarting this version") code = "MIGRATION_REQUIRED";
     else if (detail.message === "Chef project identity mismatch; use a new project namespace") code = "PROJECT_IDENTITY_MISMATCH";
     else if (detail.message === "Chef project already has an active writer") code = "WRITER_ALREADY_ACTIVE";
   }

@@ -2,7 +2,7 @@ import pg, { type PoolClient } from "pg";
 import { encodeEntity, decodeEntity, queryIndexes } from "./schema.js";
 import type { ChefStore, Checkpoint, EntityAccess, PublicBlock, ReadView, StoredEntity, StoreOptions } from "./types.js";
 
-type State = { fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reconcile_kind?: Checkpoint["reconcileKind"]; reorg_window: number };
+type State = { fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reconcile_kind?: Checkpoint["reconcileKind"]; reorg_window: number; undo_floor: number };
 const MAX_MUTATIONS = 10_000;
 const MAX_CACHE_ENTRIES = 10_000;
 const MAX_CACHE_BYTES = 16 * 1024 * 1024;
@@ -45,17 +45,19 @@ export class PostgresStore implements ChefStore {
   private async state(client: PoolClient, lock = false, allowLegacy = false): Promise<State> {
     const result = await client.query<State>(`SELECT * FROM ${this.sql}.state WHERE singleton = true${lock ? " FOR UPDATE" : ""}`);
     const row = result.rows[0];
-    const value = row && { ...row, start_height: Number(row.start_height), height: row.height === null ? null : Number(row.height) };
+    const value = row && { ...row, start_height: Number(row.start_height), height: row.height === null ? null : Number(row.height), undo_floor: row.undo_floor == null ? NaN : Number(row.undo_floor) };
     if (!value || value.fingerprint !== this.options.fingerprint || value.model !== this.options.model.fingerprint || value.network !== this.options.network || value.start_height !== this.options.startHeight || value.reorg_window !== this.options.reorgWindow) {
       throw new Error("Chef project identity mismatch; use a new project namespace");
     }
     if ((!allowLegacy || value.reconcile_kind !== undefined) && !["source", "reorg", "unknown"].includes(value.reconcile_kind ?? "")) {
       throw new Error("Chef state migration required; run migrate before restarting this version");
     }
+    if (!allowLegacy && (!Number.isInteger(value.undo_floor) || value.undo_floor < value.start_height - 1
+      || value.undo_floor > (value.height ?? value.start_height - 1))) throw new Error("Chef state migration required; run migrate before restarting this version");
     return value;
   }
   private checkpointOf(state: State): Checkpoint {
-    return { height: state.height, hash: state.hash, anchorHash: state.anchor_hash, status: state.status,
+    return { height: state.height, hash: state.hash, anchorHash: state.anchor_hash, status: state.status, undoFloor: state.undo_floor,
       ...(state.status === "reconciling" ? { reconcileKind: state.reconcile_kind ?? "unknown" } : {}) };
   }
   private entity(name: string): void {
@@ -81,15 +83,20 @@ export class PostgresStore implements ChefStore {
         await client.query(`CREATE SCHEMA ${this.sql}`);
         await client.query(`CREATE TABLE ${this.sql}.chef_owned_namespace (singleton boolean PRIMARY KEY CHECK(singleton), version integer NOT NULL)`);
         await client.query(`INSERT INTO ${this.sql}.chef_owned_namespace VALUES (true, 1)`);
-        await client.query(`CREATE TABLE ${this.sql}.state (singleton boolean PRIMARY KEY CHECK(singleton), fingerprint text NOT NULL, model text NOT NULL, network text NOT NULL, start_height bigint NOT NULL, reorg_window integer NOT NULL, height bigint, hash text, anchor_hash text, status text NOT NULL CHECK(status IN ('ready','reconciling','blocked')))`);
+        await client.query(`CREATE TABLE ${this.sql}.state (singleton boolean PRIMARY KEY CHECK(singleton), fingerprint text NOT NULL, model text NOT NULL, network text NOT NULL, start_height bigint NOT NULL, reorg_window integer NOT NULL, height bigint, hash text, anchor_hash text, undo_floor bigint NOT NULL, status text NOT NULL CHECK(status IN ('ready','reconciling','blocked')))`);
         await client.query(`CREATE TABLE ${this.sql}.entities (entity text NOT NULL, id text COLLATE "C" NOT NULL, data jsonb NOT NULL, PRIMARY KEY(entity,id))`);
         await client.query(`CREATE TABLE ${this.sql}.blocks (height bigint PRIMARY KEY, hash text NOT NULL)`);
         await client.query(`CREATE TABLE ${this.sql}.undo (height bigint NOT NULL, entity text NOT NULL, id text COLLATE "C" NOT NULL, previous jsonb, PRIMARY KEY(height,entity,id))`);
-        await client.query(`INSERT INTO ${this.sql}.state (singleton,fingerprint,model,network,start_height,reorg_window,status) VALUES(true,$1,$2,$3,$4,$5,'ready')`, [this.options.fingerprint, this.options.model.fingerprint, this.options.network, this.options.startHeight, this.options.reorgWindow]);
+        await client.query(`INSERT INTO ${this.sql}.state (singleton,fingerprint,model,network,start_height,reorg_window,undo_floor,status) VALUES(true,$1,$2,$3,$4,$5,$4::bigint-1,'ready')`, [this.options.fingerprint, this.options.model.fingerprint, this.options.network, this.options.startHeight, this.options.reorgWindow]);
       }
       // Additive migration. Previously reconciling projects remain conservative:
       // an unknown reason must not be treated as a temporary source outage.
       await client.query(`ALTER TABLE ${this.sql}.state ADD COLUMN IF NOT EXISTS reconcile_kind text NOT NULL DEFAULT 'unknown' CHECK(reconcile_kind IN ('source','reorg','unknown'))`);
+      // A rollback never recreates pruned undo. For old projects conservatively
+      // treat the earliest retained block as an ancestor, not an undoable block.
+      await client.query(`ALTER TABLE ${this.sql}.state ADD COLUMN IF NOT EXISTS undo_floor bigint`);
+      await client.query(`UPDATE ${this.sql}.state SET undo_floor=CASE WHEN height IS NULL THEN start_height-1 ELSE GREATEST(start_height-1,height-reorg_window,COALESCE((SELECT MIN(height) FROM ${this.sql}.blocks),height)) END WHERE undo_floor IS NULL`);
+      await client.query(`ALTER TABLE ${this.sql}.state ALTER COLUMN undo_floor SET NOT NULL`);
       for (const { name, entity, field } of this.indexes) {
         // Descriptor names are validated even for models supplied programmatically.
         // Native JSONB equality preserves scalar/null semantics and the ID cursor.
@@ -143,9 +150,44 @@ export class PostgresStore implements ChefStore {
   }
 
   async apply(block: PublicBlock, handler: (entities: EntityAccess) => Promise<void>): Promise<void> {
-    if (!Number.isInteger(block.height) || block.height < 0 || block.height > 0xffff_ffff || !hashPattern.test(block.hash) || !hashPattern.test(block.previousHash)) throw new Error("Invalid block identity");
+    return this.applyBatch([block], (_block, entities) => handler(entities));
+  }
+
+  /** One bounded atomic commit, with a separate undo image for each block. */
+  async applyBatch(input: PublicBlock[], handler: (block: PublicBlock, entities: EntityAccess) => Promise<void>): Promise<void> {
+    if (!Array.isArray(input) || input.length < 1 || input.length > 100) throw new Error("Batch must contain 1..100 blocks");
+    const blocks = input.map(block => ({ ...block }));
+    for (let index = 0; index < blocks.length; index++) {
+      const block = blocks[index]!;
+      if (!Number.isInteger(block.height) || block.height < 0 || block.height > 0xffff_ffff || !hashPattern.test(block.hash) || !hashPattern.test(block.previousHash)) throw new Error("Invalid block identity");
+      if (index && (block.height !== blocks[index - 1]!.height + 1 || block.previousHash !== blocks[index - 1]!.hash)) throw new Error("Non-contiguous batch");
+    }
     await this.write(async client => {
       await client.query("BEGIN");
+      try {
+        const state = await this.state(client, true);
+        if (state.status === "blocked") throw new Error("Chef project is blocked");
+        const applied: { height: number; hash: string }[] = [];
+        for (const block of blocks) {
+          if (await this.applyBlock(client, state, block, entities => handler({ ...block }, entities))) {
+            applied.push({ height: block.height, hash: block.hash });
+            state.height = block.height; state.hash = block.hash;
+            state.anchor_hash ??= block.previousHash;
+          }
+        }
+        if (applied.length) {
+          await client.query(`INSERT INTO ${this.sql}.blocks(height,hash) SELECT r.height,r.hash FROM jsonb_to_recordset($1::jsonb) AS r(height bigint,hash text)`, [JSON.stringify(applied)]);
+          const boundary = state.height! - this.options.reorgWindow;
+          await client.query(`UPDATE ${this.sql}.state SET height=$1,hash=$2,anchor_hash=$3,undo_floor=GREATEST(undo_floor,$4) WHERE singleton=true`, [state.height, state.hash, state.anchor_hash, boundary]);
+          await client.query(`DELETE FROM ${this.sql}.undo WHERE height <= $1`, [boundary]);
+          await client.query(`DELETE FROM ${this.sql}.blocks WHERE height < $1`, [boundary]);
+        }
+        await client.query("COMMIT");
+      } catch (error) { await client.query("ROLLBACK").catch(() => {}); throw error; }
+    });
+  }
+
+  private async applyBlock(client: PoolClient, state: State, block: PublicBlock, handler: (entities: EntityAccess) => Promise<void>): Promise<boolean> {
       let active = true;
       let mutations = 0;
       let operationError: unknown;
@@ -189,14 +231,11 @@ export class PostgresStore implements ChefStore {
         cache.set(key, { entity, id, data, dirty: dirty || previous?.dirty === true, bytes }); cacheBytes = nextBytes;
       };
       try {
-        const state = await this.state(client, true);
-        if (state.status === "blocked") throw new Error("Chef project is blocked");
         if (state.height !== null && block.height <= state.height) {
           const existing = await client.query<{ hash: string }>(`SELECT hash FROM ${this.sql}.blocks WHERE height=$1`, [block.height]);
           if (existing.rows[0]?.hash !== block.hash) throw new Error("Block conflicts with checkpoint or falls outside retained journal");
           active = false;
-          await client.query("COMMIT");
-          return;
+          return false;
         }
         if (block.height !== (state.height === null ? this.options.startHeight : state.height + 1)) throw new Error("Non-contiguous block height");
         if (state.hash !== null && state.hash !== block.previousHash) throw new Error("Block parent does not match checkpoint");
@@ -253,19 +292,12 @@ export class PostgresStore implements ChefStore {
           rows.push(row); bytes += rowBytes;
         }
         if (rows.length) await flush(rows);
-        await client.query(`INSERT INTO ${this.sql}.blocks VALUES($1,$2)`, [block.height, block.hash]);
-        await client.query(`UPDATE ${this.sql}.state SET height=$1,hash=$2,anchor_hash=COALESCE(anchor_hash,$3) WHERE singleton=true`, [block.height, block.hash, block.previousHash]);
-        const boundary = block.height - this.options.reorgWindow;
-        await client.query(`DELETE FROM ${this.sql}.undo WHERE height <= $1`, [boundary]);
-        await client.query(`DELETE FROM ${this.sql}.blocks WHERE height < $1`, [boundary]);
-        await client.query("COMMIT");
+        return true;
       } catch (error) {
         active = false;
         await drain();
-        await client.query("ROLLBACK").catch(() => {});
         throw error;
       } finally { active = false; }
-    });
   }
 
   private async status(status: Checkpoint["status"]): Promise<void> {
@@ -289,7 +321,7 @@ export class PostgresStore implements ChefStore {
       try {
         const state = await this.state(client, true);
         if (state.status !== "reconciling") throw new Error("Mark project reconciling before rollback");
-        if (state.height === null || height > state.height || height < Math.max(this.options.startHeight - 1, state.height - this.options.reorgWindow)) throw new Error("Rollback ancestor outside retained window");
+        if (state.height === null || height > state.height || height < state.undo_floor) throw new Error("Rollback ancestor outside retained window");
         const expected = height === this.options.startHeight - 1 ? state.anchor_hash : (await client.query<{ hash: string }>(`SELECT hash FROM ${this.sql}.blocks WHERE height=$1`, [height])).rows[0]?.hash;
         if (expected !== hash) throw new Error("Rollback ancestor hash mismatch");
         // Restore in bounded keyset pages, without loading the entire reorg journal.

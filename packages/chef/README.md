@@ -5,6 +5,36 @@ handlers, commits application entities to developer-owned PostgreSQL, and serves
 an authenticated read-only GraphQL API. This private workspace package is not
 published to npm. The current slice has no viewing-key scanner or private memos.
 
+For filtered indexing from block 0, see the
+[Orchard metadata example](../../examples/chef-filtered/README.md).
+`sync.transactionFilter` pushes public predicates to Prep; `transactionMetadata`
+receives only `txid`, block height, position, version and locktime. Use the existing
+`transaction` handler for decoded bodies; the two modes are mutually exclusive.
+Block-only indexers request no transactions. Block handlers always run for every
+scanned block, even when the transaction filter matches nothing.
+
+```ts
+sync: {
+  pageSize: 1000, // 1..1000 whole blocks per Prep response
+  batchSize: 32, // 1..100 blocks per atomic PostgreSQL transaction
+  transactionFilter: { has_orchard: true },
+},
+```
+
+Supported predicates are Prep's `txids`, `versions`, `has_sapling`, `has_orchard`
+and `transparent_output_addresses`; predicates combine with AND and entries
+within an array with OR. Empty arrays match nothing. Filters do not expose
+encrypted shielded data. All headers remain present and contiguous: a page with
+zero matching transactions still advances the checkpoint after validation.
+Scanning remains bounded to 1,000 blocks per request; this is not a sparse
+million-block jump or an unlimited query.
+
+Existing configs retain defaults of 16 blocks per page and one block per commit.
+New scaffolded projects use metadata handlers and explicit 1,000/32 settings.
+Page/commit sizes are independent; response byte limits may shorten a page.
+Changing entry configuration changes project identity. Use a new namespace when
+adopting a different filter or handler rather than attaching it to old entities.
+
 Install the repository with `npm ci`, build with `npm run build:chef`, and follow
 the [public example](https://github.com/EndPx/zeer/blob/main/examples/chef-public/README.md).
 For installation into a separate consumer project, use the
@@ -64,7 +94,8 @@ No ETA is reported. Source outages are detected by the writer's requests and pol
 not instantaneously. SIGINT/SIGTERM during finite-sync metadata preflight or polling
 emit `stopped` and release resources. A handler already executing may finish its
 current block before graceful cancellation; forced process interruption relies on
-PostgreSQL's atomic block transaction.
+PostgreSQL's atomic transaction. With `sync.batchSize > 1`, cancellation or
+failure rolls back the current batch; earlier committed batches remain.
 
 For `REBUILD_REQUIRED`, retain the old namespace for inspection, choose a new
 project name, run `migrate`, and replay from a Prep archive covering `startHeight`.
@@ -81,9 +112,10 @@ The database operator supplies access and owns backups; no hosting or billing
 service is provisioned by Chef.
 
 Block and transaction handlers execute in canonical order. Entity `get`, `set`
-and `delete` operate inside one block transaction with before-images and a
-checkpoint. A failed block rolls back all its writes; earlier committed blocks
-remain. Contexts cannot be used after their transaction finishes. BigInt values
+and `delete` operate inside a transaction with per-block before-images and a
+checkpoint. By default a failed block rolls back its writes; with batching the
+entire current batch rolls back. Earlier committed batches remain. Contexts cannot
+be used after their block handler context closes. BigInt values
 are JS `bigint` in handlers and canonical decimal strings in storage/GraphQL.
 
 Within a block, entity operations run in invocation order. `set` snapshots its
@@ -110,8 +142,13 @@ observed upstream tip can still supply that window. It resumes comparisons once
 the required history is published. A proven deeper fork, a permanently shorter
 source or an insufficient historical snapshot still requires a rebuild; missing
 temporary follower history does not itself establish that proof.
-Run `migrate` when upgrading this candidate: reconciliation reason is an additive
-state column. A source outage reopens a verified prefix after recovery, including
+Stop the old writer and run `migrate` when upgrading: reconciliation reason and
+`undo_floor` are additive state columns. The persisted undo floor never decreases
+after a rollback; deleted undo history cannot be recreated by moving a checkpoint
+backward. For legacy projects, migration conservatively uses the earliest retained
+block as an ancestor, which may exclude rollback through the initial anchor.
+Restart all processes using the upgraded package; do not run older writers against
+the upgraded namespace. A source outage reopens a verified prefix after recovery, including
 after restart; reorg replay remains gated until its target. Legacy unclassified
 reconciliation stays conservative, and an unmigrated state fails closed.
 Changes in imported helper modules must increment `handlerVersion` because the

@@ -41,6 +41,7 @@ export default defineConfig<ChefEntities>({
   schema: "./schema.graphql",
   handlerVersion: "1",
   reorgWindow: 100,
+  sync: { pageSize: 1000, batchSize: 32 },
   indexer: {
     async block({ block, context }) {
       await context.entities.set("BlockSummary", {
@@ -48,7 +49,7 @@ export default defineConfig<ChefEntities>({
         hash: block.hash, time: BigInt(block.time), transactionCount: 0,
       });
     },
-    async transaction({ transaction, context }) {
+    async transactionMetadata({ transaction, context }) {
       const id = String(transaction.blockHeight);
       const summary = await context.entities.get("BlockSummary", id);
       if (!summary) throw new Error("Block summary must exist before transactions");

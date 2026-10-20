@@ -186,7 +186,7 @@ test("interrupted partial page reports durable committed prefix separately from 
       indexed_height: 2, epoch: "1", start_block: 1, source_mode: "historical_snapshot", source_height: 2, source_observed_at: 100, lag_blocks: 0 }),
     get: async () => ({ network: "mainnet", epoch: "1", from_block: 1, next_block: 3, data: {
       blocks: [1, 2].map(height => ({ height, hash: h(height), previous_hash: h(height - 1), time: 1000 })),
-      transactions: [1, 2].map(block_height => ({ block_height, index: 0, txid: h(block_height + 100), version: 5, locktime: 0, decoded: {} })),
+      transactions: [],
     } }),
   };
   const lines = [];
@@ -205,6 +205,20 @@ test("CLI range and port validation precedes database access", async (t) => {
   const { config } = await fixture(t);
   for (const value of ["0", "01", "1.5", "-1", "4294967295"]) errorCode(run(["sync", "--config", config, "--to", value]), "INVALID_END_HEIGHT");
   for (const value of ["0", "65536", "3e4"]) errorCode(run(["serve", "--config", config, "--port", value]), "INVALID_PORT");
+});
+
+test("CLI validates sync options and supports metadata-only configs before database access", async t => {
+  const base = { project: "cli_test", network: "testnet", startHeight: 0, schema: "schema.graphql", handlerVersion: "1" };
+  for (const [sync, code] of [[{ batchSize: 101 }, "INVALID_BATCH_SIZE"], [{ pageSize: 1001 }, "INVALID_PAGE_SIZE"],
+    [{ misspelled: 1 }, "INVALID_SYNC_OPTIONS"], [{ transactionFilter: { txids: ["bad"] } }, "INVALID_TRANSACTION_FILTER"]]) {
+    const { config } = await fixture(t, `export default { ...${JSON.stringify({ ...base, sync })}, indexer: { transactionMetadata() {} } };`);
+    errorCode(run(["codegen", "--config", config]), code);
+  }
+  const { config } = await fixture(t, `export default { ...${JSON.stringify({ ...base, sync: { pageSize: 1000, batchSize: 32, transactionFilter: { has_orchard: true } } })}, indexer: { transactionMetadata() {} } };`);
+  const result = run(["codegen", "--config", config]);
+  assert.equal(result.status, 0, result.stderr);
+  const conflicting = await fixture(t, `export default { ...${JSON.stringify(base)}, indexer: { transaction() {}, transactionMetadata() {} } };`);
+  errorCode(run(["codegen", "--config", conflicting.config]), "INVALID_CONFIG");
 });
 
 test("config import and PostgreSQL errors never echo credentials or third-party messages", async (t) => {

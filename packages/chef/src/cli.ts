@@ -9,7 +9,7 @@ import { PrepClient, PrepError } from "@zeer/prep-client";
 import type { Height } from "@zeer/prep-client";
 import { parseModel, generateTypes } from "./schema.js";
 import { PostgresStore } from "./store.js";
-import { ChefError, isSourceUnavailable, syncStep } from "./runtime.js";
+import { ChefError, isSourceUnavailable, syncStep, validateSyncOptions } from "./runtime.js";
 import { createChefServer } from "./graphql.js";
 import { cliFailure, formatOutput, readStatus, sourceObservation } from "./cli-output.js";
 import type { ChefConfig, ChefStore } from "./types.js";
@@ -71,8 +71,13 @@ export async function main(args = process.argv.slice(2), dependencies: {
   if (!/^[a-z][a-z0-9_]{0,31}$/.test(config.project) || !["mainnet", "testnet", "regtest"].includes(config.network)
     || !Number.isInteger(config.startHeight) || config.startHeight < 0 || config.startHeight > 0xffff_fffe
     || typeof config.schema !== "string" || !config.schema || typeof config.handlerVersion !== "string" || !config.handlerVersion.length || config.handlerVersion.length > 128
-    || !config.indexer || typeof config.indexer !== "object" || ![config.indexer.block, config.indexer.transaction].some((handler) => typeof handler === "function")
-    || [config.indexer.block, config.indexer.transaction].some((handler) => handler !== undefined && typeof handler !== "function")) throw new CliError("INVALID_CONFIG");
+    || !config.indexer || typeof config.indexer !== "object" || ![config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata].some((handler) => typeof handler === "function")
+    || [config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata].some((handler) => handler !== undefined && typeof handler !== "function")
+    || (config.indexer.transaction && config.indexer.transactionMetadata)) throw new CliError("INVALID_CONFIG");
+  if (config.sync !== undefined && (!config.sync || typeof config.sync !== "object" || Array.isArray(config.sync)
+    || Object.keys(config.sync).some(key => !["pageSize", "batchSize", "transactionFilter"].includes(key)))) throw new CliError("INVALID_SYNC_OPTIONS");
+  validateSyncOptions(config.sync ?? {});
+  if (config.sync?.transactionFilter && !config.indexer.transaction && !config.indexer.transactionMetadata) throw new CliError("FILTER_REQUIRES_TRANSACTION_HANDLER");
   const reorgWindow = config.reorgWindow ?? 100;
   if (!Number.isInteger(reorgWindow) || reorgWindow < 1 || reorgWindow > 1000) throw new CliError("INVALID_REORG_WINDOW");
   let end = flags.has("--to") ? integer(flags.get("--to"), config.startHeight, 0xffff_fffe, "INVALID_END_HEIGHT") : undefined;
@@ -169,7 +174,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
       for (;;) {
         controller.signal.throwIfAborted();
         let result;
-        try { result = await syncStep({ client, store, indexer: config.indexer, network: config.network, startHeight: config.startHeight, reorgWindow, signal: controller.signal }, end); }
+        try { result = await syncStep({ ...config.sync, client, store, indexer: config.indexer, network: config.network, startHeight: config.startHeight, reorgWindow, signal: controller.signal }, end); }
         catch (error) {
           if (!controller.signal.aborted && temporarySourceError(error)) await report("source_unavailable");
           if (!follow || !temporarySourceError(error)) throw error;

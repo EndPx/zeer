@@ -26,6 +26,8 @@ test('init creates a standalone testnet project without contacting services or p
   if(process.platform!=='win32') assert.equal((await lstat(join(directory,'.env'))).mode & 0o777,0o600);
   await assert.rejects(lstat(join(directory,'node_modules')),{code:'ENOENT'});
   assert.match(await readFile(join(directory,'chef.config.ts'),'utf8'),/network: "testnet"/);
+  assert.match(await readFile(join(directory,'chef.config.ts'),'utf8'),/sync: \{ pageSize: 1000, batchSize: 32 \}/);
+  assert.match(await readFile(join(directory,'chef.config.ts'),'utf8'),/async transactionMetadata\(/);
   assert.match(await readFile(join(directory,'compose.yaml'),'utf8'),/POSTGRES_PASSWORD: \$\{POSTGRES_PASSWORD:\?/);
   const second=join(parent,'second');
   await scaffoldProject({directory:second,project:'second',startHeight:0});

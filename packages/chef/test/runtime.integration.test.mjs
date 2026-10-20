@@ -47,7 +47,7 @@ async function fixture(t) {
     await context.entities.set("Transfer", { id: transaction.txid, amount, height: transaction.blockHeight });
     if (transaction.blockHeight === failure) throw new Error("intentional handler failure");
   } };
-  const step = (store, pageSize = 4) => syncStep({ client: prep.client, store, indexer, network: "regtest", startHeight: 1, reorgWindow: 3, pageSize });
+  const step = (store, pageSize = 4, options = {}) => syncStep({ client: prep.client, store, indexer, network: "regtest", startHeight: 1, reorgWindow: 3, pageSize, ...options });
   const snapshot = store => store.read(async view => ({ checkpoint: view.checkpoint, total: await view.get("Total", "all"), rows: await view.list("Transfer", { first: 10 }) }));
   return { store: await open(), open, ...prep, calls, step, snapshot, failAt: height => { failure = height; } };
 }
@@ -63,6 +63,71 @@ test("runtime/PostgreSQL catch-up and process restart never repeat committed han
   assert.equal((await f.step(restarted)).state, "caught_up");
   assert.equal(f.calls.length, 4);
   assert.deepEqual(await f.snapshot(restarted), initial);
+});
+
+test("runtime/PostgreSQL batched failure resumes at the batch boundary and reorg replaces intra-batch state", { skip: !url }, async t => {
+  const f = await fixture(t); f.failAt(4);
+  await assert.rejects(f.step(f.store, 4, { batchSize: 2 }), /intentional handler failure/);
+  assert.equal((await f.snapshot(f.store)).checkpoint.height, 2);
+  assert.equal((await f.snapshot(f.store)).total.amount, "3");
+  await f.store.release(); const restarted = await f.open(); f.failAt(null);
+  assert.equal((await f.step(restarted, 4, { batchSize: 2 })).blocks, 2);
+  assert.equal((await f.snapshot(restarted)).total.amount, "10");
+  f.state.epoch = "2";
+  f.state.blocks.splice(2, 2, { height: 3, hash: h(303), previous_hash: h(2), time: 1001, amount: "30", txid: h(203) },
+    { height: 4, hash: h(304), previous_hash: h(303), time: 1001, amount: "40", txid: h(204) });
+  await f.step(restarted, 4, { batchSize: 2 });
+  const result = await f.snapshot(restarted);
+  assert.equal(result.total.amount, "73");
+  assert.deepEqual(result.rows.map(row => row.id).sort(), [h(101), h(102), h(203), h(204)].sort());
+  assert.equal(result.checkpoint.status, "ready");
+});
+
+test("runtime/PostgreSQL cancellation inside a batch rolls back its entities and checkpoint", { skip: !url }, async t => {
+  const f = await fixture(t), controller = new AbortController();
+  await assert.rejects(f.step(f.store, 4, { batchSize: 4, signal: controller.signal, indexer: {
+    async block({ block, context }) {
+      await context.entities.set("Total", { id: "all", amount: BigInt(block.height) });
+      if (block.height === 2) controller.abort();
+    },
+  } }), { name: "AbortError" });
+  const result = await f.snapshot(f.store);
+  assert.equal(result.checkpoint.height, null);
+  assert.equal(result.total, null);
+  assert.equal(await f.store.blockHash(1), null);
+});
+
+test("runtime/PostgreSQL filtered empty blocks and nonzero positions preserve exact entities through a batch reorg", { skip: !url }, async t => {
+  const f = await fixture(t);
+  let selected = new Set([1, 3]);
+  const get = f.client.get;
+  f.client.get = async query => {
+    const result = await get(query);
+    if (query.transaction_filter) {
+      assert.deepEqual(query.transaction_filter, { has_orchard: true });
+      result.data.transactions = result.data.transactions.filter(tx => selected.has(tx.block_height)).map(({ decoded, ...tx }) => ({ ...tx, index: 7 }));
+    }
+    return result;
+  };
+  const indexer = { async transactionMetadata({ transaction, context }) {
+    assert.equal(transaction.index, 7);
+    assert.equal(Object.hasOwn(transaction, "decoded"), false);
+    const total = await context.entities.get("Total", "all");
+    await context.entities.set("Total", { id: "all", amount: (total?.amount ?? 0n) + 1n });
+    await context.entities.set("Transfer", { id: transaction.txid, amount: 1n, height: transaction.blockHeight });
+  } };
+  const options = { batchSize: 4, transactionFilter: { has_orchard: true }, indexer };
+  const initial = await f.step(f.store, 4, options);
+  assert.equal(initial.blocks, 4); assert.equal(initial.transactions, 2);
+  assert.deepEqual((await f.snapshot(f.store)).rows.map(r => r.height), [1, 3]);
+  selected = new Set([1, 4]); f.state.epoch = "2";
+  f.state.blocks.splice(2, 2, { height: 3, hash: h(303), previous_hash: h(2), time: 1001, amount: "30", txid: h(203) },
+    { height: 4, hash: h(304), previous_hash: h(303), time: 1001, amount: "40", txid: h(204) });
+  await f.step(f.store, 4, options);
+  const result = await f.snapshot(f.store);
+  assert.equal(result.total.amount, "2");
+  assert.deepEqual(result.rows.map(r => r.id), [h(101), h(204)]);
+  assert.equal(result.checkpoint.height, 4); assert.equal(result.checkpoint.status, "ready");
 });
 
 test("temporary source recovery reopens a verified prefix before full catch-up, including after restart", { skip: !url }, async t => {

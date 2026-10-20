@@ -31,6 +31,118 @@ async function fixture(t, overrides = {}) {
   return { store, options, extra: changes => { const value = new PostgresStore(url, { ...options, ...changes }); extras.push(value); return value; } };
 }
 
+test("PostgreSQL: batch commits atomically and preserves per-block before-images inside the batch", { skip: !url }, async t => {
+  const { store } = await fixture(t, { reorgWindow: 4 });
+  let escaped;
+  const seen = [];
+  await store.applyBatch([0, 1, 2, 3].map(height => block(height)), async (b, entities) => {
+    escaped = entities;
+    const previous = await entities.get("Account", "a");
+    seen.push(previous?.balance ?? 0n);
+    await entities.set("Account", account("a", (previous?.balance ?? 0n) + BigInt(b.height + 1)));
+    if (b.height === 1) await entities.set("Account", account("temporary", 20n));
+    if (b.height === 2) await entities.delete("Account", "temporary");
+  });
+  assert.deepEqual(seen, [0n, 1n, 3n, 6n]);
+  assert.equal((await store.checkpoint()).height, 3);
+  assert.equal((await store.read(v => v.get("Account", "a"))).balance, "10");
+  await assert.rejects(escaped.get("Account", "a"), /no longer active/);
+  await store.markReconciling(); await store.rollback(1, h(2)); await store.markReady();
+  assert.equal((await store.read(v => v.get("Account", "a"))).balance, "3");
+  assert.equal((await store.read(v => v.get("Account", "temporary"))).balance, "20");
+  await store.markReconciling(); await store.rollback(-1, h(0)); await store.markReady();
+  assert.equal((await store.checkpoint()).height, null);
+  assert.equal(await store.read(v => v.get("Account", "a")), null);
+});
+
+test("PostgreSQL: failure/caught error in a later batch block preserves the preceding commit and journal", { skip: !url }, async t => {
+  const { store } = await fixture(t);
+  await store.apply(block(0), e => e.set("Account", account("a", 5n)));
+  for (const caught of [false, true]) {
+    await assert.rejects(store.applyBatch([block(1), block(2)], async (b, e) => {
+      await e.set("Account", account("a", 100n));
+      if (b.height === 2) {
+        if (caught) await e.set("Missing", account("b")).catch(() => {});
+        else throw new Error("batch handler failed");
+      }
+    }), caught ? /Unknown entity/ : /batch handler failed/);
+    assert.equal((await store.checkpoint()).height, 0);
+    assert.equal((await store.read(v => v.get("Account", "a"))).balance, "5");
+    assert.equal(await store.blockHash(1), null);
+  }
+  await store.applyBatch([block(1), block(2)], async (_b, e) => {
+    const previous = await e.get("Account", "a");
+    await e.set("Account", account("a", previous.balance + 1n));
+  });
+  assert.equal((await store.read(v => v.get("Account", "a"))).balance, "7");
+  await store.markReconciling(); await store.rollback(0, h(1)); await store.markReady();
+  assert.equal((await store.read(v => v.get("Account", "a"))).balance, "5");
+});
+
+test("PostgreSQL: long empty batches retain a bounded exact undo window and stable snapshots", { skip: !url }, async t => {
+  const { store, options } = await fixture(t);
+  await store.apply(block(0), e => e.set("Account", account("a", 1n)));
+  let release, started;
+  const wait = new Promise(resolve => { release = resolve; });
+  const entered = new Promise(resolve => { started = resolve; });
+  const work = store.applyBatch(Array.from({ length: 100 }, (_, i) => block(i + 1)), async (b, e) => {
+    if (b.height === 1) { await e.set("Account", account("a", 2n)); started(); await wait; }
+  });
+  await entered;
+  try {
+    const before = await store.read(async v => [v.checkpoint.height, (await v.get("Account", "a")).balance]);
+    assert.deepEqual(before, [0, "1"]);
+  } finally { release(); }
+  await work;
+  assert.equal((await store.checkpoint()).height, 100);
+  assert.equal(await store.blockHash(96), null);
+  assert.equal(await store.blockHash(97), h(98));
+  const inspect = new pg.Client({ connectionString: url }); await inspect.connect();
+  try {
+    assert.equal((await inspect.query(`SELECT count(*)::int AS n FROM "chef_${options.project}".blocks`)).rows[0].n, 4);
+    assert.equal((await inspect.query(`SELECT count(*)::int AS n FROM "chef_${options.project}".undo`)).rows[0].n, 0);
+  } finally { await inspect.end(); }
+  await store.markReconciling();
+  await assert.rejects(store.rollback(96, h(97)), /outside retained window/);
+  await store.rollback(97, h(98)); await store.markReady();
+  assert.equal((await store.read(v => v.get("Account", "a"))).balance, "2");
+  await assert.rejects(store.applyBatch([block(98), block(100)], async () => {}), /Non-contiguous batch/);
+  await assert.rejects(store.applyBatch([], async () => {}), /1..100/);
+});
+
+test("PostgreSQL: rollback does not resurrect pruned undo, including the genesis anchor after restart", { skip: !url }, async t => {
+  const { store, extra } = await fixture(t);
+  await store.applyBatch([0, 1, 2, 3].map(height => block(height)), async (b, e) => {
+    await e.set("Account", account("a", BigInt(b.height + 1)));
+  });
+  assert.equal((await store.checkpoint()).undoFloor, 0);
+  await store.markReconciling(); await store.rollback(1, h(2)); await store.markReady();
+  await store.release();
+  const restarted = extra({}); await restarted.acquire();
+  await restarted.markReconciling();
+  await assert.rejects(restarted.rollback(-1, h(0)), /outside retained window/);
+  assert.equal((await restarted.checkpoint()).height, 1);
+  await restarted.rollback(0, h(1)); await restarted.markReady();
+  assert.equal((await restarted.read(v => v.get("Account", "a"))).balance, "1");
+});
+
+test("PostgreSQL: legacy undo-floor migration preserves data and refuses unproven anchor rollback", { skip: !url }, async t => {
+  const { store, options } = await fixture(t);
+  await store.applyBatch([0, 1, 2, 3].map(height => block(height)), async (b, e) => {
+    await e.set("Account", account("a", BigInt(b.height + 1)));
+  });
+  await store.markReconciling(); await store.rollback(1, h(2)); await store.markReady();
+  const inspect = new pg.Client({ connectionString: url }); await inspect.connect();
+  try { await inspect.query(`ALTER TABLE "chef_${options.project}".state DROP COLUMN undo_floor`); }
+  finally { await inspect.end(); }
+  await assert.rejects(store.checkpoint(), /state migration required/);
+  await store.migrate();
+  assert.equal((await store.checkpoint()).undoFloor, 0);
+  assert.equal((await store.read(v => v.get("Account", "a"))).balance, "2");
+  await store.markReconciling();
+  await assert.rejects(store.rollback(-1, h(0)), /outside retained window/);
+});
+
 test("PostgreSQL: explicit opt-in indexes are partial, idempotent and identity-bound", { skip: !url }, async t => {
   const indexed = parseModel("type Account { id: ID! balance: BigInt! @index count: Int @index active: Boolean @index owner: ID @index }");
   const { store, options, extra } = await fixture(t, { model: indexed });

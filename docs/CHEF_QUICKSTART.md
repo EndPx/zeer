@@ -7,7 +7,7 @@ operator may be Zeer or you; running Chef does not require running Zebra locally
 
 The current starter targets **Zcash testnet**. Use the [limited public Prep
 preview](PUBLIC_API.md) or your own full-data testnet service with known coverage.
-Inspect `/height`; full-history backfill is still in progress.
+Inspect `/height` for current coverage and source readiness.
 For a self-contained historical example without an existing source, see the
 [fixture quickstart](../examples/quickstart/README.md); that older example uses
 explicitly labeled mainnet fixtures and is not a live testnet service.
@@ -55,6 +55,14 @@ strict TypeScript config, a query example, local Postgres Compose config and a
 README. It generates unique local database/API secrets in git-ignored `.env`
 (mode 0600 on POSIX). It makes no network requests and starts no services.
 
+The starter counts transactions through `transactionMetadata`, so it does not
+download decoded bodies. Its explicit `sync` settings fetch up to 1,000 blocks
+per page and commit 32 at a time. A failed batch rolls back in full. Existing
+configs without these settings retain their previous defaults.
+For an application that only needs matching transactions, use the
+[filtered genesis example](../examples/chef-filtered/README.md). It applies the
+public filter at Prep and stores only matches, while validating every header.
+
 Inside the new project, install the two tarballs together:
 
 ```sh
@@ -69,7 +77,7 @@ your project. Type stripping does not replace explicit typechecking.
 ## 3. Configure Prep and PostgreSQL
 
 Edit `.env`: set `PREP_URL`, optional `PREP_API_TOKEN`, and `DATABASE_URL`.
-For the shared public preview, use `https://zeer-ten.vercel.app/api/prep` and
+For the shared public preview, use `https://zeer.endpx.cloud/api/prep` and
 leave the Prep token blank. Its quotas are shared; use a dedicated/self-hosted
 endpoint for sustained high-throughput indexing.
 The generated database URL matches the optional local Postgres credentials.
