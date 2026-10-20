@@ -20,7 +20,7 @@ const upstream=createServer(async(req,res)=>{
  else res.end(JSON.stringify({network:mode==='mainnet'?'mainnet':'testnet',data:{blocks:[]},next_block:1003,cursor:null}));
 });
 await new Promise(r=>upstream.listen(39479,'127.0.0.1',r));
-const server=spawn(process.execPath,[resolve('node_modules/next/dist/bin/next'),'start','--hostname','127.0.0.1','--port','3107'],{cwd:resolve('apps/web'),env:{...process.env,ZEER_PREP_URL:'http://127.0.0.1:39479',ZEER_CHEF_URL:'http://127.0.0.1:39479',ZEER_PREP_TOKEN:token,ZEER_CHEF_TOKEN:token},stdio:'ignore'});
+const server=spawn(process.execPath,[resolve('node_modules/next/dist/bin/next'),'start','--hostname','127.0.0.1','--port','3107'],{cwd:resolve('apps/web'),env:{...process.env,ZEER_PREP_URL:'http://127.0.0.1:39479',ZEER_CHEF_URL:'http://127.0.0.1:39479',ZEER_PREP_TOKEN:token,ZEER_CHEF_TOKEN:token,ZEER_CHEF_DEMO:JSON.stringify({project:'hackathon_testnet_20261020',fromBlock:4510000,toBlock:4519999})},stdio:'ignore'});
 const closed=new Promise(r=>server.on('exit',r));
 const query=()=>fetch('http://127.0.0.1:3107/api/prep',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from_block:1000,to_block:1003})});
 try{
@@ -35,6 +35,14 @@ try{
  }
  const status=await(await fetch('http://127.0.0.1:3107/api/status')).json();assert.equal(status.prep.available,true);assert.equal(status.chef.data.height,1002);
  const html=await(await fetch('http://127.0.0.1:3107/app/prep')).text();assert.ok(!html.includes(token));
+ const inspected=await(await fetch('http://127.0.0.1:3107/app/prep?example=headers&from=1000&to=1001')).text();
+ assert.match(inspected,/Linked range: blocks 1,000–1,000 inclusive/);assert.match(inspected,/to_block/);
+ const unbounded=await(await fetch('http://127.0.0.1:3107/app/prep?example=headers&from=1000')).text();
+ assert.ok(!unbounded.includes('Linked range: blocks'));assert.match(unbounded,/Prep captures the latest indexed block/);
+ const chefRequest=query=>fetch('http://127.0.0.1:3107/api/chef',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
+ const beforeInvalid=calls;
+ r=await chefRequest('{ BlockSummaryList(first:3) { items { heigth } } }');assert.equal(r.status,400);assert.match((await r.json()).error,/heigth.*height/s);assert.equal(calls,beforeInvalid);
+ r=await chefRequest('query {\n BlockSummaryList(');assert.equal(r.status,400);assert.match((await r.json()).error,/line 2, column/);assert.equal(calls,beforeInvalid);
  mode='mainnet';assert.equal((await query()).status,502);
  mode='unauthorized';r=await query();assert.equal(r.status,502);assert.ok(!(await r.text()).includes(token));
  mode='redirect';assert.equal((await query()).status,503);

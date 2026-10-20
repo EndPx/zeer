@@ -7,13 +7,17 @@ import {
   Play,
   Square,
   ShieldCheck,
+  ArrowRight,
+  RotateCcw,
 } from "lucide-react";
 import { Code } from "./ui";
 import { CopyButton } from "./interactive";
 import { chefQuery } from "@/lib/content";
 import type { ChefDemo } from "@/lib/chef-demo";
+import { chefExampleCursor, chefExampleQuery, chefResponseEmpty } from "@/lib/chef-pagination";
 export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: ChefDemo | null }) {
   const [query, setQuery] = useState(chefQuery),
+    [exampleAfter, setExampleAfter] = useState<string>(),
     [result, setResult] = useState<unknown>(),
     [duration, setDuration] = useState<number | null>(null),
     [error, setError] = useState(""),
@@ -21,7 +25,16 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
     [stale, setStale] = useState(false);
   const abort = useRef<AbortController | null>(null);
   useEffect(() => () => abort.current?.abort(), []);
-  async function run() {
+  const nextCursor = !stale && !error ? chefExampleCursor(query, result, exampleAfter) : null;
+  function edit(nextQuery: string) {
+    abort.current?.abort();
+    setBusy(false);
+    setQuery(nextQuery);
+    setExampleAfter(undefined);
+    setStale(true);
+    setError("");
+  }
+  async function run(nextQuery = query) {
     if (!enabled || busy) return;
     const c = new AbortController();
     abort.current = c;
@@ -35,7 +48,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
       const r = await fetch("/api/chef", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: nextQuery }),
         signal: c.signal,
       });
       const data = await r.json();
@@ -56,7 +69,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
       <div className="console-title">
         <span className="eyebrow">Zeer Chef</span>
         <h1>Your schema. Your playground.</h1>
-        <p>Explore application data through the GraphQL API. Request up to 100 items per page; use nextCursor as after to continue.</p>
+        <p>Run the example to read real indexed blocks. Edit it using the schema, or use Next example page to continue through the results.</p>
       </div>
       {demo && <div className="notice demo-coverage">
         <Info size={16} aria-hidden="true" />
@@ -79,6 +92,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
             <Braces size={16} /> GraphQL query
           </strong>
           <div className="toolbar-actions">
+            <button className="copy" onClick={() => edit(chefQuery)}><RotateCcw size={14} />Restore example</button>
             <CopyButton text={query} />
             <button
               className="button compact"
@@ -90,7 +104,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
                       setBusy(false);
                       setError("Query cancelled.");
                     }
-                  : run
+                  : () => void run()
               }
             >
               {busy ? <Square size={13} /> : <Play size={13} />}{" "}
@@ -134,11 +148,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
               spellCheck={false}
               value={query}
               onChange={(e) => {
-                abort.current?.abort();
-                setBusy(false);
-                setQuery(e.target.value);
-                setStale(true);
-                setError("");
+                edit(e.target.value);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -160,9 +170,12 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
                 {error}
               </div>
             ) : result !== undefined ? (
+              <>
+              {!stale && chefResponseEmpty(result) && <p className="response-help" role="status">Query succeeded. No entities matched. {demo ? `This demo contains blocks ${demo.fromBlock.toLocaleString("en-US")}–${demo.toBlock.toLocaleString("en-US")}; a block outside that range has no entity here. Try an ID within that range or restore the example.` : "Check your filters and the indexed checkpoint, or restore the example."}</p>}
               <Code
                 code={JSON.stringify(result, null, 2)}
               />
+              </>
             ) : (
               <div className="empty-response">
                 <Braces size={32} />
@@ -193,6 +206,15 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
           </span>
         </div>
       </div>
+      {nextCursor && <div className="query-pagination">
+        <span>More indexed blocks are available. The next page updates and runs the example query.</span>
+        <button className="button secondary compact" disabled={busy} onClick={() => {
+          const nextQuery = chefExampleQuery(nextCursor);
+          setQuery(nextQuery);
+          setExampleAfter(nextCursor);
+          void run(nextQuery);
+        }}>Next example page <ArrowRight size={14} /></button>
+      </div>}
       <p className="privacy-note">
         <ShieldCheck size={15} /> Your API credentials stay on the server.
       </p>

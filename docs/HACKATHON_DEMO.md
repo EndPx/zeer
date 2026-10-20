@@ -30,6 +30,10 @@ continue; do not silently substitute a later range or a recorded response.
 Open [Chef Playground](https://zeer.endpx.cloud/app/chef) and run the default
 GraphQL query. Its notice states the namespace and inclusive bounds. Inspect
 the returned heights, hashes, transaction counts and `_meta.height`.
+Use **Next example page** to continue the built-in list without editing its
+cursor manually. **Restore example** fills the original query again without
+running it. A custom query retains its own paging behavior. A field typo in the
+hosted demo names the invalid field and suggests a supported spelling when possible.
 
 For a direct comparison, query an existing block in the demo range:
 
@@ -45,6 +49,9 @@ query {
 Open Prep's block history starting at that height and compare its header hash
 and timestamp. Transaction count is computed by the metadata handler for all
 transactions in that block. It is not a count of decrypted shielded payments.
+Clicking a latest-block tile on Overview pins Prep to that single block. Its
+linked range is visible; **Continue to latest** removes the end bound. Shared
+links preserve that range and response-field selection on the current app.
 
 The flow is **Prep → Chef → PostgreSQL → GraphQL**: Prep reads archived public
 chain data; deterministic TypeScript handlers shape it; PostgreSQL persists

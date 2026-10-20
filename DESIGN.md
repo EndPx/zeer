@@ -1,5 +1,29 @@
 # Zeer website design system
 
+## First-visit recovery and query navigation
+
+An inspection link may pin a Prep query's exclusive end without restoring a
+To block input or scan-size control. Show the linked range above the request,
+offer Continue to latest to remove that bound, and clear it when changing the
+example or starting block. Share links, generated snippets and requests must
+describe the same query. A route change resets the explorer to the URL state.
+Use the current app origin for its public API and shared playground links.
+
+Chef provides Restore example beside the existing run action. The built-in
+BlockSummary query offers Next example page only for its own unedited response;
+never rewrite a custom query to advance it. Validation feedback identifies the
+field or syntax location using locally known demo schema information. Upstream
+service details remain private. Existing panel-foot, field-hint, secondary
+button, focus, loading, stale and reduced-motion primitives apply.
+At console widths of 800px or below, compact actions, copy controls and format
+selectors retain at least a 44px touch height; let the existing toolbar wrap.
+Large Prep responses use measured, windowed table rows in the existing 384px
+scroll region. Every returned row remains reachable by scrolling and keyboard;
+announce total row count and each rendered row's original index. Keep the full
+response in JSON and Copy JSON. Browser text search sees mounted table rows;
+the supporting hint directs full-response search/export to JSON. This changes
+presentation only and introduces no request limit or server paging control.
+
 ## Bounded hackathon Chef demo
 
 Reuse the notice, coverage-note, network-facts and progress-meter primitives.

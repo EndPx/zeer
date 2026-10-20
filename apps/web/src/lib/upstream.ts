@@ -142,6 +142,7 @@ export async function upstream(
               ? "The demo service could not authenticate with its source."
               : res.status >= 500
                 ? "The source is not ready. Retry after it recovers."
+                : service === "chef" ? "Chef could not validate this query. Check field names and argument types against the schema, or restore the example."
                 : "The source rejected this query. Check its range and supported fields.",
         sourceCode ?? (res.status === 409 ? "SNAPSHOT_CONFLICT" : res.status === 416 ? "RANGE_OUTSIDE_INDEXED_ARCHIVE" : res.status === 413 ? "RESPONSE_TOO_LARGE" : res.status === 429 ? "RATE_LIMITED" : res.status >= 500 ? "SOURCE_UNAVAILABLE" : "INVALID_REQUEST"),
       );

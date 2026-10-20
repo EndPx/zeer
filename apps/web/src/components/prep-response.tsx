@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Code } from "./ui";
 import { CopyButton } from "./interactive";
+import { ResultTable } from "./result-table";
 import type { Example } from "@/lib/content";
 import { publicRecord as record, utcTimestamp, transactionKind, publicOutputPreview, shieldedComponentCounts } from "@/lib/prep-table";
 
@@ -60,21 +61,15 @@ export function PrepResponse({ value, stale, duration, blocks, scanFrom, example
       </div>
     </div>
     <div className="response-summary" role="status">
-      <span>{rows.length} {blocks ? "blocks" : "transactions"} returned</span>
+      <span>{rows.length.toLocaleString("en-US")} {blocks ? rows.length === 1 ? "block" : "blocks" : rows.length === 1 ? "transaction" : "transactions"} returned</span>
       {duration !== null && <span>{Math.round(duration).toLocaleString("en-US")} ms round trip</span>}
       <span>{more ? "More pages available" : complete ? "Requested range complete" : "Inspect response coverage"}</span>
       {scannedTo !== null && scannedTo >= scanFrom && <span>Scanned blocks {scanFrom.toLocaleString("en-US")}–{scannedTo.toLocaleString("en-US")}</span>}
     </div>
     {view === "JSON" ? <Code code={json} /> : rows.length === 0 ?
       <div className="table-empty"><strong>Query succeeded. No matches in this page.</strong><p>{(example === "orchard" || example === "sapling") && scanFrom === 0 ? `The first blocks predate ${example === "orchard" ? "Orchard" : "Sapling"}. Continue paging or use a recent block range to explore its activity.` : more ? "This page contains no matches. Continue to the next page to search more of the selected range." : "No transactions matched your filters in the scanned range."}</p></div> :
-      <div className="result-table-scroll" role="region" aria-label="Query result table" tabIndex={0}>
-        <table className="result-table"><caption className="sr-only">Public {blocks ? "block" : "transaction"} rows returned by Prep</caption>
-          <thead><tr>{columns.map(field => <th scope="col" key={field}>{field === "decoded" ? example === "sapling" ? "Sapling components" : example === "orchard" ? "Orchard actions" : "Shielded components" : field === "raw" ? "Serialized transaction" : labels[field]}</th>)}</tr></thead>
-          <tbody>{rows.map(row => <tr key={String(row.hash ?? row.txid ?? row.height ?? JSON.stringify(row))}>
-            {columns.map(field => <td key={field}>{cell(row, field)}</td>)}
-          </tr>)}</tbody>
-        </table>
-      </div>}
+      <ResultTable key={`${scanFrom}:${response.next_block}:${columns.join(",")}`} rows={rows} columns={columns} blocks={blocks} cell={cell}
+        label={field => field === "decoded" ? example === "sapling" ? "Sapling components" : example === "orchard" ? "Orchard actions" : "Shielded components" : field === "raw" ? "Serialized transaction" : labels[field]} />}
     <div className="panel-foot">
       <span>One response · public Zcash testnet data</span>
       {typeof response.next_block === "number" && <span>Next block: {response.next_block.toLocaleString("en-US")}</span>}

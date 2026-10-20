@@ -1,6 +1,6 @@
 import { PrepExplorer } from "@/components/prep-explorer";
-import { examples, publicPrepApi, defaultExampleMatch, sharedPrepFields, type Example } from "@/lib/content";
-import { CopyButton } from "@/components/interactive";
+import { examples, defaultExampleMatch, sharedPrepFields, type Example } from "@/lib/content";
+import { PrepEndpoint } from "@/components/prep-endpoint";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Prep Playground" };
 export default async function Page({
@@ -18,20 +18,18 @@ export default async function Page({
         <span className="eyebrow">Zeer Prep</span>
         <h1>Explore the query. See the data.</h1>
         <p>
-          Choose an example, adjust the range, and query your public-data
-          archive.
+          Choose an example, set a starting block, and query real public testnet data.
         </p>
       </div>
-      <div className="notice public-endpoint">
-        <span>Public testnet API<code>{publicPrepApi}</code></span>
-        <CopyButton text={publicPrepApi} label="Copy endpoint" />
-      </div>
+      <PrepEndpoint />
       <PrepExplorer
+        key={JSON.stringify([example, params.from, params.to, params.match, params.blockFields, params.transactionFields])}
         enabled={!!process.env.ZEER_PREP_URL}
         initialExample={example}
         initialFrom={
           typeof params.from === "string" ? params.from.slice(0, 12) : "0"
         }
+        initialTo={typeof params.to === "string" ? params.to.slice(0, 12) : ""}
         initialMatch={
           typeof params.match === "string" ? params.match.slice(0, 9000) : defaultExampleMatch(example)
         }

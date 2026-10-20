@@ -2504,3 +2504,9 @@ svg {
 .demo-coverage strong { color: var(--text); }
 .demo-coverage p { margin: 8px 0 0; }
 .demo-coverage code, .coverage-note code { overflow-wrap: anywhere; }
+.result-table td.table-spacer { padding: 0; border: 0; }
+.result-table-scroll { overflow-anchor: none; scroll-behavior: auto; }
+@media (max-width: 800px) {
+  .copy, .button.compact, .format-tabs button { min-height: 44px; }
+  .mobile-menu { min-width: 44px; min-height: 44px; }
+}

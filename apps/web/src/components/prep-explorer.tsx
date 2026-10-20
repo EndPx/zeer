@@ -14,10 +14,10 @@ import {
 import { Code } from "./ui";
 import { CopyButton } from "./interactive";
 import { PrepResponse } from "./prep-response";
+import { useAppOrigin } from "@/lib/use-app-origin";
 import {
   examples,
   prepQuery,
-  publicPrepApi,
   repo,
   sampleBlocks,
   defaultExampleMatch,
@@ -34,6 +34,7 @@ export function PrepExplorer({
   enabled = false,
   initialExample = "headers",
   initialFrom = "0",
+  initialTo = "",
   initialMatch = "",
   initialFields,
 }: {
@@ -41,11 +42,13 @@ export function PrepExplorer({
   enabled?: boolean;
   initialExample?: Example;
   initialFrom?: string;
+  initialTo?: string;
   initialMatch?: string;
   initialFields?: PrepFields;
 }) {
   const [selected, setSelected] = useState<Example>(initialExample),
     [from, setFrom] = useState(initialFrom),
+    [to, setTo] = useState(initialTo),
     [match, setMatch] = useState(initialMatch),
     [fields, setFields] = useState<PrepFields>(() => initialFields ?? defaultPrepFields(initialExample)),
     [page, setPage] = useState(0),
@@ -60,10 +63,13 @@ export function PrepExplorer({
     [sample, setSample] = useState(false),
     [stale, setStale] = useState(false);
   const abort = useRef<AbortController | null>(null);
+  const origin = useAppOrigin();
+  const publicPrepApi = `${origin}/api/prep`;
   useEffect(() => () => abort.current?.abort(), []);
   const rangeValid =
     /^\d+$/.test(from) &&
-    Number(from) >= 0 && Number(from) <= 4294967295;
+    Number(from) >= 0 && Number(from) <= 4294967295 &&
+    (to === "" || /^\d+$/.test(to) && Number(to) > Number(from) && Number(to) <= 4294967295);
   const matchValid =
     selected === "ids"
       ? match.trim().split(/[\s,]+/).length <= 128 &&
@@ -78,10 +84,11 @@ export function PrepExplorer({
         : true;
   const valid = rangeValid && matchValid;
   const route = "query";
-  const query = prepQuery(selected, Number(from), undefined, match, undefined, fields);
+  const query = prepQuery(selected, Number(from), to === "" ? undefined : Number(to), match, undefined, fields);
   const cursor = result && typeof result === "object" && "cursor" in result && typeof result.cursor === "string" ? result.cursor : null;
   const parameters = new URLSearchParams({example: selected, from, match, blockFields: fields.block.join(","), transactionFields: fields.transaction.join(",")});
-  const shareUrl = `${publicPrepApi.replace(/\/api\/prep$/, "")}/app/prep?${parameters}`;
+  if (to !== "") parameters.set("to", to);
+  const shareUrl = `${origin}/app/prep?${parameters}`;
   const example =
     examples.find((entry) => entry.id === selected) ?? examples[0];
   const knownSample = verifiedExample(selected, match);
@@ -157,6 +164,7 @@ export function PrepExplorer({
                 setFields(defaultPrepFields(example.id));
                 setMatch(defaultExampleMatch(example.id));
                 setFrom("0");
+                setTo("");
               }}
             >
               {example.name}
@@ -179,6 +187,7 @@ export function PrepExplorer({
                 onChange={(e) => {
                   changed();
                   setFrom(e.target.value);
+                  setTo("");
                 }}
               />
             </label>
@@ -210,7 +219,7 @@ export function PrepExplorer({
           {!valid ? (
             <p role="alert" className="field-error">
               {!rangeValid
-                ? "Choose a starting block from 0 to 4,294,967,295."
+                ? to ? "This link needs an exclusive end greater than its starting block, within 0–4,294,967,295. Change From block to start a fresh query." : "Choose a starting block from 0 to 4,294,967,295."
                 : selected === "ids"
                   ? "Enter up to 128 lowercase 64-character transaction IDs."
                   : selected === "versions" ? "Enter a transaction version from 1 to 4,294,967,295."
@@ -218,12 +227,14 @@ export function PrepExplorer({
             </p>
           ) : (
             <p className="field-hint">
-              Prep captures the latest indexed block when you run. Next page stays within that same snapshot.
+              {to ? `Linked range: blocks ${Number(from).toLocaleString("en-US")}–${(Number(to) - 1).toLocaleString("en-US")} inclusive. This request stops at the linked end.` : "Prep captures the latest indexed block when you run. Next page stays within that same snapshot."}
             </p>
           )}
+          {to && <button className="text-link" onClick={() => { changed(); setTo(""); }}>Continue to latest <ArrowRight size={14} /></button>}
           <div className="verified-example">
             <button className="button secondary compact" onClick={() => {
               changed(); setFrom(String(knownSample.from));
+              setTo("");
               setMatch(knownSample.match); setFields(defaultPrepFields(selected));
             }}>Use verified testnet sample <ArrowRight size={14} /></button>
             <span>Starts at block {knownSample.from.toLocaleString("en-US")}. Run query to fetch the actual response.</span>
@@ -313,7 +324,7 @@ export function PrepExplorer({
                 setError("");
               }}
             >
-              View recorded response <ChevronDown size={14} />
+              Preview response format <ChevronDown size={14} />
             </button>
           )}
           {embedded ? (
@@ -352,7 +363,7 @@ export function PrepExplorer({
         {embedded && sample && (
           <div className="code-panel response-panel">
             <div className="panel-toolbar">
-              Recorded testnet data · blocks 1,000–1,002
+              Block-header format preview · recorded testnet blocks 1,000–1,002
             </div>
             <Code
               code={JSON.stringify(
@@ -379,7 +390,7 @@ export function PrepExplorer({
             <div className="query-pagination">
               <span>{stale ? "Inputs changed. Run a new query to continue." : `Page ${page} · ${cursor ? "More of this range remains to be scanned" : "Selected range complete"}`}</span>
               {cursor && <button className="button secondary compact" disabled={stale || busy || !valid} onClick={() => void run(cursor)}>Next page <ArrowRight size={14} /></button>}
-              {!stale && (resultExample === "sapling" || resultExample === "orchard") && result && typeof result === "object" && "to_block" in result && typeof result.to_block === "number" && <button className="text-link" disabled={busy} onClick={() => { changed(); setFrom(String(Math.max(0, (result.to_block as number) - 1000))); }}>Start near latest blocks <ArrowUpRight size={14} /></button>}
+              {!stale && (resultExample === "sapling" || resultExample === "orchard") && result && typeof result === "object" && "to_block" in result && typeof result.to_block === "number" && <button className="text-link" disabled={busy} onClick={() => { changed(); setTo(""); setFrom(String(Math.max(0, (result.to_block as number) - 1000))); }}>Start near latest blocks <ArrowUpRight size={14} /></button>}
             </div>
           </>
         )}

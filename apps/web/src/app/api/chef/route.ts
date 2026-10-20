@@ -1,4 +1,6 @@
-import { parse, visit, Kind } from "graphql";
+import { parse, visit, Kind, GraphQLError } from "graphql";
+import { demoQueryError } from "@/lib/chef-demo-validation";
+import { parseChefDemo } from "@/lib/chef-demo";
 import { ApiError, input, upstream, failure } from "@/lib/upstream";
 export async function POST(request: Request) {
   try {
@@ -12,11 +14,12 @@ export async function POST(request: Request) {
       throw new ApiError(400, "Supply one GraphQL query.");
     let document;
     try {
-      document = parse(q.query);
-    } catch {
+      document = parse(q.query, { maxTokens: 4096 });
+    } catch (error) {
+      const location = error instanceof GraphQLError ? error.locations?.[0] : undefined;
       throw new ApiError(
         400,
-        "GraphQL syntax is invalid. Check the query and try again.",
+        `GraphQL syntax is invalid${location ? ` at line ${location.line}, column ${location.column}` : ""}. Check brackets and field names, or restore the example.`,
       );
     }
     if (
@@ -39,6 +42,8 @@ export async function POST(request: Request) {
           );
       },
     });
+    const validationError = demoQueryError(document, parseChefDemo(process.env.ZEER_CHEF_DEMO)?.project);
+    if (validationError) throw new ApiError(400, validationError);
     return Response.json(
       await upstream("chef", "/graphql", q, request.signal),
       { headers: { "Cache-Control": "no-store" } },
