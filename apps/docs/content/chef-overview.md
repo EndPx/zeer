@@ -26,3 +26,5 @@ Shielded & Memos is a Chef feature. The public hosted Chef playground demonstrat
 The quickstart creates an independent project with optional local PostgreSQL configuration. Node 24.14+ and Linux x86_64 or WSL2 are required for the documented path. Packages currently install from tarballs built from the repository.
 
 [Run your first Chef project](/docs/chef/quickstart/) or [choose an example](/docs/chef/examples/).
+
+Working with a coding assistant? Use [Quickstart with AI](/docs/chef/quickstart-ai/) for a starter prompt, actual installation steps and explicit verification outcomes. Use [Performance & benchmarks](/docs/chef/benchmarks/) to measure the resulting workload.

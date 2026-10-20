@@ -33,6 +33,16 @@ try {
     assert.deepEqual(missing, [], `Missing anchors: ${pathname}`);
     report.pages.push({pathname, title, status: response.status()});
   }
+  for (const product of ['chef', 'prep']) {
+    await page.goto(origin + `/docs/${product}/overview/`);
+    const menu = page.locator('.theme-doc-sidebar-menu').first();
+    const topLabels = await menu.locator(':scope > li > a.menu__link').allTextContents();
+    assert.deepEqual(topLabels.slice(0, 3), ['Overview', 'Quickstart', 'Quickstart with AI']);
+    if (product === 'prep') assert.deepEqual(topLabels.slice(3, 5), ['Getting Started', 'Clients']);
+    await menu.getByRole('link', {name: 'Quickstart with AI', exact: true}).click();
+    await page.getByRole('heading', {level: 1, name: 'Quickstart with AI', exact: true}).waitFor();
+  }
+  report.interactions.push('Chef and Prep onboarding sidebar order and AI guide navigation');
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({width, height: 900});
     await page.goto(origin + '/docs/chef/shielded/memos/');

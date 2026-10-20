@@ -4,7 +4,7 @@ Verified 21 October 2026. Public URL: [zeer.endpx.cloud/docs](https://zeer.endpx
 
 ## Delivered scope
 
-The Docusaurus workspace publishes 26 English pages: shared introduction and
+The Docusaurus workspace publishes 35 English pages: shared introduction and
 architecture, Prep query/data guides, Chef application-indexing guides, and
 Shielded & Memos nested under Chef. No additional console product/menu or public
 viewing-key form was added. Existing website `/docs` links enter the new site.
@@ -36,7 +36,9 @@ npm run build:chef
 All completed successfully against the final source/build. The public browser
 check used real Chrome and verified:
 
-- HTTP 200 and the correct heading for all 26 pages; no missing same-page anchors.
+- HTTP 200 and the correct heading for all 35 pages; no missing same-page anchors.
+- Explicit Overview, Quickstart and Quickstart with AI order in each product
+  sidebar, with Getting Started and Clients next in Prep; AI guide navigation.
 - No document-level overflow at 375, 768 and 1440px on the memo guide.
 - Zero automated axe WCAG 2/2.1 A/AA findings on that guide at those widths.
 - Ctrl+K search, memo-result navigation, empty-search feedback, Escape dismissal
@@ -53,7 +55,7 @@ not a new private memo-decryption or whole-chain performance experiment.
 
 Build checks reject broken internal links. A regression check planted a retired
 generated page, ran the actual generator, and confirmed the retired page was gone
-while the 26 current pages were regenerated. `npm ci --dry-run --ignore-scripts`
+while the then-current manifest pages were regenerated. `npm ci --dry-run --ignore-scripts`
 accepted the final lockfile. Production JavaScript contained neither react-grab
 nor react-scan; those tools are development-only.
 
@@ -71,8 +73,8 @@ dependency behaviors have been manually tested.
 
 ## Supplementary diagnostics and limits
 
-A final single-run Lighthouse sample through real Chrome against the public docs
-entry page reported:
+The initial 26-page publication's final single-run Lighthouse sample through real
+Chrome against the public docs entry page reported:
 
 | Profile | Performance | Accessibility | Best practices | SEO |
 | --- | ---: | ---: | ---: | ---: |
@@ -83,6 +85,8 @@ These are lab samples, not multi-run medians, field Core Web Vitals, full WCAG
 conformance or a claim that every performance target passed. Mobile performance
 remains below the frontend skill's ideal 100 target. Earlier measurements varied
 with verification load; do not interpret a score as a throughput guarantee.
+The subsequent 35-page onboarding expansion was functionally reverified; this
+table is retained as the initial release's sample rather than a new measurement.
 
 React Doctor reported zero errors and one heuristic warning about fetching in an
 effect. Source review and the browser request check establish that the effect
@@ -98,6 +102,19 @@ server and its dependency tree are not public services.
 
 ## Publication and evidence
 
+The onboarding expansion adds nine guides: Chef and Prep Quickstart with AI,
+Prep Getting Started, Clients, cURL examples, API access/tokens, Supported
+networks, Troubleshooting, and Chef benchmark methodology. Home-page sidebars
+link both starting paths; existing URLs and descriptive article titles remain.
+
+The Prep client guide's JavaScript block was copied without alteration into a
+fresh consumer, installed from the actual local tarball, and run against the
+public endpoint. It returned block heights 0 and 1, `next_block: 2` and a null
+cursor. All three query bodies in the cURL guide were executed against the
+public API, checking genesis headers, modern pool counts and the known testnet
+transaction ID. The AI prompts were reviewed against actual interfaces; this is
+not a claim of a new autonomous database or private scanner execution.
+
 The static release is served by a dedicated `/docs/` Nginx location, with gzip for
 text assets and an immutable release directory behind a docs-only symlink. HTTPS
 routes, `nginx -t` and the existing resource guard passed. The prior release and
@@ -106,5 +123,12 @@ Next.js service were not restarted by documentation publication.
 
 Detailed screenshots, browser reports, public query responses, Lighthouse output
 and deployment helpers remain local under `.deploy-local/docs-site-20261021/`.
+The additional client/cURL verification and publication helper are under
+`.deploy-local/docs-onboarding-20261021/`.
+The expanded Supported networks page lists Zcash Testnet, its `testnet`
+identifier, public Prep base URL and the height/capabilities/query routes.
+The source's network identifier and genesis coverage were checked directly.
+Its endpoint tables also passed desktop/mobile reflow and axe checks; supporting
+screenshots remain in the same onboarding evidence directory.
 No viewing keys, local environment, private receipt output or third-party research
 corpus is part of the published static release or this commit.

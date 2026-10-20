@@ -10,6 +10,7 @@ Start with a real public query, then add the processing your application needs. 
 | --- | --- |
 | Retrieve blocks or matching public transactions | [Query Prep in a few steps](/docs/prep/quickstart/) |
 | Store your own entities and expose GraphQL | [Run your own Chef project](/docs/chef/quickstart/) |
+| Build with a coding assistant | [Chef with AI](/docs/chef/quickstart-ai/) or [Prep with AI](/docs/prep/quickstart-ai/) |
 | Read notes and memos with your own viewing key | [Set up Chef's local shielded inbox](/docs/chef/shielded/local/) |
 | Try the public examples before writing code | [Open the playground](https://zeer.endpx.cloud/app) |
 

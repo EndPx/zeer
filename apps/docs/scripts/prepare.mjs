@@ -16,7 +16,7 @@ if (path.relative(root, docs) !== path.join('apps', 'docs', '.generated', 'docs'
 await rm(docs, {recursive: true, force: true});
 await mkdir(assets, {recursive: true});
 const search = [], bundle = [], index = ['# Zeer documentation', '', '> Zcash testnet developer preview. Prep is public data; private receipts and memos are a local Chef workflow.', ''];
-for (const [id, title, description, source] of pages) {
+for (const [id, title, description, source, sidebarLabel = title] of pages) {
   const input = path.resolve(root, source);
   let text = (await readFile(input, 'utf8')).replace(/^# [^\n]+\r?\n/, '').trim();
   // Rewrite prose links, preserving fenced code verbatim. Unpublished repo files
@@ -37,7 +37,7 @@ for (const [id, title, description, source] of pages) {
   const output = path.join(docs, `${id}.md`);
   await mkdir(path.dirname(output), {recursive: true});
   const editUrl = `${github}/edit/main/${source}`;
-  const header = `---\ntitle: ${JSON.stringify(title)}\ndescription: ${JSON.stringify(description)}\nslug: ${JSON.stringify(id === 'intro' ? '/' : '/' + id)}\ncustom_edit_url: ${JSON.stringify(editUrl)}\n---\n\n`;
+  const header = `---\ntitle: ${JSON.stringify(title)}\nsidebar_label: ${JSON.stringify(sidebarLabel)}\ndescription: ${JSON.stringify(description)}\nslug: ${JSON.stringify(id === 'intro' ? '/' : '/' + id)}\ncustom_edit_url: ${JSON.stringify(editUrl)}\n---\n\n`;
   await writeFile(output, header + text + '\n');
   const section = id.startsWith('prep/') ? 'Prep' : id.startsWith('chef/') ? 'Chef' : 'Start here';
   // All body text participates in local search; descriptions remain concise.

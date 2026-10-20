@@ -7,6 +7,10 @@ for Prep and Chef, a link to the existing playground and GitHub. Shielded & Memo
 is nested under Chef. Preserve the existing console's three-item navigation.
 Content is English and serves two journeys: a reviewer runs a public Prep query;
 a developer runs Chef and the opt-in local private memo example.
+Product sidebars begin with Overview, Quickstart and Quickstart with AI. Prep
+continues with Getting Started and Clients before query references. Sidebar labels
+can be concise while page titles stay descriptive. The shared introduction links
+directly to both product onboarding paths.
 
 Use the existing dark tokens, self-hosted Manrope and IBM Plex Mono. The UI/UX
 documentation lookup recommended readable sans/mono text and predictable navigation;
