@@ -13,13 +13,37 @@
 **Prep** provides public chain data for direct queries and custom pipelines. **[Chef](/docs/chef/overview/)** adds TypeScript handlers, PostgreSQL entities and GraphQL.
 :::
 
-## Key features
+## The Problem Prep Solves
 
-- **[Range queries](/docs/prep/query/)** — read available block history.
-- **[Fields & filters](/docs/prep/fields/)** — return the public records and fields you need.
-- **[Continuation](/docs/prep/continuation/)** — page through a captured historical range.
-- **[Public shielded activity](/docs/prep/shielded/)** — inspect Sapling, Orchard and Ironwood components.
-- **[JavaScript / TypeScript client](/docs/prep/clients/)** — integrate with native fetch and typed declarations.
+Reading one transaction is straightforward. Building a useful history for an application also means choosing a range, finding relevant records and tracking scan completion.
+
+- **Too much data to process** — A full block response can contain fields your application never uses.
+- **Repeated filtering work** — Address-output searches and public pool analysis need consistent selection rules across many blocks.
+- **Historical scan bookkeeping** — An empty result page can still have more history to scan; applications need a clear continuation boundary.
+
+Prep handles range queries, public filters and field selection at the data layer, leaving your application to decide what to build from the results.
+
+## Key Benefits
+
+- **Focused responses** — [Select fields and filters](/docs/prep/fields/) to receive the public records your application needs.
+- **Clear scan progress** — [Follow cursors](/docs/prep/continuation/) through a captured range, including pages with no matching transactions.
+- **Public pool visibility** — Inspect distinct [Sapling, Orchard and Ironwood components](/docs/prep/shielded/) for your analysis.
+- **Simple integration** — Use the [JavaScript / TypeScript client](/docs/prep/clients/) with native fetch and typed declarations, or call the HTTP API directly.
+- **Your own application logic** — Query Prep directly for custom pipelines, or use [Chef](/docs/chef/overview/) to store application entities and serve GraphQL.
+
+## Performance Benchmarks
+
+Recorded **20 October 2026** over blocks **0–99,023 inclusive** in a prepared Zcash Testnet archive. Times are medians of **three runs per mode**, in **seconds (s)**. The comparison is between fixed and adaptive Prep scans on a shared VPS over loopback.
+
+| Task | Fixed Prep | Adaptive Prep | Speedup |
+| --- | ---: | ---: | ---: |
+| Retrieve 99,024 block headers | 0.967156 s | 0.689918 s | 1.40× |
+| Find the genesis transaction ID | 0.234639 s | 0.004171 s | 56.26× |
+| Orchard filter (0 matches) | 0.418542 s | 0.108843 s | 3.85× |
+
+Both modes returned matching row counts and digests. The empty Orchard scan does not measure modern shielded-transaction processing. Timings include response retrieval, decoding and incremental row hashing; source preparation is excluded.
+
+See the [full benchmark methodology and recorded samples](/docs/chef/benchmarks/#prep-retrieval) for page counts, resource limits and evidence.
 
 ## Use Cases
 

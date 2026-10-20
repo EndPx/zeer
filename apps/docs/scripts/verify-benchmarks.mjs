@@ -3,9 +3,11 @@ import {readFile} from 'node:fs/promises';
 
 const data = JSON.parse(await readFile(new URL('../static/benchmarks/2026-10-20-testnet.json', import.meta.url), 'utf8'));
 const page = await readFile(new URL('../content/chef-benchmarks.md', import.meta.url), 'utf8');
+const overview = await readFile(new URL('../content/prep-overview.md', import.meta.url), 'utf8');
 const median = values => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
 const expected = {headers: [99024, 0.967156, 0.689918], genesis_id: [1, 0.234639, 0.004171], orchard: [0, 0.418542, 0.108843]};
 assert.doesNotMatch(page, /\b(?:ms|milliseconds?)\b/i);
+assert.doesNotMatch(overview, /\b(?:ms|milliseconds?)\b/i);
 assert.equal(data.network, 'testnet');
 assert.equal(data.prep.runs.length, 18);
 for (const [name, [rows, fixed, adaptive]] of Object.entries(expected)) {
@@ -21,7 +23,12 @@ for (const [name, [rows, fixed, adaptive]] of Object.entries(expected)) {
     }
     assert.equal(Number((median(selected.map(run => run.elapsedMs)) / 1000).toFixed(6)), value);
     assert.ok(page.includes(`${value.toFixed(6)} s`));
+    assert.ok(overview.includes(`${value.toFixed(6)} s`));
   }
+  const fixedMedian = median(runs.filter(run => run.mode === 'fixed').map(run => run.elapsedMs));
+  const adaptiveMedian = median(runs.filter(run => run.mode === 'adaptive').map(run => run.elapsedMs));
+  const speedup = (fixedMedian / adaptiveMedian).toFixed(2);
+  assert.ok(overview.includes(`| ${(fixedMedian / 1000).toFixed(6)} s | ${(adaptiveMedian / 1000).toFixed(6)} s | ${speedup}× |`));
 }
 for (const [profile, first, elapsed] of [['fixed', 1.201, 36.696], ['adaptive', 1.591, 35.215]]) {
   const run = data.chef[profile];
