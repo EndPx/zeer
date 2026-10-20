@@ -1,0 +1,29 @@
+{
+  "name": "@zeer/docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prepare:content": "node scripts/prepare.mjs",
+    "dev": "npm run prepare:content && docusaurus start --host 127.0.0.1 --port 3001",
+    "build": "npm run prepare:content && node scripts/build.mjs",
+    "serve": "docusaurus serve --host 127.0.0.1 --port 3001",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
+    "@mdx-js/react": "3.1.1",
+    "@fontsource-variable/manrope": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.2.7",
+    "prism-react-renderer": "2.4.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@axe-core/playwright": "4.14.0",
+    "react-grab": "0.2.0",
+    "react-scan": "0.5.7"
+  },
+  "engines": {"node": ">=24.14.0"}
+}

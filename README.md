@@ -17,6 +17,10 @@ Use Chef to build application data models and GraphQL APIs, or use Prep directly
 for custom data pipelines, analytics and specialized applications. Prep supplies
 the ingredients; Chef applies the developer's recipe.
 
+Read the [developer documentation](https://zeer.endpx.cloud/docs/) for Prep and
+Chef quickstarts, API contracts and the local Shielded & Memos workflow. The
+[Docusaurus workspace](apps/docs/README.md) documents how to build and verify it.
+
 ## Status
 
 **A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the public Chef indexes block summaries from block 0 and follows the latest Prep blocks. An opt-in local watch-only receipt preview is available separately; npm publication remains deferred.**

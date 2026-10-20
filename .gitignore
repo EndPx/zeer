@@ -53,3 +53,8 @@ Thumbs.db
 /examples/quickstart/chef.generated.ts
 
 .vercel
+
+# Generated documentation inputs and Docusaurus caches
+/apps/docs/.docusaurus/
+/apps/docs/.generated/
+/apps/docs/static/generated/

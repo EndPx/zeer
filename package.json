@@ -1,7 +1,29 @@
 {
   "name": "zeer-workspace",
   "private": true,
-  "workspaces": ["packages/prep-client", "packages/chef", "apps/web"],
-  "scripts": {"build:chef": "npm run build -w @zeer/chef", "test:chef": "npm test -w @zeer/chef", "dev:web": "npm run dev -w @zeer/web", "build:web": "npm run build -w @zeer/web"},
-  "engines": {"node": ">=24.14.0"}
+  "workspaces": [
+    "packages/prep-client",
+    "packages/chef",
+    "apps/web",
+    "apps/docs"
+  ],
+  "scripts": {
+    "build:chef": "npm run build -w @zeer/chef",
+    "test:chef": "npm test -w @zeer/chef",
+    "dev:web": "npm run dev -w @zeer/web",
+    "build:web": "npm run build -w @zeer/web",
+    "dev:docs": "npm run dev -w @zeer/docs",
+    "build:docs": "npm run build -w @zeer/docs"
+  },
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "overrides": {
+    "tinypool": "2.2.0",
+    "serialize-javascript": "7.1.2"
+  },
+  "devDependencies": {
+    "serialize-javascript": "7.1.2",
+    "tinypool": "2.2.0"
+  }
 }

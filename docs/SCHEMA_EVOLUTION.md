@@ -65,7 +65,7 @@ zeer-chef serve --config app-v2/chef.config.ts --port 39471 --json
 
 `PREP_URL`, `DATABASE_URL` and API tokens select the intended source/database for
 that invocation. Chef requires full-v1 history covering the intended start height;
-its CLI starts at height one or later. A schema change does not authorize changing
+its CLI accepts height zero when the selected archive covers genesis. A schema change does not authorize changing
 the historical start or dropping history needed by the new handler. Verify the
 capacity for a second projection and its undo journal before shadow replay. The
 v1 and v2 writers use different namespace locks and can run together, but the

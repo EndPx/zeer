@@ -30,6 +30,17 @@ of eight; the Node adapter independently bounds active upstream requests to two.
 Certificates renew through the existing Certbot timer, with a domain-scoped
 Nginx reload hook. Changing the website does not reset chain or application data.
 
+## Documentation static site
+
+The Docusaurus workspace `apps/docs` builds the public documentation for `/docs/`.
+Build locally with `npm run build:docs`, publish only `apps/docs/build` beneath
+the static release's `docs/` directory, and use a dedicated Nginx `/docs/`
+location ahead of the existing application proxy. The docs root is independent
+of the Next.js runtime. The existing website's `/docs` links enter the new docs.
+See [the docs workspace](../apps/docs/README.md) for build, browser verification,
+content ownership and an example static-hosting location. Preserve the current
+vhost and release pointer, validate before reload and keep rollback available.
+
 ## Vercel alternative
 
 The repository's Vercel project uses `apps/web` as its root, Next.js, Node24,

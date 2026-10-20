@@ -1,5 +1,40 @@
 # Zeer website design system
 
+## Documentation site — 20 October
+
+The approved documentation uses Docusaurus at `/docs/`, with product navigation
+for Prep and Chef, a link to the existing playground and GitHub. Shielded & Memos
+is nested under Chef. Preserve the existing console's three-item navigation.
+Content is English and serves two journeys: a reviewer runs a public Prep query;
+a developer runs Chef and the opt-in local private memo example.
+
+Use the existing dark tokens, self-hosted Manrope and IBM Plex Mono. The UI/UX
+documentation lookup recommended readable sans/mono text and predictable navigation;
+its blue palette and FAQ landing were rejected in favor of Zeer's approved identity.
+The Envio docs screenshots inform information hierarchy, not copied branding.
+Spatial reference: [main-with-rail](https://github.com/changeroa/StyleGallery/blob/main/patterns/split-sidebar/main-with-rail.md).
+The document owns article scrolling, with a sticky 64px navbar and independently
+scrollable product sidebar; the right heading rail follows the article. Below
+996px, navigation becomes a drawer and headings use the native page disclosure.
+Code/table overflow stays inside its panel, never the document.
+
+Documentation tokens extend the existing scale: 288px sidebar, 72ch prose maximum,
+24px article gutter (16px narrow), 40/30px page heading, 24px section heading,
+16px/1.75 body, 14px navigation and 13px code. Reuse 4/8/12/16/24/32px spacing,
+8px code radius and existing 140–180ms color transitions. Dark-only syntax uses
+paper, sage, lime and cream. No animated illustration is needed in reading pages.
+
+Reusable docs primitives: product sidebar with current-page text and lime edge;
+article with breadcrumbs, heading rail and previous/next links; bordered code
+panel with labelled copy control; scope callout; and local search dialog. Search
+indexes published page text and headings, stays inside the site, supports Ctrl/Cmd+K,
+Escape, tab navigation and links to results. Empty searches explain how to refine
+the query. Dialog close restores focus. All interactive targets are at least 44px,
+focus is visible, long names wrap, and reduced motion removes transitions.
+Code-copy controls stay visible without hover on narrow screens. Escape closes
+the search dialog directly even when a native search field contains text.
+Validate these states at narrow, tablet and desktop widths in the built docs.
+
 ## Public transaction inspector and pending observations
 
 Prep Playground contains query building, transaction inspection and the configured

@@ -1,0 +1,110 @@
+# Documentation site verification
+
+Verified 21 October 2026. Public URL: [zeer.endpx.cloud/docs](https://zeer.endpx.cloud/docs/).
+
+## Delivered scope
+
+The Docusaurus workspace publishes 26 English pages: shared introduction and
+architecture, Prep query/data guides, Chef application-indexing guides, and
+Shielded & Memos nested under Chef. No additional console product/menu or public
+viewing-key form was added. Existing website `/docs` links enter the new site.
+
+The site uses the Zeer design system, local page search with Ctrl/Cmd+K, code copy,
+responsive product navigation, section headings, metadata, sitemap, self-hosted
+fonts and generated LLM references. Font notices accompany the static assets.
+Search index download starts on user action; search terms remain in the browser.
+
+`apps/docs/pages.mjs` is the publication allowlist. Existing API, quickstart,
+scanner, evolution and index contracts are rendered from their original repository
+sources. New explanatory content lives in `apps/docs/content`. Edit links point
+at the actual source. The generator removes only its validated generated-docs
+directory before writing, preventing retired pages from remaining routable.
+
+## Functional verification
+
+Commands from the repository root:
+
+```sh
+npm run build:docs
+npm run serve -w @zeer/docs
+npm run check -w @zeer/docs
+npm run check -w @zeer/docs -- https://zeer.endpx.cloud
+npm run typecheck -w @zeer/web
+npm run build:chef
+```
+
+All completed successfully against the final source/build. The public browser
+check used real Chrome and verified:
+
+- HTTP 200 and the correct heading for all 26 pages; no missing same-page anchors.
+- No document-level overflow at 375, 768 and 1440px on the memo guide.
+- Zero automated axe WCAG 2/2.1 A/AA findings on that guide at those widths.
+- Ctrl+K search, memo-result navigation, empty-search feedback, Escape dismissal
+  and focus return. The search index was not requested during ordinary browsing.
+- Code clipboard copy and touch copy-control visibility without hover.
+- Mobile drawer navigation between products and long-reference reflow with
+  reduced motion enabled.
+- The existing website's Get started link navigates into the new documentation.
+
+The real public Prep example returned genesis headers 0 and 1, with the requested
+exclusive end of 2 and a completed cursor. The public Chef genesis entity's hash
+matched the Prep genesis hash. This validates those public read examples; it is
+not a new private memo-decryption or whole-chain performance experiment.
+
+Build checks reject broken internal links. A regression check planted a retired
+generated page, ran the actual generator, and confirmed the retired page was gone
+while the 26 current pages were regenerated. `npm ci --dry-run --ignore-scripts`
+accepted the final lockfile. Production JavaScript contained neither react-grab
+nor react-scan; those tools are development-only.
+
+## Independent review
+
+The OMC Review standards and intent axes ran separately. Intent passed with no
+actionable finding. Standards found one P2 stale-generated-page issue, which was
+fixed and independently reverified. The final standards verdict was pass.
+
+A further independent review inspected the final desktop/mobile memo-page
+screenshots plus the search, font-preload and publication code. The rendered
+design verdict passed for those supplied views. These bounded reviews do not
+claim that all possible pages, devices, assistive technologies or upstream
+dependency behaviors have been manually tested.
+
+## Supplementary diagnostics and limits
+
+A final single-run Lighthouse sample through real Chrome against the public docs
+entry page reported:
+
+| Profile | Performance | Accessibility | Best practices | SEO |
+| --- | ---: | ---: | ---: | ---: |
+| Mobile | 96 | 100 | 100 | 100 |
+| Desktop | 100 | 100 | 100 | 100 |
+
+These are lab samples, not multi-run medians, field Core Web Vitals, full WCAG
+conformance or a claim that every performance target passed. Mobile performance
+remains below the frontend skill's ideal 100 target. Earlier measurements varied
+with verification load; do not interpret a score as a throughput guarantee.
+
+React Doctor reported zero errors and one heuristic warning about fetching in an
+effect. Source review and the browser request check establish that the effect
+only registers a keyboard listener; fetching happens when the user opens search.
+No data-fetching dependency was added to silence that heuristic.
+
+Patched Tinypool and serialize-javascript are pinned through root overrides and
+the lockfile. The final npm audit still reports 43 affected package entries
+(28 high, 15 moderate, zero critical), through three underlying build-tool
+advisories: braces, postcss-selector-parser and uuid. This is not a zero-advisory
+dependency claim. Only static output is deployed; the Node development/preview
+server and its dependency tree are not public services.
+
+## Publication and evidence
+
+The static release is served by a dedicated `/docs/` Nginx location, with gzip for
+text assets and an immutable release directory behind a docs-only symlink. HTTPS
+routes, `nginx -t` and the existing resource guard passed. The prior release and
+vhost configuration remain available for rollback. Prep, Chef and the existing
+Next.js service were not restarted by documentation publication.
+
+Detailed screenshots, browser reports, public query responses, Lighthouse output
+and deployment helpers remain local under `.deploy-local/docs-site-20261021/`.
+No viewing keys, local environment, private receipt output or third-party research
+corpus is part of the published static release or this commit.
