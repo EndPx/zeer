@@ -11,7 +11,8 @@ import {
 import { Code } from "./ui";
 import { CopyButton } from "./interactive";
 import { chefQuery } from "@/lib/content";
-export function ChefPlayground({ enabled }: { enabled: boolean }) {
+import type { ChefDemo } from "@/lib/chef-demo";
+export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: ChefDemo | null }) {
   const [query, setQuery] = useState(chefQuery),
     [result, setResult] = useState<unknown>(),
     [duration, setDuration] = useState<number | null>(null),
@@ -57,6 +58,12 @@ export function ChefPlayground({ enabled }: { enabled: boolean }) {
         <h1>Your schema. Your playground.</h1>
         <p>Explore application data through the GraphQL API. Request up to 100 items per page; use nextCursor as after to continue.</p>
       </div>
+      {demo && <div className="notice demo-coverage">
+        <Info size={16} aria-hidden="true" />
+        <div><strong>Fixed testnet demo · {demo.fromBlock.toLocaleString("en-US")}–{demo.toBlock.toLocaleString("en-US")}</strong>
+          <p>Namespace <code>{demo.project}</code>. Prep supplies public data → Chef runs TypeScript handlers → PostgreSQL stores entities → GraphQL serves committed results, including during indexing. <code>_meta.height</code> reports the saved checkpoint; this demo does not cover the entire chain.</p>
+        </div>
+      </div>}
       {!enabled && (
         <div className="notice">
           <Info size={16} />

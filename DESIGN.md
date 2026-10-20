@@ -1,5 +1,17 @@
 # Zeer website design system
 
+## Bounded hackathon Chef demo
+
+Reuse the notice, coverage-note, network-facts and progress-meter primitives.
+An operator-configured fixed Chef range is distinct from whole-chain Prep
+coverage. Show its inclusive bounds and namespace on Overview and Chef Playground.
+Only an observed checkpoint within that range may fill its meter. Unavailable,
+out-of-range and source-incompatible checkpoints stay unavailable; do not clamp
+them into an apparent success. Label the remaining count as demo blocks, rather
+than lag against the chain tip. The notice wraps long namespace text and links
+the four stages in plain text. Existing 12/14px supporting typography, 24px gaps,
+lime accents and responsive panel behavior apply; no new tokens or motion.
+
 ## Query controls: limit removal
 
 Playground controls express the starting block, public filters and selected fields.

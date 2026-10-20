@@ -8,6 +8,9 @@ operator may be Zeer or you; running Chef does not require running Zebra locally
 The current starter targets **Zcash testnet**. Use the [limited public Prep
 preview](PUBLIC_API.md) or your own full-data testnet service with known coverage.
 Inspect `/height` for current coverage and source readiness.
+For a bounded modern testnet replay with live GraphQL and restart steps, use the
+[hackathon demo example](../examples/chef-hackathon/README.md). Reviewers can
+follow the [public console walkthrough](HACKATHON_DEMO.md).
 For a self-contained historical example without an existing source, see the
 [fixture quickstart](../examples/quickstart/README.md); that older example uses
 explicitly labeled mainnet fixtures and is not a live testnet service.

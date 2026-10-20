@@ -19,12 +19,18 @@ the ingredients; Chef applies the developer's recipe.
 
 ## Status
 
-**A public testnet developer preview is available at [zeer-ten.vercel.app](https://zeer-ten.vercel.app). It uses real blockchain data. Genesis-to-tip backfill is still in progress; deployment availability does not establish complete history. Viewing-key scanning and npm publication are not implemented.**
+**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the Chef hackathon demo indexes a separate, fixed modern range. Viewing-key scanning and npm publication are not implemented.**
 
-Inspect current coverage in the [console](https://zeer-ten.vercel.app/app) or
+Inspect current coverage in the [console](https://zeer.endpx.cloud/app) or
 through the [limited public Prep API](docs/PUBLIC_API.md). The preview is bounded
 and can be unavailable during source recovery or maintenance. It is not a
 production availability commitment.
+
+Start with the [public demo walkthrough](docs/HACKATHON_DEMO.md), then run the
+[bounded Chef example](examples/chef-hackathon/README.md) or the
+[developer quickstart](docs/CHEF_QUICKSTART.md). The fixed Chef demo covers
+testnet blocks **4,510,000–4,519,999 inclusive** in a fresh namespace; its
+completion meter does not represent full-chain Chef indexing.
 
 Prep supports bounded transaction-ID lookup, snapshot pinning, capability
 discovery, immutable transaction indexes and direct metadata projection. Optional

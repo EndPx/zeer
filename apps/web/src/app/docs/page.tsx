@@ -18,6 +18,7 @@ export default function Page() {
           Preview release · Linux / WSL2 · Node 24.14+ · packages installed from
           local tarballs
         </div>
+        <p><Link className="text-link" href={`${repo}/blob/main/docs/HACKATHON_DEMO.md`}>Public demo walkthrough ↗</Link>{" · "}<Link className="text-link" href={`${repo}/tree/main/examples/chef-hackathon`}>Run the bounded testnet demo ↗</Link></p>
         <section>
           <h2>1. Prepare your packages</h2>
           <p>
@@ -58,15 +59,16 @@ export default function Page() {
           <Code code={"npm run db:up\nnpm run migrate\nnpm run status"} />
         </section>
         <section>
-          <h2>4. Index, then query</h2>
+          <h2>4. Serve while indexing</h2>
           <p>
             Set an end height available in Prep. Sync uses an inclusive end;
-            Prep queries use an exclusive end. Start the API, then run the query
-            command in another terminal.
+            Prep queries use an exclusive end. Start the API first, then index
+            and query in separate terminals. GraphQL reads the committed prefix
+            while indexing continues; _meta.height reports that checkpoint.
           </p>
           <Code
             code={
-              "npm run sync -- --to 1002\nnpm run serve\n\n# In another terminal\nnpm run query"
+              "# Terminal 1\nnpm run serve\n\n# Terminal 2\nnpm run sync -- --to 1002\n\n# Terminal 3\nnpm run query"
             }
           />
           <p>

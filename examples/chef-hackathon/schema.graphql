@@ -1,0 +1,7 @@
+type BlockSummary {
+  id: ID!
+  height: Int! @index
+  hash: String!
+  time: BigInt!
+  transactionCount: Int!
+}

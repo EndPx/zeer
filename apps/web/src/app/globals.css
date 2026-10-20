@@ -2499,3 +2499,8 @@ svg {
 .verified-example > span { color: var(--muted); font-size: 12px; flex: 1; min-width: 180px; }
 .component-counts { display: flex; flex-direction: column; gap: 4px; }
 .raw-preview { display: block; max-width: 34ch; overflow: hidden; text-overflow: ellipsis; }
+.demo-coverage { align-items: flex-start; }
+.demo-coverage > svg { flex-shrink: 0; }
+.demo-coverage strong { color: var(--text); }
+.demo-coverage p { margin: 8px 0 0; }
+.demo-coverage code, .coverage-note code { overflow-wrap: anywhere; }

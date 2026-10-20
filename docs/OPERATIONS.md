@@ -120,3 +120,33 @@ keep all temporary startup allocations within the existing aggregate envelope.
 Serialize guard-policy changes against in-flight guard checks: an already-running
 Python guard keeps its loaded policy even after the source file changes. Restore
 normal service limits before completing the cutover, then verify the guard again.
+
+## Fixed Chef hackathon namespace
+
+The hosted Chef demo uses `hackathon_testnet_20261020`, with the inclusive target
+4,510,000–4,519,999. See [the manifest and handlers](../examples/chef-hackathon/README.md).
+Its API serves committed entities during a finite sync, then remains available
+after the writer reaches the target. It does not follow the chain tip. Keep the
+previous genesis namespace and its configuration intact for rollback.
+
+Set the web adapter's `ZEER_CHEF_URL` and server-side token to the matching demo
+reader. Set `ZEER_CHEF_DEMO` to a single-line JSON object from that example's
+`demo.json` (project, fromBlock and toBlock). The network field is not used by the
+UI descriptor; all hosted adapters still enforce testnet. The descriptor declares
+the intended range; only GraphQL's observed checkpoint supplies progress. Remove
+the descriptor when connecting an ordinary full-history/following Chef project.
+Never switch a URL without switching or removing its descriptor too.
+
+Before changing the public web endpoint, migrate the new namespace, start its
+API and verify its actual schema/checkpoint. Retain the previous protected env
+and web release. Use distinct loopback ports and register all added units in the
+same resource guard; do not loosen shared caps. Build and install under bounded
+units. Restart only the web adapter for the cutover, preserving warm Prep readers.
+
+For a restart proof, stop the finite demo writer after a committed prefix, keep
+the API running, record the checkpoint and verify that prefix against Prep.
+Restart the identical writer/config to the same end. Check every final entity's
+hash, timestamp and transaction count against an independent Prep projection,
+and check that the committed prefix is unchanged. A repeat sync to the completed
+target must leave both checkpoint and entity digest unchanged. Save operational
+proofs locally; never publish deployment credentials or benchmark result files.

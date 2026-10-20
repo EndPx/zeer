@@ -1,4 +1,5 @@
 import { upstream } from "@/lib/upstream";
+import { parseChefDemo } from "@/lib/chef-demo";
 export const dynamic = "force-dynamic";
 export async function GET() {
   const [prep, chef] = await Promise.allSettled([
@@ -38,6 +39,7 @@ export async function GET() {
         data: prep.status === "fulfilled" ? prep.value : null,
       },
       chef: {
+        demo: parseChefDemo(process.env.ZEER_CHEF_DEMO),
         configured: !!process.env.ZEER_CHEF_URL,
         available: chef.status === "fulfilled" && !!chef.value?.data?._meta,
         data: chef.status === "fulfilled" ? chef.value?.data?._meta : null,

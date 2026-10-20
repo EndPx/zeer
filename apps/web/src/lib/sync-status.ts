@@ -1,7 +1,9 @@
+import type { ChefDemo } from "./chef-demo.ts";
+
 export type ConsoleStatus = {
   checkedAt?: string;
   prep: { configured: boolean; available?: boolean; data?: Record<string, unknown> | null };
-  chef: { configured: boolean; available?: boolean; data?: Record<string, unknown> | null };
+  chef: { configured: boolean; available?: boolean; data?: Record<string, unknown> | null; demo?: ChefDemo | null };
   recentBlocks?: { height: number; hash: string; time: number }[];
   recentBlocksAvailable?: boolean;
 };
@@ -20,13 +22,17 @@ export function syncMetrics(status: ConsoleStatus | null, now = Date.now()) {
   const consistentTip = tip !== null && head !== null && tip >= head;
   const total = consistentTip ? tip + 1 : null;
   const checkpoint = status?.chef.available ? height(status.chef.data?.height) : null;
-  const compatible = count !== null && start !== null && head !== null && checkpoint !== null && checkpoint >= start - 1 && checkpoint <= head;
-  const chefCount = compatible ? checkpoint - start! + 1 : null;
+  const demo = status?.chef.demo ?? null;
+  const chefStart = demo?.fromBlock ?? start, chefEnd = demo?.toBlock ?? head;
+  const chefTotal = chefStart !== null && chefEnd !== null && chefEnd >= chefStart ? chefEnd - chefStart + 1 : null;
+  const compatible = count !== null && chefStart !== null && chefEnd !== null && start !== null && head !== null &&
+    chefStart >= start && chefEnd <= head && checkpoint !== null && checkpoint >= chefStart - 1 && checkpoint <= chefEnd;
+  const chefCount = compatible ? checkpoint - chefStart! + 1 : null;
   return { start, head, tip: consistentTip ? tip : null, count, total, checkpoint,
     historyPercent: count !== null && total !== null ? count / total * 100 : null,
-    chefPercent: chefCount !== null && count ? chefCount / count * 100 : null,
-    chefCount, sourceLag: consistentTip ? tip - head! : null,
-    chefLag: compatible ? head! - checkpoint! : null,
+    chefPercent: chefCount !== null && chefTotal ? chefCount / chefTotal * 100 : null,
+    chefCount, chefTotal, chefStart, chefEnd, demo, sourceLag: consistentTip ? tip - head! : null,
+    chefLag: compatible ? chefEnd! - checkpoint! : null,
     following: prep?.ready === true && prep.source_mode === "follower" && consistentTip,
   };
 }
