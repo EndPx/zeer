@@ -32,6 +32,17 @@ Verify recovery through an actual genesis query, a previously stored block, a
 newly appended block and Chef's retained checkpoint. Distinguish stored coverage,
 fresh source observation, and application indexing progress in operational reports.
 
+`snapshot bound exceeded: catalog segment count` is a different capacity stop:
+the immutable segment catalog reached its entry allowance. A caught-up follower
+can publish a small segment for each new block even with `--segment-blocks 1000`;
+that option is a maximum batch size, not a minimum publication size. Readers and
+writers now admit up to 30,000 segments, independently limited to a 16 MiB catalog
+and 640 MiB of binary block-header metadata. This remains a finite capacity;
+monitor catalog growth and plan a verified repack before either bound is reached.
+When upgrading from the old 10,000-entry limit, prepare compatible readers before
+resuming the writer past that limit. Preserve the published catalog and resume
+the same archive; editing freshness or resetting history does not fix this error.
+
 ## Lossless compressed records
 
 Start a full-node import with `--from 0 --compress` to include genesis and use

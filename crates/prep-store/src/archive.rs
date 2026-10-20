@@ -8,7 +8,10 @@ const CATALOG_NAME: &str = "catalog.json";
 const CATALOG_PENDING: &str = "catalog.pending";
 const LOCK_NAME: &str = "archive.lock";
 const MAX_CATALOG_BYTES: u64 = 16 * 1024 * 1024;
-const MAX_SEGMENTS: usize = 10_000;
+// A live follower can publish one immutable segment per new block. Keep room
+// beyond the historical import; catalog bytes and header metadata stay bounded
+// independently, including for unusually long segment directory names.
+const MAX_SEGMENTS: usize = 30_000;
 const MAX_RANGE_BLOCKS: u64 = 10_000;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -815,6 +818,54 @@ fn publish_catalog(root: &Path, catalog: &Catalog) -> Result<()> {
     fs::rename(&pending, root.join(CATALOG_NAME))?;
     sync_directory(root)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod catalog_limit_tests {
+    use super::*;
+
+    fn catalog_with_segments(count: usize) -> Catalog {
+        let hash = "00".repeat(32);
+        let mut catalog = Catalog {
+            schema_version: 1,
+            network: "testnet".into(),
+            payload_kind: FULL_KIND.into(),
+            start_height: 0,
+            epoch: 0,
+            revision: count as u64,
+            segments: (0..count)
+                .map(|height| SegmentReference {
+                    directory: format!("segments/full-{height}"),
+                    dataset_id: hash.clone(),
+                    start_height: height as u64,
+                    end_height: height as u64,
+                    predecessor_hash: hash.clone(),
+                    end_hash: hash.clone(),
+                    manifest_sha256: hash.clone(),
+                })
+                .collect(),
+            catalog_sha256: String::new(),
+        };
+        catalog.catalog_sha256 = catalog_hash(&catalog).unwrap();
+        catalog
+    }
+
+    #[test]
+    fn live_catalog_can_cross_old_ten_thousand_segment_boundary() {
+        let catalog = catalog_with_segments(10_001);
+        validate_catalog(&catalog).unwrap();
+    }
+
+    #[test]
+    fn extended_catalog_still_has_explicit_count_and_byte_bounds() {
+        let catalog = catalog_with_segments(MAX_SEGMENTS);
+        validate_catalog(&catalog).unwrap();
+        assert!(serde_json::to_vec_pretty(&catalog).unwrap().len() as u64 <= MAX_CATALOG_BYTES);
+        assert!(matches!(
+            validate_catalog(&catalog_with_segments(MAX_SEGMENTS + 1)),
+            Err(Error::Limit("catalog segment count"))
+        ));
+    }
 }
 
 #[cfg(all(test, unix))]
