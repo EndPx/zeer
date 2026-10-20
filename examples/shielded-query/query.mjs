@@ -1,4 +1,4 @@
-import { PrepClient } from "@zeer/prep-client";
+import { PrepClient } from "@zeer-dev/prep-client";
 
 const from = Number(process.env.FROM_BLOCK ?? 0);
 const to = process.env.TO_BLOCK ? Number(process.env.TO_BLOCK) : undefined;

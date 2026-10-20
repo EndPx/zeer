@@ -21,7 +21,7 @@ For an independent consumer, pack the client from the checkout with
 `npm pack ./packages/prep-client --pack-destination /absolute/artifacts`, then
 install that tarball in an empty Node 24.14+ project, copy `query.mjs` there and
 run it with the same environment variables. The example imports the installed
-`@zeer/prep-client`; it does not import Zeer's internal source paths.
+`@zeer-dev/prep-client`; it does not import Zeer's internal source paths.
 
 Override `PREP_URL` and, if required, `PREP_API_TOKEN` for your own Prep service.
 Keep tokens in the environment. The script checks advertised capabilities and

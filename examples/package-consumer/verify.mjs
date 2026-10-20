@@ -64,16 +64,16 @@ for (const name of ['prep-client', 'chef']) {
 await writeFile(join(consumer, 'package.json'), JSON.stringify({ name: 'zeer-tarball-consumer', private: true, type: 'module' }));
 await recorded('npm', ['install', '--no-audit', '--no-fund', ...tarballs], consumer, 'install-packages');
 await recorded('npm', ['install', '--save-dev', '--no-audit', '--no-fund', 'typescript@7.0.2'], consumer, 'install-typescript');
-await recorded('npm', ['ls', '@zeer/chef', '@zeer/prep-client', '@types/node', '--json'], consumer, 'dependency-tree');
+await recorded('npm', ['ls', '@zeer-dev/chef', '@zeer-dev/prep-client', '@types/node', '--json'], consumer, 'dependency-tree');
 for (const name of ['chef', 'prep-client']) {
-  const installed = join(consumer, 'node_modules/@zeer', name);
+  const installed = join(consumer, 'node_modules/@zeer-dev', name);
   assert.equal((await lstat(installed)).isSymbolicLink(), false, 'Workspace symlinks are forbidden');
   assert.equal(await realpath(installed), installed);
   const lock = JSON.parse(await readFile(join(consumer, 'package-lock.json'), 'utf8'));
-  assert.ok(lock.packages[`node_modules/@zeer/${name}`].resolved.startsWith('file:'), 'Zeer must resolve from local tarballs');
+  assert.ok(lock.packages[`node_modules/@zeer-dev/${name}`].resolved.startsWith('file:'), 'Zeer must resolve from local tarballs');
 }
 const cli = join(consumer, 'node_modules/.bin/zeer-chef');
-assert.equal(await realpath(cli), join(consumer, 'node_modules/@zeer/chef/dist/cli.js'));
+assert.equal(await realpath(cli), join(consumer, 'node_modules/@zeer-dev/chef/dist/cli.js'));
 const help = await recorded(cli, ['--help'], consumer, 'installed-bin-help');
 assert.match(help, /codegen\|migrate\|sync\|serve\|status/, 'Installed bin must execute the CLI, not exit silently');
 const project = `pkg_${Date.now().toString(36)}`;
@@ -87,8 +87,8 @@ const generated = JSON.parse(await recorded(cli, ['codegen', '--json'], consumer
 assert.equal(generated.command, 'codegen');
 assert.equal(generated.status, 'complete');
 await readFile(join(consumer, 'chef.generated.ts'), 'utf8');
-await writeFile(join(consumer, 'types-check.ts'), `import { PrepClient } from '@zeer/prep-client';
-import { createChefServer, defineConfig } from '@zeer/chef';
+await writeFile(join(consumer, 'types-check.ts'), `import { PrepClient } from '@zeer-dev/prep-client';
+import { createChefServer, defineConfig } from '@zeer-dev/chef';
 import type { ChefHandlerContext } from './chef.generated.ts';
 const client = new PrepClient({ url: 'http://127.0.0.1:39368' });
 const server: import('node:http').Server = createChefServer({} as Parameters<typeof createChefServer>[0]);
@@ -101,7 +101,7 @@ context.entities.set('PublicTransaction', { id: 'tx', minedHeight: 1, version: 4
 `);
 await writeFile(join(consumer, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', strict: true, noEmit: true, allowImportingTsExtensions: true, skipLibCheck: false, types: ['node'] }, include: ['*.ts'] }, null, 2));
 await recorded(join(consumer, 'node_modules/.bin/tsc'), ['--project', 'tsconfig.json'], consumer, 'strict-types');
-await recorded(process.execPath, ['--input-type=module', '-e', "for (const name of ['@zeer/chef', '@zeer/prep-client']) { const path = import.meta.resolve(name); if (!path.startsWith(new URL('./node_modules/', import.meta.url).href)) throw Error('External package resolution'); await import(name); console.log(JSON.stringify({name,path})); }"], consumer, 'module-resolution');
+await recorded(process.execPath, ['--input-type=module', '-e', "for (const name of ['@zeer-dev/chef', '@zeer-dev/prep-client']) { const path = import.meta.resolve(name); if (!path.startsWith(new URL('./node_modules/', import.meta.url).href)) throw Error('External package resolution'); await import(name); console.log(JSON.stringify({name,path})); }"], consumer, 'module-resolution');
 
 if (integration) {
   await copyFile(join(root, 'benchmarks/fixtures/mainnet-nu5-full-v1/fixture.json'), join(consumer, 'fixture.json'));

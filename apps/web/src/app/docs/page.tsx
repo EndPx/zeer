@@ -37,7 +37,7 @@ export default function Page() {
           </p>
           <Code
             code={
-              "node packages/chef/dist/cli.js init \\\n  --dir ../my-indexer \\\n  --project my_indexer \\\n  --start-height 0\n\ncd ../my-indexer\nnpm install ../zeer/.tmp/chef-packages/zeer-prep-client-0.1.0.tgz \\\n  ../zeer/.tmp/chef-packages/zeer-chef-0.1.0.tgz\nnpm run codegen\nnpm run typecheck"
+              "node packages/chef/dist/cli.js init \\\n  --dir ../my-indexer \\\n  --project my_indexer \\\n  --start-height 0\n\ncd ../my-indexer\nnpm install ../zeer/.tmp/chef-packages/zeer-dev-prep-client-0.1.0.tgz \\\n  ../zeer/.tmp/chef-packages/zeer-dev-chef-0.1.0.tgz\nnpm run codegen\nnpm run typecheck"
             }
           />
         </section>

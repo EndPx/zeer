@@ -1,4 +1,4 @@
-import { defineConfig } from "@zeer/chef";
+import { defineConfig } from "@zeer-dev/chef";
 
 // Controlled public Regtest projection; no wallet keys or handler side effects.
 export default defineConfig({

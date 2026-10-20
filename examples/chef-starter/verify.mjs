@@ -32,7 +32,7 @@ function run(bin,argv,cwd,label,env=process.env) {
     assert.equal(r.status,0,`${label} failed; retained output in ${output}`);return r.stdout;
   });
 }
-const tgzs=['zeer-prep-client-0.1.0.tgz','zeer-chef-0.1.0.tgz'].map(n=>join(artifacts,n));
+const tgzs=['zeer-dev-prep-client-0.1.0.tgz','zeer-dev-chef-0.1.0.tgz'].map(n=>join(artifacts,n));
 await run('npm',['install','--no-audit','--no-fund',...tgzs],bootstrap,'bootstrap-install');
 const fixture=JSON.parse(await readFile(resolve(flags.get('--fixture')),'utf8'));
 assert.equal(fixture.network,'testnet');
@@ -40,7 +40,7 @@ const expected=fixture.blocks.filter(b=>b.height>=1000&&b.height<=1002);
 assert.deepEqual(expected.map(b=>b.height),[1000,1001,1002],'Acceptance fixture must contain testnet blocks 1000..1002');
 await run(join(bootstrap,'node_modules/.bin/zeer-chef'),['init','--dir',project,'--project','starter_'+Date.now().toString(36),'--start-height','1000','--json'],bootstrap,'init');
 await run('npm',['install','--no-audit','--no-fund',...tgzs],project,'application-install');
-const packageRoot=join(project,'node_modules/@zeer/chef');assert.equal(await realpath(packageRoot),packageRoot);
+const packageRoot=join(project,'node_modules/@zeer-dev/chef');assert.equal(await realpath(packageRoot),packageRoot);
 await run('npm',['run','codegen'],project,'codegen');
 await run('npm',['run','typecheck'],project,'typecheck');
 // The scaffold's generated .env provides its own unique GraphQL token; integration

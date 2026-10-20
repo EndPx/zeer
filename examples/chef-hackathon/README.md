@@ -24,8 +24,8 @@ node packages/chef/dist/cli.js init \
 cp examples/chef-hackathon/chef.config.ts examples/chef-hackathon/schema.graphql \
   examples/chef-hackathon/demo.json ../zeer-hackathon/
 cd ../zeer-hackathon
-npm install ../zeer/.tmp/chef-packages/zeer-prep-client-0.1.0.tgz \
-  ../zeer/.tmp/chef-packages/zeer-chef-0.1.0.tgz
+npm install ../zeer/.tmp/chef-packages/zeer-dev-prep-client-0.1.0.tgz \
+  ../zeer/.tmp/chef-packages/zeer-dev-chef-0.1.0.tgz
 npm run codegen
 npm run typecheck
 ```

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ReorgError } from "@zeer/prep-client";
+import { ReorgError } from "@zeer-dev/prep-client";
 import { decodePage, syncStep, toZatoshis, validateSyncOptions } from "../dist/runtime.js";
 
 const h = n => BigInt(n).toString(16).padStart(64, "0");

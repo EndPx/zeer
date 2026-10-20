@@ -1,4 +1,4 @@
-import { defineConfig } from "@zeer/chef";
+import { defineConfig } from "@zeer-dev/chef";
 
 export default defineConfig<{
   OrchardTransaction: { id: string; height: number; version: number; transactionIndex: number };

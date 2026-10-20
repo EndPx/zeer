@@ -23,7 +23,7 @@ npm pack ./packages/prep-client --pack-destination .tmp/prep-packages
 mkdir ../prep-quickstart
 cd ../prep-quickstart
 npm init -y
-npm install "$ZEER_CHECKOUT/.tmp/prep-packages/zeer-prep-client-0.1.0.tgz"
+npm install "$ZEER_CHECKOUT/.tmp/prep-packages/zeer-dev-prep-client-0.1.0.tgz"
 ```
 
 ## 2. Write your query
@@ -31,7 +31,7 @@ npm install "$ZEER_CHECKOUT/.tmp/prep-packages/zeer-prep-client-0.1.0.tgz"
 Save this as `read-blocks.mjs`:
 
 ```js
-import { PrepClient } from "@zeer/prep-client";
+import { PrepClient } from "@zeer-dev/prep-client";
 
 const client = new PrepClient({ url: "https://zeer.endpx.cloud/api/prep" });
 const coverage = await client.getHeight();

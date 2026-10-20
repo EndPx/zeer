@@ -1,19 +1,17 @@
-# @zeer/prep-client
+# @zeer-dev/prep-client
 
 Dependency-free JavaScript ESM implementation with TypeScript
 declarations. Requires Node 22.18+ and native `fetch`. This is an HTTP client for
 the Prep full-block archive; it is not a wallet SDK or native Rust binding.
 
-The registry release is pending. Until it is available, use the
-[source installation](https://zeer.endpx.cloud/docs/prep/quickstart/).
-After publication, install with:
+Install the client with:
 
 ```sh
-npm install @zeer/prep-client@0.1.0
+npm install @zeer-dev/prep-client@0.1.0
 ```
 
 ```js
-import { PrepClient } from "@zeer/prep-client";
+import { PrepClient } from "@zeer-dev/prep-client";
 const client = new PrepClient({ url: "https://zeer.endpx.cloud/api/prep" });
 for await (const page of client.stream({
   from_block: 0, to_block: 2,
@@ -70,7 +68,7 @@ selected fields. Unknown or duplicate selections are rejected by the client
 before transport. Existing defaults and lossless decoded-number handling remain.
 
 ```ts
-import { PrepClient, ReorgError } from "@zeer/prep-client";
+import { PrepClient, ReorgError } from "@zeer-dev/prep-client";
 
 const client = new PrepClient({
   url: "http://127.0.0.1:39368",

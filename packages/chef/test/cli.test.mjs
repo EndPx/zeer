@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promis
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { main } from "../dist/cli.js";
-import { PrepError } from "@zeer/prep-client";
+import { PrepError } from "@zeer-dev/prep-client";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const cli = join(root, "packages/chef/dist/cli.js");

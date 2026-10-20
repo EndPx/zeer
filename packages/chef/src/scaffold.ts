@@ -23,15 +23,15 @@ POSTGRES_PASSWORD=${secret ? password : "REPLACE_WITH_RANDOM_PASSWORD"}
 DATABASE_URL=postgresql://chef:${secret ? password : "REPLACE_WITH_RANDOM_PASSWORD"}@127.0.0.1:39472/chef
 CHEF_API_TOKEN=${secret ? token : "REPLACE_WITH_AT_LEAST_16_RANDOM_BYTES"}
 `;
-  const launch = "node --env-file=.env node_modules/@zeer/chef/dist/cli.js";
+  const launch = "node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js";
   const files: Record<string, string> = {
     "package.json": JSON.stringify({ name: project.replaceAll("_", "-"), private: true, type: "module", engines: { node: ">=24.14.0" },
       scripts: { codegen: "zeer-chef codegen", typecheck: "tsc --noEmit", migrate: `${launch} migrate`,
         sync: `${launch} sync`, follow: `${launch} sync --follow`, status: `${launch} status`, serve: `${launch} serve`, query: "node --env-file=.env query.mjs",
         "db:up": "docker compose up -d --wait postgres", "db:stop": "docker compose stop postgres" },
-      dependencies: { "@zeer/chef": manifest.version, "@zeer/prep-client": manifest.dependencies["@zeer/prep-client"] },
+      dependencies: { "@zeer-dev/chef": manifest.version, "@zeer-dev/prep-client": manifest.dependencies["@zeer-dev/prep-client"] },
       devDependencies: { typescript: manifest.devDependencies.typescript } }, null, 2) + "\n",
-    "chef.config.ts": `import { defineConfig } from "@zeer/chef";
+    "chef.config.ts": `import { defineConfig } from "@zeer-dev/chef";
 import type { ChefEntities } from "./chef.generated.ts";
 
 export default defineConfig<ChefEntities>({

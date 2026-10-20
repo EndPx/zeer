@@ -29,7 +29,7 @@ Run this in a directory where `my-indexer` does not already exist:
 ```sh
 node packages/chef/dist/cli.js init --dir ../my-indexer --project my_indexer --start-height 0
 cd ../my-indexer
-npm install "$ZEER_CHECKOUT/.tmp/chef-packages/zeer-prep-client-0.1.0.tgz" "$ZEER_CHECKOUT/.tmp/chef-packages/zeer-chef-0.1.0.tgz"
+npm install "$ZEER_CHECKOUT/.tmp/chef-packages/zeer-dev-prep-client-0.1.0.tgz" "$ZEER_CHECKOUT/.tmp/chef-packages/zeer-dev-chef-0.1.0.tgz"
 npm run codegen
 npm run typecheck
 ```

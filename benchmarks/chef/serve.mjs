@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { PostgresStore, parseModel, createChefServer } from '@zeer/chef';
+import { PostgresStore, parseModel, createChefServer } from '@zeer-dev/chef';
 const args = new Map();
 for (let i = 2; i < process.argv.length; i += 2) {
   const key = process.argv[i], value = process.argv[i + 1];

@@ -1,5 +1,5 @@
 {
-  "name": "@zeer/chef",
+  "name": "@zeer-dev/chef",
   "version": "0.1.0",
   "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
   "repository": {"type": "git", "url": "git+https://github.com/EndPx/zeer.git", "directory": "packages/chef"},
@@ -13,7 +13,7 @@
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {"build": "tsc -p tsconfig.json", "prepack": "npm run build", "test": "node --test test/*.test.mjs"},
   "engines": {"node": ">=24.14.0"},
-  "dependencies": {"@types/node": "24.19.2", "@zeer/prep-client": "0.1.0", "graphql": "17.0.2", "pg": "8.23.1"},
+  "dependencies": {"@types/node": "24.19.2", "@zeer-dev/prep-client": "0.1.0", "graphql": "17.0.2", "pg": "8.23.1"},
   "devDependencies": {"@types/pg": "8.23.1", "typescript": "7.0.2"},
   "license": "MIT"
 }

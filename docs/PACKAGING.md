@@ -1,12 +1,12 @@
 # Release package verification
 
-The local candidate versions are `@zeer/prep-client@0.1.0`, `@zeer/chef@0.1.0`
+The local candidate versions are `@zeer-dev/prep-client@0.1.0`, `@zeer-dev/chef@0.1.0`
 and Rust Prep `0.1.0`. They implement the current public-data contracts. This
 candidate adds build-on-pack and public Node typings for Chef; it does not change
 the package entrypoints or Prep HTTP API. Both npm packages are configured for
-public publication under `@zeer`. Registry publication is a separate final step:
-verify it with `npm view @zeer/prep-client@0.1.0 version` and
-`npm view @zeer/chef@0.1.0 version` before relying on registry installation.
+public publication under `@zeer-dev`. Registry publication is a separate final step:
+verify it with `npm view @zeer-dev/prep-client@0.1.0 version` and
+`npm view @zeer-dev/chef@0.1.0 version` before relying on registry installation.
 
 The package now includes `zeer-chef init` for independent testnet projects. Follow
 [the standalone Chef quickstart](CHEF_QUICKSTART.md) after producing tarballs.
@@ -33,7 +33,7 @@ The verifier packs both packages into the requested new ignored result directory
 checks their allowed contents and required license/entrypoint files, and creates
 an empty consumer under the operating system's temporary directory. It installs
 both tarballs together so Chef's exact `0.1.0` client dependency resolves locally.
-No `@zeer/*` registry package or workspace symlink is required. Third-party npm
+No `@zeer-dev/*` registry package or workspace symlink is required. Third-party npm
 dependencies may be downloaded; use `npm_config_offline=true` only when the local
 npm cache already contains every dependency for the selected platform.
 

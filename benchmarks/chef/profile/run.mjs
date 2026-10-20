@@ -4,7 +4,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, dirname, relative, isAbsolute, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
-import { PostgresStore, parseModel } from '@zeer/chef';
+import { PostgresStore, parseModel } from '@zeer-dev/chef';
 import { check, digest, hash } from '../query/fixture.mjs';
 import { loadProfileModule } from './instrument.mjs';
 

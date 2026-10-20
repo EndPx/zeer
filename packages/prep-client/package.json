@@ -1,5 +1,5 @@
 {
-  "name": "@zeer/prep-client",
+  "name": "@zeer-dev/prep-client",
   "version": "0.1.0",
   "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
   "repository": {"type": "git", "url": "git+https://github.com/EndPx/zeer.git", "directory": "packages/prep-client"},

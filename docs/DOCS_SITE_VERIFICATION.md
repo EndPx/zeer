@@ -195,3 +195,24 @@ aggregates. Prep reports three-run medians; Chef reports one run per profile.
 Worker/support-process quotas, prepared archive, loopback transport, empty
 Orchard scan and timing exclusions are stated alongside the tables.
 No benchmark process was relaunched for this documentation revision.
+
+## npm scope follow-up, 21 October 2026
+
+The owner selected a new `@zeer-dev` organization. The free public-packages
+organization was created through npm's signed-in website; `npm org ls zeer-dev
+--json` independently returned `endpx: owner`. No additional members were invited.
+
+Both public packages, exact dependency, generated imports/launch paths, consumer
+verifiers, examples and documentation now use `@zeer-dev/chef` and
+`@zeer-dev/prep-client`. Internal `@zeer/web` and `@zeer/docs` workspace names
+are unchanged. A separate review of literal and computed paths passed.
+
+The 31 selected Chef tests, 33 SDK tests, web typecheck and docs production build
+passed after renaming. New-scope tarballs passed content checks and installed in
+a fresh isolated Windows consumer. The installed CLI generated a new project;
+its generated types passed strict typechecking, and the installed client returned
+verified public testnet heights 0 and 1. Evidence remains in
+`.deploy-local/npm-zeer-dev-20261021/`.
+
+Registry publication still requires npm's user-controlled passkey verification.
+Organization creation and package preparation do not establish publication.

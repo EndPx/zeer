@@ -1,4 +1,4 @@
-import { defineConfig } from "@zeer/chef";
+import { defineConfig } from "@zeer-dev/chef";
 import type { ChefEntities } from "./chef.generated.ts";
 
 export default defineConfig<ChefEntities>({

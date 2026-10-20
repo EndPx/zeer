@@ -1,5 +1,5 @@
-import { PrepError } from "@zeer/prep-client";
-import type { Height, PrepClient } from "@zeer/prep-client";
+import { PrepError } from "@zeer-dev/prep-client";
+import type { Height, PrepClient } from "@zeer-dev/prep-client";
 import type { Checkpoint, ChefStore } from "./types.js";
 
 const guidance: Record<string, string> = {

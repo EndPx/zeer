@@ -39,7 +39,7 @@ The existing client works against this base URL after installation from the
 [local package tarball](PACKAGING.md); it is not published on npm yet:
 
 ```ts
-import { PrepClient } from "@zeer/prep-client";
+import { PrepClient } from "@zeer-dev/prep-client";
 
 const client = new PrepClient({ url: "https://zeer.endpx.cloud/api/prep" });
 const coverage = await client.getHeight();

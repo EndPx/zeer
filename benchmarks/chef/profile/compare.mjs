@@ -4,7 +4,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, dirname, relative, isAbsolute, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { randomBytes } from 'node:crypto';
-import { PostgresStore, parseModel } from '@zeer/chef';
+import { PostgresStore, parseModel } from '@zeer-dev/chef';
 import { check, digest, hash, same } from '../query/fixture.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..'), flags = new Map();

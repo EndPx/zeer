@@ -9,14 +9,12 @@ hosted public demo. See the [shielded inbox](../../examples/shielded-inbox/READM
 
 ## Quickstart
 
-The registry release is pending. Until it is available, use the
-[source installation](https://zeer.endpx.cloud/docs/chef/quickstart/).
-After publication, initialize directly with:
+Initialize a standalone project with:
 
 Requires Node 24.14+ on Linux x86_64 or WSL2, npm and PostgreSQL.
 
 ```sh
-npx @zeer/chef@0.1.0 init --dir my-indexer --project my_indexer --start-height 0
+npx @zeer-dev/chef@0.1.0 init --dir my-indexer --project my_indexer --start-height 0
 cd my-indexer
 npm install
 npm run codegen

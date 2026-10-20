@@ -6,7 +6,7 @@ import { gunzipSync } from 'node:zlib';
 import { resolve, relative, dirname, sep, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
-import { PostgresStore, parseModel, encodeEntity } from '@zeer/chef';
+import { PostgresStore, parseModel, encodeEntity } from '@zeer-dev/chef';
 import { digest, hash, publicFixture } from './fixture.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');

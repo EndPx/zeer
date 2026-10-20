@@ -6,7 +6,7 @@ import { gunzipSync } from 'node:zlib';
 import { dirname, resolve, relative, isAbsolute, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
-import { PostgresStore, parseModel, encodeEntity, createChefServer } from '@zeer/chef';
+import { PostgresStore, parseModel, encodeEntity, createChefServer } from '@zeer-dev/chef';
 import { queryIndexes } from '../../../packages/chef/dist/schema.js';
 import { check, digest, hash, publicFixture, syntheticFixture, workloads, sqlQuery, same } from './fixture.mjs';
 

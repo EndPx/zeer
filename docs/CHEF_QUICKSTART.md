@@ -22,7 +22,7 @@ explicitly labeled mainnet fixtures and is not a live testnet service.
 - Your own PostgreSQL database; the starter also includes optional local Docker
   Compose configuration. Docker Engine and Compose v2 are needed only for that option.
 - Both Zeer package tarballs. They are **unpublished**; plain `npm install
-  @zeer/chef` is not the current installation path.
+  @zeer-dev/chef` is not the current installation path.
 
 ## 1. Prepare the package artifacts
 
@@ -69,7 +69,7 @@ public filter at Prep and stores only matches, while validating every header.
 Inside the new project, install the two tarballs together:
 
 ```sh
-npm install /absolute/path/to/zeer-prep-client-0.1.0.tgz /absolute/path/to/zeer-chef-0.1.0.tgz
+npm install /absolute/path/to/zeer-dev-prep-client-0.1.0.tgz /absolute/path/to/zeer-dev-chef-0.1.0.tgz
 npm run codegen
 npm run typecheck
 ```

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { PrepError, ReorgError } from "@zeer/prep-client";
+import { PrepError, ReorgError } from "@zeer-dev/prep-client";
 import { cliFailure, formatOutput, readStatus, sourceObservation } from "../dist/cli-output.js";
 
 const checkpoint = { height: 10, hash: "a".repeat(64), anchorHash: "b".repeat(64), status: "ready" };

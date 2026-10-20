@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { defineConfig } from "@zeer/chef";
+import { defineConfig } from "@zeer-dev/chef";
 import type { ChefEntities } from "./chef.generated.ts";
 
 const manifest = readFileSync(new URL("./demo.json", import.meta.url), "utf8");

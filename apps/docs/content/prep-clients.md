@@ -16,11 +16,11 @@ Requires **Node.js 22.18+**. The ESM package uses native `fetch` and includes Ty
 The npm release is pending. Follow the [source installation](/docs/prep/quickstart/#1-install-the-client) to create the tarball, then install its actual file path in your project:
 
 ```sh
-npm install /absolute/path/to/zeer-prep-client-0.1.0.tgz
+npm install /absolute/path/to/zeer-dev-prep-client-0.1.0.tgz
 ```
 
 ```js
-import { PrepClient } from "@zeer/prep-client";
+import { PrepClient } from "@zeer-dev/prep-client";
 
 const client = new PrepClient({ url: "https://zeer.endpx.cloud/api/prep" });
 for await (const page of client.stream({

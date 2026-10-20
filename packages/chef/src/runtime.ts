@@ -1,5 +1,5 @@
-import { PrepClient, PrepError, ReorgError } from "@zeer/prep-client";
-import type { Height, QueryResult, TransactionField } from "@zeer/prep-client";
+import { PrepClient, PrepError, ReorgError } from "@zeer-dev/prep-client";
+import type { Height, QueryResult, TransactionField } from "@zeer-dev/prep-client";
 import type { ChefStore, EntityAccess, Indexer, PublicBlock, PublicTransaction, ReceiptSource, ShieldedReceipt, SyncOptions, TransactionMetadata } from "./types.js";
 import { validateReceipts } from "./receipts.js";
 

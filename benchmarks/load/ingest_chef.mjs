@@ -7,8 +7,8 @@ import { resolve, dirname, relative, isAbsolute, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isIP } from 'node:net';
 import pg from 'pg';
-import { PrepClient } from '@zeer/prep-client';
-import { PostgresStore, parseModel, encodeEntity, syncStep } from '@zeer/chef';
+import { PrepClient } from '@zeer-dev/prep-client';
+import { PostgresStore, parseModel, encodeEntity, syncStep } from '@zeer-dev/chef';
 import { isSourceUnavailable } from '../../packages/chef/dist/runtime.js';
 import { check, hash, digest, publicFixture } from '../chef/query/fixture.mjs';
 

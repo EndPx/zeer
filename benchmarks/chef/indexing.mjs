@@ -5,8 +5,8 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import pg from 'pg';
-import { PrepClient } from '@zeer/prep-client';
-import { PostgresStore, parseModel, syncStep, createChefServer } from '@zeer/chef';
+import { PrepClient } from '@zeer-dev/prep-client';
+import { PostgresStore, parseModel, syncStep, createChefServer } from '@zeer-dev/chef';
 import { FrozenRpcSource } from './rpc_source.mjs';
 
 const sha = value => createHash('sha256').update(value).digest('hex');

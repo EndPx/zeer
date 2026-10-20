@@ -10,7 +10,7 @@
 For a protected deployment, read credentials from your backend environment:
 
 ```js
-import { PrepClient } from "@zeer/prep-client";
+import { PrepClient } from "@zeer-dev/prep-client";
 
 const client = new PrepClient({
   url: process.env.PREP_URL,

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
-import { PrepClient } from '@zeer/prep-client';
+import { PrepClient } from '@zeer-dev/prep-client';
 
 const prepOnly = process.argv[2] === '--prep-only';
 const height = prepOnly ? 1687108 : Number(process.argv[2] ?? '1687108');

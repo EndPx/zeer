@@ -1,4 +1,4 @@
-import { defineConfig, defineIndexer } from "@zeer/chef";
+import { defineConfig, defineIndexer } from "@zeer-dev/chef";
 import type { ChefEntities } from "./chef.generated.ts";
 import { readableMemo } from "./memo.ts";
 

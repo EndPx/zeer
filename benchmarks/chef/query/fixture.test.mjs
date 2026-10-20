@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
-import { parseModel, encodeEntity } from '@zeer/chef';
+import { parseModel, encodeEntity } from '@zeer-dev/chef';
 import { digest, hash, publicFixture, syntheticFixture, page, workloads, sqlQuery } from './fixture.mjs';
 
 test('committed public input yields complete example projections with all four application workflows', async () => {

@@ -1,4 +1,4 @@
-import type { Query } from "@zeer/prep-client";
+import type { Query } from "@zeer-dev/prep-client";
 export type Scalar = "ID" | "String" | "Boolean" | "Int" | "BigInt";
 export interface Field { name: string; scalar: Scalar; required: boolean; indexed?: true }
 export interface EntityDefinition { name: string; fields: Record<string, Field> }

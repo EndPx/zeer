@@ -8,8 +8,8 @@
     "apps/docs"
   ],
   "scripts": {
-    "build:chef": "npm run build -w @zeer/chef",
-    "test:chef": "npm test -w @zeer/chef",
+    "build:chef": "npm run build -w @zeer-dev/chef",
+    "test:chef": "npm test -w @zeer-dev/chef",
     "dev:web": "npm run dev -w @zeer/web",
     "build:web": "npm run build -w @zeer/web",
     "dev:docs": "npm run dev -w @zeer/docs",

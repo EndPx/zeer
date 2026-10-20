@@ -3,7 +3,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { PostgresStore, parseModel } from '@zeer/chef';
+import { PostgresStore, parseModel } from '@zeer-dev/chef';
 import { check, hash } from '../chef/query/fixture.mjs';
 
 const flags = new Map();

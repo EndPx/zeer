@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-import { PrepError } from '@zeer/prep-client';
+import { PrepError } from '@zeer-dev/prep-client';
 import { privateOrigin, ignoredPath, cleanupFailures, ingestRange, contiguousFixture, ingestDecision, sameSource, verifyProgressCheckpoint } from './ingest_chef.mjs';
 
 test('cleanup failures retain safe resource names and exclude exception messages', () => {

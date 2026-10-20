@@ -101,7 +101,7 @@ export function PrepExplorer({
         ? `curl "${publicPrepApi}/${route}" \\\n  -H "Content-Type: application/json" \\\n  --data '${shellJson}'`
         : language === "fetch"
           ? `const response = await fetch("${publicPrepApi}/query", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify(${json}),\n});\nif (!response.ok) throw new Error(await response.text());\nconst page = await response.json();\nconsole.log(page); // Pass page.cursor with the same query to continue.`
-          : `import { PrepClient } from "@zeer/prep-client";\n\nconst client = new PrepClient({\n  url: "${publicPrepApi}",\n});\n\nfor await (const page of client.stream(${json})) {\n  console.log(page);\n} // The SDK follows continuation cursors automatically.`;
+          : `import { PrepClient } from "@zeer-dev/prep-client";\n\nconst client = new PrepClient({\n  url: "${publicPrepApi}",\n});\n\nfor await (const page of client.stream(${json})) {\n  console.log(page);\n} // The SDK follows continuation cursors automatically.`;
   function changed() {
     abort.current?.abort();
     setBusy(false);
