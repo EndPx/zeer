@@ -137,13 +137,13 @@ export function prepQuery(
   from: number,
   to: number | undefined,
   match = "",
-  limit = 100,
+  limit: number | undefined = undefined,
   fields = defaultPrepFields(example),
 ) {
   return {
     from_block: from,
     ...(to === undefined ? {} : { to_block: to }),
-    limit,
+    ...(limit === undefined ? {} : { limit }),
     field_selection: fields,
     ...(example === "versions"
       ? { transaction_filter: { versions: [Number(match)] } }

@@ -86,25 +86,47 @@ pub enum ScanMode {
     Adaptive,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Clone, Debug, Serialize)]
 pub struct QueryRequest {
     pub from_block: u64,
-    /// Exclusive. If omitted, the first page captures the indexed head + 1.
     pub to_block: Option<u64>,
-    #[serde(default = "default_limit")]
     pub limit: u32,
-    /// Opt-in larger scan with a soft time slice and the existing hard bounds.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scan_mode: Option<ScanMode>,
-    #[serde(default)]
     pub field_selection: FieldSelection,
-    #[serde(default)]
     pub transaction_filter: TransactionFilter,
     pub cursor: Option<String>,
 }
-fn default_limit() -> u32 {
-    100
+
+impl<'de> Deserialize<'de> for QueryRequest {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(deny_unknown_fields)]
+        struct Wire {
+            from_block: u64,
+            to_block: Option<u64>,
+            limit: Option<u32>,
+            scan_mode: Option<ScanMode>,
+            #[serde(default)]
+            field_selection: FieldSelection,
+            #[serde(default)]
+            transaction_filter: TransactionFilter,
+            cursor: Option<String>,
+        }
+        let wire = Wire::deserialize(deserializer)?;
+        let automatic = wire.limit.is_none();
+        Ok(Self {
+            from_block: wire.from_block,
+            to_block: wire.to_block,
+            limit: wire.limit.unwrap_or(MAX_ADAPTIVE_SCAN_BLOCKS),
+            scan_mode: wire
+                .scan_mode
+                .or_else(|| automatic.then_some(ScanMode::Adaptive)),
+            field_selection: wire.field_selection,
+            transaction_filter: wire.transaction_filter,
+            cursor: wire.cursor,
+        })
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1253,6 +1275,31 @@ mod tests {
     }
     fn request() -> QueryRequest {
         serde_json::from_value(json!({"from_block":10,"limit":2})).unwrap()
+    }
+
+    #[test]
+    fn omitted_limit_automatically_uses_bounded_adaptive_scanning() {
+        let mut q: QueryRequest = serde_json::from_value(json!({"from_block":10})).unwrap();
+        assert_eq!(q.limit, MAX_ADAPTIVE_SCAN_BLOCKS);
+        assert!(q.scan_mode.is_some());
+        let first = execute_query(&fixture(20), &q, &QueryControl::default()).unwrap();
+        assert_eq!(first.next_block, 13);
+        q.to_block = Some(12);
+        assert_eq!(
+            execute_query(&fixture(20), &q, &QueryControl::default())
+                .unwrap()
+                .next_block,
+            12
+        );
+        let explicit: QueryRequest =
+            serde_json::from_value(json!({"from_block":10,"limit":2})).unwrap();
+        assert!(explicit.scan_mode.is_none());
+        assert_eq!(
+            execute_query(&fixture(20), &explicit, &QueryControl::default())
+                .unwrap()
+                .next_block,
+            12
+        );
     }
 
     struct WideSparse {

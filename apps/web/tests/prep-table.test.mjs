@@ -28,6 +28,7 @@ test('block time uses UTC consistently and missing data stays missing',()=>{
 });
 test('example presets demonstrate distinct filters and projections',()=>{
  const queries=examples.map(example=>prepQuery(example.id,0,undefined,defaultExampleMatch(example.id)));
+ assert.ok(queries.every(q=>!Object.hasOwn(q,"limit")),"Playground presets omit optional transport limits");
  assert.equal(new Set(queries.map(q=>JSON.stringify(q))).size,8);
  assert.ok(new Set(queries.map(q=>JSON.stringify(q.field_selection))).size>=7);
  assert.deepEqual(prepQuery('versions',0,undefined,'6').transaction_filter,{versions:[6]});

@@ -2475,7 +2475,7 @@ svg {
   .metric-skeleton::after, .sync-track.is-buffering > .buffer-segment, .source-state .spin { animation: none; }
   .sync-track.is-buffering > .buffer-segment { transform: none; }
 }
-.query-range-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.query-range-fields { grid-template-columns: minmax(0, 1fr); }
 
 .field-selection { margin-bottom: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px 24px; }
 .field-selection summary { cursor: pointer; font-size: 14px; min-height: 44px; align-content: center; }

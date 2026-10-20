@@ -35,7 +35,6 @@ export default async function Page({
         initialMatch={
           typeof params.match === "string" ? params.match.slice(0, 9000) : defaultExampleMatch(example)
         }
-        initialLimit={typeof params.limit === "string" ? params.limit.slice(0, 5) : example === "raw" ? "1" : "100"}
         initialFields={sharedPrepFields(example, params.blockFields, params.transactionFields)}
       />
     </>

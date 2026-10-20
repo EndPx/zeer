@@ -1,11 +1,19 @@
 # Zeer website design system
 
+## Query controls: limit removal
+
+Playground controls express the starting block, public filters and selected fields.
+Do not expose a scan-page size input or add limit to generated snippets/share URLs.
+Server-side response budgets and cursors remain part of transport. Keep partial
+results labeled and preserve continuation/cancel behavior. Reuse existing field
+and panel primitives; no new style tokens are needed.
+
 ## Varied query examples — 19 October
 
 Eight runnable presets have purpose-specific filters, field projections and table
 results: address outputs, exact txid lookup, Sapling components, Orchard actions,
 block headers, transaction footprint, version filtering and serialized bytes.
-Keep From block at 0 by default; raw uses one block per page. A secondary
+Keep From block at 0 by default. A secondary
 Use verified testnet sample button fills known inputs/ranges without executing
 or substituting data. Switching examples restores their own defaults. Sapling
 and Orchard use decoded public fields to show component counts only; payment

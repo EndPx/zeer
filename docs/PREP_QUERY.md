@@ -28,17 +28,15 @@ deployment claim. Never put a private deployment token into a public browser bun
 
 `POST /query.bin` is not implemented in this slice. SDK and examples use JSON.
 
-## Adaptive historical scans
+## Automatic historical scans
 
 Check `/capabilities` for `query.max_adaptive_scan_blocks` before using this
-opt-in extension. It requires the newer Prep server; deployment coverage is
+extension. It requires the newer Prep server; deployment coverage is
 separate from source-code availability.
 
 ```json
 {
   "from_block": 0,
-  "limit": 1000000,
-  "scan_mode": "adaptive",
   "field_selection": {
     "block": [],
     "transaction": ["txid", "block_height"]
@@ -46,6 +44,10 @@ separate from source-code availability.
   "transaction_filter": { "has_orchard": true }
 }
 ```
+
+Omitting `limit` selects bounded adaptive scanning automatically. Developers can
+provide only a start block, filters and fields. Explicit `limit` remains available
+for compatibility and advanced callers.
 
 `limit` still means the maximum number of blocks scanned, not a count of matching
 transactions. Fixed mode keeps its 1,000-block ceiling. Adaptive mode admits up
@@ -59,7 +61,9 @@ latency guarantee. One oversized block still fails rather than being omitted.
 An empty result with a non-null cursor means "no match in this scanned portion",
 not "no match in all history". Continue the same request with its returned
 cursor until it is null; the original end remains pinned even while the archive
-grows. Cursor fingerprints also bind the scan mode. Epoch changes, changed
+grows. Cursor fingerprints also bind the scan mode. After upgrading from the older fixed
+default, restart an omitted-limit query whose cursor came from that older server.
+Explicit fixed-limit requests keep their existing cursor fingerprint. Epoch changes, changed
 boundary hashes, cancellation and unavailable archive reads retain their existing
 error behavior.
 
@@ -186,10 +190,11 @@ consensus trust remain explicit; status is operator-controlled metadata.
 - `to_block` is exclusive. If omitted, the first page captures `archive_height + 1`.
   It must not exceed the indexed range. Empty intervals are valid when the archive
   is ready. A cursor retains the captured end even if the follower later appends.
-- `limit` counts **scanned whole blocks**, not returned rows. Default 100; maximum
-  1,000 in fixed mode or 1,000,000 with `scan_mode: "adaptive"`. Filters may return
+- `limit` counts **scanned whole blocks**, not returned rows. An omitted limit
+  uses automatic adaptive scanning with a 1,000,000-block ceiling. Explicit fixed
+  limits support up to 1,000 blocks, or 1,000,000 with `scan_mode: "adaptive"`. Filters may return
   empty transaction arrays while `next_block` advances.
-- `scan_mode` is optional. Omit it for existing fixed-page behavior; `"adaptive"`
+- `scan_mode` is optional. With an explicit limit, omit it for fixed-page behavior; `"adaptive"`
   enables the time/byte targets described above. Other values are rejected.
 - Unknown request, filter, or field-selection properties are rejected. Unsupported
   selected field names and duplicates are rejected; there is no silent fallback.

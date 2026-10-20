@@ -35,7 +35,6 @@ export function PrepExplorer({
   initialExample = "headers",
   initialFrom = "0",
   initialMatch = "",
-  initialLimit = "100",
   initialFields,
 }: {
   embedded?: boolean;
@@ -43,13 +42,11 @@ export function PrepExplorer({
   initialExample?: Example;
   initialFrom?: string;
   initialMatch?: string;
-  initialLimit?: string;
   initialFields?: PrepFields;
 }) {
   const [selected, setSelected] = useState<Example>(initialExample),
     [from, setFrom] = useState(initialFrom),
     [match, setMatch] = useState(initialMatch),
-    [limit, setLimit] = useState(initialLimit),
     [fields, setFields] = useState<PrepFields>(() => initialFields ?? defaultPrepFields(initialExample)),
     [page, setPage] = useState(0),
     [language, setLanguage] = useState("JSON"),
@@ -67,7 +64,6 @@ export function PrepExplorer({
   const rangeValid =
     /^\d+$/.test(from) &&
     Number(from) >= 0 && Number(from) <= 4294967295;
-  const limitValid = /^\d+$/.test(limit) && Number(limit) >= 1 && Number(limit) <= 1000;
   const matchValid =
     selected === "ids"
       ? match.trim().split(/[\s,]+/).length <= 128 &&
@@ -80,11 +76,11 @@ export function PrepExplorer({
       : selected === "address"
         ? /^t[\x21-\x7e]{1,127}$/.test(match)
         : true;
-  const valid = rangeValid && matchValid && limitValid;
+  const valid = rangeValid && matchValid;
   const route = "query";
-  const query = prepQuery(selected, Number(from), undefined, match, Number(limit), fields);
+  const query = prepQuery(selected, Number(from), undefined, match, undefined, fields);
   const cursor = result && typeof result === "object" && "cursor" in result && typeof result.cursor === "string" ? result.cursor : null;
-  const parameters = new URLSearchParams({example: selected, from, match, limit, blockFields: fields.block.join(","), transactionFields: fields.transaction.join(",")});
+  const parameters = new URLSearchParams({example: selected, from, match, blockFields: fields.block.join(","), transactionFields: fields.transaction.join(",")});
   const shareUrl = `${publicPrepApi.replace(/\/api\/prep$/, "")}/app/prep?${parameters}`;
   const example =
     examples.find((entry) => entry.id === selected) ?? examples[0];
@@ -98,7 +94,7 @@ export function PrepExplorer({
         ? `curl "${publicPrepApi}/${route}" \\\n  -H "Content-Type: application/json" \\\n  --data '${shellJson}'`
         : language === "fetch"
           ? `const response = await fetch("${publicPrepApi}/query", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify(${json}),\n});\nif (!response.ok) throw new Error(await response.text());\nconst page = await response.json();\nconsole.log(page); // Pass page.cursor with the same query to continue.`
-          : `import { PrepClient } from "@zeer/prep-client";\n\nconst client = new PrepClient({\n  url: "${publicPrepApi}",\n});\n\nconst page = await client.get(${json});\nconsole.log(page); // Use the returned cursor to continue.`;
+          : `import { PrepClient } from "@zeer/prep-client";\n\nconst client = new PrepClient({\n  url: "${publicPrepApi}",\n});\n\nfor await (const page of client.stream(${json})) {\n  console.log(page);\n} // The SDK follows continuation cursors automatically.`;
   function changed() {
     abort.current?.abort();
     setBusy(false);
@@ -161,7 +157,6 @@ export function PrepExplorer({
                 setFields(defaultPrepFields(example.id));
                 setMatch(defaultExampleMatch(example.id));
                 setFrom("0");
-                setLimit(example.id === "raw" ? "1" : "100");
               }}
             >
               {example.name}
@@ -186,10 +181,6 @@ export function PrepExplorer({
                   setFrom(e.target.value);
                 }}
               />
-            </label>
-            <label>
-              Blocks scanned per page
-              <input inputMode="numeric" value={limit} onChange={e => { changed(); setLimit(e.target.value); }} />
             </label>
           </div>
           {(selected === "ids" || selected === "address" || selected === "versions") && (
@@ -220,7 +211,6 @@ export function PrepExplorer({
             <p role="alert" className="field-error">
               {!rangeValid
                 ? "Choose a starting block from 0 to 4,294,967,295."
-                : !limitValid ? "Scan between 1 and 1,000 blocks per page. The full query range can be larger."
                 : selected === "ids"
                   ? "Enter up to 128 lowercase 64-character transaction IDs."
                   : selected === "versions" ? "Enter a transaction version from 1 to 4,294,967,295."
@@ -233,7 +223,7 @@ export function PrepExplorer({
           )}
           <div className="verified-example">
             <button className="button secondary compact" onClick={() => {
-              changed(); setFrom(String(knownSample.from)); setLimit(String(knownSample.limit));
+              changed(); setFrom(String(knownSample.from));
               setMatch(knownSample.match); setFields(defaultPrepFields(selected));
             }}>Use verified testnet sample <ArrowRight size={14} /></button>
             <span>Starts at block {knownSample.from.toLocaleString("en-US")}. Run query to fetch the actual response.</span>
@@ -306,7 +296,7 @@ export function PrepExplorer({
               {busy
                 ? "Request in progress…"
                 : enabled && !embedded
-                  ? "Results are bounded to one response page."
+                  ? language === "TypeScript" ? "The SDK follows continuation cursors automatically." : "Prep sizes responses automatically. Use the cursor to continue."
                   : "No request has been sent."}
             </span>
           </div>
@@ -389,7 +379,7 @@ export function PrepExplorer({
             <div className="query-pagination">
               <span>{stale ? "Inputs changed. Run a new query to continue." : `Page ${page} · ${cursor ? "More of this range remains to be scanned" : "Selected range complete"}`}</span>
               {cursor && <button className="button secondary compact" disabled={stale || busy || !valid} onClick={() => void run(cursor)}>Next page <ArrowRight size={14} /></button>}
-              {!stale && (resultExample === "sapling" || resultExample === "orchard") && result && typeof result === "object" && "to_block" in result && typeof result.to_block === "number" && <button className="text-link" disabled={busy} onClick={() => { changed(); setFrom(String(Math.max(0, (result.to_block as number) - Number(limit)))); }}>Start near latest blocks <ArrowUpRight size={14} /></button>}
+              {!stale && (resultExample === "sapling" || resultExample === "orchard") && result && typeof result === "object" && "to_block" in result && typeof result.to_block === "number" && <button className="text-link" disabled={busy} onClick={() => { changed(); setFrom(String(Math.max(0, (result.to_block as number) - 1000))); }}>Start near latest blocks <ArrowUpRight size={14} /></button>}
             </div>
           </>
         )}
