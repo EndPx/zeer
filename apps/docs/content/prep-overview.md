@@ -21,6 +21,13 @@
 - **[Public shielded activity](/docs/prep/shielded/)** — inspect Sapling, Orchard and Ironwood components.
 - **[JavaScript / TypeScript client](/docs/prep/clients/)** — integrate with native fetch and typed declarations.
 
+## Use Cases
+
+- **Transparent address analysis** — [Find transactions with outputs paying an address](/docs/prep/tutorials/address-outputs/) and inspect their public outputs.
+- **Transaction explorers** — [Inspect transaction details](/docs/prep/tutorials/inspect-transaction/), distinguish block rewards, and show source-observed pending or mined status.
+- **Shielded pool analytics** — Query [public Sapling, Orchard and Ironwood activity](/docs/prep/shielded/) to analyze component counts across a block range. Private note values and memos stay encrypted in public data.
+- **Custom data pipelines** — [Stream selected history](/docs/prep/clients/) into your own analysis scripts or indexer, using fields and filters that fit the job.
+
 ## Quick links
 
 [Quickstart](/docs/prep/quickstart/) · [Quickstart with AI](/docs/prep/quickstart-ai/) · [Benchmarks](/docs/chef/benchmarks/#prep-retrieval) · [Playground](https://zeer.endpx.cloud/app/prep) · [GitHub](https://github.com/EndPx/zeer)
