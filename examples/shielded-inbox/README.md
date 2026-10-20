@@ -136,6 +136,32 @@ payments. It does not calculate a spendable balance or mark a business order pai
 
 ## Independent consumer
 
+For a relayer that already knows a transaction ID, Chef also provides a single
+transaction read helper. It observes the transaction through Prep, fetches its
+mined bytes and header, decrypts with the local scanner, then rechecks its mined
+block identity before returning. The viewing key is read only by the local child.
+This does not scan a wallet's full history or track spent notes.
+
+With Chef **0.1.1 or later**, use the same protected environment as the inbox:
+
+```sh
+node --env-file=/protected/inbox.env examples/shielded-inbox/read-transaction.mjs YOUR_64_HEX_TX_ID
+```
+
+`ZEER_ACCOUNT_ID` defaults to `inbox`; it must match the configured scanner
+identity and fingerprint. The result contains the live source observation,
+per-note receipts and memo display fields. Pending or unobserved transactions
+return no mined receipts. A missing archive payload or changed block fails;
+neither is converted into a successful empty deposit. Handle retries in your
+application and keep output logs private.
+
+Both external and internal scopes retain `origin: unknown`. Scope does not
+identify the sender or establish change/self-transfer. Match receivers by the
+decoded pool receiver component and amounts with integer zatoshis. Recheck
+confirmations and source-relative canonicality near settlement; enforce output
+deduplication and payout idempotency in your own database. Zeer observes notes;
+your application validates orders and authorizes payments.
+
 Install `@zeer-dev/prep-client` and `@zeer-dev/chef` from npm, or use the
 [local tarball workflow](../../docs/PACKAGING.md) for a source-built candidate. Copy this example's
 config, schema and package metadata into your project. Run the installed

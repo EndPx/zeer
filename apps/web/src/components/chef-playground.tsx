@@ -15,16 +15,18 @@ import { CopyButton } from "./interactive";
 import { chefQuery } from "@/lib/content";
 import type { ChefDemo } from "@/lib/chef-demo";
 import { chefExampleCursor, chefExampleQuery, chefResponseEmpty } from "@/lib/chef-pagination";
-import { chefExamples, chefBlockHeight, chefPresetQuery, localMemoQuery, type ChefExample } from "@/lib/chef-examples";
+import { chefExamples, chefBlockHeight, chefPresetQuery, type ChefExample } from "@/lib/chef-examples";
+import { memoPreview, type ChefMemoDemo } from "@/lib/chef-memo-demo";
 import { useConsoleStatus } from "@/lib/use-console-status";
 import { syncMetrics } from "@/lib/sync-status";
-export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: ChefDemo | null }) {
+export function ChefPlayground({ enabled, demo, memoDemo }: { enabled: boolean; demo?: ChefDemo | null; memoDemo?: ChefMemoDemo | null }) {
   const coverage = useConsoleStatus();
   const metrics = syncMetrics(coverage.status);
   const [example, setExample] = useState<ChefExample>("browse");
   const [blockHeight, setBlockHeight] = useState("4515166");
   const [latestHeight, setLatestHeight] = useState<number | null>(null);
   const selected = chefExamples.find(item => item.id === example)!;
+  const connected = example === "memos" ? !!memoDemo : enabled;
   const [query, setQuery] = useState(chefQuery),
     [exampleAfter, setExampleAfter] = useState<string>(),
     [result, setResult] = useState<unknown>(),
@@ -35,6 +37,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
   const abort = useRef<AbortController | null>(null);
   useEffect(() => () => abort.current?.abort(), []);
   const nextCursor = !stale && !error ? chefExampleCursor(query, result, exampleAfter) : null;
+  const memo = example === "memos" && !stale && !error ? memoPreview(result, memoDemo?.txid) : null;
   function edit(nextQuery: string) {
     abort.current?.abort();
     setBusy(false);
@@ -45,7 +48,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
   }
   function chooseExample(id: ChefExample) {
     const height = chefBlockHeight(blockHeight) ?? 4515166;
-    const next = chefPresetQuery(id, height, metrics.checkpoint);
+    const next = chefPresetQuery(id, height, metrics.checkpoint, memoDemo?.txid);
     if (next === null) return;
     if (id === "height") setBlockHeight(String(height));
     setExample(id);
@@ -53,7 +56,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
     edit(next);
   }
   async function run(nextQuery = query) {
-    if (!enabled || busy) return;
+    if (!connected || busy) return;
     const c = new AbortController();
     abort.current = c;
     setBusy(true);
@@ -93,7 +96,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
         <Info size={16} aria-hidden="true" />
         <div><strong>{demo.toBlock === null ? `Zcash testnet · ${demo.fromBlock.toLocaleString("en-US")} → latest` : `Fixed testnet demo · ${demo.fromBlock.toLocaleString("en-US")}–${demo.toBlock.toLocaleString("en-US")}`}</strong>
           <p role="status">{metrics.checkpoint !== null ? `Indexed range: ${demo.fromBlock.toLocaleString("en-US")}–${metrics.checkpoint.toLocaleString("en-US")}. ` : coverage.loading ? "Reading the saved checkpoint… " : "Checkpoint unavailable. "}{coverage.error ? "Last observation may be stale. " : ""}Namespace <code>{demo.project}</code>. {demo.toBlock === null ? "Follows new Prep blocks automatically. " : "This is a fixed demonstration range. "}<code>_meta.height</code> reports the committed checkpoint.</p>
-          <p>Prep → Chef handlers → PostgreSQL → GraphQL. The hosted schema stores public block summaries; shielded note values remain encrypted.</p>
+          <p>Prep → Chef handlers → PostgreSQL → GraphQL. Block summaries are public chain data. {memoDemo ? "The memo example publishes a selected receipt from Zeer's own demo wallet." : "Shielded note values remain encrypted in public chain data."}</p>
           <button className="copy" disabled={coverage.loading} onClick={() => void coverage.refresh()}>Refresh coverage</button>
         </div>
       </div>}
@@ -109,7 +112,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
       <section className="network-status chef-examples" aria-label="Chef query examples">
         <h2>Try an example</h2>
         <p className="field-hint">Select a query to fill the editor, then press Run query.</p>
-        <div className="format-tabs" aria-label="Query examples">{chefExamples.map(item => <button key={item.id} aria-pressed={example === item.id} disabled={item.id === "latest" && metrics.checkpoint === null} onClick={() => chooseExample(item.id)}>{item.name}{item.id === "latest" && metrics.checkpoint === null ? " · reading checkpoint…" : ""}</button>)}</div>
+        <div className="format-tabs" aria-label="Query examples">{chefExamples.filter(item => item.id !== "memos" || memoDemo).map(item => <button key={item.id} aria-pressed={example === item.id} disabled={item.id === "latest" && metrics.checkpoint === null} onClick={() => chooseExample(item.id)}>{item.name}{item.id === "latest" && metrics.checkpoint === null ? " · reading checkpoint…" : ""}</button>)}</div>
         <p className="field-hint">{selected.description}</p>
         {example === "height" && <label className="chef-height-field" htmlFor="chef-block-height">Block height<input id="chef-block-height" type="number" min={0} max={2147483647} step={1} inputMode="numeric" value={blockHeight} aria-invalid={chefBlockHeight(blockHeight) === null} onChange={event => {
           setBlockHeight(event.target.value);
@@ -117,14 +120,12 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
           edit(height === null ? "" : chefPresetQuery("height", height)!);
         }}/>{chefBlockHeight(blockHeight) === null && <span className="field-hint">Enter a whole height from 0 to 2,147,483,647.</span>}</label>}
         {example === "latest" && latestHeight !== null && <p className="field-hint">Query targets block {latestHeight.toLocaleString("en-US")}, captured when you selected this example. Your editor stays unchanged as indexing advances.</p>}
+        {example === "memos" && memoDemo && <div className="field-hint">
+          <p><ShieldCheck size={14} aria-hidden="true" /> Ironwood · testnet block {memoDemo.blockHeight.toLocaleString("en-US")} · <a className="text-link" href={`/app/prep?view=transaction&txid=${memoDemo.txid}`}>Inspect transaction <ArrowRight size={14} /></a></p>
+          <p>Chef read this note with Zeer's demo viewing key in a local scanner. Only the selected demo receipt is published here. Your viewing key stays in your environment.</p>
+          <a className="text-link" href="https://github.com/EndPx/zeer/tree/main/examples/shielded-inbox">Read your own memos with Chef <ArrowRight size={14} /></a>
+        </div>}
       </section>
-      <details className="network-status chef-private-example">
-        <summary><ShieldCheck size={16} />Read shielded memos locally</summary>
-        <p className="field-hint">Use the local shielded-inbox example with your testnet viewing key. The scanner decrypts notes for your account; your authenticated Chef API exposes memoText, memoKind and the original memoHex. This public BlockSummary API does not expose private memos.</p>
-        <p className="field-hint">Keep the viewing key in a protected file read by the local scanner. Run the memo query against your own loopback Chef endpoint. No viewing-key input is needed in this browser.</p>
-        <div className="code-panel"><div className="panel-toolbar"><strong>Local Chef · ReadableNote schema</strong><CopyButton text={localMemoQuery} label="Copy local memo query" /></div><Code code={localMemoQuery} /></div>
-        <a className="text-link" href="https://github.com/EndPx/zeer/tree/main/examples/shielded-inbox">Local memo quickstart <ArrowRight size={14} /></a>
-      </details>
       <div className="graphql-workspace">
         <div className="panel-toolbar">
           <strong>
@@ -135,7 +136,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
             <CopyButton text={query} />
             <button
               className="button compact"
-              disabled={!enabled || !query.trim()}
+              disabled={!connected || !query.trim()}
               onClick={
                 busy
                   ? () => {
@@ -157,20 +158,20 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
             <details open>
               <summary>
                 <ChevronDown size={13} />
-                BlockSummary
+                {example === "memos" ? "ReadableNote" : "BlockSummary"}
               </summary>
-              {[
+              {(example === "memos" ? ["id: ID!", "txid: String!", "pool: String!", "outputIndex: Int!", "blockHeight: Int!", "valueZat: BigInt!", "receiver: String!", "memoKind: String!", "memoText: String", "scope: String!", "origin: String!", "coinbase: Boolean!"] : [
                 "id: ID!",
                 "height: Int!",
                 "hash: String!",
                 "time: BigInt!",
                 "transactionCount: Int!",
-              ].map((f) => (
+              ]).map((f) => (
                 <div key={f}>{f}</div>
               ))}
             </details>
             <div className="schema-hint">
-              From the starter schema.
+              {example === "memos" ? "From the shielded-inbox schema. _meta describes this demo projection's checkpoint." : "From the starter schema."}
               <br />
               Runtime introspection is not enabled.
             </div>
@@ -210,7 +211,8 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
               </div>
             ) : result !== undefined ? (
               <>
-              {!stale && chefResponseEmpty(result) && <p className="response-help" role="status">Query succeeded. No entities matched. {demo && metrics.checkpoint !== null ? `The observed indexed range is ${demo.fromBlock.toLocaleString("en-US")}–${metrics.checkpoint.toLocaleString("en-US")}. Try a height within that range, check the filters, or restore the example.` : "Check your filters and the indexed checkpoint, or restore the example."}</p>}
+              {memo && <div className="response-help" role="status"><strong>Decrypted memo</strong><p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{memo.text}</p><span>{memo.valueZat} zatoshi · Zeer demo receipt</span></div>}
+              {!stale && chefResponseEmpty(result) && <p className="response-help" role="status">Query succeeded. No entities matched. {example === "memos" ? "This demo contains only the selected Zeer receipt. Restore the example, or run shielded-inbox locally to query your own wallet's notes." : demo && metrics.checkpoint !== null ? `The observed indexed range is ${demo.fromBlock.toLocaleString("en-US")}–${metrics.checkpoint.toLocaleString("en-US")}. Try a height within that range, check the filters, or restore the example.` : "Check your filters and the indexed checkpoint, or restore the example."}</p>}
               <Code
                 code={JSON.stringify(result, null, 2)}
               />
@@ -222,7 +224,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
                   {busy ? "Reading your entities…" : "Your data appears here."}
                 </h3>
                 <p>
-                  {enabled
+                  {connected
                     ? "Run a query to inspect the actual response."
                     : "Connect a Chef service to run queries against your application data."}
                 </p>
@@ -232,7 +234,7 @@ export function ChefPlayground({ enabled, demo }: { enabled: boolean; demo?: Che
         </div>
         <div className="panel-foot">
           <span className="mode-pill">
-            {enabled
+            {connected
                 ? "Connected backend"
                 : "Not connected"}
           </span>

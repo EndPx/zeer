@@ -7,6 +7,7 @@ export const chefExamples = [
   { id: "compare", name: "Compare two heights", description: "Read blocks 1,000,000 and 2,000,000 together with GraphQL aliases. Compare their timestamps and transaction counts." },
   { id: "checkpoint", name: "Indexer checkpoint", description: "Read the committed checkpoint, canonical hash and readiness state while the indexer follows new blocks." },
   { id: "latest", name: "Latest indexed block", description: "Read the block at the last observed Chef checkpoint. Restore example captures a newer checkpoint without running the query." },
+  { id: "memos", name: "Read shielded memos", description: "Read a receipt published from Zeer's demo wallet. Chef decrypted the note with a local viewing key and indexed its amount, output identity and memo." },
 ] as const;
 
 export type ChefExample = typeof chefExamples[number]["id"];
@@ -25,8 +26,17 @@ export function chefBlockHeight(value: string): number | null {
   return Number.isSafeInteger(height) && height <= 0x7fff_ffff ? height : null;
 }
 
-export function chefPresetQuery(example: ChefExample, height = 4515166, checkpoint: number | null = null): string | null {
+export function chefPresetQuery(example: ChefExample, height = 4515166, checkpoint: number | null = null, memoTxid?: string): string | null {
   switch (example) {
+    case "memos":
+      if (!memoTxid || !/^[0-9a-f]{64}$/.test(memoTxid)) return null;
+      return `query ReadShieldedMemos {
+  ReadableNoteList(first: 10, where: { txid: "${memoTxid}" }) {
+    items { id txid pool outputIndex blockHeight valueZat receiver memoKind memoText scope origin coinbase }
+    nextCursor
+  }
+  _meta { height hash status }
+}`;
     case "browse": return chefQuery;
     case "genesis": return `query GenesisBlock {
   BlockSummaryById(id: "0") { id height hash time transactionCount }

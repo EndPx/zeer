@@ -65,17 +65,17 @@ export async function input(request: Request, publicRead = false) {
   return boundedJson(new Response(request.body), publicRead ? 16128 : 16384);
 }
 export async function upstream(
-  service: "prep" | "chef",
+  service: "prep" | "chef" | "chefMemo",
   route: string,
   body?: unknown,
   signal?: AbortSignal,
 ) {
   const base =
-    service === "prep" ? process.env.ZEER_PREP_URL : process.env.ZEER_CHEF_URL;
+    service === "prep" ? process.env.ZEER_PREP_URL : service === "chefMemo" ? process.env.ZEER_CHEF_MEMO_URL : process.env.ZEER_CHEF_URL;
   const token =
     service === "prep"
       ? process.env.ZEER_PREP_TOKEN
-      : process.env.ZEER_CHEF_TOKEN;
+      : service === "chefMemo" ? process.env.ZEER_CHEF_MEMO_TOKEN : process.env.ZEER_CHEF_TOKEN;
   if (!base)
     throw new ApiError(
       503,
@@ -86,7 +86,7 @@ export async function upstream(
       429,
       "The demo is busy. Wait for the current requests to finish, then retry.",
     );
-  const privateTransport = base === `ssh://${service}`;
+  const privateTransport = service !== "chefMemo" && base === `ssh://${service}`;
   let url: URL;
   try {
     url = new URL(privateTransport ? "http://127.0.0.1" : base);
@@ -106,7 +106,7 @@ export async function upstream(
   try {
     const timeout = AbortSignal.timeout(15000);
     const requestSignal = signal ? AbortSignal.any([timeout, signal]) : timeout;
-    const res = privateTransport ? await sshUpstream(service, route, body, requestSignal) : await fetch(url, {
+    const res = privateTransport ? await sshUpstream(service as "prep" | "chef", route, body, requestSignal) : await fetch(url, {
       method: body === undefined ? "GET" : "POST",
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -142,7 +142,7 @@ export async function upstream(
               ? "The demo service could not authenticate with its source."
               : res.status >= 500
                 ? "The source is not ready. Retry after it recovers."
-                : service === "chef" ? "Chef could not validate this query. Check field names and argument types against the schema, or restore the example."
+                : service !== "prep" ? "Chef could not validate this query. Check field names and argument types against the schema, or restore the example."
                 : "The source rejected this query. Check its range and supported fields.",
         sourceCode ?? (res.status === 409 ? "SNAPSHOT_CONFLICT" : res.status === 416 ? "RANGE_OUTSIDE_INDEXED_ARCHIVE" : res.status === 413 ? "RESPONSE_TOO_LARGE" : res.status === 429 ? "RATE_LIMITED" : res.status >= 500 ? "SOURCE_UNAVAILABLE" : "INVALID_REQUEST"),
       );
@@ -153,7 +153,7 @@ export async function upstream(
         502,
         "The source did not return the expected testnet response.",
       );
-    if (service === "chef" && data?.errors)
+    if (service !== "prep" && data?.errors)
       throw new ApiError(
         400,
         "Chef rejected this query. Check supported fields and source readiness.",

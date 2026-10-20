@@ -62,6 +62,17 @@ Validate these states at narrow, tablet and desktop widths in the built docs.
 
 ## Public transaction inspector and pending observations
 
+Chef memo example, 21 October: put `Read shielded memos` alongside the existing
+Try an example buttons. Selecting it fills the same GraphQL editor and schema
+panel; Run query reads a dedicated demo-wallet receipt projection. Show the
+selected transaction link, pool and a short explanation of whose viewing key
+authorized the note. A returned text memo is readable beside the JSON result.
+Use the existing panels, field hints, copy controls and error/empty/stale states.
+Do not add a product, menu or viewing-key input to the public playground. Demo
+results must come from actual Chef-indexed notes and a canonical testnet TX;
+fixtures are only for implementation tests and must not be presented as mined.
+Ordinary BlockSummary examples keep their existing source and checkpoint.
+
 Prep Playground contains query building, transaction inspection and the configured
 node's bounded mempool observation. Keep only Overview, Prep and Chef in the main
 sidebar. Reuse format-tab styling for links within Prep, with an accessible current

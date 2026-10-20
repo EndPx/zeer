@@ -89,14 +89,15 @@ fingerprints retain their behavior.
 | `value_zat` | Positive decimal integer string, checked against the protocol monetary bound; no floating point |
 | `memo_hex` | All 512 memo bytes, including padding; binary, no-memo and textual content stay distinguishable |
 | `scope` | `external` or `internal` incoming-viewing-key scope |
-| `origin` | Always `unknown`; external scope does not prove a different sender |
+| `origin` | Always `unknown`; neither external nor internal scope identifies the sender or origin of funds |
 | `is_coinbase` | Actual null-outpoint coinbase marker, independent of note scope or transaction position |
 | `height` | Caller-supplied source block height, bound to canonical headers by Chef |
 
 Height, memo and amount are absent from the logical identity, so replay and
 re-inclusion do not create a new logical note ID. Keys, account identities and
-pools are distinct identity domains. Outgoing-key recovery is excluded; internal
-notes remain labeled because they can be change or self-transfers. Zero-valued
+pools are distinct identity domains. Outgoing-key recovery is excluded. The scanner
+reports notes with external or internal scope; the scope alone does not establish
+that a note is change, a self-transfer or a payment from another person. Zero-valued
 descriptions are not emitted as receipts. A full UA can contain multiple receivers;
 compare the decoded pool receiver component, not strings of different UA forms.
 
@@ -105,6 +106,18 @@ settlement authorization. Apps choose confirmation requirements, matching rules
 and treatment of internal/coinbase notes. A reorg can invalidate an observation;
 no index rollback can retract an external payment. Keep irreversible side effects
 outside handlers and make downstream processing idempotent.
+
+Canonicality is checked against the configured chain source: Chef binds receipts
+to that source's block headers and hashes, then reconciles observed chain changes
+within its retained recovery window. Zeer is not a consensus validator. A receipt
+that was canonical can later be orphaned. A consumer such as ZeeSwap must recheck
+confirmations and canonicality near settlement and enforce output deduplication
+in its own database and payout workflow.
+
+Zeer observes deposits; the consuming application authorizes payment. For example,
+ZeeSwap validates the note against its order, exact amount, decoded pool receiver,
+deadline, confirmations and current canonicality. A readable memo can carry an
+order reference, but cannot by itself establish a valid order or authorize payout.
 
 ## Local process and keys
 
@@ -161,4 +174,6 @@ simulated reorg removal. They are distinct from a natural network reorg. Live
 testnet receipt verification uses a dedicated Zeer account; keys and detailed
 evidence remain local-only. Pool support must be reported separately for fixtures
 and actual mined observations. No ZeeSwap project or settlement is part of this
-capability, and no private scanner is enabled on the public demo by default.
+capability. The public memo preset publishes one selected receipt from Zeer's own
+testnet wallet. Its scanner runs locally; the hosted reader has neither a viewing
+key nor a signing key. Other wallet notes are excluded from that projection.

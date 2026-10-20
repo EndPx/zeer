@@ -1,5 +1,10 @@
 # Release package verification
 
+Chef `0.1.1` is the next candidate, adding `readShieldedTransaction` for a local
+receipt source. Its tarball and strict consumer types have been verified against
+an actual mined testnet memo. Registry publication still requires npm account
+verification. The published `0.1.0` CLI and indexing profile remain available.
+
 The local candidate versions are `@zeer-dev/prep-client@0.1.0`, `@zeer-dev/chef@0.1.0`
 and Rust Prep `0.1.0`. They implement the current public-data contracts. This
 candidate adds build-on-pack and public Node typings for Chef; it does not change

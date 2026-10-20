@@ -4,8 +4,10 @@ Chef reads complete public Zcash data from Prep, invokes trusted TypeScript
 handlers, commits application entities to developer-owned PostgreSQL, and serves
 an authenticated read-only GraphQL API. The default profile reads public data. An explicit local
 [watch-only receipt profile](../../docs/SHIELDED_RECEIPTS.md) adds a native scanner
-and `receipt` handlers for authorized testnet notes. It is not enabled on the
-hosted public demo. See the [shielded inbox](../../examples/shielded-inbox/README.md).
+and `receipt` handlers for authorized testnet notes. Viewing keys stay in the
+operator's environment. The public playground publishes only one selected Zeer
+demo receipt. See the [shielded inbox](../../examples/shielded-inbox/README.md)
+for local indexing and the `readShieldedTransaction` helper for a known TX ID.
 
 ## Quickstart
 
