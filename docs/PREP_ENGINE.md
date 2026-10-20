@@ -3,7 +3,8 @@
 Updated 2026-10-19. The user requires complete blocks and transactions for the
 28 October delivery. [Delivery contract](PREP_DELIVERY.md) owns the active scope;
 [query contract](PREP_QUERY.md) owns the HTTP and SDK semantics. Chef's public-data
-pipeline is implemented; private viewing-key scanning remains deferred.
+pipeline is implemented; optional private scanning is a separate
+[Chef receipt profile](SHIELDED_RECEIPTS.md), not a public Prep capability.
 
 ## Implemented data paths
 

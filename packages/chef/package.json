@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Experimental public-data TypeScript indexing framework over Zeer Prep",
+  "description": "Experimental TypeScript indexing over Zeer Prep with optional local shielded receipts",
   "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}},
   "bin": {"zeer-chef": "./dist/cli.js"},
   "files": ["dist", "README.md", "LICENSE"],

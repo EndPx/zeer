@@ -1,6 +1,7 @@
 import { PrepClient, PrepError, ReorgError } from "@zeer/prep-client";
 import type { Height, QueryResult, TransactionField } from "@zeer/prep-client";
-import type { ChefStore, EntityAccess, Indexer, PublicBlock, PublicTransaction, SyncOptions, TransactionMetadata } from "./types.js";
+import type { ChefStore, EntityAccess, Indexer, PublicBlock, PublicTransaction, ReceiptSource, ShieldedReceipt, SyncOptions, TransactionMetadata } from "./types.js";
+import { validateReceipts } from "./receipts.js";
 
 export class ChefError extends Error {
   constructor(readonly code: string) { super(code); this.name = "ChefError"; }
@@ -12,6 +13,7 @@ export interface RuntimeOptions<E extends object> extends SyncOptions {
   client: Pick<PrepClient, "get" | "getHeight">;
   store: ChefStore;
   indexer: Indexer<E>;
+  receiptSource?: ReceiptSource;
   network: "mainnet" | "testnet" | "regtest";
   startHeight: number;
   reorgWindow: number;
@@ -25,8 +27,8 @@ export interface SyncResult {
 }
 
 export function decodePage(page: QueryResult, from: number, to: number): { block: PublicBlock; transactions: PublicTransaction[] }[];
-export function decodePage(page: QueryResult, from: number, to: number, selection: { mode: "decoded" | "metadata" | "none"; filtered: boolean }): { block: PublicBlock; transactions: (TransactionMetadata & { decoded?: Record<string, unknown> })[] }[];
-export function decodePage(page: QueryResult, from: number, to: number, selection = { mode: "decoded", filtered: false }) {
+export function decodePage(page: QueryResult, from: number, to: number, selection: { mode: "decoded" | "metadata" | "none"; filtered: boolean; raw?: boolean }): { block: PublicBlock; transactions: (TransactionMetadata & { decoded?: Record<string, unknown> })[] }[];
+export function decodePage(page: QueryResult, from: number, to: number, selection: { mode: "decoded" | "metadata" | "none"; filtered: boolean; raw?: boolean } = { mode: "decoded", filtered: false }) {
   requireValue(page.from_block === from && page.next_block > from && page.next_block <= to, "INVALID_PREP_RANGE");
   requireValue(page.data.blocks.length === page.next_block - from, "INCOMPLETE_PREP_BLOCKS");
   const batches = page.data.blocks.map((raw, index) => {
@@ -39,12 +41,13 @@ export function decodePage(page: QueryResult, from: number, to: number, selectio
     requireValue(uint(raw.block_height) && raw.block_height >= from && raw.block_height < page.next_block
       && raw.block_height >= lastHeight && uint(raw.index) && uint(raw.version) && uint(raw.locktime)
       && hash(raw.txid) && selection.mode !== "none"
-      && (selection.mode !== "decoded" || (raw.decoded !== null && typeof raw.decoded === "object" && !Array.isArray(raw.decoded))), "INVALID_PREP_TRANSACTION");
+      && (selection.mode !== "decoded" || (raw.decoded !== null && typeof raw.decoded === "object" && !Array.isArray(raw.decoded)))
+      && (!selection.raw || (typeof raw.raw === "string" && raw.raw.length > 0 && raw.raw.length <= 4000000 && raw.raw.length % 2 === 0 && /^[0-9a-f]+$/.test(raw.raw))), "INVALID_PREP_TRANSACTION");
     const target = batches[raw.block_height - from]!;
     requireValue(selection.filtered ? raw.index > (target.transactions.at(-1)?.index ?? -1)
       : raw.index === target.transactions.length, "INVALID_PREP_TRANSACTION_ORDER");
     target.transactions.push({ txid: raw.txid, index: raw.index, version: raw.version, locktime: raw.locktime,
-      blockHeight: raw.block_height, ...(selection.mode === "decoded" ? { decoded: raw.decoded as Record<string, unknown> } : {}) });
+      blockHeight: raw.block_height, ...(selection.mode === "decoded" ? { decoded: raw.decoded as Record<string, unknown> } : {}), ...(selection.raw ? { raw: raw.raw as string } : {}) });
     lastHeight = raw.block_height;
   }
   for (let index = 0; index < batches.length; index++) {
@@ -84,7 +87,10 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   validateSyncOptions(options);
   requireValue((options.batchSize ?? 1) === 1 || typeof store.applyBatch === "function", "BATCHING_UNSUPPORTED");
   requireValue(!(options.indexer.transaction && options.indexer.transactionMetadata), "CONFLICTING_TRANSACTION_HANDLERS");
-  const mode = options.indexer.transaction ? "decoded" : options.indexer.transactionMetadata ? "metadata" : "none";
+  const privateNotes = !!options.indexer.receipt;
+  requireValue(!privateNotes || options.network === "testnet" && options.receiptSource && hash(options.receiptSource.identity) && hash(options.receiptSource.keyFingerprint) && /^[a-zA-Z0-9_-]{1,64}$/.test(options.receiptSource.accountId), "TESTNET_RECEIPT_SOURCE_REQUIRED");
+  requireValue(!options.receiptSource || privateNotes, "RECEIPT_HANDLER_REQUIRED");
+  const mode = options.indexer.transaction ? "decoded" : options.indexer.transactionMetadata || privateNotes ? "metadata" : "none";
   const filtered = Object.values(options.transactionFilter ?? {}).some(value => value !== undefined && value !== null);
   requireValue(!filtered || mode !== "none", "FILTER_REQUIRES_TRANSACTION_HANDLER");
   let checkpoint = await store.checkpoint();
@@ -159,18 +165,41 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   const page = await fetched(() => client.get({ from_block: next, to_block: target + 1, limit,
     ...(options.adaptiveScan ? { scan_mode: "adaptive" as const } : {}),
     field_selection: { block: ["height", "hash", "previous_hash", "time"],
-      transaction: mode === "none" ? [] : ["txid", "block_height", "index", "version", "locktime", ...(mode === "decoded" ? ["decoded" as TransactionField] : [])] },
+      transaction: mode === "none" ? [] : ["txid", "block_height", "index", "version", "locktime", ...(mode === "decoded" ? ["decoded" as TransactionField] : []), ...(privateNotes ? ["raw" as TransactionField] : [])] },
     ...(options.transactionFilter ? { transaction_filter: options.transactionFilter } : {}) }, { signal }));
   if (page.epoch !== meta.epoch) { await store.markReconciling(); throw new ReorgError(); }
-  requireValue(page.network === options.network, "SOURCE_NETWORK_OR_KIND_MISMATCH");
-  requireValue(page.next_block <= next + limit, "INVALID_PREP_RANGE");
-  const batches = decodePage(page, next, target + 1, { mode, filtered });
+  let batches;
+  try {
+    requireValue(page.network === options.network, "SOURCE_NETWORK_OR_KIND_MISMATCH");
+    requireValue(page.next_block <= next + limit, "INVALID_PREP_RANGE");
+    batches = decodePage(page, next, target + 1, { mode, filtered, raw: privateNotes });
+  } catch (error) {
+    if (privateNotes) await store.markReconciling("source");
+    throw error;
+  }
   let handlerMs = 0, applyMs = 0, transactionCount = 0;
   const batchSize = options.batchSize ?? 1;
   for (let offset = 0; offset < batches.length; offset += batchSize) {
     signal?.throwIfAborted();
-    const applyStart = performance.now();
     const group = batches.slice(offset, offset + batchSize);
+    // Decrypt before opening the application transaction. The scanner has no durable state;
+    // a failed/rolled-back application commit can rescan the same canonical bytes.
+    const receipts = new Map<string, ShieldedReceipt[]>();
+    if (privateNotes) {
+      try {
+        for (const { block, transactions } of group) for (const transaction of transactions) {
+          signal?.throwIfAborted();
+          const result = await options.receiptSource!.scan({ block, transaction: transaction as TransactionMetadata & { raw: string } }, signal);
+          receipts.set(`${block.height}:${transaction.index}`, validateReceipts(result, options.receiptSource!.accountId, options.receiptSource!.keyFingerprint, transaction.txid, block.height));
+        }
+      } catch {
+        await store.markReconciling("source"); throw new ChefError("SHIELDED_SCAN_UNAVAILABLE");
+      }
+      // Scanning may take time. Bind the whole contiguous group to its current canonical end.
+      const last = group.at(-1)!.block;
+      if ((await header(last.height)).hash !== last.hash) { await store.markReconciling(); throw new ReorgError(); }
+    }
+    const applyStart = performance.now();
     const handler = async (block: PublicBlock, entities: EntityAccess) => {
       signal?.throwIfAborted();
       const transactions = batches[block.height - next]!.transactions;
@@ -181,6 +210,9 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
         for (const transaction of transactions) {
           if (mode === "decoded") await options.indexer.transaction?.({ block, transaction: transaction as PublicTransaction, context });
           else await options.indexer.transactionMetadata?.({ block, transaction, context });
+          for (const receipt of receipts.get(`${block.height}:${transaction.index}`) ?? []) {
+            await options.indexer.receipt!({ block, transaction, receipt, context });
+          }
         }
       } finally { handlerMs += performance.now() - start; }
       signal?.throwIfAborted();

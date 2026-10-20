@@ -1,0 +1,116 @@
+# Shielded inbox
+
+A generic self-hosted Chef example that stores readable Sapling, Orchard and
+Ironwood note observations in the developer's PostgreSQL database and exposes
+authenticated GraphQL. There are no invoices, orders, wallet sends or payouts.
+Read [the receipt contract and trust boundaries](../../docs/SHIELDED_RECEIPTS.md)
+before configuring keys. This is an experimental testnet-only profile.
+
+## Build and configure
+
+From the repository root, with Rust 1.99+, Node 24.14+ and protoc available
+(the validated Rust toolchain is 1.99.0):
+
+```sh
+npm ci
+npm run build:chef
+cargo build --release --locked -p zeer-scanner
+```
+
+Export a UFVK from an operator-owned **testnet** wallet to an absolute protected
+file outside the checkout. It must contain Sapling and Orchard viewing components.
+Do not paste a seed or spending key. On Unix use 0400/0600; on Windows configure
+an owner-only ACL. Record a birthday height at or before the first relevant
+payment. The scanner does not need a spending key.
+
+For an isolated test account only, an explicit offline utility is available:
+
+```sh
+cargo run --locked -p zeer-scanner --example create_test_account -- /protected/new-test-account
+```
+
+The directory must not exist. The utility writes an OS-random testnet seed,
+UFVK and account metadata to protected files; it starts no wallet service and
+does not send transactions. Keep the seed offline for recovery. Windows users
+must first protect the parent directory ACL. Never use the public fixture UFVK
+or example seed values for funds. Requesting a testnet faucet drip is a separate
+operator action; it is not performed by Chef or the scanner.
+
+Inspect the key with the account ID used in this example:
+
+```sh
+target/release/zeer-scanner inspect-key --account inbox --key-file /protected/testnet.ufvk
+```
+
+Copy `.env.example` to a private file outside the checkout and fill its values.
+`ZEER_KEY_FINGERPRINT` is the inspected fingerprint, `ZEER_BIRTHDAY_HEIGHT` is
+the wallet birthday, and `DATABASE_URL` points to developer-owned PostgreSQL.
+`CHEF_API_TOKEN` must be a private random token of at least 16 bytes. Set the
+scanner executable and key file to absolute paths. Do not point the database
+configuration at another application's schema or reuse its project identity.
+
+The example reads public full transactions through Prep and decrypts them locally.
+Its pool predicate selects these three pools only, not every future protocol.
+For other intentional transaction filters, state the narrower coverage explicitly.
+Whole-history scanning is unnecessary for a wallet created recently.
+
+## Run from this checkout
+
+Replace `/protected/inbox.env` below with the private environment file. Keep the
+same configuration for migration, sync and serving:
+
+```sh
+node --env-file=/protected/inbox.env packages/chef/dist/cli.js codegen --config examples/shielded-inbox/chef.config.ts
+node --env-file=/protected/inbox.env packages/chef/dist/cli.js migrate --config examples/shielded-inbox/chef.config.ts
+node --env-file=/protected/inbox.env packages/chef/dist/cli.js sync --config examples/shielded-inbox/chef.config.ts --follow
+```
+
+In a separate terminal:
+
+```sh
+node --env-file=/protected/inbox.env packages/chef/dist/cli.js serve --config examples/shielded-inbox/chef.config.ts --listen 127.0.0.1 --port 39370
+```
+
+For a bounded verification instead of following, use `sync --to HEIGHT` with an
+**inclusive** available end. Restart the same command to resume its checkpoint.
+Changing schema, handler behavior, account, key fingerprint or birthday requires
+the explicit [evolution procedure](../../docs/SCHEMA_EVOLUTION.md).
+
+```graphql
+{
+  _meta { height status }
+  ReadableNoteList(first: 20) {
+    items { id txid pool outputIndex blockHeight valueZat scope origin coinbase }
+    nextCursor
+  }
+}
+```
+
+Send this query to the loopback `/graphql` endpoint with
+`Authorization: Bearer $CHEF_API_TOKEN`. Receiver and full memo fields are also
+available to authorized readers; do not expose the endpoint or token publicly.
+This example stores internal notes and coinbase flags without treating them as
+payments. It does not calculate a spendable balance or mark a business order paid.
+
+## Independent consumer
+
+Packages remain unpublished. Use the existing [local tarball workflow](../../docs/PACKAGING.md)
+to pack/install both `@zeer/prep-client` and `@zeer/chef`, then copy this example's
+config, schema and package metadata into your project. Run the installed
+`zeer-chef` executable. The native scanner is a separately built local executable;
+its absolute path is selected through `ZEER_SCANNER_EXECUTABLE`.
+
+## Verify the native boundary
+
+After building the native scanner and Chef, set `ZEER_SCANNER_TEST_EXECUTABLE`
+to its absolute path. For PostgreSQL integration, also set
+`CHEF_TEST_DATABASE_URL` to an isolated Zeer test database:
+
+```sh
+cargo test --locked -p zeer-scanner
+node --test packages/chef/test/receipts.test.mjs packages/chef/test/receipts.integration.test.mjs
+```
+
+The PostgreSQL test owns only its generated `t_` namespace and removes that test
+namespace afterward. Without the explicit binary/database variables, the native
+integration cases are skipped; a skipped test is not acceptance evidence.

@@ -148,7 +148,9 @@ completed range should commit no new blocks. `npm run db:stop` retains local dat
 ## Scope and recovery
 
 The first API provides bounded, read-only queries. WebSocket subscriptions,
-introspection, private viewing-key scanning and public hosting are not included.
+introspection, private viewing-key scanning and public hosting are not included
+in this public-data walkthrough. The separate opt-in
+[shielded inbox](../examples/shielded-inbox/README.md) documents local receipt scanning.
 Changing a model/config/handler identity requires a new project namespace and
 replay; never reset existing data as a routine onboarding step. See
 [operations](OPERATIONS.md) and [schema evolution](SCHEMA_EVOLUTION.md).

@@ -1,9 +1,12 @@
-# Zeer Chef (public-data prototype)
+# Zeer Chef (developer preview)
 
 Chef reads complete public Zcash data from Prep, invokes trusted TypeScript
 handlers, commits application entities to developer-owned PostgreSQL, and serves
 an authenticated read-only GraphQL API. This private workspace package is not
-published to npm. The current slice has no viewing-key scanner or private memos.
+published to npm. The default profile reads public data. An explicit local
+[watch-only receipt profile](../../docs/SHIELDED_RECEIPTS.md) adds a native scanner
+and `receipt` handlers for authorized testnet notes. It is not enabled on the
+hosted public demo. See the [shielded inbox](../../examples/shielded-inbox/README.md).
 
 For filtered indexing from block 0, see the
 [Orchard metadata example](../../examples/chef-filtered/README.md).

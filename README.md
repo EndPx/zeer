@@ -19,7 +19,7 @@ the ingredients; Chef applies the developer's recipe.
 
 ## Status
 
-**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the Chef hackathon demo indexes a separate, fixed modern range. Viewing-key scanning and npm publication are not implemented.**
+**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the Chef hackathon demo indexes a separate, fixed modern range. An opt-in local watch-only receipt preview is available separately; npm publication remains deferred.**
 
 Inspect current coverage in the [console](https://zeer.endpx.cloud/app) or
 through the [limited public Prep API](docs/PUBLIC_API.md). The preview is bounded
@@ -60,6 +60,11 @@ input fixtures. No performance ranking is published here.
 Whole-chain execution and production readiness remain unproven. Neither Prep
 nor the current public Chef slice decrypts private notes or validates consensus.
 
+For operator-authorized notes, the separate [watch-only receipt profile](docs/SHIELDED_RECEIPTS.md)
+uses a local native scanner and a generic Chef `receipt` handler. Try the
+[shielded inbox](examples/shielded-inbox/README.md) with an operator-owned UFVK.
+Private keys and note data are not accepted by the hosted public Prep service.
+
 Full archives now support genesis, opt-in lossless compressed records and
 binary in-memory header indexes. An offline conversion can resume from a
 verified segment prefix while preserving the original archive. See
@@ -76,7 +81,7 @@ then run codegen, migrate, sync and GraphQL. Packages remain local tarball insta
 - One local unpublished package with CLI, TypeScript handlers and generated types.
 - Self-hosted operation with developer-owned PostgreSQL.
 - Historical processing followed by live block tracking.
-- Public chain facts from Prep; viewing-key scanning and webhooks are deferred.
+- Public chain facts from Prep; optional local testnet receipt scanning; webhooks remain deferred.
 - Typed entity operations and authenticated read-only GraphQL.
 - Explicit checkpoint, replay and reorg behavior.
 

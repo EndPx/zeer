@@ -39,6 +39,24 @@ test("CLI help succeeds without config, source or database", () => {
   }
 });
 
+test("CLI receipt projects require explicit testnet key identity and reject inline key/config fields", async t => {
+  const base={project:'private_test',network:'testnet',startHeight:4200000,schema:'schema.graphql',handlerVersion:'1',shielded:{accountId:'inbox',keyFingerprint:'a'.repeat(64)}};
+  const cases=[
+    [{...base,network:'mainnet'},'INVALID_SHIELDED_CONFIG'],
+    [{...base,shielded:undefined},'SHIELDED_CONFIG_AND_RECEIPT_HANDLER_REQUIRED'],
+    [{...base,shielded:{...base.shielded,viewingKey:secret}},'INVALID_SHIELDED_CONFIG'],
+    [{...base,shielded:{...base.shielded,keyFingerprint:'bad'}},'INVALID_SHIELDED_CONFIG'],
+    [{...base,shielded:{...base.shielded,timeoutMs:0}},'INVALID_SHIELDED_CONFIG'],
+    [{...base,shielded:{...base.shielded,keyFileEnv:'not-an-env-name'}},'INVALID_ENV_NAME'],
+  ];
+  for(const [config,code] of cases){
+    const text=`export default {...${JSON.stringify(config)},indexer:{receipt(){}}};`;
+    const f=await fixture(t,text);errorCode(run(['codegen','--config',f.config,'--json']),code);
+  }
+  const valid=await fixture(t,`export default {...${JSON.stringify(base)},indexer:{receipt(){}}};`);
+  const result=run(['codegen','--config',valid.config,'--json']);assert.equal(result.status,0,result.stderr);
+});
+
 test("installed CLI runs help and codegen through a symlinked executable path", async t => {
   const { path, config } = await fixture(t);
   let entry;

@@ -2,7 +2,27 @@
 
 Updated: 2026-10-20 (Asia/Jakarta).
 
-**Status: Prep supports admitted transaction-ID indexes, direct metadata, bounded batch lookup and compiled capabilities. Chef implements a public-data writer and GraphQL API. Viewing-key scanning and whole-chain Chef execution remain deferred; a bounded public testnet preview is deployed. All benchmark results and reports are local-only under `benchmarks/results/`; source, methodology and fixtures remain public.**
+**Status: Prep supports public historical queries and live node observations. Chef implements public handlers and an opt-in local testnet receipt preview with a native watch-only scanner. Whole-chain Chef execution and production readiness remain unproven. The hosted demo remains public-data only. All benchmark results and detailed proof reports remain local-only; source, methodology and fixtures remain public.**
+
+## Current slice: generic shielded receipts, 20 October
+
+The user authorized the scanner-first progression after the public shielded query
+slice, then explicitly authorized a new isolated Zeer test account. Scope remains
+the Zeer framework; another agent owns any ZeeSwap-specific integration.
+
+The [receipt contract](docs/SHIELDED_RECEIPTS.md) and
+[shielded inbox example](examples/shielded-inbox/README.md) define the current
+bounded full-transaction implementation. It reuses official trial decryption and
+the existing PostgreSQL checkpoint/undo mechanism. Unlike the historical proposal
+below, this profile maintains no separate SDK wallet database or witness trees.
+Full wallet balances, spending, webhooks and the earlier lightwalletd/two-store
+lifecycle are not implemented by this change. Public Prep never accepts UFVKs.
+
+Verification distinguishes all-pool encrypted fixtures, real native/SQL/GraphQL
+restart and simulated reorg tests, and a separately observed mined Ironwood
+receipt. Detailed results and key-bearing material stay outside Git. This is not
+a claim that all historical scanner-first release gates or all pools' live
+receipts have passed.
 
 Zeer is the umbrella brand and monorepo for **Zeer Prep**, the Zcash data preparation and delivery engine, and **Zeer Chef**, the application-indexing framework. Both have bounded public-data implementations. Accepted names and original architecture decisions are recorded in [the framework proposal](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
 
@@ -320,7 +340,7 @@ identity and follows the separate-namespace evolution procedure above.
 
 Larger early-chain datasets must not be presented as modern full-chain coverage.
 No universal speed advantage, persistent-index benefit or atomic version cutover
-is assumed before evidence. Private scanning remains deferred. These priorities
+is assumed before evidence. Private scanning was deferred at that stage; the 20 October local receipt profile is defined above. These older priorities
 supersede the older one-follow-up-at-a-time note for investigation work.
 
 **Release objective:** a developer can obtain Zeer from a clean checkout, run a
@@ -609,6 +629,6 @@ Use disposable copies of the frozen Regtest state and the existing 3 CPU / 8 GiB
 / 40 GiB experiment envelope. No private viewing keys or public-chain writes are
 needed for these proofs.
 
-A full public-mainnet deployment, broader performance claims and production readiness require additional evidence. Chef's public-only slice is now implemented under its separate contract; private scanning remains deferred. No npm package or public endpoint was published.
+A full public-mainnet deployment, broader performance claims and production readiness require additional evidence. Chef's public-only slice was implemented under its separate contract; the later local receipt profile is defined at the top of this plan. No npm package or public endpoint was published.
 
 The plan does not authorize purchasing infrastructure, publishing packages, submitting the hackathon entry, or accessing third-party private wallet data. It records work to perform when implementation is requested.

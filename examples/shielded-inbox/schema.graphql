@@ -1,0 +1,13 @@
+type ReadableNote {
+  id: ID!
+  txid: String!
+  pool: String!
+  outputIndex: Int!
+  blockHeight: Int!
+  valueZat: BigInt!
+  receiver: String!
+  memoHex: String!
+  scope: String!
+  origin: String!
+  coinbase: Boolean!
+}

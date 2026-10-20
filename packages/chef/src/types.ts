@@ -11,8 +11,19 @@ export interface EntityAccess<E extends object = Record<string, Record<string, u
   delete<K extends keyof E & string>(entity: K, id: string): Promise<void>;
 }
 export interface PublicBlock { height: number; hash: string; previousHash: string; time: number }
-export interface PublicTransaction { txid: string; index: number; version: number; locktime: number; blockHeight: number; decoded: Record<string, unknown> }
+export interface PublicTransaction { txid: string; index: number; version: number; locktime: number; blockHeight: number; decoded: Record<string, unknown>; raw?: string }
 export type TransactionMetadata = Omit<PublicTransaction, "decoded">;
+export interface ShieldedReceipt {
+  id: string; account_id: string; network: "testnet"; txid: string; pool: "sapling" | "orchard" | "ironwood";
+  output_index: number; height: number; receiver: string; receiver_type: "sapling" | "orchard";
+  value_zat: string; memo_hex: string; scope: "external" | "internal"; origin: "unknown"; is_coinbase: boolean;
+}
+export interface ReceiptSource {
+  readonly identity: string; readonly accountId: string; readonly keyFingerprint: string;
+  scan(input: { block: PublicBlock; transaction: TransactionMetadata & { raw: string } }, signal?: AbortSignal): Promise<ShieldedReceipt[]>;
+  close(): Promise<void>;
+}
+export interface ShieldedConfig { accountId: string; keyFingerprint: string; executableEnv?: string; keyFileEnv?: string; timeoutMs?: number }
 export interface SyncOptions {
   /** Blocks fetched per page, 1..1000, or up to 1,000,000 with adaptiveScan. Defaults to 16. */
   pageSize?: number;
@@ -25,6 +36,8 @@ export interface SyncOptions {
 }
 export interface HandlerContext<E extends object> { entities: EntityAccess<E> }
 export interface Indexer<E extends object = Record<string, Record<string, unknown>>> {
+  /** Private readable-note observations. Internal scope can be change; external origin remains unknown. */
+  receipt?: (args: { block: PublicBlock; transaction: TransactionMetadata; receipt: ShieldedReceipt; context: HandlerContext<E> }) => Promise<void> | void;
   block?: (args: { block: PublicBlock; context: HandlerContext<E> }) => Promise<void> | void;
   transaction?: (args: { block: PublicBlock; transaction: PublicTransaction; context: HandlerContext<E> }) => Promise<void> | void;
   /** Lightweight alternative to transaction; the two handlers are mutually exclusive. */
@@ -63,5 +76,6 @@ export interface ChefConfig<E extends object = Record<string, Record<string, unk
   databaseUrlEnv?: string;
   reorgWindow?: number;
   sync?: SyncOptions;
+  shielded?: ShieldedConfig;
   indexer: Indexer<E>;
 }

@@ -2,7 +2,7 @@
 
 Date: 2026-10-12 (Asia/Jakarta).
 Last planning update: 2026-10-14 (Asia/Jakarta), public Chef, measured Prep retrieval improvements and bounded batch APIs.
-Status: **Chef's public writer is optimized; the user subsequently authorized Prep transaction-ID indexes and direct metadata. That bounded update is implemented; benchmark evidence is retained locally. Viewing-key scanning remains deferred.** This older framework proposal does not authorize additional execution by itself.
+Status: **This is the historical full-framework proposal. The active 20 October roadmap now includes an authorized, bounded local receipt preview; see [the current slice](../../plan.md#current-slice-generic-shielded-receipts-20-october). Its stateless full-transaction design does not claim completion of the SQLite/lightwalletd/two-store gates below.** This older proposal does not authorize additional execution by itself.
 Result policy (2026-10-14): all benchmark outputs and reports are local-only; this supersedes earlier result-publication requirements.
 Scope: independently usable Core & Tooling prototype; existing ZeeSwap project remains separate.
 

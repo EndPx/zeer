@@ -120,6 +120,8 @@ decryption for Orchard/Ironwood. It explicitly says Sapling memo decryption is
 unsupported there. This review inspected the public page, not the WASM binary or
 key-bearing data flow, so its no-key-egress claim is not independently verified.
 No keys were entered. It is a UX/research reference, not a dependency or a claim
-that Zeer now decrypts private notes. See the earlier
+that this public inspector decrypts private notes. A separate local-only
+[watch-only receipt profile](SHIELDED_RECEIPTS.md) now provides operator-authorized
+scanning; it does not add a viewing-key field to public Prep. See the earlier
 [pinned CipherScan review](SL_CIPHERSCAN_RESEARCH.md) for additional implementation
 risks to check before a viewing-key phase.

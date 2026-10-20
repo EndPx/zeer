@@ -1,0 +1,30 @@
+[package]
+name = "zeer-scanner"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+zcash_client_backend = { version = "=0.25.0-pre.2", default-features = false, features = ["orchard", "zeroize"] }
+zcash_keys = { version = "=0.17.0-pre.2", default-features = false, features = ["std", "sapling", "orchard"] }
+zcash_primitives = { version = "=0.31.0-pre.2", default-features = false, features = ["std"] }
+zcash_protocol = "=0.11.0-pre.1"
+serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
+sha2.workspace = true
+clap.workspace = true
+zeroize = "=1.9.1"
+zip32 = "=0.3.0"
+
+[dev-dependencies]
+zcash_transparent = { version = "=0.11.0-pre.2", default-features = false }
+getrandom = "=0.4.3"
+orchard = { version = "=0.16.0", default-features = false, features = ["std"] }
+sapling = { package = "sapling-crypto", version = "=0.9.0", default-features = false, features = ["std"] }
+zcash_note_encryption = "=0.5.1"
+rand_chacha = "=0.10.0"
+nonempty = "=0.11.0"
+tempfile.workspace = true
