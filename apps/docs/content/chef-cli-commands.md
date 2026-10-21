@@ -7,7 +7,7 @@ The `@zeer-dev/chef` npm package installs the **`zeer-chef`** executable. It cre
 Requires Node.js 24.14+ on Linux x86_64 or WSL2. Initialize a new directory with the published CLI:
 
 ```sh
-npx @zeer-dev/chef@0.1.0 init --dir my-indexer --project my_indexer --start-height 0
+npx @zeer-dev/chef@0.1.1 init --dir my-indexer --project my_indexer --start-height 0
 cd my-indexer
 npm install
 npx zeer-chef --help

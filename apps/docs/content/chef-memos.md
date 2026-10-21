@@ -37,6 +37,12 @@ Open the [Chef playground](https://zeer.endpx.cloud/app/chef), select **Read shi
 
 ## Read a known transaction locally
 
-The [single-transaction example](https://github.com/EndPx/zeer/blob/main/examples/shielded-inbox/read-transaction.mjs) uses the Chef 0.1.1 candidate's local read helper. Until that release is published, use a [source-built package](https://github.com/EndPx/zeer/blob/main/docs/PACKAGING.md). The helper fetches public bytes from Prep and decrypts locally, then checks that the source still reports the same mined block. An archive gap or changed block is an error, not a confirmed empty deposit.
+Install the published Chef package:
+
+```sh
+npm install @zeer-dev/chef@0.1.1
+```
+
+The [single-transaction example](https://github.com/EndPx/zeer/blob/main/examples/shielded-inbox/read-transaction.mjs) uses `readShieldedTransaction` to fetch public bytes from Prep and decrypt locally, then checks that the source still reports the same mined block. An archive gap or changed block is an error, not a confirmed empty deposit.
 
 Match the exact per-note amount, decoded pool receiver and your application reference. External/internal scope leaves `origin: unknown`. The application remains responsible for deduplication, order validation and a fresh confirmation/canonicality check before settlement.

@@ -47,6 +47,10 @@ editor, schema panel and Run query action as the block examples.
   TypeScript declarations and used its installed helper to read this actual mined
   transaction through public Prep and a local native scanner. Candidate-package
   acceptance is distinct from npm registry publication.
+- Chef 0.1.1 was subsequently published to npm on 21 October 2026. A fresh
+  registry installation passed strict TypeScript checks and read the same mined
+  memo with the local native scanner. Its package integrity matched the verified
+  release tarball.
 
 Detailed local proofs and key material remain outside version control. The public
 example deliberately discloses its selected demo note; it cannot decrypt an

@@ -168,6 +168,12 @@ config, schema and package metadata into your project. Run the installed
 `zeer-chef` executable. The native scanner is a separately built local executable;
 its absolute path is selected through `ZEER_SCANNER_EXECUTABLE`.
 
+The verified registry versions are:
+
+```sh
+npm install @zeer-dev/chef@0.1.1 @zeer-dev/prep-client@0.1.0
+```
+
 ## Verify the native boundary
 
 After building the native scanner and Chef, set `ZEER_SCANNER_TEST_EXECUTABLE`

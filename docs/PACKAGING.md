@@ -1,21 +1,19 @@
 # Release package verification
 
-Chef `0.1.1` is the next candidate, adding `readShieldedTransaction` for a local
-receipt source. Its tarball and strict consumer types have been verified against
-an actual mined testnet memo. Registry publication still requires npm account
-verification. The published `0.1.0` CLI and indexing profile remain available.
+The current published npm versions are `@zeer-dev/prep-client@0.1.0` and
+`@zeer-dev/chef@0.1.1`. Chef 0.1.1 adds `readShieldedTransaction` for a local
+receipt source. A fresh registry consumer passed strict TypeScript checks and
+read an actual mined testnet memo through public Prep and a local native scanner.
+The Prep HTTP API and Chef's exact `0.1.0` Prep-client dependency remain compatible.
 
-The local candidate versions are `@zeer-dev/prep-client@0.1.0`, `@zeer-dev/chef@0.1.0`
-and Rust Prep `0.1.0`. They implement the current public-data contracts. This
-candidate adds build-on-pack and public Node typings for Chef; it does not change
-the package entrypoints or Prep HTTP API. Both npm packages are configured for
-public publication under `@zeer-dev`. Both `0.1.0` releases were published and
-verified from the public registry on 21 October 2026. Prefer the
+Both npm packages are public under `@zeer-dev` and were verified on
+21 October 2026. Rust Prep remains version `0.1.0` and is built from source.
+Prefer the
 [Chef quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) or
 [Prep quickstart](https://zeer.endpx.cloud/docs/prep/quickstart/) for npm installation.
 
 The package now includes `zeer-chef init` for independent testnet projects. Follow
-[the standalone Chef quickstart](CHEF_QUICKSTART.md) after producing tarballs.
+[the standalone Chef quickstart](CHEF_QUICKSTART.md) for project setup.
 The remaining instructions verify source-built release candidates. When testing
 tarballs, install both together so the candidate's client dependency resolves locally.
 

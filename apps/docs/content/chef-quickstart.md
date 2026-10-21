@@ -13,7 +13,7 @@ Create a Zcash indexer with a schema, TypeScript handlers and a GraphQL API. Thi
 Run this in a directory where `my-indexer` does not already exist:
 
 ```sh
-npx @zeer-dev/chef@0.1.0 init --dir my-indexer --project my_indexer --start-height 0
+npx @zeer-dev/chef@0.1.1 init --dir my-indexer --project my_indexer --start-height 0
 cd my-indexer
 npm install
 npm run codegen
