@@ -1,0 +1,57 @@
+{
+  "format": "zeer-scanner-public-delivery-v1",
+  "status": "PASS",
+  "recorded_at_utc": "2026-10-21T20:04:13.202664+00:00",
+  "source_commit": "df2737e90a7deafb054b0e76800339d1bbcdb176",
+  "release_url": "https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1",
+  "anonymous_download": true,
+  "asset_byte_equality_with_accepted_release": true,
+  "assets": {
+    "SHA256SUMS": {
+      "bytes": 679,
+      "sha256": "e3c6834c6ab45bcb4fb5dce942c60700c61b2ac235313573ce9475fcc0f161f7"
+    },
+    "install-scanner.mjs": {
+      "bytes": 6301,
+      "sha256": "57e1174c57581c6a935e710c23286556bcc2b0f1865552fcd174a8615659fe34"
+    },
+    "LICENSE": {
+      "bytes": 1062,
+      "sha256": "b798539d129b1f28b6f61989f4d025910aca02f547dd92e35d688026c0e293de"
+    },
+    "provenance.json": {
+      "bytes": 2399,
+      "sha256": "7a58840365529095a53bbc361a5a4a1050e86d6d9722965792f2257ccc9afe2a"
+    },
+    "scanner-build.log": {
+      "bytes": 5938,
+      "sha256": "297a80a1e471fbcf0729d81d33b18cd20b080d47b86b9ee87090a820a2e3acea"
+    },
+    "scanner-manifest.json": {
+      "bytes": 518,
+      "sha256": "5415e865c9342fd0354ff1259c423f0f245b8a3e648f9683739d74b4a468df2e"
+    },
+    "scanner-source.tar.gz": {
+      "bytes": 171330,
+      "sha256": "38f69d19425a499ca26ba06f0ae4a7518897b79bb265336af6db733becb15fc9"
+    },
+    "shielded-inbox.tar.gz": {
+      "bytes": 21860,
+      "sha256": "5ee331efa2bde29ad4920cf488a898d46c2e3aadaf70388b9fbbd56dd615b980"
+    },
+    "zeer-scanner-linux-x64": {
+      "bytes": 1750872,
+      "sha256": "1a24bcc9f066466ec9dab902b21d8619c8a4a5fffdd1a2c2d8fc099b3fa6b00c"
+    }
+  },
+  "installer_downloaded_binary_from_public_url": true,
+  "installed": {
+    "installed": true,
+    "release": "scanner-v0.1.0-testnet.1",
+    "sha256": "1a24bcc9f066466ec9dab902b21d8619c8a4a5fffdd1a2c2d8fc099b3fa6b00c",
+    "protocol_version": 1,
+    "viewing_key_loaded": false
+  },
+  "operator_viewing_key_loaded": false,
+  "database_required": false
+}

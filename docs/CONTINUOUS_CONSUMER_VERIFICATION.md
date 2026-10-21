@@ -94,8 +94,22 @@ confirming zero active connections. Temporary runtime credential files were
 removed; production source credentials and original local wallet were retained.
 The resource guard passed after cleanup; the temporary systemd job is inactive.
 
-The docs production build and local browser check passed for all 44 pages,
-anchors, search/navigation and clipboard flows, responsive layouts and automated
-accessibility checks. Scanner publication, anonymous download/install validation
-and public docs activation are recorded separately after delivery; this record
-does not substitute for those steps.
+The docs production build and both local/public browser checks passed for all
+44 pages, anchors, search/navigation and clipboard flows, responsive layouts and
+automated accessibility checks. Additional mobile/desktop checks passed for the
+local setup, memo and example chapters. The public benchmark anchor and the
+guide's navigation to the actual GitHub release also passed.
+
+The scanner prerelease is published against immutable source commit
+`df2737e90a7deafb054b0e76800339d1bbcdb176`. All nine primary assets were downloaded
+anonymously and matched the accepted bytes. The downloaded installer then fetched
+its binary from the public release URL, verified its pinned digest and completed
+keyless installation on Linux. `SCANNER_PUBLIC_DELIVERY_20261022.json` retains the
+asset digests and delivery result. No npm package version changed.
+
+Public docs activated `/opt/zeer-docs/releases/20261022-continuous-v1` through the
+existing atomic symlink and nginx reload, retaining the preceding release for
+rollback. No application service restarted. The served 804,367-byte study artifact
+matches the committed bytes with SHA-256
+`6de4b3f0d8c5cea07d1a5ef30c85c874d44c9bdf5ce3358926f335533e7cbc22`.
+`CONTINUOUS_PUBLIC_DELIVERY_20261022.json` records the documentation checks.
