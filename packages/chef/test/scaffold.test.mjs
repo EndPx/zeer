@@ -20,7 +20,7 @@ test('init creates a standalone testnet project without contacting services or p
   const password=env.match(/^POSTGRES_PASSWORD=(.+)$/m)[1],token=env.match(/^CHEF_API_TOKEN=(.+)$/m)[1];
   assert.equal(password.length,48); assert.equal(token.length,64);
   assert.equal(result.stdout.includes(password)||result.stdout.includes(token),false);
-  assert.match(env,/^PREP_URL=$/m);
+  assert.match(env,/^PREP_URL=https:\/\/invalid.example$/m);
   assert.match(env,new RegExp(`DATABASE_URL=postgresql://chef:${password}@127.0.0.1:39472/chef`));
   assert.equal((await readFile(join(directory,'.env.example'),'utf8')).includes(token),false);
   if(process.platform!=='win32') assert.equal((await lstat(join(directory,'.env'))).mode & 0o777,0o600);

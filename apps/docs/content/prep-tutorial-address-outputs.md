@@ -6,12 +6,14 @@ The filter matches output addresses. It does not resolve spent inputs into sende
 
 ## 1. Install the client
 
-Use Node.js 22.18+ and npm. In a new working directory:
+Use Node.js 22.18+ and pnpm, or npm using the alternative below. In a new working directory:
 
 ```sh
 npm init -y
-npm install @zeer-dev/prep-client@0.1.0
+pnpm add @zeer-dev/prep-client@0.1.0
 ```
+
+With npm, use `npm install @zeer-dev/prep-client@0.1.0` instead.
 
 ## 2. Write the query
 

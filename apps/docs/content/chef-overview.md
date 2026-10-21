@@ -34,6 +34,8 @@ Each profile has one recorded run. The timer includes CLI startup, Prep reads, h
 
 See the [Chef benchmark methodology and recorded samples](/docs/chef/benchmarks/) for timing boundaries, resource limits and evidence.
 
+To tune your own project, start with [Database / Queries](/docs/chef/database-performance/), [Latency at the Head](/docs/chef/latency-at-head/) or [Benchmarking](/docs/chef/benchmarking/), depending on the delay you observe.
+
 ## Use Cases
 
 - **Application backends** — Turn chain data into your own entity model and give a frontend an authenticated [GraphQL API](/docs/chef/graphql/).

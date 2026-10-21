@@ -28,12 +28,14 @@ explicitly labeled mainnet fixtures and is not a live testnet service.
 Run the published CLI through npx:
 
 ```sh
-npx @zeer-dev/chef@0.1.2 init
+npx @zeer-dev/chef@0.1.3 init
 ```
 
 Answer the project name, folder and start block prompts; Enter accepts each
-default (`my_indexer`, `my-indexer`, `0`). You can also install the package globally
-once with `npm install -g @zeer-dev/chef@0.1.2`, then use `zeer init`.
+default (`my_indexer`, `my-indexer`, `latest`). Latest captures the selected
+Prep archive height once; explicit `0` includes genesis history. The chosen
+source URL is recorded in `.env`. You can also install the package globally
+once with `npm install -g @zeer-dev/chef@0.1.3`, then use `zeer init`.
 For scripts, pass `--dir DIR --project NAME --start-height HEIGHT --json`.
 The `zeer-chef` command remains an alias. Only terminal sessions ask questions.
 
@@ -41,10 +43,11 @@ The directory must not already exist. Its parent must exist and be writable.
 Choose a start height within your Prep archive. The full-data starter supports
 genesis height 0; another provider may expose a later starting range.
 
+Latest setup makes one bounded Prep metadata read; an explicit height works offline.
 Init creates an independent package, testnet config, BlockSummary schema/handlers,
 strict TypeScript config, a query example, local Postgres Compose config and a
 README. It generates unique local database/API secrets in git-ignored `.env`
-(mode 0600 on POSIX). It makes no network requests and starts no services.
+(mode 0600 on POSIX). It starts no services.
 
 The starter counts transactions through `transactionMetadata`, so it does not
 download decoded bodies. Its explicit `sync` settings fetch up to 1,000 blocks
@@ -113,8 +116,8 @@ npm run serve
 Start indexing in terminal B, using the same config and environment:
 
 ```sh
-npm run sync -- --to 1002
-# Or follow new blocks after historical catch-up:
+npm run sync
+# Or keep following new available blocks:
 # npm run follow
 ```
 

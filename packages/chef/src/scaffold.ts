@@ -15,7 +15,7 @@ export function validateStartHeight(startHeight: number): void {
 }
 
 /** Creates a new project only. It does not install packages, connect or migrate. */
-export async function scaffoldProject(options: { directory: string; project: string; startHeight: number }) {
+export async function scaffoldProject(options: { directory: string; project: string; startHeight: number; prepUrl?: string }) {
   const { project, startHeight } = options;
   validateProjectName(project);
   validateStartHeight(startHeight);
@@ -23,8 +23,8 @@ export async function scaffoldProject(options: { directory: string; project: str
   const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const password = randomBytes(24).toString("hex");
   const token = randomBytes(32).toString("hex");
-  const env = (secret: boolean) => `# Select an actual full-data Zcash TESTNET Prep endpoint. No hosted endpoint is assumed.
-PREP_URL=
+  const env = (secret: boolean) => `# Full-data Zcash TESTNET Prep endpoint used for this project.
+PREP_URL=${options.prepUrl ?? ""}
 PREP_API_TOKEN=
 # Local development only; use your own DATABASE_URL for an existing Postgres service.
 POSTGRES_PASSWORD=${secret ? password : "REPLACE_WITH_RANDOM_PASSWORD"}
@@ -38,7 +38,7 @@ CHEF_API_TOKEN=${secret ? token : "REPLACE_WITH_AT_LEAST_16_RANDOM_BYTES"}
         sync: `${launch} sync`, follow: `${launch} sync --follow`, status: `${launch} status`, serve: `${launch} serve`, query: "node --env-file=.env query.mjs",
         "db:up": "docker compose up -d --wait postgres", "db:stop": "docker compose stop postgres" },
       dependencies: { "@zeer-dev/chef": manifest.version, "@zeer-dev/prep-client": manifest.dependencies["@zeer-dev/prep-client"] },
-      devDependencies: { typescript: manifest.devDependencies.typescript } }, null, 2) + "\n",
+      devDependencies: { typescript: manifest.devDependencies.typescript, "@types/node": manifest.dependencies["@types/node"] } }, null, 2) + "\n",
     "chef.config.ts": `import { defineConfig } from "@zeer-dev/chef";
 import type { ChefEntities } from "./chef.generated.ts";
 
@@ -109,23 +109,27 @@ if (!response.ok || result.errors) {
   process.exitCode = 1;
 } else console.log(JSON.stringify(result, null, 2));
 `,
-    "README.md": `# ${project} â€” standalone Zeer Chef project
+    "README.md": `# ${project} - standalone Zeer Chef project
 
 Chef runs in your environment; Prep can run at your provider or on your own server.
 This starter uses **Zcash testnet public data**. No viewing keys or wallet are needed.
-Initialization does not contact Prep/Postgres, install packages, start Docker or migrate a database.
+Initialization reads Prep metadata only when latest is selected. It does not
+install packages, start Docker or migrate a database. Explicit heights work offline.
 
 ## Install
 
 Use Node 24.14+ on Linux x86_64 or WSL2. Install the dependencies declared in package.json:
 
 \`\`\`sh
-npm install
-npm run codegen
-npm run typecheck
+pnpm install
+pnpm run codegen
+pnpm run typecheck
 \`\`\`
 
-Registry packages must be published before using npm install. For an unpublished
+You can use npm instead: replace pnpm with npm in these commands and retain
+only your chosen package manager's lockfile. With npm, pass script arguments after
+an extra separator: npm run sync -- --to AVAILABLE_HEIGHT. Registry packages must be published
+before installation. For an unpublished
 candidate or source build, install BOTH local release tarballs together instead;
 follow https://github.com/EndPx/zeer/blob/main/docs/PACKAGING.md.
 Retain the generated lockfile. Do not use monorepo imports in this project.
@@ -135,14 +139,17 @@ Retain the generated lockfile. Do not use monorepo imports in this project.
 Edit the git-ignored .env: set PREP_URL to your actual testnet Prep service and
 PREP_API_TOKEN if required. It must cover startHeight ${startHeight} continuously.
 Inspect the provider's /height endpoint before selecting your start height.
-There is no default hosted Zeer endpoint. The generated local credentials are unique;
+CLI setup records the selected Prep URL in .env; the default is the public
+testnet preview. If latest was selected, ${startHeight} is its indexed height
+captured during setup, not a value that moves on restart. Use height 0 for history
+from genesis, in a new project namespace. The generated local credentials are unique;
 never commit .env or place its tokens in frontend code. Copying .env.example requires
 replacing its placeholders, not reusing them as real passwords.
 
 For local Postgres with Docker Engine and Compose v2:
 
 \`\`\`sh
-npm run db:up
+pnpm run db:up
 \`\`\`
 
 Alternatively, set DATABASE_URL to your own PostgreSQL database (including a
@@ -153,22 +160,22 @@ Use a unique Compose project name when running more than one copy of this starte
 ## Index and query
 
 \`\`\`sh
-npm run migrate
-npm run status
+pnpm run migrate
+pnpm run status
 \`\`\`
 
 Start the API first in terminal A:
 
 \`\`\`sh
-npm run serve
+pnpm run serve
 \`\`\`
 
 In terminal B, start indexing with the same config and environment:
 
 \`\`\`sh
-npm run sync -- --to AVAILABLE_HEIGHT
+pnpm run sync --to AVAILABLE_HEIGHT
 # Or keep following after historical catch-up:
-# npm run follow
+# pnpm run follow
 \`\`\`
 
 AVAILABLE_HEIGHT is an inclusive height covered by Prep. Omit --to to capture
@@ -178,7 +185,7 @@ same project. Migrate creates the project namespace, not the database server.
 The API binds 127.0.0.1:39370. Query in terminal C while indexing is active:
 
 \`\`\`sh
-npm run query
+pnpm run query
 \`\`\`
 
 API and indexing run in separate Node processes. The API serves committed data;
@@ -195,7 +202,7 @@ completed sync should add zero new blocks. A source gap or mismatch is an error,
 not an empty successful history. Schema/config/handler changes require a fresh
 project namespace and replay; do not point a changed identity at old state.
 
-\`npm run db:stop\` stops only this Compose project's database and retains data.
+\`pnpm run db:stop\` stops only this Compose project's database and retains data.
 Do not run Docker prune or delete a populated volume as an onboarding step.
 
 ## Troubleshooting

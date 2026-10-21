@@ -45,6 +45,7 @@ try {
   report.interactions.push('Chef and Prep onboarding sidebar order and AI guide navigation');
   for (const [product, chapter, category, labels] of [
     ['chef', 'cli-commands', 'Guides', ['Configuration File (chef.config.ts)', 'Entity Schema (schema.graphql)', 'Transaction Handlers', 'Block Handlers', 'Testing', 'Querying with GraphQL', 'Environment Variables', 'CLI Commands', 'Equality query indexes']],
+    ['chef', 'benchmarking', 'Performance', ['Database / Queries', 'Latency at the Head', 'Benchmarking']],
     ['prep', 'tutorials/address-outputs', 'Tutorials', ['Analyzing Address Outputs', 'Inspecting Transactions']],
   ]) {
     await page.goto(origin + `/docs/${product}/${chapter}/`);
@@ -94,7 +95,7 @@ try {
     assert.equal(alignment.overflow, false);
   }
   report.interactions.push('Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment');
-  for (const pathname of ['/docs/chef/quickstart/', '/docs/prep/quickstart/', '/docs/prep/clients/', '/docs/chef/benchmarks/', '/docs/prep/benchmarks/', '/docs/chef/block-handlers/', '/docs/chef/cli-commands/', '/docs/prep/tutorials/address-outputs/']) {
+  for (const pathname of ['/docs/chef/quickstart/', '/docs/prep/quickstart/', '/docs/prep/clients/', '/docs/chef/benchmarks/', '/docs/prep/benchmarks/', '/docs/chef/block-handlers/', '/docs/chef/cli-commands/', '/docs/chef/database-performance/', '/docs/chef/latency-at-head/', '/docs/chef/benchmarking/', '/docs/prep/tutorials/address-outputs/']) {
     for (const width of [375, 1440]) {
       await page.setViewportSize({width, height: 900});
       await page.goto(origin + pathname);

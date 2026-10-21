@@ -23,6 +23,7 @@ export default {
   chef: [
     'chef/overview', 'chef/quickstart', 'chef/quickstart-ai', 'chef/benchmarks',
     {type: 'category', label: 'Guides', collapsed: false, items: ['chef/configuration', 'chef/schema', 'chef/handlers', 'chef/block-handlers', 'chef/testing', 'chef/graphql', 'chef/environment-variables', 'chef/cli-commands', 'chef/indexes']},
+    {type: 'category', label: 'Performance', collapsed: false, items: ['chef/database-performance', 'chef/latency-at-head', 'chef/benchmarking']},
     {type: 'category', label: 'Shielded & Memos', collapsed: false, items: ['chef/shielded/overview', 'chef/shielded/local', 'chef/shielded/memos']},
     'chef/examples', 'chef/recovery', 'chef/evolution', 'chef/self-hosting',
   ],

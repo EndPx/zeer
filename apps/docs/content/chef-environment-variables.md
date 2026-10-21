@@ -1,12 +1,12 @@
 # Environment variables
 
-Chef reads connections and credentials from the process environment. The generated project's npm scripts load `.env` for you. If you invoke the CLI directly, load that file with Node's `--env-file` option.
+Chef reads connections and credentials from the process environment. The generated project's scripts (pnpm or npm) load `.env` for you. If you invoke the CLI directly, load that file with Node's `--env-file` option.
 
 ## Source, database and API
 
 | Variable | Used by | Purpose |
 | --- | --- | --- |
-| `PREP_URL` | `migrate`, `sync`, `status`, `serve` | Prep base URL for this project's source identity |
+| `PREP_URL` | `init`, `migrate`, `sync`, `status`, `serve` | Prep base URL for this project's source identity |
 | `PREP_API_TOKEN` | Prep requests | Optional bearer token for a private Prep deployment |
 | `DATABASE_URL` | `migrate`, `sync`, `status`, `serve` | PostgreSQL connection string |
 | `CHEF_API_TOKEN` | `serve`, starter query client | Private bearer token; `serve` requires at least 16 bytes |
@@ -28,10 +28,10 @@ From a project with Chef installed:
 
 ```sh
 node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js status
-node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js sync --to 1
+node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js sync
 ```
 
-Bare `zeer-chef` does not load `.env` automatically. `init` and the public starter's `codegen` do not need a database connection; a custom config can still depend on environment values while it is imported.
+Bare `zeer` / `zeer-chef` does not load `.env` automatically. `init` reads Prep metadata when `latest` is selected. An explicit numeric height and the public starter's `codegen` work without source or database access; a custom config can still depend on environment values while it is imported.
 
 The configuration properties `prepUrlEnv`, `prepTokenEnv` and `databaseUrlEnv` select alternative variable names. Keep the same source URL and project configuration between the writer and reader; the source URL participates in project identity.
 

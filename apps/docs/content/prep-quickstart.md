@@ -8,7 +8,7 @@ Fetch Zcash block headers with the JavaScript client. This example reads testnet
 
 ## Prerequisites
 
-**Node.js 22.18+** and npm. The public testnet preview requires no personal API token.
+**Node.js 22.18+** and pnpm, or npm using the alternative below. The public testnet preview requires no personal API token.
 
 ## 1. Install the client
 
@@ -16,8 +16,10 @@ Fetch Zcash block headers with the JavaScript client. This example reads testnet
 mkdir prep-quickstart
 cd prep-quickstart
 npm init -y
-npm install @zeer-dev/prep-client@0.1.0
+pnpm add @zeer-dev/prep-client@0.1.0
 ```
+
+With npm, use `npm install @zeer-dev/prep-client@0.1.0` instead.
 
 ## 2. Write your query
 

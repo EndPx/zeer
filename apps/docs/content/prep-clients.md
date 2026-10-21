@@ -11,11 +11,13 @@ Use the JavaScript client for typed queries and cursor handling, or call Prep's 
 
 ## Node.js / TypeScript
 
-Requires **Node.js 22.18+**. The ESM package uses native `fetch` and includes TypeScript declarations.
+Requires **Node.js 22.18+** and pnpm, or npm using the alternative below. The ESM package uses native `fetch` and includes TypeScript declarations.
 
 ```sh
-npm install @zeer-dev/prep-client@0.1.0
+pnpm add @zeer-dev/prep-client@0.1.0
 ```
+
+With npm, use `npm install @zeer-dev/prep-client@0.1.0` instead.
 
 ```js
 import { PrepClient } from "@zeer-dev/prep-client";

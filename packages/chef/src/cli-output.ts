@@ -5,8 +5,10 @@ import type { Checkpoint, ChefStore } from "./types.js";
 const guidance: Record<string, string> = {
   INIT_OPTIONS_REQUIRED: "Run zeer init in a terminal for guided setup, or supply --dir NEW_DIRECTORY --project project_name --start-height HEIGHT for scripts. No installation or service startup is automatic.",
   INIT_CANCELLED: "Setup cancelled before creating project files. Run zeer init when you are ready.",
+  INIT_PREP_UNAVAILABLE: "Could not read Prep's indexed height within 5 seconds. Retry with --prep-url URL or PREP_URL, or choose an explicit --start-height HEIGHT. No project files were created.",
+  INIT_PREP_NOT_READY: "Latest setup requires ready full-v1 Zcash testnet history. Check Prep /height or choose an explicit start height for a compatible source. No project files were created.",
   INVALID_PROJECT_NAME: "Use a lowercase letter followed by lowercase letters, digits or underscores, at most 32 characters.",
-  INVALID_START_HEIGHT: "Choose an integer start height between 0 and 4294967294 covered by the testnet Prep archive.",
+  INVALID_START_HEIGHT: "Choose latest during init, or an integer start height between 0 and 4294967294 covered by the testnet Prep archive.",
   PROJECT_DIRECTORY_EXISTS: "Choose a new directory. Init never overwrites an existing directory, file or symlink.",
   PROJECT_DIRECTORY_UNWRITABLE: "Use a new directory under an existing writable parent.",
   INVALID_OR_DUPLICATE_FLAG: "Use --help for supported flags; --json and --human are exclusive.",
@@ -137,6 +139,7 @@ export function formatOutput(value: Record<string, unknown>, human: boolean): st
   if (value.metricsScope === "completed_pages") lines.push(`Invocation totals for completed pages: ${value.blocks} blocks, ${value.transactions} transactions; persisted checkpoint includes any committed partial page.`);
   if (value.output) lines.push(`Generated file: ${value.output}`);
   if (value.directory) lines.push(`Project directory: ${value.directory}`);
+  if (value.command === "init" && value.startHeight !== undefined) lines.push(`Start block: ${value.startHeight}${value.startSelection === "latest_indexed" ? " (latest indexed height captured from Prep)" : " (explicit)"}`);
   if (Array.isArray(value.nextSteps)) for (const step of value.nextSteps) lines.push(String(step));
   if (value.host) lines.push(`Listening: ${value.host}:${value.port}`);
   return `${lines.join("\n")}\n`;

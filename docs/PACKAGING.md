@@ -1,11 +1,18 @@
 # Release package verification
 
 The current published npm versions are `@zeer-dev/prep-client@0.1.0` and
-`@zeer-dev/chef@0.1.2`. Chef 0.1.2 adds the `zeer` executable alias and guided
-`zeer init` setup. Complete flags and `--json` retain noninteractive operation.
-The same packed candidate passed isolated Windows and Linux installation,
-code generation and strict generated-project typechecking. Actual Linux terminal
-checks covered setup, Ctrl+C and end-of-input before file creation.
+`@zeer-dev/chef@0.1.3`. Chef 0.1.3 defaults guided setup to `latest`: one bounded
+Prep metadata read captures the available testnet archive height and persists a
+numeric start. Explicit numeric heights still initialize offline. Per-command
+help and `--version` are available; complete flags and `--json` keep scripts
+noninteractive. The `zeer` and `zeer-chef` aliases remain compatible.
+
+The public registry version, latest tag and downloaded tarball checksum match
+the tested package. The same packed candidate passed isolated Windows and Linux
+installation, code generation and strict generated-project typechecking with
+pnpm 10.21; Windows also passed with pnpm 12.14. The starter declares Node types
+directly rather than relying on transitive dependency visibility. Actual Linux
+terminal checks covered setup, Ctrl+C and end-of-input before file creation.
 
 Chef 0.1.1 added `readShieldedTransaction` for a local
 receipt source. A fresh registry consumer passed strict TypeScript checks and

@@ -13,21 +13,30 @@ for local indexing and the `readShieldedTransaction` helper for a known TX ID.
 
 Initialize a standalone project with:
 
-Requires Node 24.14+ on Linux x86_64 or WSL2, npm and PostgreSQL.
+Requires Node 24.14+ on Linux x86_64 or WSL2, pnpm (or npm) and PostgreSQL.
 
 ```sh
-npx @zeer-dev/chef@0.1.2 init
+pnpm --package=@zeer-dev/chef@0.1.3 dlx zeer init
 cd my-indexer
-npm install
-npm run codegen
-npm run typecheck
+pnpm install
+pnpm run codegen
+pnpm run typecheck
 ```
 
-Answer the project name, folder and start block questions, or press Enter for
-`my_indexer`, `my-indexer` and `0`. For a shorter command after a one-time global
-install, run `npm install -g @zeer-dev/chef@0.1.2`, then `zeer init`.
-The `zeer-chef` alias remains available. Scripts should pass all three flags and
-`--json`; redirected sessions never prompt. Ctrl+C cancels before file creation.
+Answer the project name, folder and start block questions. The defaults are
+`my_indexer`, `my-indexer` and `latest`. Latest reads the chosen Prep's ready,
+full-data testnet archive height once and saves a numeric start. Use an explicit
+`0` for genesis history or another height for offline setup. Lookup failures do
+not silently choose a different range. `--prep-url` overrides `PREP_URL`; otherwise
+the public testnet Prep is selected and written to the new `.env`. Existing private
+tokens are not sent to that default source or copied into generated files.
+
+For a short command after one global installation, use
+`pnpm add -g @zeer-dev/chef@0.1.3`, then `zeer init`. The `zeer-chef` alias remains.
+With npm, use `npx @zeer-dev/chef@0.1.3 init` and the matching npm project scripts.
+Scripts should supply all three setup flags and `--json`; redirected sessions
+never prompt. Use `zeer <command> --help` for details and `zeer --version` to check
+the installed version. Cancelled questions or height lookups create no project.
 
 Set `PREP_URL` and database settings in the generated `.env`, then migrate before
 running sync and serve. Follow the [complete quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/)
