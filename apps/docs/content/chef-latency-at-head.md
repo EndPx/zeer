@@ -63,3 +63,9 @@ For a new block, record its height and hash when the source is observed, when Pr
 Fresh data can still be reorganized. Chef reconciles supported chain changes behind its read gate; a checkpoint can become blocked when recovery cannot prove a retained ancestor. Follow [checkpoint and reorg handling](/docs/chef/recovery/) rather than resetting the namespace to make it appear ready.
 
 Applications such as payment observers must recheck their required confirmations and source canonicality before settlement. Private scanner work adds a separate processing stage. The public block-summary [recorded benchmark](/docs/chef/benchmarks/) does not measure note decryption or establish a chain-head latency SLA.
+
+## Recorded polling experiment
+
+On 21 October 2026, three separate 12-block paired studies compared Chef 0.1.3's 5-second polling with 1-second and 2-second candidates. Shorter intervals reduced median source-to-GraphQL latency, but every study still observed temporary 503 read gates. None passed the predeclared availability criterion, so polling defaults and production services remained unchanged.
+
+An extra Prep observer affected capacity in the first study. Without that observer, writer-derived Prep timestamps include polling detection delay and cannot isolate source publication latency. See the [live following results and limits](/docs/chef/benchmarks/#live-following-polling-interval-and-read-availability) for timings in seconds, tail observations, correctness checks and raw evidence.
