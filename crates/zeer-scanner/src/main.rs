@@ -9,6 +9,7 @@ use zeer_scanner::{ScanError, ScanRequest, Scanner, MAX_FRAME_BYTES};
 use zeroize::Zeroizing;
 
 #[derive(Parser)]
+#[command(version)]
 #[command(about = "Local testnet watch-only receipt scanner; no wallet signing or network access")]
 struct Args {
     #[command(subcommand)]
@@ -101,7 +102,7 @@ fn run() -> Result<(), ScanError> {
     match Args::parse().command {
         Command::Capabilities => frame(
             &mut io::stdout().lock(),
-            &json!({"protocol_version":1,"network":"testnet","pools":["sapling","orchard","ironwood"],"watch_only":true,"stateless":true,"key_file_required":true,"max_frame_bytes":MAX_FRAME_BYTES}),
+            &json!({"scanner_version":env!("CARGO_PKG_VERSION"),"protocol_version":1,"network":"testnet","pools":["sapling","orchard","ironwood"],"watch_only":true,"stateless":true,"key_file_required":true,"max_frame_bytes":MAX_FRAME_BYTES}),
         ),
         Command::InspectKey {
             key_file: path,

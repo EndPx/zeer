@@ -2,7 +2,7 @@
 
 Chef's benchmark measures the application-indexing pipeline: reading from Prep, running TypeScript handlers, committing entities to PostgreSQL and making committed data readable through GraphQL.
 
-For private payment observations, start with the [six uninterrupted live receipts](#shielded-receipts-six-uninterrupted-live-samples). Public block-summary and earlier polling studies are recorded separately below.
+For private payment observations, start with the [six uninterrupted live receipts](#shielded-receipts-six-uninterrupted-live-samples). For a longer application-consumption check, see the [continuous consumer study](#continuous-consumer-one-observed-hour). Public block-summary and earlier polling studies are recorded separately below.
 
 Recorded **20 October 2026** on real **Zcash Testnet** data. All durations are in **seconds (s)**.
 
@@ -122,6 +122,40 @@ The run recorded **zero source errors** and **480 successful API responses**: 44
 Immutable report snapshots address a Windows file-replacement failure reproduced under concurrent readers. The earlier interrupted observer's original cause remains unclassified. Two new setup attempts ended before any funding; their reasons are retained separately. This successful run replaces neither the failed evidence nor the earlier catch-up timings.
 
 [Download all six live samples, operation IDs and provenance](pathname:///docs/benchmarks/2026-10-22-chef-receipts-testnet.json). Check the timestamps, fees, source hashes and recovery assertions with `node apps/docs/scripts/verify-uninterrupted-receipts.mjs`. Internal change values and credentials are excluded. This is a small owned-wallet observation test, not sender attribution, spendable-balance proof, settlement authorization or an SLA.
+
+## Continuous consumer: one observed hour
+
+Recorded **22 October 2026 (Asia/Jakarta)** with Chef **0.2.0 installed from npm outside the checkout**. The continuous consumer backfilled 1,200 modern testnet blocks and followed 143 more while production Prep ingestion stayed active. The timed run lasted **3,601.00 s**, after **49.20 s** of bootstrap.
+
+| Check | Observed result |
+| --- | --- |
+| Real source blocks | 1,343, with contiguous height/hash references |
+| Application entities | 16,116: twelve synthetic observations per block |
+| Duplicate IDs | 0 |
+| Final comparison | Every entity matched the independent projection from Prep headers |
+| Separate Zebra check | 32 evenly spaced headers, including both endpoints, matched the configured node |
+| Controlled interruptions | Four; each resumed without losing the last complete observation |
+
+The twelve observations per block deliberately exceed the old single-range 10,000-row limit. **They are generated application data, not shielded transactions or decrypted notes.** No viewing key was loaded. The consumer advances bounded historical windows, seals only the prefix allowed by Chef's recovery horizon, and atomically replaces the visible mutable tail.
+
+### Recovery during the run
+
+| Interruption | Pause | Outcome |
+| --- | ---: | --- |
+| Kill the consumer | 3 s | Persisted rows survived; the restarted process continued |
+| Stop the GraphQL API | 10 s | The consumer retained its last complete projection and resumed |
+| Stop the producer | 45 s | Stale-source checks held the projection until fresh observations returned |
+| Kill the producer | 3 s | The producer restarted and the consumer caught up |
+
+The consumer recorded **18 stale-source waits** and **11 transport-unavailable waits**. These expected interruptions remain in the evidence. The API recorded 3,702 successful status responses and 1,924 successful GraphQL responses; connection failures while the API was stopped are counted separately. No natural reorg occurred during this hour. A separate PostgreSQL fixture exercised cursor invalidation, a shorter branch, removed outputs and re-included IDs through **15 continuous-mode CLI processes**; the original bounded mode passed another **12 processes**.
+
+### Resources and boundaries
+
+The study processes shared **0.5 CPU / 1 GiB**, inside the existing **3 CPU / 8 GiB** pipeline. Kernel counters recorded **53.02 s of CPU** and a **201,216,000-byte memory peak**, with no OOM kill. These group counters include bootstrap, monitoring and finalization. Supporting Prep and PostgreSQL are separate processes inside the shared envelope. Peak sampled SQLite files, including WAL, occupied **8,078,616 bytes**; the final disposable PostgreSQL database occupied **15,047,703 bytes**.
+
+This is a bounded operational check against authenticated loopback services on one VPS. It does not measure public ingress, maximum sustained load or receipt decryption latency, and it does not establish an SLA. Lag samples are discrete observations rather than per-block latency measurements. Mutable aggregate entities and financial side effects are outside this consumer's contract.
+
+[Download the hour, source, fault and acceptance evidence](pathname:///docs/benchmarks/2026-10-22-chef-continuous-testnet.json). Reconstruct its 16,116-row digest and verify the recovery assertions with `node apps/docs/scripts/verify-continuous-benchmarks.mjs`. The [reference consumer](https://github.com/EndPx/zeer/tree/main/examples/receipt-consumer) contains both modes; the [local shielded guide](/docs/chef/shielded/local/) uses the versioned Linux/WSL scanner and a standalone starter.
 
 ## Shielded receipts: live observations and recovery
 

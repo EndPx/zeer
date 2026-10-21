@@ -16,7 +16,7 @@ const defaultFields=['id','txid','pool','outputIndex','blockHeight','blockHash',
 
 /** A bounded, reversible local projection. Completing a sweep replaces the range. */
 export class RangeConsumer {
-  constructor({file,url,token,project,from,to,entity='ReadableNote',heightField='blockHeight',fields=defaultFields,pageSize=25,maxRange=1000,maxRows=10000,maxAgeSeconds=30,fetchImpl=fetch,onPage=()=>{}}){
+  constructor({file,url,token,project,from,to,entity='ReadableNote',heightField='blockHeight',fields=defaultFields,pageSize=25,maxRange=1000,maxRows=10000,maxAgeSeconds=30,fetchImpl=fetch,onPage=()=>{},mode='range',maxTotalRows=100000}){
     const endpoint=new URL(url);
     requireValue(/^https?:$/.test(endpoint.protocol)&&!endpoint.username&&!endpoint.password&&!endpoint.search&&!endpoint.hash,'INVALID_ENDPOINT');
     requireValue(endpoint.protocol==='https:'||['localhost','127.0.0.1','[::1]'].includes(endpoint.hostname),'HTTPS_OR_LOOPBACK_REQUIRED');
@@ -24,6 +24,8 @@ export class RangeConsumer {
     requireValue(typeof token==='string'&&Buffer.byteLength(token)>=16&&Buffer.byteLength(token)<=4096&&!/[\r\n]/.test(token),'INVALID_API_TOKEN');
     requireValue(typeof project==='string'&&/^[a-z][a-z0-9_]{0,31}$/.test(project),'INVALID_PROJECT');
     requireValue(integer(from)&&(to===undefined||integer(to)&&to>=from),'INVALID_RANGE');
+    requireValue(['range','continuous'].includes(mode)&&(mode==='range'||to===undefined),'INVALID_MODE');
+    requireValue(integer(maxTotalRows)&&maxTotalRows>=maxRows&&maxTotalRows<=1000000,'INVALID_TOTAL_BUDGET');
     requireValue(integer(maxRange)&&maxRange>=1&&maxRange<=1000&&integer(maxRows)&&maxRows>=1&&maxRows<=100000,'INVALID_BUDGET');
     requireValue(integer(pageSize)&&pageSize>=1&&pageSize<=100&&Number.isFinite(maxAgeSeconds)&&maxAgeSeconds>=1&&maxAgeSeconds<=120,'INVALID_LIMIT');
     requireValue(name(entity)&&name(heightField)&&heightField!=='id'&&Array.isArray(fields)&&fields.length<=24&&fields.every(name),'INVALID_FIELDS');
@@ -37,9 +39,9 @@ export class RangeConsumer {
     if(existing&&this.db.prepare('PRAGMA application_id').get().application_id!==0x5a454552){this.db.close();throw new ConsumerError('UNMARKED_DATABASE');}
     if(!existing)this.db.exec(`PRAGMA application_id=${0x5a454552}`);
     this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; CREATE TABLE IF NOT EXISTS state(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL,identity TEXT NOT NULL,payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS staging(id TEXT PRIMARY KEY,height INTEGER NOT NULL,payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS entities(id TEXT PRIMARY KEY,height INTEGER NOT NULL,payload TEXT NOT NULL)');
-    this.options={url:endpoint.origin,token,project,from,to,entity,heightField,fields,pageSize,maxRange,maxRows,maxAgeSeconds};
+    this.options={url:endpoint.origin,token,project,from,to,entity,heightField,fields,pageSize,maxRange,maxRows,maxAgeSeconds,mode,maxTotalRows};
     this.fetch=fetchImpl;this.onPage=onPage;this.busy=false;
-    const identity=createHash('sha256').update(JSON.stringify({url:endpoint.origin,project,from,to:to??null,entity,heightField,fields,maxRange,maxRows})).digest('hex');
+    const identity=createHash('sha256').update(JSON.stringify({url:endpoint.origin,project,from,to:to??null,entity,heightField,fields,maxRange,maxRows,...(mode==='continuous'?{mode,maxTotalRows}: {})})).digest('hex');
     this.db.prepare('INSERT OR IGNORE INTO state VALUES(1,0,?,?)').run(identity,JSON.stringify({scan:null,complete:null}));
     if(this.db.prepare('SELECT identity FROM state WHERE singleton=1').get().identity!==identity){this.db.close();throw new ConsumerError('CONSUMER_IDENTITY_MISMATCH');}
   }
@@ -81,8 +83,25 @@ export class RangeConsumer {
     if(source?.status!=='available'||!integer(source.prepIndexedHeight)||!integer(source.sourceObservedHeight)||!Number.isSafeInteger(source.sourceObservedAt))return 'SOURCE_UNKNOWN_OR_UNAVAILABLE';
     const checked=Date.parse(source.checkedAt),observed=source.sourceObservedAt*1000;
     if(!Number.isFinite(checked)||checked>now+60000||observed>now+60000||now-checked>age||now-observed>age)return 'SOURCE_OBSERVATION_STALE';
-    if(!integer(cp.height)||!hash(cp.hash)||cp.height<this.options.from)return 'INDEXER_BEHIND';
+    if(!integer(cp.height)||!hash(cp.hash)||(cp.height<this.options.from&&(this.options.mode==='range'||!this.state().complete)))return 'INDEXER_BEHIND';
     return null;
+  }
+  continuousPlan(status,current){
+    const cp=status.checkpoint,previous=current.complete;
+    requireValue(Number.isInteger(cp.undoFloor)&&cp.undoFloor>=-1&&cp.undoFloor<=cp.height,'RECOVERY_HORIZON_REQUIRED');
+    if(previous){
+      requireValue(cp.undoFloor>=previous.checkpoint.undoFloor,'RECOVERY_HORIZON_DECREASED');
+      requireValue(cp.height>=previous.sealedThrough,'CHECKPOINT_BELOW_SEALED_HISTORY');
+    }
+    const from=(previous?.sealedThrough??(this.options.from-1))+1;
+    let end=Math.min(cp.height,from+this.options.maxRange-1);
+    // A partial window may contain sealed history only. The entire visible
+    // mutable tail must be replaced together, never a mixture of two branches.
+    if(end<cp.height&&end>cp.undoFloor)end=cp.undoFloor;
+    end=Math.max(end,previous?.to??end);
+    requireValue(end<from||end-from+1<=this.options.maxRange,'RECOVERY_WINDOW_EXCEEDS_BUDGET');
+    requireValue(end>=from||cp.height<from,'RECOVERY_WINDOW_EXCEEDS_BUDGET');
+    return {from,to:end};
   }
   async step({maxPages=20,signal}={}){
     requireValue(!this.busy,'CONSUMER_BUSY');requireValue(integer(maxPages)&&maxPages>=1&&maxPages<=100,'INVALID_PAGE_BUDGET');
@@ -94,17 +113,19 @@ export class RangeConsumer {
       let current=this.state();
       if(current.complete)requireValue(current.complete.generation===status.generation,'PROJECT_GENERATION_CHANGED');
       if(current.scan)requireValue(current.scan.generation===status.generation,'PROJECT_GENERATION_CHANGED');
+      const continuous=this.options.mode==='continuous';
+      const planned=continuous?this.continuousPlan(status,current):null;
       if(!current.scan){
         const target=this.options.to??status.checkpoint.height;
         if(target>status.checkpoint.height)return {state:'waiting',reason:'INDEXER_BEHIND'};
-        const end=Math.max(target,current.complete?.to??target);
-        requireValue(end-this.options.from+1<=this.options.maxRange,'WATCHED_RANGE_LIMIT');
-        if(current.complete?.revision===status.revision&&current.complete.to===end)return {state:'unchanged',revision:status.revision};
-        current=this.update(current.version,state=>{this.db.exec('DELETE FROM staging');return {...state,scan:{to:end,generation:status.generation,revision:status.revision,checkpoint:status.checkpoint,after:null,last:null,pages:0}};});
+        const end=planned?.to??Math.max(target,current.complete?.to??target),start=planned?.from??this.options.from;
+        requireValue(end-start+1<=this.options.maxRange,'WATCHED_RANGE_LIMIT');
+        if(end<start||current.complete?.revision===status.revision&&current.complete.to===(continuous?target:end))return {state:'unchanged',revision:status.revision};
+        current=this.update(current.version,state=>{this.db.exec('DELETE FROM staging');return {...state,scan:{from:start,to:end,generation:status.generation,revision:status.revision,checkpoint:status.checkpoint,after:null,last:null,pages:0}};});
       }
       for(let page=0;page<maxPages;page++){
         signal?.throwIfAborted();const scan=current.scan;
-        const {entity,heightField,fields,from,pageSize}=this.options;
+        const {entity,heightField,fields,pageSize}=this.options,from=scan.from??this.options.from;
         const query=`query Page($after:ID){ ${entity}List(first:${pageSize},after:$after,range:{${heightField}:{gte:${from},lte:${scan.to}}},orderBy:[{${heightField}:ASC},{id:ASC}]){items{${fields.join(' ')}}nextCursor} _meta{project generation revision height hash status} }`;
         const response=await this.request('/graphql',{query,variables:{after:scan.after}},signal);
         if(response.wait)return {state:'waiting',reason:response.wait};
@@ -119,7 +140,9 @@ export class RangeConsumer {
           const latest=await this.request('/status',undefined,signal);if(latest.wait)return {state:'waiting',reason:latest.wait};
           const stale=this.fresh(latest.value);if(stale)return {state:'waiting',reason:stale};
           requireValue(latest.value.generation===scan.generation,'PROJECT_GENERATION_CHANGED');
+          if(continuous)this.continuousPlan(latest.value,current);
           if(latest.value.revision!==scan.revision||latest.value.checkpoint.height!==scan.checkpoint.height||latest.value.checkpoint.hash!==scan.checkpoint.hash){this.reset(current);return {state:'restarting',reason:'REVISION_CHANGED'};}
+          if(continuous)requireValue(latest.value.checkpoint.undoFloor===scan.checkpoint.undoFloor,'RECOVERY_HORIZON_CHANGED');
         }
         let last=scan.last;
         for(const row of rows.items){
@@ -134,8 +157,11 @@ export class RangeConsumer {
           // An incomplete scan never mutates the visible projection. Removal and
           // replacement happen atomically only on the final compatible page.
           this.db.prepare('DELETE FROM entities WHERE height>=? AND height<=?').run(from,scan.to);
+          if(continuous)requireValue(!this.db.prepare('SELECT 1 FROM staging JOIN entities USING(id) LIMIT 1').get(),'ENTITY_OUTSIDE_RECONCILED_RANGE');
           this.db.exec('INSERT INTO entities SELECT * FROM staging; DELETE FROM staging');
-          return {scan:null,complete:{from,to:scan.to,generation:scan.generation,revision:scan.revision,checkpoint:scan.checkpoint,count,observedAt:new Date().toISOString()}};
+          const total=this.db.prepare('SELECT count(*) AS count FROM entities').get().count;
+          if(continuous)requireValue(total<=this.options.maxTotalRows,'TOTAL_ROW_LIMIT');
+          return {scan:null,complete:{from:this.options.from,to:continuous?Math.min(scan.to,scan.checkpoint.height):scan.to,generation:scan.generation,revision:scan.revision,checkpoint:scan.checkpoint,count:continuous?total:count,observedAt:new Date().toISOString(),...(continuous?{sealedThrough:Math.max(state.complete?.sealedThrough??this.options.from-1,Math.min(scan.to,scan.checkpoint.undoFloor)),windowFrom:from,windowTo:scan.to,caughtUp:scan.to>=scan.checkpoint.height}: {})}};
         });
         await this.onPage({state:current.scan?'staged':'complete',pages:scan.pages+1,count:rows.items.length,revision:scan.revision});
         if(!current.scan)return {state:'complete',...current.complete};
@@ -144,5 +170,13 @@ export class RangeConsumer {
     }finally{this.busy=false;}
   }
   rows(){return this.db.prepare('SELECT payload FROM entities ORDER BY height,id COLLATE BINARY').all().map(row=>JSON.parse(row.payload));}
+  count(){return this.db.prepare('SELECT count(*) AS count FROM entities').get().count;}
   close(){requireValue(!this.busy,'CONSUMER_BUSY');this.db.close();}
+}
+
+/** Continuous projection for immutable, block-scoped observations only.
+ * Sealed data relies on Chef's monotonic undo floor and blocked recovery gate.
+ * This is not a durable change feed for arbitrary mutable aggregate entities. */
+export class ContinuousConsumer extends RangeConsumer {
+  constructor(options){super({...options,mode:'continuous'});}
 }

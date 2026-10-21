@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 
-const endpoint = new URL(process.env.CHEF_LOCAL_URL ?? 'http://127.0.0.1:39375/graphql');
+const endpoint = new URL(process.env.CHEF_LOCAL_URL ?? new URL('/graphql',process.env.CHEF_URL ?? 'http://127.0.0.1:39375').href);
 if (endpoint.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(endpoint.hostname) ||
     endpoint.username || endpoint.password || endpoint.pathname !== '/graphql' || endpoint.search || endpoint.hash) {
   throw new Error('CHEF_LOCAL_URL must be a loopback HTTP /graphql endpoint');

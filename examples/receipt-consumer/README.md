@@ -1,6 +1,6 @@
 # Standalone receipt consumer
 
-This example watches a bounded Chef receipt projection and keeps a private local
+This example watches a Chef receipt projection and keeps a private local
 SQLite copy. It uses the published **Chef 0.2.0** package for the indexer/API and
 ordinary authenticated HTTP for the consumer. No source imports or workspace
 links are needed after copying this directory outside the Zeer checkout.
@@ -68,6 +68,59 @@ Run the normal command again to resume. A bounded invocation exits with code 2
 when its last round is incomplete/waiting, and 0 after a complete or unchanged
 round. Errors are fixed codes; the CLI does not print note payloads or credentials.
 
+## Follow continuously
+
+For immutable block-scoped observations such as readable notes, use continuous
+mode. It processes history in bounded windows, then re-reads the entire visible
+tail that Chef can still reconcile. It can cross more than 1,000 blocks and
+10,000 total rows without making any single request unbounded.
+
+```sh
+npm run consume -- --mode continuous --follow --db private/inbox.sqlite \
+  --project receipt_reference --from 4523000 --window-blocks 200 --page-size 100
+```
+
+Use a separate database from a range-mode run: mode and budgets are part of its
+persisted identity. Ctrl+C/SIGTERM retains progress and exits 0. For a bounded
+operation, add `--deadline-seconds 3600`; expiry reports `DEADLINE_EXCEEDED` and
+exits 2, including when it interrupts a polling sleep. Without `--follow`, each
+invocation still uses bounded rounds and the normal 300-second default deadline.
+
+Continuous mode relies on Chef 0.2.0's `checkpoint.undoFloor`: the oldest retained
+rollback ancestor. It seals processed rows only through that boundary, while
+keeping the entire visible mutable tail replaceable. A shorter chain removes
+orphaned tail rows; the same output ID may return with new block context. Window
+promotion and progress are atomic, and interrupted pages remain staged.
+
+This contract requires an immutable block location and payload once an
+observation lies below Chef's recovery boundary. It is suitable for receipt and
+block observations. It is **not** a feed for mutable account totals or arbitrary
+entities that a later handler can rewrite at an old height. Such entities need
+full-range reconciliation or a separate change-feed contract.
+
+Defaults: at most 1,000 blocks and 10,000 rows per window, 25 rows per HTTP page,
+and 100,000 stored rows overall. `--window-blocks`, `--max-rows`, `--page-size` and
+`--max-total-rows` set explicit budgets. Total rows may be raised up to 1,000,000;
+the example does not silently prune history. Provide filesystem/process limits
+for long deployments. Use `count()` for metrics without loading all rows.
+
+| Outcome | Operator action |
+| --- | --- |
+| `CURSOR_INVALIDATED` / `REVISION_CHANGED` | Automatically discard partial staging and retry the window |
+| Source unavailable/stale or HTTP/transport wait | Preserve the last completed projection; wait for recovery |
+| `RECOVERY_WINDOW_EXCEEDS_BUDGET` | Choose a window that covers the mutable tail; configuration changes require a new consumer database |
+| `RECOVERY_HORIZON_REQUIRED` | Use a compatible API that reports its retained recovery boundary |
+| Decreased/changed horizon, checkpoint below sealed history, changed project generation | Stop and plan an explicit rescan; keep the previous projection for inspection |
+| `TOTAL_ROW_LIMIT` / `ROW_LIMIT` | Stop without promoting the offending window; provision an explicit budget or archive/rescan plan |
+
+`state().complete` reports the processed prefix, sealed boundary and whether it
+was caught up at that observation. Cached rows and a cached `caughtUp` flag are
+not current source freshness or settlement authorization.
+
+For another block-scoped model, supply `--entity`, `--height-field` and a comma-
+separated `--fields` list, or instantiate `ContinuousConsumer` directly. The
+chosen height field must support Chef's indexed range/order queries.
+
 ## Recovery behavior
 
 - Pages and their continuation cursor are staged in one SQLite transaction.
@@ -114,3 +167,10 @@ regtest branches; no viewing key is loaded and they are not live shielded timing
 The additional runs interrupt the HTTP connection and simulate a PostgreSQL
 wire disconnect for this owned API, then verify recovery without changing the
 shared database service. Both retain the last complete local projection.
+
+Set `ZEER_CONSUMER_MODE=continuous` for the same process checks plus a real
+PostgreSQL-backed sealed-prefix test: advance through height 80, retain the
+prefix through undo floor 70, replace the mutable branch with a shorter head at
+78, re-include an existing output there, then restart and compare all IDs/context.
+The optional phase adds three CLI runs. The default range-mode fixture remains
+the twelve-run check.

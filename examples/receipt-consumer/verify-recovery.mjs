@@ -1,22 +1,23 @@
 // Controlled-branch acceptance. This script never loads a viewing key or signs.
 import assert from 'node:assert/strict';
 import {randomUUID,createHash} from 'node:crypto';
-import {readFile,writeFile,mkdir,lstat} from 'node:fs/promises';
-import {resolve,join,dirname} from 'node:path';
+import {readFile,writeFile,mkdir,lstat,realpath} from 'node:fs/promises';
+import {resolve,join,dirname,relative,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {createServer as createTcpServer} from 'node:net';
 import {DatabaseSync} from 'node:sqlite';
 import pg from 'pg';
 import {PostgresStore,parseModel,syncStep,createChefServer} from '@zeer-dev/chef';
-import {RangeConsumer} from './consumer.mjs';
+import {RangeConsumer,ContinuousConsumer} from './consumer.mjs';
 
 const root=dirname(fileURLToPath(import.meta.url));
 const project=`ref_${randomUUID().replaceAll('-','').slice(0,22)}`;
 const directory=join(root,'private',project);await mkdir(directory,{recursive:true,mode:0o700});
 const token=process.env.CHEF_API_TOKEN;assert.ok(typeof token==='string'&&token.length>=16);
 assert.ok(process.env.DATABASE_URL);
-const proof={source:'controlled-regtest-branches',live_shielded_latency:false,viewing_key_loaded:false,project,checks:{}};
+const mode=process.env.ZEER_CONSUMER_MODE??'range';assert.ok(['range','continuous'].includes(mode));const Consumer=mode==='continuous'?ContinuousConsumer:RangeConsumer;
+const proof={source:'controlled-regtest-branches',consumer_mode:mode,live_shielded_latency:false,viewing_key_loaded:false,project,checks:{}};
 const h=n=>BigInt(n).toString(16).padStart(64,'0');
 let epoch='1',ready=true;
 const original=[40,41,42,43].map(height=>({height,hash:h(height+1),previousHash:h(height),time:1700000000+height,txid:h(1000+height)}));
@@ -43,10 +44,10 @@ try{
   const origin=`http://127.0.0.1:${server.address().port}`;
   const envFile=join(directory,'consumer.env');await writeFile(envFile,`CHEF_URL=${origin}\nCHEF_API_TOKEN=${token}\n`,{mode:0o600});
   const database=join(directory,'consumer.sqlite');
-  const local=()=>new RangeConsumer({file:database,url:origin,token,project,from:40});
+  const local=()=>new Consumer({file:database,url:origin,token,project,from:40});
   const snapshot=()=>{const c=local();try{return {state:c.state(),rows:c.rows()};}finally{c.close();}};
   async function run({killAfterPage=false,maxPages=20,rounds=1}={}){
-    const child=spawn(process.execPath,['--env-file='+envFile,join(root,'consume.mjs'),'--db',database,'--project',project,'--from','40','--max-pages',String(maxPages),'--rounds',String(rounds),'--deadline-seconds','60'],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']});children.add(child);
+    const child=spawn(process.execPath,['--env-file='+envFile,join(root,'consume.mjs'),'--mode',mode,'--db',database,'--project',project,'--from','40','--max-pages',String(maxPages),'--rounds',String(rounds),'--deadline-seconds','60'],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']});children.add(child);
     const events=[];let buffer='',stderr='',killed=false;
     const timeout=setTimeout(()=>child.kill('SIGKILL'),65000);
     child.stdout.on('data',chunk=>{buffer+=chunk;for(;;){const index=buffer.indexOf('\n');if(index<0)break;const line=buffer.slice(0,index);buffer=buffer.slice(index+1);if(!line)continue;const value=JSON.parse(line);events.push(value);if(killAfterPage&&value.event==='page'&&value.state==='staged'&&!killed){killed=true;child.kill('SIGKILL');}}});
@@ -102,10 +103,22 @@ try{
   store=new PostgresStore(process.env.DATABASE_URL,storeOptions);await store.migrate();await store.acquire();await step();await serve();await run();assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.database_connection_recovery=true;
   assert.ok(http.some(row=>row.path==='/graphql'&&row.status===409));
   proof.checks.actual_graphql_409_observed=true;
-  proof.final_count=recovered.rows.length;proof.final_revision=recovered.state.complete.revision;
-  proof.final_sha256=createHash('sha256').update(JSON.stringify(recovered.rows)).digest('hex');
+  if(mode==='continuous'){
+    for(let height=43;height<=80;height++)blocks.push({height,hash:h(10000+height),previousHash:blocks.at(-1).hash,time:1700000000+height,txid:h(20000+height)});
+    epoch='3';while((await store.checkpoint()).height<80)await step();await run();
+    const sealed=snapshot();assert.equal(sealed.rows.length,41*12);assert.equal(sealed.state.complete.sealedThrough,70);
+    const reused=blocks.find(b=>b.height===79).txid;blocks=blocks.filter(b=>b.height<75);
+    for(let height=75;height<=78;height++)blocks.push({height,hash:h(30000+height),previousHash:blocks.at(-1).hash,time:1700000000+height,txid:height===78?reused:h(40000+height)});
+    epoch='4';await step();await run();const tail=snapshot();assert.equal(tail.rows.length,39*12);assert.equal(tail.state.complete.to,78);assert.equal(tail.state.complete.sealedThrough,70);
+    const expected=new Set(blocks.flatMap(b=>Array.from({length:12},(_,i)=>`${b.txid}:${String(i).padStart(2,'0')}`)));assert.deepEqual(new Set(tail.rows.map(r=>r.id)),expected);
+    assert.ok(tail.rows.filter(r=>r.txid===reused).every(r=>r.blockHeight===78&&r.blockHash===h(30078)));
+    const beforeRestart=tail.rows;await run();assert.deepEqual(snapshot().rows,beforeRestart);proof.checks.sealed_prefix_and_mutable_reorg_with_postgres=true;
+  }
+  const finalSnapshot=snapshot();proof.final_count=finalSnapshot.rows.length;proof.final_revision=finalSnapshot.state.complete.revision;
+  proof.final_sha256=createHash('sha256').update(JSON.stringify(finalSnapshot.rows)).digest('hex');
   proof.api_requests=http;proof.package_version=JSON.parse(await readFile(join(root,'node_modules/@zeer-dev/chef/package.json'),'utf8')).version;
-  proof.workspace_link=(await lstat(join(root,'node_modules/@zeer-dev/chef'))).isSymbolicLink();assert.equal(proof.package_version,'0.2.0');assert.equal(proof.workspace_link,false);
+  const packageRelative=relative(await realpath(join(root,'node_modules')),await realpath(join(root,'node_modules/@zeer-dev/chef')));assert.ok(packageRelative&&!isAbsolute(packageRelative)&&!packageRelative.split(/[\\/]/).includes('..'));
+  proof.package_symlink=(await lstat(join(root,'node_modules/@zeer-dev/chef'))).isSymbolicLink();proof.workspace_link=false;assert.equal(proof.package_version,'0.2.0');
   passed=true;proof.passed=true;
 }finally{
   for(const child of children)child.kill('SIGKILL');

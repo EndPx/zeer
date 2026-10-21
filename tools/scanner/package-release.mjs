@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+import {createHash} from 'node:crypto';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {release,verifyBytes} from './install-scanner.mjs';
+const run=promisify(execFile);
+const directory=resolve(process.argv[2]??''),binary=resolve(process.argv[3]??'');
+assert.ok(process.argv.length===4&&directory!==process.cwd());
+const bytes=await fs.readFile(binary);verifyBytes(bytes);await fs.mkdir(directory,{recursive:false});
+await fs.copyFile(binary,join(directory,release.asset));await fs.copyFile('tools/scanner/install-scanner.mjs',join(directory,'install-scanner.mjs'));
+const stage=join(directory,'shielded-inbox');await fs.mkdir(stage,{recursive:false});
+const files=['package.json','chef.config.mjs','schema.graphql','consumer.mjs','consume.mjs','.env.example','.gitignore','README.md','consumer.test.mjs','continuous.test.mjs','cli.test.mjs','verify-recovery.mjs'];
+for(const file of files)await fs.copyFile(join('examples/receipt-consumer',file),join(stage,file));
+for(const file of ['query.mjs','query.graphql','read-transaction.mjs'])await fs.copyFile(join('examples/shielded-inbox',file),join(stage,file));
+await fs.copyFile('LICENSE',join(stage,'LICENSE'));
+await run('tar',['-czf',join(directory,'shielded-inbox.tar.gz'),'-C',directory,'shielded-inbox']);
+await fs.writeFile(join(directory,'scanner-manifest.json'),JSON.stringify({...release,scope:'experimental-testnet-watch-only',tested_runtime:['Linux Ubuntu24.04 x64','WSL2 Ubuntu24.04 x64'],integrity:'SHA256 relative to trusted release; no independent signature'},null,2)+'\n');
+const assets=[release.asset,'install-scanner.mjs','shielded-inbox.tar.gz','scanner-manifest.json'];
+const sums=[];for(const name of assets){const data=await fs.readFile(join(directory,name));sums.push(`${createHash('sha256').update(data).digest('hex')}  ${name}`);}
+await fs.writeFile(join(directory,'SHA256SUMS'),sums.join('\n')+'\n');console.log(JSON.stringify({release:release.tag,assets}));

@@ -1,0 +1,7 @@
+type BlockObservation {
+  id: ID!
+  blockHeight: Int! @index
+  blockHash: String!
+  observationIndex: Int!
+  value: BigInt!
+}
