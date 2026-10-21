@@ -1,0 +1,14 @@
+{
+  "name": "zeer-receipt-consumer-reference",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "chef": "node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js",
+    "consume": "node --env-file=.env consume.mjs",
+    "test": "node --test consumer.test.mjs",
+    "verify:recovery": "node --env-file=.env verify-recovery.mjs"
+  },
+  "engines": { "node": ">=24.14.0" },
+  "dependencies": { "@zeer-dev/chef": "0.2.0", "@zeer-dev/prep-client": "0.1.0" },
+  "devDependencies": { "pg": "8.23.1" }
+}

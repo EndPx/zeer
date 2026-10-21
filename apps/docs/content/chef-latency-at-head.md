@@ -8,6 +8,7 @@ At the head, the question is how long a new source block takes to become queryab
 | --- | --- |
 | Zcash source | The configured node observes a block and its hash |
 | Prep | `/height` reports the block as indexed and queries can return it |
+| Local scanner, when used | Authorized notes finish decryption before their receipt handler runs |
 | Chef | The handler's entities and checkpoint commit to PostgreSQL |
 | GraphQL | Your reader first observes that committed checkpoint and entity |
 
@@ -69,3 +70,7 @@ Applications such as payment observers must recheck their required confirmations
 On 21 October 2026, three separate 12-block paired studies compared Chef 0.1.3's 5-second polling with 1-second and 2-second candidates. Shorter intervals reduced median source-to-GraphQL latency, but every study still observed temporary 503 read gates. None passed the predeclared availability criterion, so polling defaults and production services remained unchanged.
 
 An extra Prep observer affected capacity in the first study. Without that observer, writer-derived Prep timestamps include polling detection delay and cannot isolate source publication latency. See the [live following results and limits](/docs/chef/benchmarks/#live-update-delay-polling-experiment) for timings in seconds, tail observations, correctness checks and raw evidence.
+
+The later [source-admission study](/docs/chef/benchmarks/#live-following-bounded-source-admission) keeps Chef 0.2.0 and polling fixed. It tests bounded metadata waiting with a modern live-tail archive. Both variants had zero failed timed reads; its results cannot establish a live error-rate improvement or full-history cold-start performance.
+
+The separate [shielded receipt observations](/docs/chef/benchmarks/#shielded-receipts-live-observations-and-recovery) measure the path through local decryption, PostgreSQL and a standalone SQLite consumer. They disclose an interrupted initial run, two catch-up receipts and four live recovery samples. Use those results for that application path rather than borrowing public block-summary timings.

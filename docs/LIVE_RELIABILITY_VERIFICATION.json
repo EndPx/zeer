@@ -1,0 +1,77 @@
+{
+  "recorded_date": "2026-10-21",
+  "source_base_commit": "afaca65",
+  "chef_registry_version": "0.2.0",
+  "npm_workspace_links": false,
+  "native_prep": {
+    "production_change": "Height/readiness use the existing bounded request admission queue",
+    "regression_reproduced_on_original": true,
+    "unit_tests_passed": 74,
+    "integration_tests_passed": 7,
+    "clippy_passed_after_installing_tool": true,
+    "release_build_passed": true,
+    "same_compiler_control_matches_original_deployed_binary": true
+  },
+  "new_offline_tests_passed": 11,
+  "standalone_controlled_recovery": {
+    "actual_consumer_process_runs": 8,
+    "fixture_entities": 36,
+    "viewing_key_loaded": false,
+    "simulated_reorg": true,
+    "passed": true
+  },
+  "paired_public_data": {
+    "future_blocks": 12,
+    "restarts_verified": 5,
+    "exact_source_entities": true,
+    "candidate_acceptance": true,
+    "failed_reads_original": 0,
+    "failed_reads_candidate": 0,
+    "live_error_rate_improvement_established": false,
+    "archive": "fully validated modern tail, not full history"
+  },
+  "shielded_observations": {
+    "owned_testnet_transactions": 6,
+    "distinct_mined_blocks": 6,
+    "matching_external_memos_and_values": 6,
+    "selected_note_value_zat": "100000",
+    "total_fee_zat": "60000",
+    "initial_run": { "status": "INCOMPLETE", "live_samples": 1 },
+    "recovery_run": { "live_samples": 4, "catch_up_samples": 2 },
+    "timings_pooled": false,
+    "original_six_live_goal_met": false,
+    "api_and_consumer_restart_verified": true,
+    "persisted_notes_after_restart": 12,
+    "duplicate_ids": 0,
+    "viewing_keys_or_seeds_uploaded": false,
+    "financial_execution_by_zeer": false
+  },
+  "production_activation": {
+    "status": "NOT_ACTIVATED",
+    "reason": "Candidate did not reach full-archive readiness by the declared 1200-second deadline",
+    "candidate_cpu_quota": 0.5,
+    "candidate_memory_mib": 1024,
+    "public_route_changed": false,
+    "original_reader_kept_serving": true,
+    "temporary_unit_removed": true,
+    "guard_registration_restored": true,
+    "hosted_chef_projects_upgraded": false
+  },
+  "cleanup": {
+    "owned_disposable_database_and_role_removed": true,
+    "database_connections_before_removal": 0,
+    "temporary_credential_copies_removed": true,
+    "ssh_tunnel_closed": true,
+    "production_databases_changed": false,
+    "aggregate_resource_guard": "PASS",
+    "aggregate_cpu_quota": 3,
+    "aggregate_memory_mib": 8192
+  },
+  "docs": { "build": "PASS", "local_pages_checked": 44, "responsive_widths": [375, 768, 1440], "axe_violations_at_checked_widths": 0 },
+  "reviews": { "standards": "PASS", "intent": "PASS" },
+  "known_secret_publication_scan_findings": 0,
+  "evidence": [
+    "../apps/docs/static/benchmarks/2026-10-21-chef-admission-testnet.json",
+    "../apps/docs/static/benchmarks/2026-10-21-chef-receipts-testnet.json"
+  ]
+}

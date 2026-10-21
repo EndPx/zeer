@@ -1,0 +1,654 @@
+{
+  "format": "zeer-public-receipt-results-v1",
+  "recorded_date": "2026-10-21",
+  "network": "testnet",
+  "chef_version": "0.2.0",
+  "status": "RECOVERY_VERIFIED_ORIGINAL_LIVE_GOAL_UNMET",
+  "original_live_goal": 6,
+  "original_live_goal_met": false,
+  "runs": [
+    {
+      "id": "initial",
+      "recorded_sampler_status": "INCOMPLETE",
+      "status": "INCOMPLETE",
+      "sample_goal": 6,
+      "live_sample_count": 1,
+      "catch_up_sample_count": 0,
+      "original_live_goal_met": false,
+      "started_at_utc": "2026-10-21T14:39:17.723Z",
+      "completed_at_utc": "2026-10-21T14:45:05.306Z",
+      "selected": [
+        {
+          "txid": "a14297aa83f6e4bb5f00ffeeadbb17f96568da851c27dd0bfe3f3a7cdad78966",
+          "pool": "ironwood",
+          "output_index": 0,
+          "output_identity_sha256": "02c5e6da7e92249d381326fe8161271ee27b744cc40b73b83585ce2a2aa53ac2",
+          "height": 4525872,
+          "block_hash": "00001114d4b5019cbf5d8e6d2a38b912fb26d7f733c57a4efb79232357965f24",
+          "memo": "Zeer live receipt 01",
+          "value_zat": "100000",
+          "scope": "external",
+          "observation_mode": "live",
+          "timestamps": {
+            "prep_ns": "133034094465800",
+            "decrypt_start_ns": "133034106657200",
+            "decrypt_ns": "133034148783800",
+            "handler_start_ns": "133034550817100",
+            "handler_end_ns": "133034552525800",
+            "commit_ns": "133035056470900",
+            "consumer_ns": "133036737497100"
+          },
+          "seconds": {
+            "prep_to_decrypted": 0.054318,
+            "decrypt_service": 0.0421266,
+            "decrypted_to_commit": 0.9076871,
+            "commit_to_consumer": 1.6810262,
+            "prep_to_consumer": 2.6430313
+          }
+        }
+      ],
+      "live_summary": {
+        "prep_to_decrypted": {
+          "samples": 1,
+          "median_seconds": 0.054318,
+          "p95_seconds": 0.054318,
+          "min_seconds": 0.054318,
+          "max_seconds": 0.054318
+        },
+        "decrypt_service": {
+          "samples": 1,
+          "median_seconds": 0.0421266,
+          "p95_seconds": 0.0421266,
+          "min_seconds": 0.0421266,
+          "max_seconds": 0.0421266
+        },
+        "decrypted_to_commit": {
+          "samples": 1,
+          "median_seconds": 0.9076871,
+          "p95_seconds": 0.9076871,
+          "min_seconds": 0.9076871,
+          "max_seconds": 0.9076871
+        },
+        "commit_to_consumer": {
+          "samples": 1,
+          "median_seconds": 1.6810262,
+          "p95_seconds": 1.6810262,
+          "min_seconds": 1.6810262,
+          "max_seconds": 1.6810262
+        },
+        "prep_to_consumer": {
+          "samples": 1,
+          "median_seconds": 2.6430313,
+          "p95_seconds": 2.6430313,
+          "min_seconds": 2.6430313,
+          "max_seconds": 2.6430313
+        }
+      },
+      "errors": [
+        {
+          "at_ns": "132830491141500",
+          "code": "RATE_LIMITED",
+          "status": 429
+        },
+        {
+          "at_ns": "132834498791900",
+          "code": "RATE_LIMITED",
+          "status": 429
+        },
+        {
+          "at_ns": "132939654632500",
+          "code": "RATE_LIMITED",
+          "status": 429
+        }
+      ],
+      "api_statuses": {
+        "/status:200": 249,
+        "/graphql:200": 14
+      },
+      "consumer_states": {
+        "INDEXER_BEHIND": 1,
+        "complete": 26,
+        "unchanged": 215,
+        "INDEXER_RECONCILING": 6,
+        "REVISION_CHANGED": 1
+      },
+      "resource": {
+        "peak_parent_rss_bytes": 81555456,
+        "peak_scanner_rss_not_measured": true
+      },
+      "storage_retries": [],
+      "supervision": {
+        "started_at_utc": "2026-10-21T14:39:16.927Z",
+        "finished_at_utc": "2026-10-21T14:45:08.294Z",
+        "deadline_seconds": 2400,
+        "forced": false,
+        "outcome": "EXITED",
+        "exit": {
+          "code": 1,
+          "signal": null
+        }
+      },
+      "failure": "Sampler stopped after its first completed live observation; generic STUDY_FAILED did not preserve an actionable cause. No full six-live result is claimed."
+    },
+    {
+      "id": "recovery",
+      "recorded_sampler_status": "PASS",
+      "status": "RECEIPT_CHECKS_PASS_LIVE_GOAL_UNMET",
+      "sample_goal": 6,
+      "live_sample_count": 4,
+      "catch_up_sample_count": 2,
+      "original_live_goal_met": false,
+      "started_at_utc": "2026-10-21T14:48:00.344Z",
+      "completed_at_utc": "2026-10-21T14:56:58.969Z",
+      "selected": [
+        {
+          "txid": "a14297aa83f6e4bb5f00ffeeadbb17f96568da851c27dd0bfe3f3a7cdad78966",
+          "pool": "ironwood",
+          "output_index": 0,
+          "output_identity_sha256": "02c5e6da7e92249d381326fe8161271ee27b744cc40b73b83585ce2a2aa53ac2",
+          "height": 4525872,
+          "block_hash": "00001114d4b5019cbf5d8e6d2a38b912fb26d7f733c57a4efb79232357965f24",
+          "memo": "Zeer live receipt 01",
+          "value_zat": "100000",
+          "scope": "external",
+          "observation_mode": "catch_up",
+          "timestamps": {
+            "prep_ns": "133313730398300",
+            "decrypt_start_ns": "133322223800900",
+            "decrypt_ns": "133322257819100",
+            "handler_start_ns": "133322735965300",
+            "handler_end_ns": "133322737460300",
+            "commit_ns": "133323293722400",
+            "consumer_ns": "133329856839400"
+          },
+          "seconds": {
+            "prep_to_decrypted": 8.5274208,
+            "decrypt_service": 0.0340182,
+            "decrypted_to_commit": 1.0359033,
+            "commit_to_consumer": 6.563117,
+            "prep_to_consumer": 16.1264411
+          }
+        },
+        {
+          "txid": "36d6dbdfd99eeaa32f45ab22d589945b848ae6224921afbc46a180c13fbcb3f2",
+          "pool": "ironwood",
+          "output_index": 1,
+          "output_identity_sha256": "0ff485a612ce2094fa7516f5d34df671633dde2f2869cc56c4960cf656cb3e89",
+          "height": 4525878,
+          "block_hash": "000014f10728123d1b898f850458ce8f750b2dc623a5b11dcfd1a706e9fec626",
+          "memo": "Zeer live receipt 02",
+          "value_zat": "100000",
+          "scope": "external",
+          "observation_mode": "catch_up",
+          "timestamps": {
+            "prep_ns": "133331129813100",
+            "decrypt_start_ns": "133331145439700",
+            "decrypt_ns": "133331203164400",
+            "handler_start_ns": "133331581281000",
+            "handler_end_ns": "133331581718000",
+            "commit_ns": "133331964845100",
+            "consumer_ns": "133335595252400"
+          },
+          "seconds": {
+            "prep_to_decrypted": 0.0733513,
+            "decrypt_service": 0.0577247,
+            "decrypted_to_commit": 0.7616807,
+            "commit_to_consumer": 3.6304073,
+            "prep_to_consumer": 4.4654393
+          }
+        },
+        {
+          "txid": "a73c02a71eff1be2509483198d377cbf7807dac4a7ef52fcd758ab9d14444de3",
+          "pool": "ironwood",
+          "output_index": 0,
+          "output_identity_sha256": "e531bbf4a51a97ee50716a71a321ec53a1e242faf95b70a0ec6bdd3d0daccab0",
+          "height": 4525887,
+          "block_hash": "000020e9c27c229f4c3c1677f4934d089376da0629bf35dea3150b26ae0532a6",
+          "memo": "Zeer live receipt 03",
+          "value_zat": "100000",
+          "scope": "external",
+          "observation_mode": "live",
+          "timestamps": {
+            "prep_ns": "133451790137500",
+            "decrypt_start_ns": "133451800325300",
+            "decrypt_ns": "133451836148200",
+            "handler_start_ns": "133452191188200",
+            "handler_end_ns": "133452191646600",
+            "commit_ns": "133452851079400",
+            "consumer_ns": "133454788378000"
+          },
+          "seconds": {
+            "prep_to_decrypted": 0.0460107,
+            "decrypt_service": 0.0358229,
+            "decrypted_to_commit": 1.0149312,
+            "commit_to_consumer": 1.9372986,
+            "prep_to_consumer": 2.9982405
+          }
+        },
+        {
+          "txid": "1272696bf4ac15b9cb476d78cf394426cf98b695d405d57243f77bb9c62a31f2",
+          "pool": "ironwood",
+          "output_index": 0,
+          "output_identity_sha256": "8831817c4fd6e7f5ee8c4b58c4b51c41f569631d254e2ef5d69248c9dc05ea3d",
+          "height": 4525889,
+          "block_hash": "00001295707f91a03fbe2003452618f6a54e90b193a6b9a3e3fc2df4255c4a86",
+          "memo": "Zeer live receipt 04",
+          "value_zat": "100000",
+          "scope": "external",
+          "observation_mode": "live",
+          "timestamps": {
+            "prep_ns": "133613009585900",
+            "decrypt_start_ns": "133613023782000",
+            "decrypt_ns": "133613057395200",
+            "handler_start_ns": "133613544447100",
+            "handler_end_ns": "133613544739500",
+            "commit_ns": "133614021913600",
+            "consumer_ns": "133615730087600"
+          },
+          "seconds": {
+            "prep_to_decrypted": 0.0478093,
+            "decrypt_service": 0.0336132,
+            "decrypted_to_commit": 0.9645184,
+            "commit_to_consumer": 1.708174,
+            "prep_to_consumer": 2.7205017
+          }
+        },
+        {
+          "txid": "e0345ead87a4a92fbdb17a40a1d32162191d3e090f53052067851d2ebdaf2b45",
+          "pool": "ironwood",
+          "output_index": 1,
+          "output_identity_sha256": "ef6268196f8ac4530fd071f7d689a947d579c5115f55e31932558c5542890746",
+          "height": 4525894,
+          "block_hash": "0000130cd9ba6574b45372e21dd7f6671933ff061dcd899ad06bf73f284ed4f4",
+          "memo": "Zeer live receipt 05",
+          "value_zat": "100000",
+          "scope": "external",
+          "observation_mode": "live",
+          "timestamps": {
+            "prep_ns": "133766761549000",
+            "decrypt_start_ns": "133766761702700",
+            "decrypt_ns": "133766794549600",
+            "handler_start_ns": "133767240911700",
+            "handler_end_ns": "133767241500400",
+            "commit_ns": "133767737993900",
+            "consumer_ns": "133769244056700"
+          },
+          "seconds": {
+            "prep_to_decrypted": 0.0330006,
+            "decrypt_service": 0.0328469,
+            "decrypted_to_commit": 0.9434443,
+            "commit_to_consumer": 1.5060628,
+            "prep_to_consumer": 2.4825077
+          }
+        },
+        {
+          "txid": "c6dced25f853c3c27cc22d232e3a18ed2198a8390d1ff695cfaa8f35852cb8ba",
+          "pool": "ironwood",
+          "output_index": 1,
+          "output_identity_sha256": "199507194c3282c1f127daf5b52cc89ce704a00d43de6259b6432b198a23990f",
+          "height": 4525896,
+          "block_hash": "00001202757ce80f488560a2142710ae2d6fb3c38b039e96df67df61c54ee41a",
+          "memo": "Zeer live receipt 06",
+          "value_zat": "100000",
+          "scope": "external",
+          "observation_mode": "live",
+          "timestamps": {
+            "prep_ns": "133841521167300",
+            "decrypt_start_ns": "133841534554100",
+            "decrypt_ns": "133841567165000",
+            "handler_start_ns": "133842056020600",
+            "handler_end_ns": "133842056574700",
+            "commit_ns": "133842664123200",
+            "consumer_ns": "133844720486700"
+          },
+          "seconds": {
+            "prep_to_decrypted": 0.0459977,
+            "decrypt_service": 0.0326109,
+            "decrypted_to_commit": 1.0969582,
+            "commit_to_consumer": 2.0563635,
+            "prep_to_consumer": 3.1993194
+          }
+        }
+      ],
+      "live_summary": {
+        "prep_to_decrypted": {
+          "samples": 4,
+          "median_seconds": 0.0460042,
+          "p95_seconds": 0.0478093,
+          "min_seconds": 0.0330006,
+          "max_seconds": 0.0478093
+        },
+        "decrypt_service": {
+          "samples": 4,
+          "median_seconds": 0.03323005,
+          "p95_seconds": 0.0358229,
+          "min_seconds": 0.0326109,
+          "max_seconds": 0.0358229
+        },
+        "decrypted_to_commit": {
+          "samples": 4,
+          "median_seconds": 0.9897248,
+          "p95_seconds": 1.0969582,
+          "min_seconds": 0.9434443,
+          "max_seconds": 1.0969582
+        },
+        "commit_to_consumer": {
+          "samples": 4,
+          "median_seconds": 1.8227363,
+          "p95_seconds": 2.0563635,
+          "min_seconds": 1.5060628,
+          "max_seconds": 2.0563635
+        },
+        "prep_to_consumer": {
+          "samples": 4,
+          "median_seconds": 2.8593710999999997,
+          "p95_seconds": 3.1993194,
+          "min_seconds": 2.4825077,
+          "max_seconds": 3.1993194
+        }
+      },
+      "errors": [
+        {
+          "at_ns": "133620488193500",
+          "code": "RATE_LIMITED",
+          "status": 429
+        },
+        {
+          "at_ns": "133776235903600",
+          "code": "RATE_LIMITED",
+          "status": 429
+        }
+      ],
+      "api_statuses": {
+        "/status:200": 385,
+        "/graphql:200": 26
+      },
+      "consumer_states": {
+        "INDEXER_BEHIND": 1,
+        "REVISION_CHANGED": 8,
+        "complete": 36,
+        "unchanged": 333,
+        "INDEXER_RECONCILING": 4
+      },
+      "resource": {
+        "peak_parent_rss_bytes": 80777216,
+        "peak_scanner_rss_not_measured": true,
+        "parent_cpu_seconds": 4.359
+      },
+      "storage_retries": [],
+      "supervision": {
+        "started_at_utc": "2026-10-21T14:47:59.343Z",
+        "finished_at_utc": "2026-10-21T14:57:01.880Z",
+        "deadline_seconds": 2400,
+        "forced": false,
+        "outcome": "EXITED",
+        "exit": {
+          "code": 0,
+          "signal": null
+        }
+      },
+      "interpretation": "The recorded PASS verifies all six receipt rows. Two are catch_up; this derived report explicitly leaves the original six-live goal unmet. Timings from different runs are not pooled."
+    }
+  ],
+  "operations": [
+    {
+      "ordinal": 1,
+      "txid": "a14297aa83f6e4bb5f00ffeeadbb17f96568da851c27dd0bfe3f3a7cdad78966",
+      "pool": "ironwood",
+      "note_value_zat": "100000",
+      "fee_zat": "10000",
+      "memo": "Zeer live receipt 01"
+    },
+    {
+      "ordinal": 2,
+      "txid": "36d6dbdfd99eeaa32f45ab22d589945b848ae6224921afbc46a180c13fbcb3f2",
+      "pool": "ironwood",
+      "note_value_zat": "100000",
+      "fee_zat": "10000",
+      "memo": "Zeer live receipt 02"
+    },
+    {
+      "ordinal": 3,
+      "txid": "a73c02a71eff1be2509483198d377cbf7807dac4a7ef52fcd758ab9d14444de3",
+      "pool": "ironwood",
+      "note_value_zat": "100000",
+      "fee_zat": "10000",
+      "memo": "Zeer live receipt 03"
+    },
+    {
+      "ordinal": 4,
+      "txid": "1272696bf4ac15b9cb476d78cf394426cf98b695d405d57243f77bb9c62a31f2",
+      "pool": "ironwood",
+      "note_value_zat": "100000",
+      "fee_zat": "10000",
+      "memo": "Zeer live receipt 04"
+    },
+    {
+      "ordinal": 5,
+      "txid": "e0345ead87a4a92fbdb17a40a1d32162191d3e090f53052067851d2ebdaf2b45",
+      "pool": "ironwood",
+      "note_value_zat": "100000",
+      "fee_zat": "10000",
+      "memo": "Zeer live receipt 05"
+    },
+    {
+      "ordinal": 6,
+      "txid": "c6dced25f853c3c27cc22d232e3a18ed2198a8390d1ff695cfaa8f35852cb8ba",
+      "pool": "ironwood",
+      "note_value_zat": "100000",
+      "fee_zat": "10000",
+      "memo": "Zeer live receipt 06"
+    }
+  ],
+  "total_fee_zat": "60000",
+  "viewing_key_remained_local": true,
+  "spending_helper_not_part_of_zeer": true,
+  "boundaries": {
+    "fixture_reorg_separate": true,
+    "clock": "Windows process.hrtime.bigint; consumer timestamp after parent reads revision-matched committed SQLite snapshot",
+    "prep_start": "First client receipt of matching raw transaction; includes detection/transport, not exact server publication",
+    "block_production_excluded": true,
+    "confirmation_wait_excluded": true,
+    "exact_block_wait_not_measured": true,
+    "producer_poll_target_seconds": 2,
+    "consumer_poll_target_seconds": 1,
+    "source_http": "Public shared-preview endpoint with2r/s global ingress and burst8",
+    "database": "VPS PostgreSQL reached from Windows over encrypted SSH tunnel",
+    "resource": "Parent RSS/CPU only; scanner/child aggregate peaks not measured. VPS aggregate quotas remain3CPU/8GiB."
+  },
+  "registry": {
+    "version": "0.2.0",
+    "resolved": "https://registry.npmjs.org/@zeer-dev/chef/-/chef-0.2.0.tgz",
+    "integrity": "sha512-A5R3nL75KmonUAbGa1WTosXNgzkNYAmV3j9I5tufXqsPfRVMhYMEa2SX/mfGPA/BTtIMe6VSFMnDRdzglVaj+Q==",
+    "workspace_link": false
+  },
+  "restart": {
+    "passed": true,
+    "api_and_consumer_restarted": true,
+    "rows": 12,
+    "external_selected_notes": 6,
+    "duplicate_ids": 0,
+    "unchanged_sha256": "841ed47b0e4047d760fc953f5c1699bd38185a2f7a5307d8d1a86f7f97036adf",
+    "checkpoint": {
+      "height": 4525896,
+      "hash": "00001202757ce80f488560a2142710ae2d6fb3c38b039e96df67df61c54ee41a",
+      "anchorHash": "00001b7d150b4cd133e195cc09582a2bf9a9cf99e4bccd0d809bd14b1ef0f48c",
+      "status": "ready",
+      "undoFloor": 4525861
+    },
+    "viewing_key_loaded": false,
+    "canonicality_rechecked": true
+  },
+  "source_canonicality": {
+    "network": "testnet",
+    "all_six_mined_canonical_at_source": true,
+    "checked_at_unix": 1792595043.6193624,
+    "observations": [
+      {
+        "ordinal": 1,
+        "txid": "a14297aa83f6e4bb5f00ffeeadbb17f96568da851c27dd0bfe3f3a7cdad78966",
+        "height": 4525872,
+        "block_hash": "00001114d4b5019cbf5d8e6d2a38b912fb26d7f733c57a4efb79232357965f24",
+        "confirmations_observed": 44
+      },
+      {
+        "ordinal": 2,
+        "txid": "36d6dbdfd99eeaa32f45ab22d589945b848ae6224921afbc46a180c13fbcb3f2",
+        "height": 4525878,
+        "block_hash": "000014f10728123d1b898f850458ce8f750b2dc623a5b11dcfd1a706e9fec626",
+        "confirmations_observed": 38
+      },
+      {
+        "ordinal": 3,
+        "txid": "a73c02a71eff1be2509483198d377cbf7807dac4a7ef52fcd758ab9d14444de3",
+        "height": 4525887,
+        "block_hash": "000020e9c27c229f4c3c1677f4934d089376da0629bf35dea3150b26ae0532a6",
+        "confirmations_observed": 29
+      },
+      {
+        "ordinal": 4,
+        "txid": "1272696bf4ac15b9cb476d78cf394426cf98b695d405d57243f77bb9c62a31f2",
+        "height": 4525889,
+        "block_hash": "00001295707f91a03fbe2003452618f6a54e90b193a6b9a3e3fc2df4255c4a86",
+        "confirmations_observed": 27
+      },
+      {
+        "ordinal": 5,
+        "txid": "e0345ead87a4a92fbdb17a40a1d32162191d3e090f53052067851d2ebdaf2b45",
+        "height": 4525894,
+        "block_hash": "0000130cd9ba6574b45372e21dd7f6671933ff061dcd899ad06bf73f284ed4f4",
+        "confirmations_observed": 22
+      },
+      {
+        "ordinal": 6,
+        "txid": "c6dced25f853c3c27cc22d232e3a18ed2198a8390d1ff695cfaa8f35852cb8ba",
+        "height": 4525896,
+        "block_hash": "00001202757ce80f488560a2142710ae2d6fb3c38b039e96df67df61c54ee41a",
+        "confirmations_observed": 20
+      }
+    ]
+  },
+  "controlled_recovery": {
+    "source": "controlled-regtest-branches",
+    "live_shielded_latency": false,
+    "viewing_key_loaded": false,
+    "project": "ref_3fda4535b9c6414ebd5f7f",
+    "checks": {
+      "killed_after_atomic_page": true,
+      "restart_resumed_opaque_cursor": true,
+      "completed_restart_no_duplicates": true,
+      "invalid_cursor_does_not_promote_staging": true,
+      "orphan_removal_and_reincluded_output_context": true,
+      "closed_gate_preserves_last_complete_observation": true,
+      "source_recovery_resumes": true,
+      "actual_graphql_409_observed": true
+    },
+    "process_runs": 8,
+    "final_count": 36,
+    "final_revision": "7",
+    "final_sha256": "af29ea02afcf37647003f0be97e7f808e9322bb9d8640d31e04bac6e21879a8d",
+    "api_requests": [
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 409
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      }
+    ],
+    "package_version": "0.2.0",
+    "workspace_link": false,
+    "passed": true,
+    "owned_fixture_namespace_removed": true
+  },
+  "source": {
+    "files": {
+      "receipt-live.mjs": "// Run from a copied, registry-installed receipt-consumer directory. Keys stay local.\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs/promises';\nimport {join,resolve} from 'node:path';\nimport {randomUUID,createHash} from 'node:crypto';\nimport {spawn} from 'node:child_process';\nimport {setTimeout as delay} from 'node:timers/promises';\nimport {DatabaseSync} from 'node:sqlite';\nimport {PrepClient} from '@zeer-dev/prep-client';\nimport {NativeReceiptSource,PostgresStore,parseModel,syncStep,createChefServer,decodeMemo} from '@zeer-dev/chef';\n\nprocess.umask(0o077);\nconst root=process.cwd(),out=resolve(process.env.STUDY_DIRECTORY);await fs.mkdir(out,{recursive:false,mode:0o700});\nassert.equal(JSON.parse(await fs.readFile('node_modules/@zeer-dev/chef/package.json','utf8')).version,'0.2.0');\nassert.equal((await fs.lstat('node_modules/@zeer-dev/chef')).isSymbolicLink(),false);\nconst now=()=>process.hrtime.bigint().toString(),seconds=(end,start)=>Number(BigInt(end)-BigInt(start))/1e9;\nconst prep=new PrepClient({url:'https://zeer.endpx.cloud/api/prep',timeoutMs:15000});\nconst meta=await prep.getHeight();assert.equal(meta.network,'testnet');assert.ok(meta.ready);\nconst from=process.env.STUDY_FROM_HEIGHT?Number(process.env.STUDY_FROM_HEIGHT):meta.indexed_height,project='live_'+randomUUID().replaceAll('-','').slice(0,22);assert.ok(Number.isInteger(from)&&from>=meta.indexed_height-100&&from<=meta.indexed_height);\nconst account=JSON.parse(await fs.readFile(process.env.ZEER_ACCOUNT_FILE,'utf8'));\nconst scanner=new NativeReceiptSource({executable:process.env.ZEER_SCANNER_EXECUTABLE,keyFile:process.env.ZEER_VIEWING_KEY_FILE,accountId:account.account_id,keyFingerprint:account.key_fingerprint});\nconst model=parseModel(await fs.readFile('schema.graphql','utf8'));\nconst store=new PostgresStore(process.env.DATABASE_URL,{project,fingerprint:'receipt-live-v1',model,network:'testnet',startHeight:from,reorgWindow:100});\nconst proof={format:'zeer-live-receipt-v1',status:'RUNNING',started_at_utc:new Date().toISOString(),project,from_height:from,sample_goal:6,deadline_seconds:2400,chef_version:'0.2.0',prep_url:'https://zeer.endpx.cloud/api/prep',producer_poll_seconds:2,consumer_poll_seconds:1,consumer_clock:'parent receipt of child post-SQLite-commit event; upper bound',database_transport:'PostgreSQL on VPS through encrypted SSH tunnel from Windows',viewing_key_remained_local:true,events:[],observations:{},consumer_events:[],errors:[],api_statuses:{},resource:{peak_parent_rss_bytes:0,peak_scanner_rss_not_measured:true}};\nconst rows=proof.observations,entry=txid=>rows[txid]??=( {txid} );\nconst client={getHeight:(...args)=>prep.getHeight(...args),get:async(...args)=>{const start=now();const page=await prep.get(...args),at=now();for(const tx of page.data.transactions??[]){const r=entry(tx.txid);r.prep_ns??=at;r.prep_request_ns??=start;r.height??=tx.block_height;}return page;}};\nconst originalScan=scanner.scan.bind(scanner);scanner.scan=async(input,signal)=>{const start=now();const receipts=await originalScan(input,signal);const at=now();const r=entry(input.transaction.txid);r.decrypt_start_ns??=start;r.decrypt_ns??=at;r.hash=input.block.hash;return receipts;};\nconst originalApply=store.applyBatch.bind(store);store.applyBatch=async(blocks,handler)=>{await originalApply(blocks,handler);const at=now();for(const r of Object.values(rows))if(blocks.some(b=>b.height===r.height)&&r.handler_end_ns&&!r.commit_ns)r.commit_ns=at;};\nconst indexer={async receipt({block,receipt,context}){const r=entry(receipt.txid);r.handler_start_ns??=now();await context.entities.set('ReadableNote',{id:receipt.id,txid:receipt.txid,pool:receipt.pool,outputIndex:receipt.output_index,blockHeight:block.height,blockHash:block.hash,valueZat:BigInt(receipt.value_zat),receiver:receipt.receiver,memoHex:receipt.memo_hex,...decodeMemo(receipt.memo_hex),scope:receipt.scope,origin:receipt.origin,coinbase:receipt.is_coinbase});r.handler_end_ns=now();}};\nconst dbFile=join(out,'consumer.sqlite'),token=process.env.CHEF_API_TOKEN;let server,child,fatal=null,buffer='';\nconst save=async()=>{await fs.writeFile(join(out,'raw-private.tmp'),JSON.stringify(proof,null,2));for(let attempt=0;;attempt++){try{await fs.rename(join(out,'raw-private.tmp'),join(out,'raw-private.json'));return;}catch(error){if(!['EPERM','EBUSY','EACCES'].includes(error.code)||attempt===4)throw error;proof.storage_retries??=[];proof.storage_retries.push({code:error.code,attempt,at_ns:now()});await delay(50*2**attempt);}}};\nconst fail=code=>{fatal??=code;};\ntry{\n await store.migrate();await store.acquire();server=createChefServer({store,model,token});server.on('request',(req,res)=>res.once('finish',()=>{const key=`${req.url}:${res.statusCode}`;proof.api_statuses[key]=(proof.api_statuses[key]??0)+1;}));\n await new Promise(r=>server.listen(0,'127.0.0.1',r));\n const origin=`http://127.0.0.1:${server.address().port}`;\n child=spawn(process.execPath,['consume.mjs','--db',dbFile,'--from',String(from),'--project',project,'--rounds','3600','--interval-seconds','1','--deadline-seconds','2400'],{cwd:root,env:{...process.env,CHEF_URL:origin},windowsHide:true,stdio:['ignore','pipe','pipe']});\n child.on('error',()=>fail('CONSUMER_SPAWN_FAILED'));child.on('exit',(code,signal)=>{if(!proof.stopping)fail('CONSUMER_EXITED');proof.consumer_exit={code,signal};});\n child.stderr.on('data',()=>{proof.consumer_stderr_events=(proof.consumer_stderr_events??0)+1;});\n child.stdout.on('data',chunk=>{try{buffer+=chunk;if(buffer.length>100000)throw Error();for(;;){const i=buffer.indexOf('\\n');if(i<0)break;const line=buffer.slice(0,i);buffer=buffer.slice(i+1);if(!line)continue;const value=JSON.parse(line),at=now();proof.consumer_events.push({...value,received_ns:at});if(value.event==='page'&&value.state==='complete'){\n  const db=new DatabaseSync(dbFile,{readOnly:true});try{db.exec('BEGIN');const snapshot=JSON.parse(db.prepare('SELECT payload FROM state WHERE singleton=1').get().payload);const items=db.prepare('SELECT payload FROM entities').all();db.exec('COMMIT');const storedAt=now();if(snapshot.complete?.revision===value.revision)for(const item of items){const note=JSON.parse(item.payload);if(note.scope==='external'&&/^Zeer live receipt 0[1-6]$/.test(note.memoText??'')){const r=entry(note.txid);r.consumer_ns??=storedAt;r.output_id=note.id;r.output_index=note.outputIndex;r.memo=note.memoText;r.value_zat=note.valueZat;r.pool=note.pool;r.scope=note.scope;r.receiver_sha256=createHash('sha256').update(note.receiver).digest('hex');r.consumer_hash=note.blockHash;r.consumer_height=note.blockHeight;}}}finally{db.close();}\n }}}catch{fail('CONSUMER_EVENT_INVALID');}});\n const bootstrap=await syncStep({client,store,indexer,receiptSource:scanner,network:'testnet',startHeight:from,reorgWindow:100,pageSize:16,batchSize:1,transactionFilter:{shielded_pools:['sapling','orchard','ironwood']}});proof.events.push({at_ns:now(),bootstrap:true,...bootstrap});\n await delay(500);if(fatal)throw Error(fatal);await save();\n await fs.writeFile(join(out,'ready.json'),JSON.stringify({project,from_height:from,pid:process.pid,origin}));\n console.log(JSON.stringify({state:'ready',project,from_height:from}));\n const start=Date.now(),cpu=process.cpuUsage();\n while(Date.now()-start<2400000){\n  if(fatal)throw Error(fatal);if(await fs.stat(join(out,'stop')).then(()=>true,()=>false))break;\n  const tick=Date.now();try{const result=await syncStep({client,store,indexer,receiptSource:scanner,network:'testnet',startHeight:from,reorgWindow:100,pageSize:16,batchSize:1,transactionFilter:{shielded_pools:['sapling','orchard','ironwood']}});proof.events.push({at_ns:now(),...result});}\n  catch(error){proof.errors.push({at_ns:now(),code:typeof error.code==='string'?error.code:'SYNC_FAILED',status:error.status??0});if(![429,409,500,502,503,504].includes(error.status??0))throw Error('NONRECOVERABLE_SYNC_ERROR');}\n  proof.resource.peak_parent_rss_bytes=Math.max(proof.resource.peak_parent_rss_bytes,process.memoryUsage().rss);await save();await delay(Math.max(0,2000-(Date.now()-tick)));\n }\n proof.resource.parent_cpu_seconds=(process.cpuUsage(cpu).user+process.cpuUsage(cpu).system)/1e6;\n const expected=JSON.parse(await fs.readFile(join(out,'expected-operations.json'),'utf8'));\n assert.equal(expected.length,6);assert.deepEqual(expected.map(r=>r.ordinal),[1,2,3,4,5,6]);assert.equal(new Set(expected.map(r=>r.txid)).size,6);\n const selected=expected.map(operation=>{const r=rows[operation.txid];assert.ok(r?.consumer_ns,'LIVE_SAMPLE_GOAL_NOT_MET');assert.equal(r.memo,`Zeer live receipt 0${operation.ordinal}`);r.observation_mode=operation.observation_mode??'live';return r;});assert.equal(new Set(selected.map(r=>r.height)).size,6);assert.equal(new Set(selected.map(r=>r.receiver_sha256)).size,1);\n for(const r of selected){assert.equal(r.value_zat,'100000');assert.equal(r.pool,'ironwood');assert.equal(r.hash,r.consumer_hash);assert.equal(r.height,r.consumer_height);assert.ok(BigInt(r.prep_ns)<=BigInt(r.decrypt_start_ns)&&BigInt(r.decrypt_ns)<=BigInt(r.handler_start_ns)&&BigInt(r.handler_end_ns)<=BigInt(r.commit_ns));\n  const page=await prep.get({from_block:r.height,to_block:r.height+1,field_selection:{block:['height','hash'],transaction:[]}});assert.equal(page.data.blocks[0].hash,r.hash);r.canonical_rechecked_at=new Date().toISOString();\n  r.seconds={prep_to_decrypted:seconds(r.decrypt_ns,r.prep_ns),decrypt_service:seconds(r.decrypt_ns,r.decrypt_start_ns),decrypted_to_commit:seconds(r.commit_ns,r.decrypt_ns),commit_to_consumer:seconds(r.consumer_ns,r.commit_ns),prep_to_consumer:seconds(r.consumer_ns,r.prep_ns)};\n }\n proof.selected=selected;proof.status='PASS';\n}catch(error){proof.status='INCOMPLETE';proof.failure=error.message?.match(/^[A-Z_]+$/)?.[0]??'STUDY_FAILED';proof.failure_code=String(error.code??error.name??'UNKNOWN').match(/^[A-Z_a-z0-9]+$/)?.[0]??'UNKNOWN';proof.failure_syscall=String(error.syscall??'').match(/^[a-z]+$/)?.[0]??null;process.exitCode=1;}\nfinally{proof.stopping=true;if(child&&child.exitCode===null){const exit=new Promise(r=>child.once('exit',r));child.kill('SIGTERM');await Promise.race([exit,delay(3000)]);if(child.exitCode===null)child.kill('SIGKILL');}\n if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}await scanner.close();await store.close();proof.completed_at_utc=new Date().toISOString();await save();console.log(JSON.stringify({status:proof.status,samples:Object.values(rows).filter(r=>r.consumer_ns).length,failure:proof.failure}));}\n",
+      "receipt-supervisor.mjs": "// Independent Windows process-tree deadline for the local live-receipt study.\nimport {spawn} from 'node:child_process';\nimport {writeFile} from 'node:fs/promises';\nimport {join} from 'node:path';\nimport assert from 'node:assert/strict';\nassert.equal(process.platform,'win32');\nconst out=process.env.STUDY_DIRECTORY;assert.ok(out);\nconst started=new Date().toISOString();let forced=false;\nconst child=spawn(process.execPath,['--env-file=.env','receipt-live.mjs'],{cwd:process.cwd(),env:process.env,windowsHide:true,stdio:'inherit'});\nconst timer=setTimeout(()=>{forced=true;if(child.exitCode===null&&child.signalCode===null){const kill=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});kill.on('error',()=>{process.exitCode=1;});}},2400000);\nconst exit=await new Promise((resolve,reject)=>{child.once('exit',(code,signal)=>resolve({code,signal}));child.once('error',reject);});clearTimeout(timer);\nawait writeFile(join(out,'supervision.json'),JSON.stringify({started_at_utc:started,finished_at_utc:new Date().toISOString(),deadline_seconds:2400,forced,outcome:forced?'INCOMPLETE_DEADLINE':'EXITED',exit},null,2));\nprocess.exitCode=forced||exit.code!==0?1:0;\n",
+      "consumer.mjs": "import {DatabaseSync} from 'node:sqlite';\nimport {mkdirSync,existsSync,lstatSync,openSync,closeSync} from 'node:fs';\nimport {dirname} from 'node:path';\nimport {createHash} from 'node:crypto';\n\nexport class ConsumerError extends Error {\n  constructor(code){super(code);this.code=code;}\n}\nconst requireValue=(ok,code)=>{if(!ok)throw new ConsumerError(code);};\nconst integer=value=>Number.isInteger(value)&&value>=0&&value<=2147483647;\nconst name=value=>typeof value==='string'&&/^[_A-Za-z][_0-9A-Za-z]{0,63}$/.test(value)&&!value.startsWith('__');\nconst hash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);\nconst revision=value=>typeof value==='string'&&/^(0|[1-9][0-9]*)$/.test(value);\nconst compare=(a,b)=>a.height-b.height||Buffer.compare(Buffer.from(a.id),Buffer.from(b.id));\nconst defaultFields=['id','txid','pool','outputIndex','blockHeight','blockHash','valueZat','receiver','memoHex','memoKind','memoText','scope','origin','coinbase'];\n\n/** A bounded, reversible local projection. Completing a sweep replaces the range. */\nexport class RangeConsumer {\n  constructor({file,url,token,project,from,to,entity='ReadableNote',heightField='blockHeight',fields=defaultFields,pageSize=25,maxRange=1000,maxRows=10000,maxAgeSeconds=30,fetchImpl=fetch,onPage=()=>{}}){\n    const endpoint=new URL(url);\n    requireValue(/^https?:$/.test(endpoint.protocol)&&!endpoint.username&&!endpoint.password&&!endpoint.search&&!endpoint.hash,'INVALID_ENDPOINT');\n    requireValue(endpoint.protocol==='https:'||['localhost','127.0.0.1','[::1]'].includes(endpoint.hostname),'HTTPS_OR_LOOPBACK_REQUIRED');\n    requireValue(endpoint.pathname==='/'||endpoint.pathname==='','ENDPOINT_MUST_BE_ORIGIN');\n    requireValue(typeof token==='string'&&Buffer.byteLength(token)>=16&&Buffer.byteLength(token)<=4096&&!/[\\r\\n]/.test(token),'INVALID_API_TOKEN');\n    requireValue(typeof project==='string'&&/^[a-z][a-z0-9_]{0,31}$/.test(project),'INVALID_PROJECT');\n    requireValue(integer(from)&&(to===undefined||integer(to)&&to>=from),'INVALID_RANGE');\n    requireValue(integer(maxRange)&&maxRange>=1&&maxRange<=1000&&integer(maxRows)&&maxRows>=1&&maxRows<=100000,'INVALID_BUDGET');\n    requireValue(integer(pageSize)&&pageSize>=1&&pageSize<=100&&Number.isFinite(maxAgeSeconds)&&maxAgeSeconds>=1&&maxAgeSeconds<=120,'INVALID_LIMIT');\n    requireValue(name(entity)&&name(heightField)&&heightField!=='id'&&Array.isArray(fields)&&fields.length<=24&&fields.every(name),'INVALID_FIELDS');\n    fields=[...new Set(['id',heightField,...fields])].sort();\n    requireValue(fields.length<=24,'INVALID_FIELDS');\n    mkdirSync(dirname(file),{recursive:true,mode:0o700});\n    const existing=existsSync(file);\n    requireValue(!existing||lstatSync(file).isFile()&&!lstatSync(file).isSymbolicLink(),'INVALID_DATABASE_FILE');\n    const fd=openSync(file,'a',0o600);closeSync(fd);\n    this.db=new DatabaseSync(file);\n    if(existing&&this.db.prepare('PRAGMA application_id').get().application_id!==0x5a454552){this.db.close();throw new ConsumerError('UNMARKED_DATABASE');}\n    if(!existing)this.db.exec(`PRAGMA application_id=${0x5a454552}`);\n    this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; CREATE TABLE IF NOT EXISTS state(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL,identity TEXT NOT NULL,payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS staging(id TEXT PRIMARY KEY,height INTEGER NOT NULL,payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS entities(id TEXT PRIMARY KEY,height INTEGER NOT NULL,payload TEXT NOT NULL)');\n    this.options={url:endpoint.origin,token,project,from,to,entity,heightField,fields,pageSize,maxRange,maxRows,maxAgeSeconds};\n    this.fetch=fetchImpl;this.onPage=onPage;this.busy=false;\n    const identity=createHash('sha256').update(JSON.stringify({url:endpoint.origin,project,from,to:to??null,entity,heightField,fields,maxRange,maxRows})).digest('hex');\n    this.db.prepare('INSERT OR IGNORE INTO state VALUES(1,0,?,?)').run(identity,JSON.stringify({scan:null,complete:null}));\n    if(this.db.prepare('SELECT identity FROM state WHERE singleton=1').get().identity!==identity){this.db.close();throw new ConsumerError('CONSUMER_IDENTITY_MISMATCH');}\n  }\n  state(){const row=this.db.prepare('SELECT version,payload FROM state WHERE singleton=1').get();return {version:row.version,...JSON.parse(row.payload)};}\n  update(expected,change){\n    this.db.exec('BEGIN IMMEDIATE');\n    try{\n      const current=this.state();requireValue(current.version===expected,'CONSUMER_BUSY');\n      const next=change(current);\n      this.db.prepare('UPDATE state SET version=version+1,payload=? WHERE singleton=1').run(JSON.stringify({scan:next.scan,complete:next.complete}));\n      this.db.exec('COMMIT');return this.state();\n    }catch(error){this.db.exec('ROLLBACK');throw error;}\n  }\n  reset(current){return this.update(current.version,state=>{this.db.exec('DELETE FROM staging');return {...state,scan:null};});}\n  async request(path,payload,signal){\n    const timeout=AbortSignal.timeout(5000);\n    let response;\n    try{response=await this.fetch(this.options.url+path,{method:payload?'POST':'GET',headers:{authorization:`Bearer ${this.options.token}`,...(payload?{'content-type':'application/json'}:{})},body:payload?JSON.stringify(payload):undefined,redirect:'error',signal:signal?AbortSignal.any([signal,timeout]):timeout});}\n    catch{if(signal?.aborted)throw signal.reason;return {wait:'TRANSPORT_UNAVAILABLE'};}\n    let value;\n    try{\n      const reader=response.body.getReader();let size=0;const chunks=[];\n      try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>2*1024*1024){await reader.cancel();throw new ConsumerError('RESPONSE_TOO_LARGE');}chunks.push(value);}}\n      finally{reader.releaseLock();}\n      value=JSON.parse(Buffer.concat(chunks).toString('utf8'));\n    }catch(error){if(error instanceof ConsumerError)throw error;if(signal?.aborted)throw signal.reason;return {wait:'RESPONSE_UNAVAILABLE'};}\n    if(response.status===401||response.status===403)throw new ConsumerError('API_UNAUTHORIZED');\n    if(response.status===409&&value.errors?.[0]?.extensions?.code==='CURSOR_INVALIDATED')return {invalidated:true};\n    if(response.status===429||response.status>=500)return {wait:`HTTP_${response.status}`};\n    requireValue(response.status===200,'API_PROTOCOL_ERROR');return {value};\n  }\n  fresh(status){\n    requireValue(status&&status.project===this.options.project,'PROJECT_IDENTITY_CHANGED');\n    requireValue(typeof status.generation==='string'&&status.generation.length>0&&revision(status.revision),'INVALID_STATUS');\n    const cp=status.checkpoint;\n    requireValue(cp&&['ready','reconciling','blocked'].includes(cp.status),'INVALID_STATUS');\n    if(cp.status!=='ready')return 'INDEXER_'+cp.status.toUpperCase();\n    const source=status.source,now=Date.now(),age=this.options.maxAgeSeconds*1000;\n    if(source?.status!=='available'||!integer(source.prepIndexedHeight)||!integer(source.sourceObservedHeight)||!Number.isSafeInteger(source.sourceObservedAt))return 'SOURCE_UNKNOWN_OR_UNAVAILABLE';\n    const checked=Date.parse(source.checkedAt),observed=source.sourceObservedAt*1000;\n    if(!Number.isFinite(checked)||checked>now+60000||observed>now+60000||now-checked>age||now-observed>age)return 'SOURCE_OBSERVATION_STALE';\n    if(!integer(cp.height)||!hash(cp.hash)||cp.height<this.options.from)return 'INDEXER_BEHIND';\n    return null;\n  }\n  async step({maxPages=20,signal}={}){\n    requireValue(!this.busy,'CONSUMER_BUSY');requireValue(integer(maxPages)&&maxPages>=1&&maxPages<=100,'INVALID_PAGE_BUDGET');\n    this.busy=true;\n    try{\n      const statusResponse=await this.request('/status',undefined,signal);if(statusResponse.wait)return {state:'waiting',reason:statusResponse.wait};\n      requireValue(statusResponse.value,'INVALID_STATUS');const status=statusResponse.value,wait=this.fresh(status);\n      if(wait)return {state:'waiting',reason:wait};\n      let current=this.state();\n      if(current.complete)requireValue(current.complete.generation===status.generation,'PROJECT_GENERATION_CHANGED');\n      if(current.scan)requireValue(current.scan.generation===status.generation,'PROJECT_GENERATION_CHANGED');\n      if(!current.scan){\n        const target=this.options.to??status.checkpoint.height;\n        if(target>status.checkpoint.height)return {state:'waiting',reason:'INDEXER_BEHIND'};\n        const end=Math.max(target,current.complete?.to??target);\n        requireValue(end-this.options.from+1<=this.options.maxRange,'WATCHED_RANGE_LIMIT');\n        if(current.complete?.revision===status.revision&&current.complete.to===end)return {state:'unchanged',revision:status.revision};\n        current=this.update(current.version,state=>{this.db.exec('DELETE FROM staging');return {...state,scan:{to:end,generation:status.generation,revision:status.revision,checkpoint:status.checkpoint,after:null,last:null,pages:0}};});\n      }\n      for(let page=0;page<maxPages;page++){\n        signal?.throwIfAborted();const scan=current.scan;\n        const {entity,heightField,fields,from,pageSize}=this.options;\n        const query=`query Page($after:ID){ ${entity}List(first:${pageSize},after:$after,range:{${heightField}:{gte:${from},lte:${scan.to}}},orderBy:[{${heightField}:ASC},{id:ASC}]){items{${fields.join(' ')}}nextCursor} _meta{project generation revision height hash status} }`;\n        const response=await this.request('/graphql',{query,variables:{after:scan.after}},signal);\n        if(response.wait)return {state:'waiting',reason:response.wait};\n        if(response.invalidated){this.reset(current);return {state:'restarting',reason:'CURSOR_INVALIDATED'};}\n        const result=response.value;requireValue(result&&!result.errors&&result.data,'INVALID_PAGE');\n        const meta=result.data._meta;\n        requireValue(meta?.project===this.options.project&&meta.status==='ready'&&meta.generation===scan.generation&&revision(meta.revision)&&integer(meta.height)&&hash(meta.hash),'INVALID_PAGE_METADATA');\n        if(meta.revision!==scan.revision||meta.height!==scan.checkpoint.height||meta.hash!==scan.checkpoint.hash){this.reset(current);return {state:'restarting',reason:'REVISION_CHANGED'};}\n        const rows=result.data[`${entity}List`];requireValue(rows&&Array.isArray(rows.items)&&rows.items.length<=pageSize,'INVALID_PAGE');\n        const after=rows.nextCursor;requireValue(after===null||typeof after==='string'&&after.length>0&&after.length<=2048&&rows.items.length>0&&after!==scan.after,'INVALID_CURSOR');\n        if(after===null){\n          const latest=await this.request('/status',undefined,signal);if(latest.wait)return {state:'waiting',reason:latest.wait};\n          const stale=this.fresh(latest.value);if(stale)return {state:'waiting',reason:stale};\n          requireValue(latest.value.generation===scan.generation,'PROJECT_GENERATION_CHANGED');\n          if(latest.value.revision!==scan.revision||latest.value.checkpoint.height!==scan.checkpoint.height||latest.value.checkpoint.hash!==scan.checkpoint.hash){this.reset(current);return {state:'restarting',reason:'REVISION_CHANGED'};}\n        }\n        let last=scan.last;\n        for(const row of rows.items){\n          requireValue(row&&typeof row.id==='string'&&row.id.length>0&&!row.id.includes('\\0')&&Buffer.byteLength(row.id)<=256&&integer(row[heightField])&&row[heightField]>=from&&row[heightField]<=scan.to&&Buffer.byteLength(JSON.stringify(row))<=32768,'INVALID_ENTITY');\n          const key={id:row.id,height:row[heightField]};requireValue(last===null||compare(key,last)>0,'INVALID_PAGE_ORDER');last=key;\n        }\n        current=this.update(current.version,state=>{\n          const put=this.db.prepare('INSERT INTO staging VALUES(?,?,?)');\n          for(const row of rows.items)put.run(row.id,row[heightField],JSON.stringify(row));\n          const count=this.db.prepare('SELECT count(*) AS count FROM staging').get().count;requireValue(count<=this.options.maxRows,'ROW_LIMIT');\n          if(after!==null)return {...state,scan:{...scan,after,last,pages:scan.pages+1}};\n          // An incomplete scan never mutates the visible projection. Removal and\n          // replacement happen atomically only on the final compatible page.\n          this.db.prepare('DELETE FROM entities WHERE height>=? AND height<=?').run(from,scan.to);\n          this.db.exec('INSERT INTO entities SELECT * FROM staging; DELETE FROM staging');\n          return {scan:null,complete:{from,to:scan.to,generation:scan.generation,revision:scan.revision,checkpoint:scan.checkpoint,count,observedAt:new Date().toISOString()}};\n        });\n        await this.onPage({state:current.scan?'staged':'complete',pages:scan.pages+1,count:rows.items.length,revision:scan.revision});\n        if(!current.scan)return {state:'complete',...current.complete};\n      }\n      return {state:'paused',pages:current.scan.pages};\n    }finally{this.busy=false;}\n  }\n  rows(){return this.db.prepare('SELECT payload FROM entities ORDER BY height,id COLLATE BINARY').all().map(row=>JSON.parse(row.payload));}\n  close(){requireValue(!this.busy,'CONSUMER_BUSY');this.db.close();}\n}\n",
+      "consume.mjs": "import {RangeConsumer,ConsumerError} from './consumer.mjs';\nimport {setTimeout as delay} from 'node:timers/promises';\n\nconst args=process.argv.slice(2),flags=new Map();\nconst allowed=new Set(['--db','--from','--to','--project','--rounds','--interval-seconds','--deadline-seconds','--max-pages']);\ntry{\n  for(let i=0;i<args.length;i++){\n    const key=args[i],value=args[++i];\n    if(!allowed.has(key)||flags.has(key)||value===undefined||value.startsWith('--'))throw new ConsumerError('INVALID_ARGUMENTS');\n    flags.set(key,value);\n  }\n  const number=(key,fallback,min,max)=>{\n    const text=flags.get(key)??String(fallback);\n    if(!/^(0|[1-9][0-9]*)$/.test(text)||Number(text)<min||Number(text)>max)throw new ConsumerError('INVALID_ARGUMENTS');\n    return Number(text);\n  };\n  if(!flags.has('--db')||!flags.has('--from')||!flags.has('--project'))throw new ConsumerError('USE_DB_FROM_PROJECT_FLAGS');\n  const rounds=number('--rounds',1,1,3600),interval=number('--interval-seconds',2,1,30),deadline=number('--deadline-seconds',300,1,3600);\n  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(new ConsumerError('DEADLINE_EXCEEDED')),deadline*1000);\n  const stop=()=>controller.abort(new ConsumerError('STOPPED'));\n  process.once('SIGINT',stop);process.once('SIGTERM',stop);process.umask(0o077);\n  let consumer;\n  try{\n    consumer=new RangeConsumer({file:flags.get('--db'),url:process.env.CHEF_URL??'http://127.0.0.1:39370',token:process.env.CHEF_API_TOKEN,\n      project:flags.get('--project'),from:number('--from',undefined,0,2147483647),...(flags.has('--to')?{to:number('--to',undefined,0,2147483647)}:{}),\n      onPage:async page=>process.stdout.write(JSON.stringify({event:'page',...page})+'\\n')});\n    let last;\n    for(let round=0;round<rounds;round++){\n      controller.signal.throwIfAborted();\n      const result=await consumer.step({maxPages:number('--max-pages',20,1,100),signal:controller.signal});last=result;\n      process.stdout.write(JSON.stringify(result)+'\\n');\n      if(round+1<rounds)await delay(interval*1000,undefined,{signal:controller.signal});\n    }\n    if(!['complete','unchanged'].includes(last?.state))process.exitCode=2;\n  }finally{\n    clearTimeout(timer);process.off('SIGINT',stop);process.off('SIGTERM',stop);consumer?.close();\n  }\n}catch(error){\n  // Never echo network bodies, URLs, keys or private note fields.\n  const code=error instanceof ConsumerError?error.code:error?.name==='AbortError'?'STOPPED':'CONSUMER_FAILED';\n  process.stderr.write(JSON.stringify({error:{code}})+'\\n');process.exitCode=1;\n}\n",
+      "schema.graphql": "type ReadableNote {\n  id: ID!\n  txid: String!\n  pool: String!\n  outputIndex: Int!\n  blockHeight: Int! @index\n  blockHash: String!\n  valueZat: BigInt!\n  receiver: String!\n  memoHex: String!\n  memoKind: String!\n  memoText: String\n  scope: String!\n  origin: String!\n  coinbase: Boolean!\n}\n"
+    },
+    "sha256": {
+      "receipt-live.mjs": "841741ff4ac4cf2d30cfc6eb0acc71f4d6c284a7b664f87f87bda3a2324bc603",
+      "receipt-supervisor.mjs": "14957886f1f585cdbf018ffc1b077e411f750cf3ec0c6faac5061aab63d6cc0b",
+      "consumer.mjs": "a3ae9d4222e701fae18d29da1099eb20f2e4929baf1ed12455cd3b19ddbe8141",
+      "consume.mjs": "18a6d993b1d835218c79d7bab700466115a2acf4d85b51a0353db80899ff48a0",
+      "schema.graphql": "b24cd8df17b6566593f2780e15967c125a7ded3bbd336bdab838814d4582a2cf"
+    }
+  },
+  "precollection_attempts": [
+    {
+      "id": "live-20261021",
+      "actual_broadcasts": 0,
+      "reason": "Review strengthened output-directory and expected-operation checks"
+    },
+    {
+      "id": "live-v2-20261021",
+      "actual_broadcasts": 0,
+      "reason": "Review strengthened SQLite timing/revision coherence"
+    },
+    {
+      "id": "live-v3-20261021",
+      "actual_broadcasts": 0,
+      "reason": "PowerShell watchdog timezone-conversion bug stopped preparation; replaced with independent monotonic Node supervisor"
+    }
+  ]
+}

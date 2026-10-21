@@ -280,7 +280,7 @@ async fn metadata(state: HttpState, headers: HeaderMap, require_ready: bool) -> 
     if let Err(error) = authorize(&state, &headers) {
         return error_response(error);
     }
-    let permit = match state.permits.clone().try_acquire_owned() {
+    let permit = match admit(&state).await {
         Ok(permit) => permit,
         Err(_) => return error_response(QueryError::new(429, "QUERY_CAPACITY_EXCEEDED")),
     };
@@ -709,6 +709,79 @@ mod tests {
         drop(b);
         assert_eq!(state.permits.available_permits(), MAX_ACTIVE_QUERIES);
         assert_eq!(state.waiting.available_permits(), MAX_WAITING_QUERIES);
+    }
+
+    #[tokio::test]
+    async fn metadata_waits_for_capacity_then_reads_the_current_snapshot() {
+        let (root, mut writer) = fixture();
+        let state = make_state(writer.snapshot(), None).unwrap();
+        let a = admit(&state).await.unwrap();
+        let b = admit(&state).await.unwrap();
+        let request = {
+            let state = state.clone();
+            tokio::spawn(async move { height(State(state), HeaderMap::new()).await })
+        };
+        wait_for_waiters(&state, 1).await;
+        add_segment(root.path(), &mut writer, 3);
+        drop(a);
+        let response = request.await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let value: Value = serde_json::from_slice(
+            &axum::body::to_bytes(response.into_body(), 4096)
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(value["archive_height"], 3);
+        assert_eq!(state.waiting.available_permits(), MAX_WAITING_QUERIES);
+        drop(b);
+    }
+
+    #[tokio::test]
+    async fn metadata_authentication_precedes_queueing_and_queue_timeout_is_bounded() {
+        let (_root, writer) = fixture();
+        let state = make_state(writer.snapshot(), Some("metadata-token".into())).unwrap();
+        let a = admit(&state).await.unwrap();
+        let b = admit(&state).await.unwrap();
+        assert_eq!(
+            height(State(state.clone()), HeaderMap::new())
+                .await
+                .status(),
+            StatusCode::UNAUTHORIZED
+        );
+        assert_eq!(state.waiting.available_permits(), MAX_WAITING_QUERIES);
+        let mut headers = HeaderMap::new();
+        headers.insert("authorization", "Bearer metadata-token".parse().unwrap());
+        let started = Instant::now();
+        let response = ready(State(state.clone()), headers).await;
+        assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert_eq!(response.headers()["retry-after"], "1");
+        assert!(started.elapsed() >= Duration::from_millis(QUERY_QUEUE_TIMEOUT_MILLIS));
+        assert_eq!(state.waiting.available_permits(), MAX_WAITING_QUERIES);
+        drop((a, b));
+    }
+
+    #[tokio::test]
+    async fn actual_http_disconnect_cancels_queued_metadata() {
+        use std::io::Write;
+        let (_root, writer) = fixture();
+        let state = make_state(writer.snapshot(), None).unwrap();
+        let a = admit(&state).await.unwrap();
+        let b = admit(&state).await.unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let router = build_router(state.clone());
+        let server = tokio::spawn(async move { axum::serve(listener, router).await.unwrap() });
+        let mut socket = std::net::TcpStream::connect(address).unwrap();
+        write!(socket, "GET /height HTTP/1.1\r\nHost: localhost\r\n\r\n").unwrap();
+        wait_for_waiters(&state, 1).await;
+        socket.shutdown(std::net::Shutdown::Both).unwrap();
+        drop(socket);
+        tokio::time::timeout(Duration::from_millis(150), wait_for_waiters(&state, 0))
+            .await
+            .unwrap();
+        drop((a, b));
+        server.abort();
     }
 
     #[tokio::test]
