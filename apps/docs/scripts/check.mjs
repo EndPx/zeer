@@ -94,7 +94,7 @@ try {
     assert.equal(alignment.overflow, false);
   }
   report.interactions.push('Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment');
-  for (const pathname of ['/docs/chef/quickstart/', '/docs/prep/quickstart/', '/docs/prep/clients/', '/docs/chef/benchmarks/', '/docs/chef/block-handlers/', '/docs/chef/cli-commands/', '/docs/prep/tutorials/address-outputs/']) {
+  for (const pathname of ['/docs/chef/quickstart/', '/docs/prep/quickstart/', '/docs/prep/clients/', '/docs/chef/benchmarks/', '/docs/prep/benchmarks/', '/docs/chef/block-handlers/', '/docs/chef/cli-commands/', '/docs/prep/tutorials/address-outputs/']) {
     for (const width of [375, 1440]) {
       await page.setViewportSize({width, height: 900});
       await page.goto(origin + pathname);
@@ -104,15 +104,21 @@ try {
       await page.screenshot({path: path.join(evidence, `${pathname.split('/').filter(Boolean).slice(1).join('-')}-${width}.png`), fullPage: true});
     }
   }
-  await page.goto(origin + '/docs/chef/benchmarks/');
-  const samplesUrl = await page.getByRole('link', {name: 'Download recorded samples and provenance', exact: true}).getAttribute('href');
-  assert.equal(samplesUrl, '/docs/benchmarks/2026-10-20-testnet.json');
-  const samplesResponse = await context.request.get(origin + samplesUrl);
-  assert.equal(samplesResponse.status(), 200);
-  const samples = await samplesResponse.json();
-  assert.equal(samples.prep.runs.length, 18);
-  assert.equal(samples.chef.fixed.blocks, 10000);
-  report.interactions.push('Quickstart, client, guide, tutorial and benchmark page reflow/accessibility plus downloadable benchmark evidence');
+  for (const product of ['prep', 'chef']) {
+    await page.goto(origin + `/docs/${product}/overview/`);
+    await page.locator('article').getByRole('link', {name: 'Benchmarks', exact: true}).click();
+    await page.waitForURL(`**/docs/${product}/benchmarks/`);
+    await page.getByRole('heading', {level: 1, name: product === 'prep' ? 'Prep retrieval benchmarks' : 'Chef indexing benchmarks', exact: true}).waitFor();
+    const samplesUrl = await page.getByRole('link', {name: 'Download recorded samples and provenance', exact: true}).getAttribute('href');
+    assert.equal(samplesUrl, `/docs/benchmarks/2026-10-20-${product}-testnet.json`);
+    const samplesResponse = await context.request.get(origin + samplesUrl);
+    assert.equal(samplesResponse.status(), 200);
+    const samples = await samplesResponse.json();
+    assert.equal(samples.product, product);
+    if (product === 'prep') { assert.equal(samples.prep.runs.length, 18); assert.equal(Object.hasOwn(samples, 'chef'), false); }
+    else { assert.equal(samples.chef.fixed.blocks, 10000); assert.equal(Object.hasOwn(samples, 'prep'), false); }
+  }
+  report.interactions.push('Product-specific benchmark navigation and downloads; quickstart, guide, tutorial and benchmark reflow/accessibility');
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({width, height: 900});
     await page.goto(origin + '/docs/chef/shielded/memos/');

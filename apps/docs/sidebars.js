@@ -14,7 +14,7 @@ export default {
     ]},
   ],
   prep: [
-    'prep/overview', 'prep/quickstart', 'prep/quickstart-ai', 'prep/getting-started', 'prep/clients',
+    'prep/overview', 'prep/quickstart', 'prep/quickstart-ai', 'prep/getting-started', 'prep/clients', 'prep/benchmarks',
     'prep/query', 'prep/fields', 'prep/examples', 'prep/curl', 'prep/tokens', 'prep/networks', 'prep/continuation',
     {type: 'category', label: 'Tutorials', collapsed: false, items: ['prep/tutorials/address-outputs', 'prep/tutorials/inspect-transaction']},
     {type: 'category', label: 'Data reference', collapsed: false, items: ['prep/shielded', 'prep/transactions']},

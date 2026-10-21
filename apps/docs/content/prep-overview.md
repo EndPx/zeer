@@ -43,7 +43,7 @@ Recorded **20 October 2026** over blocks **0–99,023 inclusive** in a prepared 
 
 Both modes returned matching row counts and digests. The empty Orchard scan does not measure modern shielded-transaction processing. Timings include response retrieval, decoding and incremental row hashing; source preparation is excluded.
 
-See the [full benchmark methodology and recorded samples](/docs/chef/benchmarks/#prep-retrieval) for page counts, resource limits and evidence.
+See the [Prep benchmark methodology and recorded samples](/docs/prep/benchmarks/) for page counts, resource limits and evidence.
 
 ## Use Cases
 
@@ -54,4 +54,4 @@ See the [full benchmark methodology and recorded samples](/docs/chef/benchmarks/
 
 ## Quick links
 
-[Quickstart](/docs/prep/quickstart/) · [Quickstart with AI](/docs/prep/quickstart-ai/) · [Benchmarks](/docs/chef/benchmarks/#prep-retrieval) · [Playground](https://zeer.endpx.cloud/app/prep) · [GitHub](https://github.com/EndPx/zeer)
+[Quickstart](/docs/prep/quickstart/) · [Quickstart with AI](/docs/prep/quickstart-ai/) · [Benchmarks](/docs/prep/benchmarks/) · [Playground](https://zeer.endpx.cloud/app/prep) · [GitHub](https://github.com/EndPx/zeer)

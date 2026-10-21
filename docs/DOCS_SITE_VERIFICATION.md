@@ -4,7 +4,7 @@ Verified 21 October 2026. Public URL: [zeer.endpx.cloud/docs](https://zeer.endpx
 
 ## Delivered scope
 
-The Docusaurus workspace publishes 40 English pages: shared introduction and
+The Docusaurus workspace publishes 41 English pages: shared introduction and
 architecture, Prep query/data guides, Chef application-indexing guides, and
 Shielded & Memos nested under Chef. No additional console product/menu or public
 viewing-key form was added. Existing website `/docs` links enter the new site.
@@ -37,7 +37,7 @@ All commands passed during the initial publication/onboarding work. The current
 editorial revision reran the docs build and browser checks; unchanged web and Chef
 packages were not rebuilt for this docs-only revision. Real Chrome verified:
 
-- HTTP 200 and the correct heading for all 40 pages; no missing same-page anchors.
+- HTTP 200 and the correct heading for all 41 pages; no missing same-page anchors.
 - Explicit Overview, Quickstart and Quickstart with AI order in each product
   sidebar, with Getting Started and Clients next in Prep; AI guide navigation.
 - No document-level overflow at 375, 768 and 1440px on the memo guide.
@@ -53,8 +53,8 @@ packages were not rebuilt for this docs-only revision. Real Chrome verified:
   and 1920px, with the brand still at the original left inset.
 - Chef precedes Prep in desktop product navigation. The quickstart, client and
   benchmark pages pass reflow and automated axe checks at 375px and 1440px.
-- The benchmark evidence link returns the actual JSON snapshot with 18 Prep
-  samples and both recorded Chef runs.
+- Each product's benchmark link opens its own chapter and evidence download:
+  18 retrieval samples for Prep, and the two entity-indexing runs for Chef.
 - The existing website's Get started link navigates into the new documentation.
 
 The real public Prep example returned genesis headers 0 and 1, with the requested
@@ -217,6 +217,14 @@ aggregates. Prep reports three-run medians; Chef reports one run per profile.
 Worker/support-process quotas, prepared archive, loopback transport, empty
 Orchard scan and timing exclusions are stated alongside the tables.
 No benchmark process was relaunched for this documentation revision.
+
+Prep retrieval and Chef application indexing now have separate pages, overview
+tables and product-only JSON downloads. Their values and product objects are
+checked against the original combined snapshot, which remains available for old
+evidence links. Prep's own sidebar and overview lead to `/docs/prep/benchmarks/`;
+Chef's lead to `/docs/chef/benchmarks/`. The retained `prep-retrieval` anchor on
+the older Chef URL points readers to the new Prep chapter. First observed GraphQL
+data is labelled separately from individual query latency.
 
 ## npm scope follow-up, 21 October 2026
 

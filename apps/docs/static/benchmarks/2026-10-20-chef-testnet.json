@@ -1,0 +1,59 @@
+{
+  "format": "zeer-public-benchmark-v1",
+  "recorded_date": "2026-10-20",
+  "network": "testnet",
+  "source_commit": "7c063c88c5b53f62cd612a631f7994afa7050d42",
+  "scope": "Prepared historical Zcash Testnet data; shared VPS; loopback requests; no controlled cold-cache or whole-chain measurement.",
+  "environment": {
+    "pipeline_cpu_quota": 3,
+    "pipeline_memory_mib": 8192,
+    "experiment_worker_cpu_quota": 0.5,
+    "experiment_worker_memory_mib": 512,
+    "note": "Ceilings are shared resource limits, not dedicated physical CPUs; worker limits exclude supporting Prep/PostgreSQL processes."
+  },
+  "product": "chef",
+  "chef": {
+    "range_inclusive": [
+      0,
+      9999
+    ],
+    "repetitions_per_profile": 1,
+    "timer": "Installed CLI sync launch through completion, observed by GraphQL polling. Database setup and post-run entity comparison excluded.",
+    "fixed": {
+      "from": 0,
+      "to": 9999,
+      "blocks": 10000,
+      "firstDataMs": 1201.2211850000003,
+      "elapsedMs": 36695.893953000006,
+      "graphqlReads": 573,
+      "entitiesDigest": "813cb8737f9ed9f03bf7bdcc41eb80fcdca13162ecafa4ae917b21fe4fddf544",
+      "exactOracleMatch": true,
+      "packageResolution": "standalone installed tarballs, no workspace symlinks",
+      "databaseInitiallyEmpty": true,
+      "graphqlCheckpoint": {
+        "height": 9999,
+        "hash": "0001165646c807f012b174ce0d637b288686457ec6b46307fdcfeba2aa5ffb49",
+        "status": "ready"
+      }
+    },
+    "adaptive": {
+      "from": 0,
+      "to": 9999,
+      "blocks": 10000,
+      "firstDataMs": 1591.3629659999997,
+      "elapsedMs": 35215.100332,
+      "exactOracleMatch": true,
+      "graphqlCheckpoint": {
+        "height": 9999,
+        "hash": "0001165646c807f012b174ce0d637b288686457ec6b46307fdcfeba2aa5ffb49",
+        "status": "ready"
+      },
+      "adaptiveScan": true
+    }
+  },
+  "original_evidence_sha256": {
+    "developer.json": "b887a7fd7dbf44bb3da1e5e5ca4c4ca10874ba30593d2c5590820bd2e61ea3bf",
+    "adaptive-chef.json": "b54e10d2424aef45d174aeeb740b2677bb896c9869a209749c91224dc7702c84",
+    "snapshot.json": "9501070794310fb61688da4a4830bbdda4801313547c8c8c399b697d7050f7e9"
+  }
+}
