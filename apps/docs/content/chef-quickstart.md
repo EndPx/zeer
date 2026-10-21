@@ -13,10 +13,10 @@ Create a Zcash indexer with a schema, TypeScript handlers and a GraphQL API. Thi
 For a one-time setup without installing the CLI globally:
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.1.3 dlx zeer init
+pnpm --package=@zeer-dev/chef@0.2.0 dlx zeer init
 ```
 
-The explicit executable name selects `zeer` from the package's two compatible aliases. With npm, use `npx @zeer-dev/chef@0.1.3 init`.
+The explicit executable name selects `zeer` from the package's two compatible aliases. With npm, use `npx @zeer-dev/chef@0.2.0 init`.
 
 Accept the defaults or enter your own values:
 
@@ -91,4 +91,4 @@ For a new historical project, choose `0` during setup. To index only blocks 0 an
 
 Changing an existing project's start height changes its identity. Create a fresh project namespace and replay rather than editing the retained checkpoint. Read [restart and reorg handling](/docs/chef/recovery/) for compatible continuation.
 
-For a globally installed CLI, use `pnpm add -g @zeer-dev/chef@0.1.3` once, then `zeer init`. See the [CLI reference](/docs/chef/cli-commands/) for every supported command, [Performance](/docs/chef/benchmarking/) for measurement, or [Local viewing-key setup](/docs/chef/shielded/local/) for private receipts.
+For a globally installed CLI, use `pnpm add -g @zeer-dev/chef@0.2.0` once, then `zeer init`. See the [CLI reference](/docs/chef/cli-commands/) for every supported command, [Performance](/docs/chef/benchmarking/) for measurement, or [Local viewing-key setup](/docs/chef/shielded/local/) for private receipts.

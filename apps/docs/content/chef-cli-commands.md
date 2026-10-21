@@ -7,13 +7,13 @@ The `@zeer-dev/chef` package installs `zeer` and its compatible alias `zeer-chef
 Requires Node.js 24.14+ on Linux x86_64 or WSL2. With a configured pnpm global bin directory, install once:
 
 ```sh
-pnpm add -g @zeer-dev/chef@0.1.3
+pnpm add -g @zeer-dev/chef@0.2.0
 zeer --version
 zeer --help
 zeer init
 ```
 
-Without a global install, use `pnpm --package=@zeer-dev/chef@0.1.3 dlx zeer init`. The executable name is explicit because the package has two aliases. npm users can use `npm install -g @zeer-dev/chef@0.1.3` or the one-time `npx @zeer-dev/chef@0.1.3 init`.
+Without a global install, use `pnpm --package=@zeer-dev/chef@0.2.0 dlx zeer init`. The executable name is explicit because the package has two aliases. npm users can use `npm install -g @zeer-dev/chef@0.2.0` or the one-time `npx @zeer-dev/chef@0.2.0 init`.
 
 For any command, `zeer <command> --help` prints its options without loading project configuration or contacting services. `zeer --version` prints the installed package version.
 

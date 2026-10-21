@@ -28,14 +28,14 @@ explicitly labeled mainnet fixtures and is not a live testnet service.
 Run the published CLI through npx:
 
 ```sh
-npx @zeer-dev/chef@0.1.3 init
+npx @zeer-dev/chef@0.2.0 init
 ```
 
 Answer the project name, folder and start block prompts; Enter accepts each
 default (`my_indexer`, `my-indexer`, `latest`). Latest captures the selected
 Prep archive height once; explicit `0` includes genesis history. The chosen
 source URL is recorded in `.env`. You can also install the package globally
-once with `npm install -g @zeer-dev/chef@0.1.3`, then use `zeer init`.
+once with `npm install -g @zeer-dev/chef@0.2.0`, then use `zeer init`.
 For scripts, pass `--dir DIR --project NAME --start-height HEIGHT --json`.
 The `zeer-chef` command remains an alias. Only terminal sessions ask questions.
 

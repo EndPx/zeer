@@ -29,15 +29,25 @@ For new measurements, use the [benchmark specification](https://github.com/EndPx
 
 For chain-data retrieval timings, see [Prep performance benchmarks](/docs/prep/benchmarks/).
 
-## Live following: polling interval and read availability
+<span id="live-following-polling-interval-and-read-availability"></span>
+
+## Live update delay: polling experiment
 
 Recorded **21 October 2026**, using published **Chef 0.1.3** against an authenticated native Prep service and Zebra on the same host. Two fresh indexers processed each observed block; their polling assignments crossed over after six samples. Each study contains **12 paired blocks**. These are separate trials with different live blocks; their samples are not pooled.
 
-| Study | 5-second median | 5-second p95 | Candidate median | Candidate p95 | Change accepted? |
+This experiment asks: **does checking for new blocks more often make data readable sooner, without interrupting reads?** It compares the default **5-second polling interval** with 1-second and 2-second intervals. A polling interval is how often Chef checks for work; it is not a completion-time guarantee.
+
+**Read the timings as the delay from a new block being seen at Zebra RPC to its data being returned by GraphQL.** Median is the middle of the observed delays. The p95 column describes the slower observations; with only 12 samples, it is the slowest sample in each trial.
+
+| Polling tested | Default 5 s: median | Default 5 s: p95 | Tested: median | Tested: p95 | Adopt as default? |
 | --- | ---: | ---: | ---: | ---: | --- |
-| 1-second candidate with independent Prep observer | 9.101496 s | 14.490752 s | 4.989191 s | 8.564376 s | Rejected |
-| 1-second candidate without independent Prep observer | 7.248339 s | 10.009997 s | 5.375185 s | 6.756668 s | Rejected |
-| 2-second candidate without independent Prep observer | 5.881772 s | 10.512270 s | 4.506570 s | 6.735981 s | Rejected |
+| 1 s, with extra Prep checks | 9.10 s | 14.49 s | 4.99 s | 8.56 s | No: temporary 503s |
+| 1 s, without extra Prep checks | 7.25 s | 10.01 s | 5.38 s | 6.76 s | No: temporary 503s |
+| 2 s, without extra Prep checks | 5.88 s | 10.51 s | 4.51 s | 6.74 s | No: temporary 503s |
+
+**The shorter intervals were faster in these samples, but we did not adopt them.** Some queries temporarily returned 503 while Chef rechecked its source. The predeclared rule required no failed read probes, so all three experiments failed that availability condition. Entity correctness and restart checks passed in every trial.
+
+The first trial adds a separate observer that repeatedly checks when Prep makes a block available. Those checks add source traffic. The other trials remove that observer; they also use different live blocks, so compare the two indexers within each row rather than treating the rows as one ranking.
 
 The timer starts when the RPC observer first sees a new block and ends when GraphQL returns its expected hash and complete transaction count. It includes source ingestion, Chef processing and read availability. It does not measure block production time. With 12 samples, the nearest-rank p95 is the maximum observed value.
 

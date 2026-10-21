@@ -1,7 +1,7 @@
 {
   "recorded_date": "2026-10-21",
   "chef_version": "0.2.0",
-  "release_state": "candidate-awaiting-npm-verification",
+  "release_state": "published-and-registry-verified",
   "source_base_commit": "f76077a",
   "local_suite": {
     "tests": 127,
@@ -82,5 +82,21 @@
     "schema.js": "84b512bb04f2f2bca875b01d816af73a0abbdc69c5b60e7391f970783b4f54a4",
     "store.js": "17b8f254bbff033e180f81b9ea78bbc5aef46f62b90666289568b27cda9b1d4e",
     "types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
-  }
+  },
+  "source_commit": "915dfa9",
+  "registry_verification": {
+    "verified_at": "2026-10-21T12:16:00.407Z",
+    "version": "0.2.0",
+    "latest": "0.2.0",
+    "integrity": "sha512-A5R3nL75KmonUAbGa1WTosXNgzkNYAmV3j9I5tufXqsPfRVMhYMEa2SX/mfGPA/BTtIMe6VSFMnDRdzglVaj+Q==",
+    "tarball_checksum_matches_tested_candidate": true,
+    "registry_install": true,
+    "cli_version": true,
+    "offline_numeric_init": true,
+    "codegen": true,
+    "generated_typecheck": true,
+    "node": "v24.18.0",
+    "platform": "win32"
+  },
+  "hosted_project_migration": "not performed by SDK publication"
 }

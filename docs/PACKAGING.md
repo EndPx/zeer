@@ -1,16 +1,21 @@
 # Release package verification
 
 The current published npm versions are `@zeer-dev/prep-client@0.1.0` and
-`@zeer-dev/chef@0.1.3`. Chef 0.1.3 defaults guided setup to `latest`: one bounded
+`@zeer-dev/chef@0.2.0`. Chef 0.1.3 introduced guided setup with a `latest` default: one bounded
 Prep metadata read captures the available testnet archive height and persists a
 numeric start. Explicit numeric heights still initialize offline. Per-command
 help and `--version` are available; complete flags and `--json` keep scripts
 noninteractive. The `zeer` and `zeer-chef` aliases remain compatible.
 
-The public registry version, latest tag and downloaded tarball checksum match
-the tested package. The same packed candidate passed isolated Windows and Linux
-installation, code generation and strict generated-project typechecking with
-pnpm 10.21; Windows also passed with pnpm 12.14. The starter declares Node types
+Chef 0.2.0's public registry version, latest tag and downloaded tarball checksum
+match the tested candidate. A fresh Windows registry consumer passed CLI version,
+offline numeric init, code generation and strict generated-project typechecking.
+Its core ran 37 passing integration checks on Linux with isolated PostgreSQL.
+Native scanner checks were not rerun without their executable.
+
+The earlier Chef 0.1.3 release also passed isolated Windows and Linux installation,
+code generation and strict generated-project typechecking with pnpm 10.21;
+Windows also passed with pnpm 12.14. The starter declares Node types
 directly rather than relying on transitive dependency visibility. Actual Linux
 terminal checks covered setup, Ctrl+C and end-of-input before file creation.
 
@@ -145,6 +150,6 @@ licenses travel in both npm packages; generated Rust protobuf material retains
 its separately attributed source notices in the source checkout. No performance,
 full-mainnet, private-scanning or public-deployment claim follows from this gate.
 
-## Chef 0.2.0 candidate
+## Chef 0.2.0 consumption API
 
-The consumption API candidate adds ordered ranges, revision-bound cursors and cached status. It passed isolated tarball installation and the tests recorded in [the consumption verification](CHEF_CONSUMPTION_VERIFICATION.json). Publication is awaiting npm account verification; the registry and hosted services remain at their verified versions above until that completes.
+The published consumption API adds ordered ranges, revision-bound cursors and cached status. It passed isolated tarball and registry installation and the checks recorded in [the consumption verification](CHEF_CONSUMPTION_VERIFICATION.json). Updating the npm package does not migrate hosted project databases or restart their services; follow [the migration contract](CHEF_CONSUMPTION_API.md) for those upgrades.

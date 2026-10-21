@@ -1,6 +1,6 @@
 # Querying with GraphQL
 
-Chef serves authenticated, read-only queries for your project's entity schema. **Chef 0.2.0** adds bounded range queries, revision-bound cursors and cached source metadata. Existing 0.1.x projects need the additive migration below before using this API.
+Chef serves authenticated, read-only queries for your project's entity schema. **Chef 0.2.0** adds bounded range queries, revision-bound cursors and cached source metadata. Existing 0.1.x projects need the additive migration below before using this API. These features apply to your project running 0.2.0; publishing the SDK does not automatically upgrade hosted Playground projects.
 
 ```graphql
 query {

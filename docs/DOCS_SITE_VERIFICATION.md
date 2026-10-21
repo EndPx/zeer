@@ -277,3 +277,24 @@ Public browser checks executed the Prep headers and Chef genesis presets and
 confirmed the live npm quickstart. Screenshots, registry metadata/integrity,
 consumer lockfiles, Linux acceptance and activation evidence remain under
 `.deploy-local/npm-zeer-dev-20261021/`.
+
+
+## Chef 0.2.0 publication and documentation
+
+On 21 October 2026, npm accepted Chef 0.2.0 after account verification. Registry
+metadata, the latest tag and downloaded tarball integrity matched the tested
+candidate. A fresh registry consumer passed CLI version, offline numeric init,
+code generation and strict generated-project typechecking. This release's
+verification is recorded in `CHEF_CONSUMPTION_VERIFICATION.json`; earlier 0.1.3
+Linux/Windows package checks remain separately described above.
+
+Public quickstarts and CLI commands now select 0.2.0. The GraphQL guide documents
+range/order limits, revision-bound cursor recovery, cached status and additive
+migration. The benchmark page explains polling intervals, rounded observed delays
+and rejected default changes while retaining all raw samples and prior anchors.
+
+Static release `20261021-chef020-v1` passed the resource guard and HTTPS content
+checks, followed by all 44 documentation routes, navigation and targeted responsive
+accessibility checks. Activation reloaded nginx without restarting application
+services. SDK publication and this static docs activation did not migrate hosted
+Chef projects; those operational upgrades remain separate.
