@@ -6,11 +6,19 @@ export class ScaffoldError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 
+export function validateProjectName(project: string): void {
+  if (!/^[a-z][a-z0-9_]{0,31}$/.test(project)) throw new ScaffoldError("INVALID_PROJECT_NAME");
+}
+
+export function validateStartHeight(startHeight: number): void {
+  if (!Number.isInteger(startHeight) || startHeight < 0 || startHeight > 0xffff_fffe) throw new ScaffoldError("INVALID_START_HEIGHT");
+}
+
 /** Creates a new project only. It does not install packages, connect or migrate. */
 export async function scaffoldProject(options: { directory: string; project: string; startHeight: number }) {
   const { project, startHeight } = options;
-  if (!/^[a-z][a-z0-9_]{0,31}$/.test(project)) throw new ScaffoldError("INVALID_PROJECT_NAME");
-  if (!Number.isInteger(startHeight) || startHeight < 0 || startHeight > 0xffff_fffe) throw new ScaffoldError("INVALID_START_HEIGHT");
+  validateProjectName(project);
+  validateStartHeight(startHeight);
   const directory = resolve(options.directory);
   const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const password = randomBytes(24).toString("hex");

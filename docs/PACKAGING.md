@@ -1,7 +1,13 @@
 # Release package verification
 
 The current published npm versions are `@zeer-dev/prep-client@0.1.0` and
-`@zeer-dev/chef@0.1.1`. Chef 0.1.1 adds `readShieldedTransaction` for a local
+`@zeer-dev/chef@0.1.2`. Chef 0.1.2 adds the `zeer` executable alias and guided
+`zeer init` setup. Complete flags and `--json` retain noninteractive operation.
+The same packed candidate passed isolated Windows and Linux installation,
+code generation and strict generated-project typechecking. Actual Linux terminal
+checks covered setup, Ctrl+C and end-of-input before file creation.
+
+Chef 0.1.1 added `readShieldedTransaction` for a local
 receipt source. A fresh registry consumer passed strict TypeScript checks and
 read an actual mined testnet memo through public Prep and a local native scanner.
 The Prep HTTP API and Chef's exact `0.1.0` Prep-client dependency remain compatible.

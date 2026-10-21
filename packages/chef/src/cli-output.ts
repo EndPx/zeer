@@ -3,7 +3,8 @@ import type { Height, PrepClient } from "@zeer-dev/prep-client";
 import type { Checkpoint, ChefStore } from "./types.js";
 
 const guidance: Record<string, string> = {
-  INIT_OPTIONS_REQUIRED: "Use init --dir NEW_DIRECTORY --project project_name --start-height FIRST_AVAILABLE_TESTNET_HEIGHT. No installation or service startup is automatic.",
+  INIT_OPTIONS_REQUIRED: "Run zeer init in a terminal for guided setup, or supply --dir NEW_DIRECTORY --project project_name --start-height HEIGHT for scripts. No installation or service startup is automatic.",
+  INIT_CANCELLED: "Setup cancelled before creating project files. Run zeer init when you are ready.",
   INVALID_PROJECT_NAME: "Use a lowercase letter followed by lowercase letters, digits or underscores, at most 32 characters.",
   INVALID_START_HEIGHT: "Choose an integer start height between 0 and 4294967294 covered by the testnet Prep archive.",
   PROJECT_DIRECTORY_EXISTS: "Choose a new directory. Init never overwrites an existing directory, file or symlink.",

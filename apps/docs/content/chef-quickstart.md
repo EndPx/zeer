@@ -13,12 +13,14 @@ Create a Zcash indexer with a schema, TypeScript handlers and a GraphQL API. Thi
 Run this in a directory where `my-indexer` does not already exist:
 
 ```sh
-npx @zeer-dev/chef@0.1.1 init --dir my-indexer --project my_indexer --start-height 0
+npx @zeer-dev/chef@0.1.2 init
 cd my-indexer
 npm install
 npm run codegen
 npm run typecheck
 ```
+
+The setup asks for a project name, folder and start block. Press Enter to use `my_indexer`, `my-indexer` and `0`, or enter your own values.
 
 The `my_indexer` project name creates an isolated PostgreSQL schema named `chef_my_indexer` for this indexer's records and progress. Choose a fresh name for each independent indexer.
 

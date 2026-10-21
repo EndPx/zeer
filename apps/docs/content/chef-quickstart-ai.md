@@ -9,7 +9,8 @@ Read https://zeer.endpx.cloud/docs/chef/quickstart/ and
 https://zeer.endpx.cloud/docs/chef/configuration/ before writing code.
 
 1. Follow the Quickstart's installation method and run Chef init with
-   start-height 0, a fresh directory and a new project name.
+   explicit --dir, --project and --start-height 0 flags with --json,
+   using a fresh directory and a new project name.
 2. Install the generated project's dependencies, generate types and typecheck.
 3. Configure the public testnet Prep URL and the intended PostgreSQL database.
    Keep credentials in the generated private environment file.

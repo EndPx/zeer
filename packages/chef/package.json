@@ -1,6 +1,6 @@
 {
   "name": "@zeer-dev/chef",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
   "repository": {"type": "git", "url": "git+https://github.com/EndPx/zeer.git", "directory": "packages/chef"},
   "homepage": "https://zeer.endpx.cloud/docs/chef/overview/",
@@ -9,7 +9,7 @@
   "type": "module",
   "description": "Experimental TypeScript indexing over Zeer Prep with optional local shielded receipts",
   "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}},
-  "bin": {"zeer-chef": "./dist/cli.js"},
+  "bin": {"zeer": "./dist/cli.js", "zeer-chef": "./dist/cli.js"},
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {"build": "tsc -p tsconfig.json", "prepack": "npm run build", "test": "node --test test/*.test.mjs"},
   "engines": {"node": ">=24.14.0"},

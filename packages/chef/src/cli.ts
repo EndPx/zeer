@@ -5,6 +5,7 @@ import { realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
+import { createInterface } from "node:readline/promises";
 import { PrepClient, PrepError } from "@zeer-dev/prep-client";
 import type { Height } from "@zeer-dev/prep-client";
 import { parseModel, generateTypes } from "./schema.js";
@@ -15,6 +16,7 @@ import { cliFailure, formatOutput, readStatus, sourceObservation } from "./cli-o
 import type { ChefConfig, ChefStore } from "./types.js";
 import { ScaffoldError, scaffoldProject } from "./scaffold.js";
 import { NativeReceiptSource, ReceiptSourceError } from "./receipts.js";
+import { collectInitAnswers } from "./init.js";
 
 class CliError extends Error { constructor(readonly code: string) { super(code); } }
 const help = "zeer-chef <codegen|migrate|sync|serve|status> [--config chef.config.ts] [--json | --human]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nOutput defaults to readable text on a terminal and JSON elsewhere. status observes Prep with a 5-second timeout without changing the database.\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
@@ -35,9 +37,9 @@ function temporarySourceError(error: unknown): boolean {
 
 export async function main(args = process.argv.slice(2), dependencies: {
   store?: ChefStore; client?: Pick<PrepClient, "get" | "getHeight">;
-  write?: (text: string) => void; tty?: boolean;
+  write?: (text: string) => void; tty?: boolean; prompt?: (question: string) => Promise<string>;
 } = {}): Promise<void> {
-  if (args.length === 0 || args[0] === "--help" || args[0] === "help") { process.stdout.write(`${help}\ninit: --dir NEW_DIRECTORY --project project_name --start-height FIRST_AVAILABLE_TESTNET_HEIGHT\nCreates a standalone testnet project without installing dependencies or starting services.\n`); return; }
+  if (args.length === 0 || args[0] === "--help" || args[0] === "help") { process.stdout.write(`zeer init\nAsk for project name, folder and start block on a terminal. All commands also accept the zeer-chef alias.\n${help}\ninit: [--dir NEW_DIRECTORY] [--project project_name] [--start-height HEIGHT]\nFor scripts, supply all three options with --json. Creates a standalone testnet project without installing dependencies or starting services.\n`); return; }
   const command = args[0]!;
   if (!["init", "codegen", "migrate", "sync", "serve", "status"].includes(command)) throw new CliError("UNKNOWN_COMMAND");
   const flags = new Map<string, string>();
@@ -53,9 +55,28 @@ export async function main(args = process.argv.slice(2), dependencies: {
   const human = flags.has("--human") || (!flags.has("--json") && (dependencies.tty ?? process.stdout.isTTY ?? false));
   const out = (value: Record<string, unknown>) => (dependencies.write ?? ((text: string) => { process.stdout.write(text); }))(formatOutput(value, human));
   if (command === "init") {
-    const directory = flags.get("--dir"), project = flags.get("--project");
-    if (!directory || !project || !flags.has("--start-height")) throw new CliError("INIT_OPTIONS_REQUIRED");
-    const startHeight = integer(flags.get("--start-height"), 0, 0xffff_fffe, "INVALID_START_HEIGHT");
+    let directory = flags.get("--dir"), project = flags.get("--project"), start = flags.get("--start-height");
+    if ((!directory || !project || start === undefined) && !flags.has("--json")
+      && (dependencies.tty ?? Boolean(process.stdin.isTTY && process.stdout.isTTY))) {
+      const write = dependencies.write ?? ((text: string) => { process.stdout.write(text); });
+      write("Zeer Chef · Zcash Testnet\nCreate a local indexer. Press Enter to use the defaults.\n");
+      const controller = new AbortController();
+      const readline = dependencies.prompt ? undefined : createInterface({ input: process.stdin, output: process.stdout });
+      const cancel = () => controller.abort();
+      readline?.once("SIGINT", cancel); readline?.once("close", cancel);
+      try {
+        const answers = await collectInitAnswers({ directory, project, startHeight: start },
+          dependencies.prompt ?? (question => readline!.question(question, { signal: controller.signal })),
+          code => write(`${cliFailure(undefined, code).help}\n`));
+        controller.signal.throwIfAborted();
+        ({ directory, project, startHeight: start } = answers);
+      } catch (error) {
+        if (controller.signal.aborted) throw new ScaffoldError("INIT_CANCELLED");
+        throw error;
+      } finally { readline?.close(); }
+    }
+    if (!directory || !project || start === undefined) throw new CliError("INIT_OPTIONS_REQUIRED");
+    const startHeight = integer(start, 0, 0xffff_fffe, "INVALID_START_HEIGHT");
     const result = await scaffoldProject({ directory, project, startHeight });
     out({ command, status: "complete", project, network: "testnet", ...result });
     return;
@@ -241,6 +262,6 @@ if (isCliEntry()) {
     const failure = cliFailure(error, error instanceof CliError || error instanceof ChefError || error instanceof ScaffoldError || error instanceof ReceiptSourceError ? error.code : undefined);
     const human = !process.argv.includes("--json") && (process.argv.includes("--human") || process.stdout.isTTY === true);
     process.stderr.write(formatOutput(failure, human));
-    process.exitCode = 1;
+    process.exitCode = error instanceof ScaffoldError && error.code === "INIT_CANCELLED" ? 130 : 1;
   });
 }

@@ -16,12 +16,18 @@ Initialize a standalone project with:
 Requires Node 24.14+ on Linux x86_64 or WSL2, npm and PostgreSQL.
 
 ```sh
-npx @zeer-dev/chef@0.1.1 init --dir my-indexer --project my_indexer --start-height 0
+npx @zeer-dev/chef@0.1.2 init
 cd my-indexer
 npm install
 npm run codegen
 npm run typecheck
 ```
+
+Answer the project name, folder and start block questions, or press Enter for
+`my_indexer`, `my-indexer` and `0`. For a shorter command after a one-time global
+install, run `npm install -g @zeer-dev/chef@0.1.2`, then `zeer init`.
+The `zeer-chef` alias remains available. Scripts should pass all three flags and
+`--json`; redirected sessions never prompt. Ctrl+C cancels before file creation.
 
 Set `PREP_URL` and database settings in the generated `.env`, then migrate before
 running sync and serve. Follow the [complete quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/)

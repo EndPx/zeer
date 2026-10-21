@@ -28,11 +28,14 @@ explicitly labeled mainnet fixtures and is not a live testnet service.
 Run the published CLI through npx:
 
 ```sh
-npx @zeer-dev/chef@0.1.0 init \
-  --dir /absolute/path/to/my-zcash-indexer \
-  --project my_zcash_indexer \
-  --start-height 0
+npx @zeer-dev/chef@0.1.2 init
 ```
+
+Answer the project name, folder and start block prompts; Enter accepts each
+default (`my_indexer`, `my-indexer`, `0`). You can also install the package globally
+once with `npm install -g @zeer-dev/chef@0.1.2`, then use `zeer init`.
+For scripts, pass `--dir DIR --project NAME --start-height HEIGHT --json`.
+The `zeer-chef` command remains an alias. Only terminal sessions ask questions.
 
 The directory must not already exist. Its parent must exist and be writable.
 Choose a start height within your Prep archive. The full-data starter supports
@@ -53,10 +56,10 @@ public filter at Prep and stores only matches, while validating every header.
 
 ## 2. Install dependencies
 
-Inside the new project:
+Inside the new project (use your chosen folder if different):
 
 ```sh
-cd /absolute/path/to/my-zcash-indexer
+cd my-indexer
 npm install
 npm run codegen
 npm run typecheck

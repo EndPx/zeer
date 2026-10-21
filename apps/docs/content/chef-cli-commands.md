@@ -1,17 +1,40 @@
 # Chef CLI commands
 
-The `@zeer-dev/chef` npm package installs the **`zeer-chef`** executable. It creates projects, generates entity types, runs indexing and serves GraphQL.
+The `@zeer-dev/chef` npm package installs the **`zeer`** executable, with `zeer-chef` as a compatible alias. It creates projects, generates entity types, runs indexing and serves GraphQL.
 
 ## Install and initialize
 
 Requires Node.js 24.14+ on Linux x86_64 or WSL2. Initialize a new directory with the published CLI:
 
 ```sh
-npx @zeer-dev/chef@0.1.1 init --dir my-indexer --project my_indexer --start-height 0
+npx @zeer-dev/chef@0.1.2 init
 cd my-indexer
 npm install
-npx zeer-chef --help
+npx zeer --help
 ```
+
+The setup asks three questions. Press Enter to accept each default:
+
+```text
+Project name (my_indexer):
+Project folder (my-indexer):
+Start block (0):
+```
+
+For the shorter command on future projects, install the CLI globally once:
+
+```sh
+npm install -g @zeer-dev/chef@0.1.2
+zeer init
+```
+
+For scripts and AI agents, supply all options so no questions are needed:
+
+```sh
+npx @zeer-dev/chef@0.1.2 init --dir my-indexer --project my_indexer --start-height 0 --json
+```
+
+`--json` and non-terminal sessions never prompt. In a terminal, supplied options are kept and only missing options are asked. Invalid names and heights are explained and requested again. Ctrl+C or end-of-input cancels before any project files are created.
 
 `init` creates files only. It refuses an existing target directory and does not install packages, start Docker or connect to a database. Follow the [quickstart](/docs/chef/quickstart/) to configure and run the generated project.
 
@@ -19,7 +42,8 @@ npx zeer-chef --help
 
 | Command | Action |
 | --- | --- |
-| `init --dir DIR --project NAME --start-height HEIGHT` | Create a standalone testnet project; all three options are required |
+| `init` | Guided setup for a new standalone testnet project |
+| `init --dir DIR --project NAME --start-height HEIGHT` | Create the same project with explicit options for scripts |
 | `codegen` | Read the config and schema; write `chef.generated.ts` beside the config |
 | `migrate` | Initialize or migrate this compatible project's PostgreSQL namespace |
 | `sync` | Index through a captured available Prep tip, then exit |
