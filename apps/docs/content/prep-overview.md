@@ -33,17 +33,21 @@ Prep handles range queries, public filters and field selection at the data layer
 
 ## Performance Benchmarks
 
-Recorded **20 October 2026** over blocks **0–99,023 inclusive** in a prepared Zcash Testnet archive. Times are medians of **three runs per mode**, in **seconds (s)**. The comparison is between fixed and adaptive Prep scans on a shared VPS over loopback.
+Recorded **21 October 2026** on Zcash Testnet blocks **4,522,544–4,522,799 inclusive**: 256 blocks and 531 transactions, with real transparent, Sapling, Orchard and Ironwood activity. Times are medians of **three runs per candidate**, in **seconds (s)**, after verified warmups.
 
-| Task | Fixed Prep | Adaptive Prep | Speedup |
+| Task | Returned rows | Prep | Zebra RPC |
 | --- | ---: | ---: | ---: |
-| Retrieve 99,024 block headers | 0.967156 s | 0.689918 s | 1.40× |
-| Find the genesis transaction ID | 0.234639 s | 0.004171 s | 56.26× |
-| Orchard filter (0 matches) | 0.418542 s | 0.108843 s | 3.85× |
+| Block headers | 256 | 0.003608 s | 0.262936 s |
+| All transaction metadata | 531 | 0.159506 s | 0.347455 s |
+| 16 selected TX IDs | 16 | 0.018925 s | 0.014246 s |
+| Transactions paying one transparent address | 200 | 0.134044 s | 0.157427 s |
+| Sapling component filter | 2 | 0.127810 s | 0.288864 s |
+| Orchard component filter | 2 | 0.177232 s | 0.300796 s |
+| Ironwood component filter | 181 | 0.142961 s | 0.287944 s |
 
-Both modes returned matching row counts and digests. The empty Orchard scan does not measure modern shielded-transaction processing. Timings include response retrieval, decoding and incremental row hashing; source preparation is excluded.
+All rows and digests matched. Zebra is faster for the selected TX IDs. The address lookup winner changed between trials, so it has no consistent ranking here. This compares warm service paths over loopback on a shared VPS, with unequal service quotas; it is not a universal performance claim. Preparing the new 256-block archive took **1.576383 s** separately in one direct run, excluding node initial sync.
 
-See the [Prep benchmark methodology and recorded samples](/docs/prep/benchmarks/) for page counts, resource limits and evidence.
+See the [Prep benchmark methodology and recorded samples](/docs/prep/benchmarks/) for request counts, response sizes, cache conditions, preparation costs, resource limits and both complete trials.
 
 ## Use Cases
 

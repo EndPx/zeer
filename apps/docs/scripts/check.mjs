@@ -110,12 +110,12 @@ try {
     await page.waitForURL(`**/docs/${product}/benchmarks/`);
     await page.getByRole('heading', {level: 1, name: product === 'prep' ? 'Prep retrieval benchmarks' : 'Chef indexing benchmarks', exact: true}).waitFor();
     const samplesUrl = await page.getByRole('link', {name: 'Download recorded samples and provenance', exact: true}).getAttribute('href');
-    assert.equal(samplesUrl, `/docs/benchmarks/2026-10-20-${product}-testnet.json`);
+    assert.equal(samplesUrl, product === 'prep' ? '/docs/benchmarks/2026-10-21-prep-zebra-rpc.json' : '/docs/benchmarks/2026-10-20-chef-testnet.json');
     const samplesResponse = await context.request.get(origin + samplesUrl);
     assert.equal(samplesResponse.status(), 200);
     const samples = await samplesResponse.json();
     assert.equal(samples.product, product);
-    if (product === 'prep') { assert.equal(samples.prep.runs.length, 18); assert.equal(Object.hasOwn(samples, 'chef'), false); }
+    if (product === 'prep') { assert.equal(samples.runs.length, 42); assert.equal(samples.warmups.length, 14); assert.equal(Object.hasOwn(samples, 'chef'), false); }
     else { assert.equal(samples.chef.fixed.blocks, 10000); assert.equal(Object.hasOwn(samples, 'prep'), false); }
   }
   report.interactions.push('Product-specific benchmark navigation and downloads; quickstart, guide, tutorial and benchmark reflow/accessibility');

@@ -106,11 +106,12 @@ def load_dataset(oracle_path, manifest_path):
 
 
 class Http:
-    def __init__(self, endpoint, token=None, deadline=None):
+    def __init__(self, endpoint, token=None, deadline=None, authorization=None):
         p = urlsplit(endpoint)
         require(p.scheme in ("http", "https") and p.hostname and not p.username and not p.password and not p.query and not p.fragment and p.path in ("", "/"), "CREDENTIAL_FREE_ENDPOINT_REQUIRED")
         self.connection = (http.client.HTTPSConnection if p.scheme == "https" else http.client.HTTPConnection)(p.hostname, p.port, timeout=30)
         self.token, self.requests, self.response_bytes = token, 0, 0
+        self.authorization = authorization
         self.deadline = deadline
 
     def request(self, path, body=None):
@@ -119,15 +120,33 @@ class Http:
             if self.connection.sock:
                 self.connection.sock.settimeout(self.connection.timeout)
         headers = {"Content-Type": "application/json"}
-        if self.token:
+        if self.authorization:
+            headers["Authorization"] = self.authorization
+        elif self.token:
             headers["Authorization"] = "Bearer " + self.token
         self.requests += 1
         self.connection.request("GET" if body is None else "POST", path, None if body is None else json.dumps(body, separators=(",", ":")), headers)
         response = self.connection.getresponse()
-        raw = response.read(MAX_RESPONSE + 1)
-        self.response_bytes += len(raw)
+        chunks, size = [], 0
+        while size <= MAX_RESPONSE:
+            if self.deadline is not None:
+                timeout = min(30, remaining(self.deadline))
+                if self.connection.sock:
+                    self.connection.sock.settimeout(timeout)
+            chunk = response.read1(min(65536, MAX_RESPONSE + 1 - size))
+            if self.deadline is not None:
+                remaining(self.deadline)
+            self.response_bytes += len(chunk)
+            if not chunk:
+                break
+            chunks.append(chunk)
+            size += len(chunk)
+        raw = b"".join(chunks)
         require(response.status == 200 and len(raw) <= MAX_RESPONSE, "HTTP_STATUS_OR_SIZE_FAILURE")
-        return json.loads(raw, parse_float=Decimal)
+        result = json.loads(raw, parse_float=Decimal)
+        if self.deadline is not None:
+            remaining(self.deadline)
+        return result
 
     def close(self):
         self.connection.close()

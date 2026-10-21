@@ -42,6 +42,9 @@ The document owns article scrolling, with a sticky 64px navbar and independently
 scrollable product sidebar; the right heading rail follows the article. Below
 996px, navigation becomes a drawer and headings use the native page disclosure.
 Code/table overflow stays inside its panel, never the document.
+Documentation tables retain native table semantics and receive a keyboard tab
+stop so narrow-screen readers can scroll all columns with the arrow keys. Reuse
+the existing visible focus treatment; do not hide columns or shrink the data.
 
 Documentation tokens extend the existing scale: 288px sidebar, 72ch prose maximum,
 24px article gutter (16px narrow), 40/30px page heading, 24px section heading,
