@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {stats} from '../../../benchmarks/chef/head/common.mjs';
+const e=JSON.parse(await readFile(new URL('../static/benchmarks/2026-10-22-chef-receipts-testnet.json',import.meta.url),'utf8'));
+assert.equal(e.format,'zeer-uninterrupted-receipt-results-v1');assert.equal(e.status,'PASS');assert.equal(e.chef_version,'0.2.0');
+assert.equal(e.original_live_goal,6);assert.equal(e.original_live_goal_met,true);assert.equal(e.live_sample_count,6);assert.equal(e.catch_up_sample_count,0);assert.equal(e.selected.length,6);
+assert.deepEqual(e.operations.map(row=>row.ordinal),[1,2,3,4,5,6]);
+for(const field of ['txid','height','output_identity_sha256'])assert.equal(new Set(e.selected.map(row=>row[field])).size,6);
+assert.equal(new Set(e.selected.map(row=>row.receiver_sha256)).size,1);
+const stages=[['broadcast_to_prep','prep_ns','broadcast_ns'],['prep_to_decrypted','decrypt_ns','prep_ns'],['decrypt_service','decrypt_ns','decrypt_start_ns'],['decrypted_to_commit','commit_ns','decrypt_ns'],['commit_to_consumer','consumer_ns','commit_ns'],['prep_to_consumer','consumer_ns','prep_ns']];
+for(const row of e.selected){
+  assert.equal(row.scope,'external');assert.equal(row.origin,'unknown');assert.equal(row.pool,'ironwood');assert.equal(row.value_zat,'100000');assert.equal(row.observation_mode,'live');assert.ok(row.height>e.from_height);
+  const t=row.timestamps;assert.ok(BigInt(t.broadcast_ns)>BigInt(e.ready_ns));
+  const sequence=['broadcast_ns','prep_ns','decrypt_start_ns','decrypt_ns','handler_start_ns','handler_end_ns','commit_ns','consumer_ns'];
+  for(let i=1;i<sequence.length;i++)assert.ok(BigInt(t[sequence[i]])>=BigInt(t[sequence[i-1]]));
+  for(const [key,end,start]of stages)assert.equal(row.seconds[key],Number(BigInt(t[end])-BigInt(t[start]))/1e9);
+  const operation=e.operations.find(o=>o.txid===row.txid);assert.ok(operation);assert.equal(operation.memo,row.memo);assert.equal(row.memo,`Zeer live receipt 0${operation.ordinal}`);assert.equal(operation.fee_zat,'10000');assert.equal(operation.note_value_zat,row.value_zat);
+  const source=e.source_canonicality.observations.find(o=>o.txid===row.txid);assert.ok(source);assert.equal(source.height,row.height);assert.equal(source.block_hash,row.block_hash);assert.ok(source.confirmations_observed>=1);
+}
+for(const [key,value]of Object.entries(e.live_summary))assert.deepEqual(value,stats(e.selected.map(row=>row.seconds[key])));
+assert.equal(e.total_fee_zat,'60000');assert.equal(e.operations.reduce((n,row)=>n+BigInt(row.fee_zat),0n),60000n);
+assert.equal(e.source_canonicality.all_six_mined_canonical_at_source,true);assert.equal(e.source_canonicality.observations.length,6);
+assert.equal(e.restart.passed,true);assert.equal(e.restart.rows,12);assert.equal(e.restart.duplicate_ids,0);assert.equal(e.restart.viewing_key_loaded,false);
+assert.equal(e.supervision.forced,false);assert.equal(e.supervision.exit.code,0);
+assert.equal(e.controlled_recovery.passed,true);assert.equal(e.controlled_recovery.process_runs,12);assert.equal(e.controlled_recovery.final_count,36);assert.equal(e.controlled_recovery.viewing_key_loaded,false);assert.ok(Object.values(e.controlled_recovery.checks).every(Boolean));
+assert.equal(e.registry.version,'0.2.0');assert.equal(e.registry.workspace_link,false);assert.equal(e.viewing_key_remained_local,true);
+assert.ok(e.setup_attempts.every(row=>row.new_broadcasts===0));
+for(const [file,hash]of Object.entries(e.source.sha256))assert.equal(createHash('sha256').update(e.source.files[file]).digest('hex'),hash);
+assert.match(e.scanner_sha256,/^[a-f0-9]{64}$/);
+console.log('Receipts:6 future mined notes in one observer, zero catch-up, source rechecks,12-note restart/dedup and12 controlled process recovery runs PASS.');

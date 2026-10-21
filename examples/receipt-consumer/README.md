@@ -107,7 +107,10 @@ ZeeSwap-specific state is included.
 For process termination and controlled PostgreSQL reorg checks, use a disposable
 database role that may create/drop its own schemas, then run
 `npm run verify:recovery`. It creates only a new `ref_` namespace and removes that
-namespace after success. It records eight actual consumer invocations, including
+namespace after success. It records twelve actual consumer invocations, including
 termination after an atomic staged page, cursor rejection, orphan removal and
 re-inclusion of the same output identity at a new block. These are synthetic
 regtest branches; no viewing key is loaded and they are not live shielded timings.
+The additional runs interrupt the HTTP connection and simulate a PostgreSQL
+wire disconnect for this owned API, then verify recovery without changing the
+shared database service. Both retain the last complete local projection.

@@ -1,7 +1,12 @@
 //! Opt-in synchronous admission instrumentation. Ordinary builds contain no timers.
 use crate::{Archive, Result};
 use serde::Serialize;
-use std::{cell::RefCell, collections::BTreeMap, path::Path, time::Instant};
+use std::{
+    cell::{Cell, RefCell},
+    collections::BTreeMap,
+    path::Path,
+    time::Instant,
+};
 
 #[derive(Default, Serialize)]
 pub struct PhaseTime {
@@ -31,6 +36,7 @@ pub struct SegmentAdmission {
 }
 thread_local! {
     static ACTIVE: RefCell<Option<AdmissionProfile>> = const { RefCell::new(None) };
+    static PROGRESS: Cell<Option<Instant>> = const { Cell::new(None) };
 }
 
 pub(crate) struct Phase {
@@ -67,6 +73,13 @@ pub(crate) fn archive_budget(default: usize) -> usize {
             .map_or(default, |p| p.archive_budget_bytes)
     })
 }
+pub(crate) fn counter(name: &'static str) {
+    ACTIVE.with(|slot| {
+        if let Some(profile) = slot.borrow_mut().as_mut() {
+            profile.phases.entry(name).or_default().calls += 1;
+        }
+    });
+}
 pub(crate) fn segment(directory: &str, available: usize, store: &crate::Store) {
     ACTIVE.with(|slot| {
         if let Some(profile) = slot.borrow_mut().as_mut() {
@@ -84,8 +97,36 @@ pub(crate) fn segment(directory: &str, available: usize, store: &crate::Store) {
                 start_height: store.manifest().start_height,
                 end_height: store.manifest().end_height,
             });
+            PROGRESS.with(|progress| {
+                if let Some(started) = progress.get() {
+                    if profile.segments.len() == 1 || profile.segments.len().is_multiple_of(128) {
+                        eprintln!("{}", serde_json::json!({"format":"prep-admission-progress-v1",
+                            "elapsed_seconds":started.elapsed().as_secs_f64(),"segments":profile.segments.len(),
+                            "last_height":store.manifest().end_height,"phases":profile.phases}));
+                    }
+                }
+            });
         }
     });
+}
+
+/// Diagnostic-only progress on stderr; ordinary archive admission is unchanged.
+pub fn open_with_progress(
+    path: impl AsRef<Path>,
+    budget: Option<usize>,
+) -> Result<(Archive, AdmissionProfile)> {
+    struct Reset;
+    impl Drop for Reset {
+        fn drop(&mut self) {
+            PROGRESS.with(|p| p.set(None));
+        }
+    }
+    PROGRESS.with(|p| {
+        assert!(p.get().is_none(), "nested progress profiling");
+        p.set(Some(Instant::now()));
+    });
+    let _reset = Reset;
+    open(path, budget)
 }
 
 /// Fresh admission using all ordinary integrity checks. A reduced optional budget

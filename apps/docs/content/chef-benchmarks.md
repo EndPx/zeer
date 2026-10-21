@@ -2,6 +2,8 @@
 
 Chef's benchmark measures the application-indexing pipeline: reading from Prep, running TypeScript handlers, committing entities to PostgreSQL and making committed data readable through GraphQL.
 
+For private payment observations, start with the [six uninterrupted live receipts](#shielded-receipts-six-uninterrupted-live-samples). Public block-summary and earlier polling studies are recorded separately below.
+
 Recorded **20 October 2026** on real **Zcash Testnet** data. All durations are in **seconds (s)**.
 
 ## Workload and results
@@ -96,7 +98,30 @@ The shared envelope remained 3 CPU / 8 GiB; the observer, shadow follower and re
 
 ### Full-history rollout check
 
-After timing finished, the candidate was started separately against the full historical archive, while the original public reader kept serving. It did not reach readiness within **1,200 s** at **0.5 CPU / 1 GiB**, so the temporary candidate was stopped and the public route was left unchanged. The check used 599.04 s of CPU and reached the 1 GiB memory ceiling; it does not prove which resource dominated startup. Its journal and outcome are included in the artifact. The accepted tail study therefore supports the bounded admission change, but **a production rollout has not passed**. Full-history startup remains a separate issue to resolve.
+In this earlier attempt, the candidate was started separately against the full historical archive, while the original public reader kept serving. It did not reach readiness within **1,200 s** at **0.5 CPU / 1 GiB**, so the temporary candidate was stopped and the public route was left unchanged. The check used 599.04 s of CPU and reached the 1 GiB memory ceiling; it does not prove which resource dominated startup. Its journal and failed outcome remain in the original artifact. A later [full-history profiling and readiness study](/docs/prep/benchmarks/#full-history-startup) measures the separate startup fix; the tail timings above do not establish that result.
+
+## Shielded receipts: six uninterrupted live samples
+
+A new study recorded on **21 October 2026 (UTC)** completed **six future mined receipts in one uninterrupted observer**, with **no catch-up samples**. The observer was ready before any of its six broadcast requests. Each owned Ironwood self-transfer delivered a selected **100,000-zatoshi external note**, a matching numbered memo and a distinct output identity in a different block. All six block hashes were rechecked against the configured Zebra node. Total test fees were **60,000 zatoshi**.
+
+| Stage, 6 live samples | Median | p95 |
+| --- | ---: | ---: |
+| Prep response received → native decryption complete | 0.04 s | 0.05 s |
+| Decryption complete → Chef commit acknowledged | 0.90 s | 1.05 s |
+| Chef commit acknowledged → consumer storage observed | 1.34 s | 2.10 s |
+| Prep response received → consumer storage observed | **2.27 s** | **3.17 s** |
+
+Chef **0.2.0 was installed from npm outside the checkout**, without a workspace link. Viewing and spending keys stayed on Windows. The scanner, producer and consumer ran locally; authenticated candidate Prep and PostgreSQL were reached through encrypted SSH tunnels to the VPS. **This study bypassed the public HTTP ingress** and does not measure its rate limits or internet-facing API latency. The Prep reader retained its 0.5 CPU / 1 GiB ceiling within the shared 3 CPU / 8 GiB pipeline, with production ingestion active.
+
+The commit stage includes canonical-header checks and the remote database connection, rather than database execution alone. Consumer timestamps are upper bounds observed after reading a coherent committed SQLite projection. Producer and consumer polling targets were 2 s and 1 s. With six samples, nearest-rank p95 is the maximum, not a reliable estimate of the population tail.
+
+Separately, **broadcast request → first matching Prep response** had a median of **45.01 s** and maximum of **98.18 s**. That interval includes mining, the source follower's one-confirmation policy, ingestion and polling. It is not pure block-production time. No additional settlement confirmation delay is included in the receipt-processing table.
+
+The run recorded **zero source errors** and **480 successful API responses**: 448 status and 32 GraphQL requests. The consumer waited once for the checkpoint to catch up and restarted three traversals when the revision changed. Those recoverable outcomes remain in the evidence. API and consumer restart preserved **12 notes, including change, with zero duplicate IDs**. A separate controlled fixture passed **12 actual consumer-process runs**, covering termination, cursor invalidation, orphan removal/re-inclusion, closed read gates and HTTP/database wire recovery. Its branches are synthetic; the six live transfers did not exercise a natural reorg.
+
+Immutable report snapshots address a Windows file-replacement failure reproduced under concurrent readers. The earlier interrupted observer's original cause remains unclassified. Two new setup attempts ended before any funding; their reasons are retained separately. This successful run replaces neither the failed evidence nor the earlier catch-up timings.
+
+[Download all six live samples, operation IDs and provenance](pathname:///docs/benchmarks/2026-10-22-chef-receipts-testnet.json). Check the timestamps, fees, source hashes and recovery assertions with `node apps/docs/scripts/verify-uninterrupted-receipts.mjs`. Internal change values and credentials are excluded. This is a small owned-wallet observation test, not sender attribution, spendable-balance proof, settlement authorization or an SLA.
 
 ## Shielded receipts: live observations and recovery
 

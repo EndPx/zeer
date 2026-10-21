@@ -38,5 +38,7 @@ try{
 }catch(error){
   // Never echo network bodies, URLs, keys or private note fields.
   const code=error instanceof ConsumerError?error.code:error?.name==='AbortError'?'STOPPED':'CONSUMER_FAILED';
-  process.stderr.write(JSON.stringify({error:{code}})+'\n');process.exitCode=1;
+  const nativeCode=typeof error?.code==='string'&&/^[A-Z_0-9]+$/.test(error.code)?error.code:undefined;
+  const sqliteCode=Number.isSafeInteger(error?.errcode)?error.errcode:undefined;
+  process.stderr.write(JSON.stringify({error:{code,nativeCode,sqliteCode,stage:'consumer'}})+'\n');process.exitCode=1;
 }

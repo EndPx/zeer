@@ -5,6 +5,7 @@ import {readFile,writeFile,mkdir,lstat} from 'node:fs/promises';
 import {resolve,join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
+import {createServer as createTcpServer} from 'node:net';
 import {DatabaseSync} from 'node:sqlite';
 import pg from 'pg';
 import {PostgresStore,parseModel,syncStep,createChefServer} from '@zeer-dev/chef';
@@ -25,7 +26,8 @@ const client={
   async get(query){const selected=blocks.filter(b=>b.height>=query.from_block&&b.height<query.to_block).slice(0,query.limit);return {network:'regtest',epoch,from_block:query.from_block,next_block:selected.at(-1).height+1,data:{blocks:selected.map(b=>({height:b.height,hash:b.hash,previous_hash:b.previousHash,time:b.time})),transactions:query.field_selection.transaction.length?selected.map(b=>({block_height:b.height,index:0,txid:b.txid,version:6,locktime:0})):[]}};},
 };
 const model=parseModel(await readFile(join(root,'schema.graphql'),'utf8'));
-const store=new PostgresStore(process.env.DATABASE_URL,{project,fingerprint:'standalone-recovery-v1',model,network:'regtest',startHeight:40,reorgWindow:10});
+const storeOptions={project,fingerprint:'standalone-recovery-v1',model,network:'regtest',startHeight:40,reorgWindow:10};
+let store=new PostgresStore(process.env.DATABASE_URL,storeOptions);
 const indexer={async transactionMetadata({block,transaction,context}){
   for(let index=0;index<12;index++)await context.entities.set('ReadableNote',{
     id:`${transaction.txid}:${String(index).padStart(2,'0')}`,txid:transaction.txid,pool:'ironwood',outputIndex:index,
@@ -33,7 +35,7 @@ const indexer={async transactionMetadata({block,transaction,context}){
   });
 }};
 const step=()=>syncStep({client,store,indexer,network:'regtest',startHeight:40,reorgWindow:10,pageSize:16});
-let server,passed=false;const children=new Set(),http=[];
+let server,disconnectServer,passed=false;const children=new Set(),http=[];
 try{
   await store.migrate();await store.acquire();await step();
   server=createChefServer({store,model,token});server.on('request',(request,response)=>response.once('finish',()=>http.push({path:request.url,status:response.statusCode})));
@@ -80,6 +82,24 @@ try{
   ready=false;await step();const waiting=await run();assert.ok(waiting.events.some(e=>e.reason==='INDEXER_RECONCILING'));
   assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.closed_gate_preserves_last_complete_observation=true;
   ready=true;await step();await run();assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.source_recovery_resumes=true;
+
+  const port=server.address().port;
+  server.closeAllConnections();await new Promise(r=>server.close(r));server=undefined;
+  const disconnected=await run();assert.ok(disconnected.events.some(e=>e.reason==='TRANSPORT_UNAVAILABLE'));
+  assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.closed_http_connection_preserves_rows=true;
+  const serve=async()=>{server=createChefServer({store,model,token});server.on('request',(request,response)=>response.once('finish',()=>http.push({path:request.url,status:response.statusCode})));await new Promise(r=>server.listen(port,'127.0.0.1',r));};
+  await serve();await run();assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.http_transport_recovery=true;
+
+  // Simulate a wire disconnect only for this owned API's database connection.
+  // The shared PostgreSQL service and every other namespace remain untouched.
+  server.closeAllConnections();await new Promise(r=>server.close(r));server=undefined;await store.close();
+  let refusedConnections=0;disconnectServer=createTcpServer(socket=>{refusedConnections++;socket.destroy();});await new Promise(r=>disconnectServer.listen(0,'127.0.0.1',r));
+  const unavailable=new URL(process.env.DATABASE_URL);unavailable.hostname='127.0.0.1';unavailable.port=String(disconnectServer.address().port);
+  store=new PostgresStore(unavailable.href,storeOptions);await serve();
+  const databaseFailure=await run();assert.ok(refusedConnections>0);assert.ok(databaseFailure.events.some(e=>e.reason==='HTTP_500'||e.reason==='TRANSPORT_UNAVAILABLE'));
+  assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.database_wire_disconnect_preserves_rows=true;
+  server.closeAllConnections();await new Promise(r=>server.close(r));server=undefined;await store.close();await new Promise(r=>disconnectServer.close(r));disconnectServer=undefined;
+  store=new PostgresStore(process.env.DATABASE_URL,storeOptions);await store.migrate();await store.acquire();await step();await serve();await run();assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.database_connection_recovery=true;
   assert.ok(http.some(row=>row.path==='/graphql'&&row.status===409));
   proof.checks.actual_graphql_409_observed=true;
   proof.final_count=recovered.rows.length;proof.final_revision=recovered.state.complete.revision;
@@ -90,6 +110,7 @@ try{
 }finally{
   for(const child of children)child.kill('SIGKILL');
   if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}
+  if(disconnectServer)await new Promise(r=>disconnectServer.close(r));
   await store.close();
   if(passed){const db=new pg.Client({connectionString:process.env.DATABASE_URL,connectionTimeoutMillis:5000});await db.connect();try{assert.match(project,/^ref_[a-f0-9]{22}$/);await db.query(`DROP SCHEMA "chef_${project}" CASCADE`);proof.owned_fixture_namespace_removed=true;}finally{await db.end();}}
   await writeFile(join(directory,'proof.json'),JSON.stringify(proof,null,2)+'\n');

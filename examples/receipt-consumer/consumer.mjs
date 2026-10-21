@@ -51,7 +51,7 @@ export class RangeConsumer {
       const next=change(current);
       this.db.prepare('UPDATE state SET version=version+1,payload=? WHERE singleton=1').run(JSON.stringify({scan:next.scan,complete:next.complete}));
       this.db.exec('COMMIT');return this.state();
-    }catch(error){this.db.exec('ROLLBACK');throw error;}
+    }catch(error){try{this.db.exec('ROLLBACK');}catch{/* SQLite may already have rolled the transaction back. */}throw error;}
   }
   reset(current){return this.update(current.version,state=>{this.db.exec('DELETE FROM staging');return {...state,scan:null};});}
   async request(path,payload,signal){

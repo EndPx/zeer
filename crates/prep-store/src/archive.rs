@@ -316,7 +316,10 @@ impl Archive {
             remaining = remaining
                 .checked_sub(store.transaction_index_bytes())
                 .ok_or(Error::Limit("archive transaction index bytes"))?;
-            stores.push(store.compact_manifest()?);
+            stores.push(profile_phase!(
+                "compact_manifest",
+                store.compact_manifest()
+            )?);
         }
         Ok(Self {
             root: root.to_path_buf(),

@@ -18,18 +18,32 @@ as queries. Native tests cover busy-slot waiting, authentication, queue timeout,
 request cancellation and snapshot freshness. The live run has zero failed timed
 reads in **both** variants, so it does not prove a lower live error rate.
 
-`receipt-live.mjs` is a separate Windows study. Copy it into the standalone
+`receipt-live.mjs` is a separate Windows study. Copy it, `report.mjs`, `readiness.mjs` and
+`receipt-supervisor.mjs` into the standalone
 `examples/receipt-consumer` directory **outside** the checkout after installing
 its dependencies from npm. It expects protected environment paths for a local
 scanner, viewing key and account metadata, plus an owned PostgreSQL connection.
 It refuses a reused output directory. `receipt-supervisor.mjs` launches it with
 an independent 2,400-second process-tree deadline. It never signs or broadcasts.
 
+Live monitoring reads `readLatestReport(directory)` from `report.mjs`. The writer
+publishes synced immutable `report-*.json` snapshots and normally retains four;
+a hard 64-snapshot / 4 MiB-per-report bound stops an unhealthy diagnostic sink.
+Readers retry a snapshot removed by retention. The fixed `raw-private.json` is
+created once after shutdown for terminal evidence, never replaced during polling.
+Transient storage failures have bounded retries; fatal failures retain safe
+stage/code diagnostics on stderr and preserve the last complete snapshot.
+
 The study requires a private `expected-operations.json` containing exactly six
-unique `{ordinal,txid}` operations, ordinals 1–6, before completion. Selected
+unique `{ordinal,txid,broadcast_ns}` operations, ordinals 1–6, before completion. Selected
 external notes must carry the corresponding `Zeer live receipt 01`–`06` memos,
 equal 100000-zatoshi values and a consistent receiver. Test funding is a separate
 private operator action; no signing helper is shipped with this harness.
+Readiness requires a successful bootstrap, a ready persisted checkpoint and a
+live consumer child. Each live operation must have been requested after that
+readiness timestamp and first observed by Prep afterwards in a future block.
+Use `STUDY_PREP_URL` and, where needed, `STUDY_PREP_TOKEN` for a private candidate;
+disclose the chosen transport separately from public-ingress measurements.
 
 Timings begin when the client receives the matching raw transaction from Prep.
 Native scanner completion, handler work, PostgreSQL commit acknowledgement and

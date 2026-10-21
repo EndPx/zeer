@@ -12,6 +12,10 @@ admission-profile = []
 name = "admission_phases"
 required-features = ["admission-profile"]
 
+[[example]]
+name = "startup_profile"
+required-features = ["admission-profile"]
+
 [dependencies]
 prep-proto = { path = "../prep-proto" }
 prost.workspace = true

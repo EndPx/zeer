@@ -1,0 +1,734 @@
+{
+  "format": "zeer-full-history-readiness-verification-v1",
+  "status": "PASS",
+  "date_local": "2026-10-22",
+  "timezone": "Asia/Jakarta",
+  "baseline_commit": "d35d2eb",
+  "native": {
+    "prep_unit_tests_passed": 74,
+    "prep_integration_tests_passed": 7,
+    "prep_store_tests_passed": 61,
+    "feature_clippy_passed": true,
+    "ordinary_and_profile_release_builds_passed": true,
+    "fmt_check_passed": true,
+    "deployed_binary_sha256": "d788ea8b25216b4e0fe21b3336bf4955fa670f890a764ca6adab91da6758c414",
+    "deployed_hash_rechecked_over_ssh": true
+  },
+  "javascript": {
+    "report_readiness_consumer_tests_passed": 15,
+    "shutdown_supervisor_tests_passed": 4,
+    "standalone_registry_consumer_process_runs": 12,
+    "chef_version": "0.2.0",
+    "registry_integrity_rechecked": true
+  },
+  "evidence_verifiers_passed": [
+    "verify-benchmarks.mjs",
+    "verify-head-benchmarks.mjs",
+    "verify-reliability.mjs",
+    "verify-receipt-benchmarks.mjs",
+    "verify-startup-benchmarks.mjs",
+    "verify-uninterrupted-receipts.mjs"
+  ],
+  "startup": {
+    "frozen_blocks": 4526100,
+    "segments": 13513,
+    "baseline_seconds": 1098.547186043,
+    "candidate_seconds": 897.791157246,
+    "samples_per_variant": 1,
+    "host_caches_cleared": false,
+    "ordinary_live_http_readiness_seconds": 837.4246019860147,
+    "query_equality": "PASS"
+  },
+  "receipts": {
+    "live_samples": 6,
+    "catch_up_samples": 0,
+    "uninterrupted": true,
+    "prep_to_consumer": {
+      "samples": 6,
+      "median_seconds": 2.27004985,
+      "p95_seconds": 3.1714455,
+      "min_seconds": 1.957701,
+      "max_seconds": 3.1714455
+    },
+    "source_canonicality_passed": true,
+    "restart_rows": 12,
+    "duplicate_ids": 0,
+    "fee_zat": "60000",
+    "viewing_keys_remained_local": true,
+    "public_ingress_measured": false
+  },
+  "prep_activation": {
+    "status": "ACTIVATED",
+    "switched_at_utc": "2026-10-21T17:51:37Z",
+    "switch_seconds": 12.928011930023786,
+    "source_height_compared": 4526310,
+    "data_equal": true,
+    "canonicality_gates_preserved": true,
+    "ingress_limits_changed": false,
+    "original_native_retained_warm": true,
+    "existing_chef_namespaces_changed": false,
+    "public_prep_upstream_changed": true
+  },
+  "public_api_smoke": {
+    "status": "PASS",
+    "checked_at_unix": 1792605177.5104535,
+    "origin": "https://zeer.endpx.cloud",
+    "prep_start": 0,
+    "prep_height": 4526315,
+    "all_six_public_transaction_observations_match_source": true,
+    "existing_chef_available": true,
+    "recent_headers_available": true,
+    "public_max_active_queries": 2,
+    "requests": [
+      {
+        "path": "/api/prep/height",
+        "status": 200,
+        "response_sha256": "4d0c2ec70395be4c1fa8865827f326c5c4bfcfb30a94fe7ef92b1a6f92c2684b"
+      },
+      {
+        "path": "/api/prep/capabilities",
+        "status": 200,
+        "response_sha256": "b2f0651c1e02ab3bbaafca5ef08cdb329b6106d2d79a1a54c59325bc9f45bfc7"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "e0f4deac25b3a798df33ea4c1f056c3d029df82fa0987d7d281d5b5cf33fadd4"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "386e3d200f4f0ec76fbf456cbf025fa80581cd21d342cdd1c4497c4fac87aed2"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "6d8f03f1e08edda406f64bdbbd3205cfff4089d307ae1f2f105c9da0e008b9d1"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "5d8c051e577d6a4a76a66edbcc2130c7f50a90b99293f921ae92cdd40ba78f11"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "e9230f89abc2ef6aec2a7f10caff47fd83479b3bc027cbb4de019dec996dc826"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "add6e6ca66ec4b87b43e0b323555629021c5dcc7dac1320696d59ca863b396b8"
+      },
+      {
+        "path": "/api/status",
+        "status": 200,
+        "response_sha256": "5aa6d1ee1b8be444f2199b56e11e21ae11538b1b9c629cde12a3933ccaed021d"
+      }
+    ]
+  },
+  "docs_activation": {
+    "status": "PASS",
+    "previous": "/opt/zeer-docs/releases/20261021-live-reliability-v1",
+    "release": "/opt/zeer-docs/releases/20261022-full-history-v1",
+    "pages": 44,
+    "application_services_restarted": false
+  },
+  "browser_checks": {
+    "127.0.0.1": {
+      "origin": "http://127.0.0.1:3002",
+      "pages": [
+        {
+          "pathname": "/docs/",
+          "title": "Build with Zeer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/architecture/",
+          "title": "From source to API",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/overview/",
+          "title": "Zeer Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart/",
+          "title": "Your first Prep query",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/getting-started/",
+          "title": "Getting started with Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/clients/",
+          "title": "Prep clients",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/benchmarks/",
+          "title": "Prep retrieval benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/curl/",
+          "title": "cURL examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tokens/",
+          "title": "API access & tokens",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/networks/",
+          "title": "Supported networks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/troubleshooting/",
+          "title": "Troubleshooting",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/query/",
+          "title": "Query & response",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/fields/",
+          "title": "Filters & field selection",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/continuation/",
+          "title": "Continuation & historical scans",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/address-outputs/",
+          "title": "Find payments to a transparent address",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/inspect-transaction/",
+          "title": "Inspect a Zcash transaction",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/shielded/",
+          "title": "Public shielded activity",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/transactions/",
+          "title": "Transaction lookup & mempool",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/examples/",
+          "title": "Prep examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/public-api/",
+          "title": "Coverage, access & preview limits",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/overview/",
+          "title": "Zeer Chef",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart/",
+          "title": "Run your own Chef project",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarks/",
+          "title": "Chef indexing benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/configuration/",
+          "title": "Configuration file",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/schema/",
+          "title": "Entity schema",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/handlers/",
+          "title": "Transaction handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/block-handlers/",
+          "title": "Block handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/environment-variables/",
+          "title": "Environment variables",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/cli-commands/",
+          "title": "Chef CLI commands",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/database-performance/",
+          "title": "Database performance",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/latency-at-head/",
+          "title": "Latency at the chain head",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarking/",
+          "title": "Benchmark your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/graphql/",
+          "title": "Querying with GraphQL",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/overview/",
+          "title": "Shielded receipts & privacy",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/local/",
+          "title": "Local viewing-key setup",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/memos/",
+          "title": "Reading receipts & memos",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/examples/",
+          "title": "Chef examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/testing/",
+          "title": "Testing your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/recovery/",
+          "title": "Checkpoints, restart & reorgs",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/evolution/",
+          "title": "Schema & handler evolution",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/indexes/",
+          "title": "Equality query indexes",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/self-hosting/",
+          "title": "Self-hosting & troubleshooting",
+          "status": 200
+        }
+      ],
+      "viewports": [
+        {
+          "width": 375,
+          "viewport": 375,
+          "document": 375,
+          "axeViolations": 0
+        },
+        {
+          "width": 768,
+          "viewport": 768,
+          "document": 768,
+          "axeViolations": 0
+        },
+        {
+          "width": 1440,
+          "viewport": 1440,
+          "document": 1440,
+          "axeViolations": 0
+        }
+      ],
+      "interactions": [
+        "Chef and Prep onboarding sidebar order and AI guide navigation",
+        "Chef Guides and Prep Tutorials: order, collapse/expand and chapter navigation",
+        "Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment",
+        "Product-specific benchmark navigation and downloads; quickstart, guide, tutorial and benchmark reflow/accessibility",
+        "Ctrl+K search and memo result navigation",
+        "Empty search, Escape dismissal and focus return",
+        "Code clipboard copy",
+        "Mobile drawer product navigation",
+        "Long reference reflow with reduced motion"
+      ]
+    },
+    "zeer.endpx.cloud": {
+      "origin": "https://zeer.endpx.cloud",
+      "pages": [
+        {
+          "pathname": "/docs/",
+          "title": "Build with Zeer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/architecture/",
+          "title": "From source to API",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/overview/",
+          "title": "Zeer Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart/",
+          "title": "Your first Prep query",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/getting-started/",
+          "title": "Getting started with Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/clients/",
+          "title": "Prep clients",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/benchmarks/",
+          "title": "Prep retrieval benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/curl/",
+          "title": "cURL examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tokens/",
+          "title": "API access & tokens",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/networks/",
+          "title": "Supported networks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/troubleshooting/",
+          "title": "Troubleshooting",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/query/",
+          "title": "Query & response",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/fields/",
+          "title": "Filters & field selection",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/continuation/",
+          "title": "Continuation & historical scans",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/address-outputs/",
+          "title": "Find payments to a transparent address",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/inspect-transaction/",
+          "title": "Inspect a Zcash transaction",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/shielded/",
+          "title": "Public shielded activity",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/transactions/",
+          "title": "Transaction lookup & mempool",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/examples/",
+          "title": "Prep examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/public-api/",
+          "title": "Coverage, access & preview limits",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/overview/",
+          "title": "Zeer Chef",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart/",
+          "title": "Run your own Chef project",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarks/",
+          "title": "Chef indexing benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/configuration/",
+          "title": "Configuration file",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/schema/",
+          "title": "Entity schema",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/handlers/",
+          "title": "Transaction handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/block-handlers/",
+          "title": "Block handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/environment-variables/",
+          "title": "Environment variables",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/cli-commands/",
+          "title": "Chef CLI commands",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/database-performance/",
+          "title": "Database performance",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/latency-at-head/",
+          "title": "Latency at the chain head",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarking/",
+          "title": "Benchmark your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/graphql/",
+          "title": "Querying with GraphQL",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/overview/",
+          "title": "Shielded receipts & privacy",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/local/",
+          "title": "Local viewing-key setup",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/memos/",
+          "title": "Reading receipts & memos",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/examples/",
+          "title": "Chef examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/testing/",
+          "title": "Testing your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/recovery/",
+          "title": "Checkpoints, restart & reorgs",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/evolution/",
+          "title": "Schema & handler evolution",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/indexes/",
+          "title": "Equality query indexes",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/self-hosting/",
+          "title": "Self-hosting & troubleshooting",
+          "status": 200
+        }
+      ],
+      "viewports": [
+        {
+          "width": 375,
+          "viewport": 375,
+          "document": 375,
+          "axeViolations": 0
+        },
+        {
+          "width": 768,
+          "viewport": 768,
+          "document": 768,
+          "axeViolations": 0
+        },
+        {
+          "width": 1440,
+          "viewport": 1440,
+          "document": 1440,
+          "axeViolations": 0
+        }
+      ],
+      "interactions": [
+        "Chef and Prep onboarding sidebar order and AI guide navigation",
+        "Chef Guides and Prep Tutorials: order, collapse/expand and chapter navigation",
+        "Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment",
+        "Product-specific benchmark navigation and downloads; quickstart, guide, tutorial and benchmark reflow/accessibility",
+        "Ctrl+K search and memo result navigation",
+        "Empty search, Escape dismissal and focus return",
+        "Code clipboard copy",
+        "Mobile drawer product navigation",
+        "Long reference reflow with reduced motion",
+        "Existing website Get started link enters the new docs"
+      ]
+    }
+  },
+  "served_artifacts": [
+    {
+      "file": "2026-10-22-chef-receipts-testnet.json",
+      "sha256": "4877d57e1af4c6e2d0560e6271925892004cc2aad70b6e59424c99ff208ae327",
+      "matches": true
+    },
+    {
+      "file": "2026-10-22-prep-startup-baseline-profile.json.gz",
+      "sha256": "2ebd9e5187a0973fb7f290a690f4a935a42dc8135727919c6be9977b419f032b",
+      "matches": true
+    },
+    {
+      "file": "2026-10-22-prep-startup-baseline-source.tar.gz",
+      "sha256": "76bb74bb8c85a7037f401f511a429912ab05482dc2cd5508671409c2d3c1340f",
+      "matches": true
+    },
+    {
+      "file": "2026-10-22-prep-startup-candidate-profile.json.gz",
+      "sha256": "934c5b08997d1464298ac1bb19d4bc432d5d97786ba60392c8a0ae0615461d68",
+      "matches": true
+    },
+    {
+      "file": "2026-10-22-prep-startup-candidate-source.tar.gz",
+      "sha256": "829daf510c51e823b6f090aae32bf8b9136bfa302cbc91161a8372e0308ae633",
+      "matches": true
+    },
+    {
+      "file": "2026-10-22-prep-startup-testnet.json",
+      "sha256": "970a5c68607a6a575c3944e3989946d5088b0004082df2d5d96772e2a34ba223",
+      "matches": true
+    }
+  ],
+  "reviews": {
+    "standards": "PASS; no remaining verified actionable findings",
+    "intent": "PASS; no actionable findings",
+    "reviewers_read_only": true
+  },
+  "cleanup": {
+    "remote": {
+      "database_removed": "zeer_readiness_20261021",
+      "role_removed": "zeer_readiness_20261021",
+      "active_connections_before": 0,
+      "temporary_credential_files_removed": [
+        "client.env",
+        "study.env"
+      ],
+      "production_databases_changed": false
+    },
+    "local": {
+      "known_secret_byte_audit_passed": true,
+      "publication_files_checked": 30,
+      "compressed_members_checked": true,
+      "temporary_local_credential_files_removed": [
+        ".env",
+        "private/ref_505a0853a2514278ad3262/consumer.env",
+        "private/ref_85409a255c19456aba37a8/consumer.env"
+      ],
+      "original_wallet_keys_retained_locally": true
+    },
+    "pin": {
+      "owned_pinned_hardlinks_removed": true,
+      "catalog_retained_for_provenance": true,
+      "source_archive_untouched": true,
+      "active_candidate_archive_is_original": true,
+      "guard_status": "PASS"
+    },
+    "temporary_tunnels_closed": [
+      49379,
+      49381
+    ]
+  },
+  "limitations": [
+    "Pinned admission is one sequential sample per variant, not a cold-disk comparison or SLA.",
+    "The six live self-transfers do not exercise a natural reorg or financial settlement.",
+    "Receipt timing uses private SSH transport; public ingress capacity is not established.",
+    "The earlier failed/interrupted studies remain unchanged."
+  ],
+  "evidence_sha256": {
+    "2026-10-22-prep-startup-testnet.json": "970a5c68607a6a575c3944e3989946d5088b0004082df2d5d96772e2a34ba223",
+    "2026-10-22-chef-receipts-testnet.json": "4877d57e1af4c6e2d0560e6271925892004cc2aad70b6e59424c99ff208ae327"
+  },
+  "git_artifact_bytes_match_public": true
+}

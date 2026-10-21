@@ -2,7 +2,7 @@
 
 Prep retrieves selected public chain data from a prepared archive. This benchmark compares that retrieval path with native Zebra RPC over the **same block range, fields and expected results**. It does not measure Chef indexing or shielded decryption.
 
-Recorded **21 October 2026** on **Zcash Testnet**. All durations are in **seconds (s)**.
+Recorded **21 October 2026 (UTC)** on **Zcash Testnet**. All durations are in **seconds (s)**. Full-history startup is reported separately below.
 
 ## Workload and results
 
@@ -59,6 +59,26 @@ Five background reads each of the production Prep and Chef endpoints completed w
 [Download recorded samples and provenance](pathname:///docs/benchmarks/2026-10-21-prep-zebra-rpc.json) — all measured samples and warmups, medians, response sizes, resources, binary and source hashes, native preparation, and the earlier complete trial.
 
 [Download the frozen reference](pathname:///docs/benchmarks/2026-10-21-prep-zebra-rpc-reference.json) — expected rows, lookup IDs, output address, block hashes and selection rules. Validate the published aggregates with `node apps/docs/scripts/verify-benchmarks.mjs`, or follow the [benchmark README](https://github.com/EndPx/zeer/tree/main/benchmarks/prep/rpc) to repeat the work against your own node.
+
+## Full-history startup
+
+This later experiment measures **opening and validating an existing archive**, before serving queries. Both fresh processes read the same frozen catalog: **4,526,100 blocks, heights 0–4,526,099, in 13,513 segments**. All retained record and segment integrity checks remained enabled.
+
+| Admission work | Previous implementation | Candidate |
+| --- | ---: | ---: |
+| Complete archive admission | 1,098.55 s | 897.79 s |
+| Raw-reference reconstruction, included above | 551.40 s | 390.53 s |
+| Process-group CPU usage | 549.23 s | 447.99 s |
+
+These are **one sequential run per implementation**, under the same **0.5 CPU / 1 GiB** reader ceilings and shared **3 CPU / 8 GiB** pipeline, with production ingestion active. The candidate's observed admission time was **18.3% lower**. Host caches were not cleared; metadata pinning and the preceding run can affect filesystem cache. This is not a cold-disk comparison, median, throughput claim or SLA. Both pinned runs passed the 1,200 s readiness criterion.
+
+Profiling identified raw-reference reconstruction as the largest measured phase. The candidate reconstructs supported canonical JSON directly from validated spans, avoiding a full intermediate JSON tree. Unsupported forms use the existing decoder. Payload and segment checksums, decoded-record validation, bounds and optional-index budgets remain unchanged. Both profiles record **4,526,100 record/payload/integrity checks**, identical index topology and **13,513 segment checks**.
+
+The ordinary service binary, built without profiling timers, then opened the **live full archive** and answered HTTP readiness in **837.42 s**. That separate observation uses a later live catalog and is not another sample of the pinned comparison. Six query cases checked metadata and raw/decoded responses across first, middle and modern 16-block windows. Each matched the previous reader; headers and transaction IDs also matched the configured Zebra node. These sample checks complement admission validation rather than proving every possible query.
+
+After the [six-receipt application test](/docs/chef/benchmarks/#shielded-receipts-six-uninterrupted-live-samples) passed, the public Prep upstream switched to this candidate. Post-switch checks returned the expected six mined transactions and ready status; existing Chef remained available. The original native reader stays warm for rollback. Public rate limits, canonicality gates and existing Chef namespaces were preserved.
+
+[Download startup measurements and provenance](pathname:///docs/benchmarks/2026-10-22-prep-startup-testnet.json), including links to the compressed full profiles and exact source archives. Recompute the checks with `node apps/docs/scripts/verify-startup-benchmarks.mjs`; the [reproduction guide](https://github.com/EndPx/zeer/tree/main/benchmarks/prep/startup) explains the diagnostic build and resource bounds. The earlier unsuccessful full-history warmup remains in the [Chef admission study](/docs/chef/benchmarks/#full-history-rollout-check); its workload and cache conditions differ from these pinned runs.
 
 ## Earlier fixed versus adaptive comparison
 

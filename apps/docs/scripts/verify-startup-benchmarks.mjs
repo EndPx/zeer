@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {gunzipSync} from 'node:zlib';
+const root=new URL('../static/benchmarks/',import.meta.url);
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const e=JSON.parse(await readFile(new URL('2026-10-22-prep-startup-testnet.json',root),'utf8'));
+assert.equal(e.format,'zeer-prep-full-history-startup-v1');
+assert.equal(e.sample_count_per_variant,1);assert.equal(e.dataset.start,0);assert.equal(e.dataset.head,4526099);
+assert.equal(e.dataset.segments,13513);assert.equal(e.cache.host_caches_cleared,false);assert.equal(e.cache.disk_cold_claim,false);
+assert.deepEqual(e.runs.map(row=>row.variant),['baseline','candidate']);
+const profiles=[];
+for(const run of e.runs){
+  assert.equal(run.status,'PASS');assert.equal(run.returncode,0);assert.deepEqual(run.pin,e.dataset);
+  assert.equal(run.readiness_gate_seconds,1200);assert.ok(run.admission_seconds<=1200);assert.equal(run.readiness_gate_met,true);
+  const compressed=await readFile(new URL(run.profile.filename,root));assert.equal(sha(compressed),run.profile.gzip_sha256);
+  const bytes=gunzipSync(compressed);assert.equal(sha(bytes),run.profile.json_sha256);
+  const p=JSON.parse(bytes);assert.equal(p.catalog_sha256,e.dataset.catalog_sha256);assert.equal(p.head_hash,e.dataset.head_hash);
+  assert.equal(p.profile.admission_ns/1e9,run.admission_seconds);assert.deepEqual(p.profile.phases,run.profile.phases);
+  for(const phase of ['record_io','payload_hash','integrity_decode','decompression','raw_reference_expansion'])assert.equal(p.profile.phases[phase].calls,4526100);
+  assert.equal(p.profile.phases.segment_hash.calls,13513);assert.equal(p.profile.segments.length,13513);
+  for(const [name,value]of Object.entries(p.profile.phases))assert.equal(value.ns/1e9,run.phases_seconds[name]);
+  assert.equal(run.peak_memory_bytes,e.resource_limits.reader_memory_bytes);profiles.push(p.profile);
+}
+assert.deepEqual(profiles[0].segments,profiles[1].segments);
+for(const field of ['archive_budget_bytes','segment_budget_bytes','native_metadata_row_bytes','native_index_fixed_bytes','native_offset_bytes','native_secondary_entry_bytes'])assert.equal(profiles[0][field],profiles[1][field]);
+assert.equal(profiles[1].phases.raw_reference_fast_path.calls+profiles[1].phases.raw_reference_legacy_path.calls,4526100);
+assert.equal(e.observed_admission_reduction_percent,(1-e.runs[1].admission_seconds/e.runs[0].admission_seconds)*100);
+assert.equal(e.live_http_readiness.status,'READY');assert.equal(e.live_http_readiness.full_archive_validated,true);assert.ok(e.live_http_readiness.seconds<=1200);
+assert.equal(e.query_equality.status,'PASS');assert.equal(e.query_equality.cases.length,6);
+for(const row of e.query_equality.cases){assert.equal(row.old_new_equal,true);assert.equal(row.node_headers_and_txids_equal,true);assert.equal(row.blocks,16);assert.equal(row.to_exclusive-row.from,16);}
+for(const row of e.source_archives)assert.equal(sha(await readFile(new URL(row.filename,root))),row.sha256);
+for(const [name,hash]of Object.entries(e.source.sha256))assert.equal(sha(e.source.files[name]),hash);
+assert.match(e.ordinary_native_sha256,/^[a-f0-9]{64}$/);
+assert.equal(sha(e.validation.linux_build_test_log),e.validation.linux_build_test_log_sha256);
+assert.ok([74,7,61].every(count=>e.validation.linux_build_test_log.includes(`test result: ok. ${count} passed; 0 failed;`)));
+assert.equal(e.rollout.status,'ACTIVATED');assert.equal(e.rollout.data_equal,true);assert.equal(e.rollout.original_native_retained_warm,true);assert.equal(e.rollout.ingress_limits_changed,false);assert.equal(e.rollout.existing_chef_namespaces_changed,false);
+assert.equal(e.public_smoke.status,'PASS');assert.equal(e.public_smoke.all_six_public_transaction_observations_match_source,true);assert.equal(e.public_smoke.existing_chef_available,true);assert.ok(e.public_smoke.requests.every(row=>row.status===200));
+assert.equal(e.post_activation_guard.status,'PASS');assert.equal(e.post_activation_guard.envelope_invalid,false);assert.deepEqual(e.post_activation_guard.pipeline_limit_violations,[]);
+console.log('Prep startup:4,526,100 records/13,513 segments checked in both runs; matching topology, source hashes and six query cases PASS. One run per variant, caches not cleared.');

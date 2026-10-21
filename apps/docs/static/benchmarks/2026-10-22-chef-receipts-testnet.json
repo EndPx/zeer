@@ -1,0 +1,578 @@
+{
+  "format": "zeer-uninterrupted-receipt-results-v1",
+  "recorded_date_utc": "2026-10-21",
+  "network": "testnet",
+  "chef_version": "0.2.0",
+  "status": "PASS",
+  "original_live_goal": 6,
+  "original_live_goal_met": true,
+  "live_sample_count": 6,
+  "catch_up_sample_count": 0,
+  "started_at_utc": "2026-10-21T17:39:49.016Z",
+  "completed_at_utc": "2026-10-21T17:50:07.661Z",
+  "from_height": 4526276,
+  "ready_ns": "143622965780300",
+  "selected": [
+    {
+      "txid": "96fece7a1f7c018f5306334c6eb15d28057472ddbb8a90772009e111531ac8c5",
+      "pool": "ironwood",
+      "scope": "external",
+      "origin": "unknown",
+      "value_zat": "100000",
+      "memo": "Zeer live receipt 01",
+      "output_index": 0,
+      "output_identity_sha256": "ff171a07333295bb184ef080e677611b214fdd967d67baf09de5bdc878b232e0",
+      "receiver_sha256": "a6eb58ac243887a8cd62cd63d1f048e535ee659fde3b3dcb6dda2381e30adda8",
+      "height": 4526284,
+      "block_hash": "000006543dc20123b22d03fb381722baa5276eefeaea84dab02077eab93ddacc",
+      "observation_mode": "live",
+      "timestamps": {
+        "broadcast_ns": "143684640238900",
+        "prep_ns": "143727851082900",
+        "decrypt_start_ns": "143727860734900",
+        "decrypt_ns": "143727903285900",
+        "handler_start_ns": "143728350621500",
+        "handler_end_ns": "143728351924400",
+        "commit_ns": "143728775734700",
+        "consumer_ns": "143730076337300"
+      },
+      "seconds": {
+        "prep_to_decrypted": 0.052203,
+        "decrypt_service": 0.042551,
+        "decrypted_to_commit": 0.8724488,
+        "commit_to_consumer": 1.3006026,
+        "prep_to_consumer": 2.2252544,
+        "broadcast_to_prep": 43.210844
+      },
+      "canonical_rechecked_at": "2026-10-21T17:50:06.149Z"
+    },
+    {
+      "txid": "6c6155dda66054d1945a94d1c63e2891a82578608aff97b5c9dc3d25b58a1eb4",
+      "pool": "ironwood",
+      "scope": "external",
+      "origin": "unknown",
+      "value_zat": "100000",
+      "memo": "Zeer live receipt 02",
+      "output_index": 1,
+      "output_identity_sha256": "b934648531032a032871f8398f56c65272aa607f4148a0dab5744a01f9139564",
+      "receiver_sha256": "a6eb58ac243887a8cd62cd63d1f048e535ee659fde3b3dcb6dda2381e30adda8",
+      "height": 4526285,
+      "block_hash": "0000195791b5c7721d25d979dfe111bd2e2cc9e2b5d5a324e6f067e0fbba1bb7",
+      "observation_mode": "live",
+      "timestamps": {
+        "broadcast_ns": "143766566541700",
+        "prep_ns": "143810627361900",
+        "decrypt_start_ns": "143810627515500",
+        "decrypt_ns": "143810659635300",
+        "handler_start_ns": "143811217882300",
+        "handler_end_ns": "143811218321800",
+        "commit_ns": "143811710157900",
+        "consumer_ns": "143812876406800"
+      },
+      "seconds": {
+        "prep_to_decrypted": 0.0322734,
+        "decrypt_service": 0.0321198,
+        "decrypted_to_commit": 1.0505226,
+        "commit_to_consumer": 1.1662489,
+        "prep_to_consumer": 2.2490449,
+        "broadcast_to_prep": 44.0608202
+      },
+      "canonical_rechecked_at": "2026-10-21T17:50:06.413Z"
+    },
+    {
+      "txid": "1f1b417569845115ff6dd0c0b0c7e5bc3975f12b5b2b4b6fc3e132e663ebba75",
+      "pool": "ironwood",
+      "scope": "external",
+      "origin": "unknown",
+      "value_zat": "100000",
+      "memo": "Zeer live receipt 03",
+      "output_index": 0,
+      "output_identity_sha256": "257b7bdb6aefe0b136345f2874d3c5913071c107343cf77e2bda3eda7a335123",
+      "receiver_sha256": "a6eb58ac243887a8cd62cd63d1f048e535ee659fde3b3dcb6dda2381e30adda8",
+      "height": 4526291,
+      "block_hash": "00001d981b3343761a39394e7f5fa44d32e7071be13da4649673f6fbe8d2afdd",
+      "observation_mode": "live",
+      "timestamps": {
+        "broadcast_ns": "143847366422300",
+        "prep_ns": "143945551208800",
+        "decrypt_start_ns": "143945551446400",
+        "decrypt_ns": "143945594769800",
+        "handler_start_ns": "143946083169400",
+        "handler_end_ns": "143946083385300",
+        "commit_ns": "143946514057800",
+        "consumer_ns": "143947508909800"
+      },
+      "seconds": {
+        "prep_to_decrypted": 0.043561,
+        "decrypt_service": 0.0433234,
+        "decrypted_to_commit": 0.919288,
+        "commit_to_consumer": 0.994852,
+        "prep_to_consumer": 1.957701,
+        "broadcast_to_prep": 98.1847865
+      },
+      "canonical_rechecked_at": "2026-10-21T17:50:06.714Z"
+    },
+    {
+      "txid": "6f5f9cd70025f270c2f5e3e1c4bf0a65caf997355474eea1114806454821d27f",
+      "pool": "ironwood",
+      "scope": "external",
+      "origin": "unknown",
+      "value_zat": "100000",
+      "memo": "Zeer live receipt 04",
+      "output_index": 1,
+      "output_identity_sha256": "d848dd99040fafb49c9bf7f08facab6ddee1c57e44057f34fd61f756d5121454",
+      "receiver_sha256": "a6eb58ac243887a8cd62cd63d1f048e535ee659fde3b3dcb6dda2381e30adda8",
+      "height": 4526299,
+      "block_hash": "00000a08f2f8e8bf41f8d09e18ef261de556a95689347e118b54b9bc89e28c2e",
+      "observation_mode": "live",
+      "timestamps": {
+        "broadcast_ns": "143984985986400",
+        "prep_ns": "144060933136500",
+        "decrypt_start_ns": "144060944394500",
+        "decrypt_ns": "144060975782600",
+        "handler_start_ns": "144061428183300",
+        "handler_end_ns": "144061428520400",
+        "commit_ns": "144061848245500",
+        "consumer_ns": "144063224191300"
+      },
+      "seconds": {
+        "prep_to_decrypted": 0.0426461,
+        "decrypt_service": 0.0313881,
+        "decrypted_to_commit": 0.8724629,
+        "commit_to_consumer": 1.3759458,
+        "prep_to_consumer": 2.2910548,
+        "broadcast_to_prep": 75.9471501
+      },
+      "canonical_rechecked_at": "2026-10-21T17:50:06.919Z"
+    },
+    {
+      "txid": "43354d5d065b51cf46a4205a6878fc44563002b01eeedff03e17c6070dd8f12e",
+      "pool": "ironwood",
+      "scope": "external",
+      "origin": "unknown",
+      "value_zat": "100000",
+      "memo": "Zeer live receipt 05",
+      "output_index": 0,
+      "output_identity_sha256": "5e3244d914bc2f5896043b699da37fcea2c5eb95b1698df57347ea95f7f78b36",
+      "receiver_sha256": "a6eb58ac243887a8cd62cd63d1f048e535ee659fde3b3dcb6dda2381e30adda8",
+      "height": 4526303,
+      "block_hash": "00001e4e7a448e63410cb3e4c9e051efc9a95997fb9ef3811e91a7f7dc9c52ed",
+      "observation_mode": "live",
+      "timestamps": {
+        "broadcast_ns": "144103120383900",
+        "prep_ns": "144149070886100",
+        "decrypt_start_ns": "144149082176000",
+        "decrypt_ns": "144149113257500",
+        "handler_start_ns": "144149399810300",
+        "handler_end_ns": "144149400143900",
+        "commit_ns": "144149952679900",
+        "consumer_ns": "144151734461800"
+      },
+      "seconds": {
+        "prep_to_decrypted": 0.0423714,
+        "decrypt_service": 0.0310815,
+        "decrypted_to_commit": 0.8394224,
+        "commit_to_consumer": 1.7817819,
+        "prep_to_consumer": 2.6635757,
+        "broadcast_to_prep": 45.9505022
+      },
+      "canonical_rechecked_at": "2026-10-21T17:50:07.234Z"
+    },
+    {
+      "txid": "0fce55bdd7e8858ffd02389d428c6eb4629e3f367bf1e6ac0bd1041edff09fc4",
+      "pool": "ironwood",
+      "scope": "external",
+      "origin": "unknown",
+      "value_zat": "100000",
+      "memo": "Zeer live receipt 06",
+      "output_index": 1,
+      "output_identity_sha256": "8976561e7fd3b0a84e18bd1133ee49d1acf707e9ed3293878987e09451d52821",
+      "receiver_sha256": "a6eb58ac243887a8cd62cd63d1f048e535ee659fde3b3dcb6dda2381e30adda8",
+      "height": 4526307,
+      "block_hash": "0000141b1bc88430789260c87081efc43f0a29c03de402c01d98682ea9b96c95",
+      "observation_mode": "live",
+      "timestamps": {
+        "broadcast_ns": "144187172310700",
+        "prep_ns": "144227759151800",
+        "decrypt_start_ns": "144227770777600",
+        "decrypt_ns": "144227800595300",
+        "handler_start_ns": "144228191780800",
+        "handler_end_ns": "144228191976700",
+        "commit_ns": "144228828167800",
+        "consumer_ns": "144230930597300"
+      },
+      "seconds": {
+        "prep_to_decrypted": 0.0414435,
+        "decrypt_service": 0.0298177,
+        "decrypted_to_commit": 1.0275725,
+        "commit_to_consumer": 2.1024295,
+        "prep_to_consumer": 3.1714455,
+        "broadcast_to_prep": 40.5868411
+      },
+      "canonical_rechecked_at": "2026-10-21T17:50:07.449Z"
+    }
+  ],
+  "live_summary": {
+    "prep_to_decrypted": {
+      "samples": 6,
+      "median_seconds": 0.04250875,
+      "p95_seconds": 0.052203,
+      "min_seconds": 0.0322734,
+      "max_seconds": 0.052203
+    },
+    "decrypt_service": {
+      "samples": 6,
+      "median_seconds": 0.03175395,
+      "p95_seconds": 0.0433234,
+      "min_seconds": 0.0298177,
+      "max_seconds": 0.0433234
+    },
+    "decrypted_to_commit": {
+      "samples": 6,
+      "median_seconds": 0.89587545,
+      "p95_seconds": 1.0505226,
+      "min_seconds": 0.8394224,
+      "max_seconds": 1.0505226
+    },
+    "commit_to_consumer": {
+      "samples": 6,
+      "median_seconds": 1.3382741999999999,
+      "p95_seconds": 2.1024295,
+      "min_seconds": 0.994852,
+      "max_seconds": 2.1024295
+    },
+    "prep_to_consumer": {
+      "samples": 6,
+      "median_seconds": 2.27004985,
+      "p95_seconds": 3.1714455,
+      "min_seconds": 1.957701,
+      "max_seconds": 3.1714455
+    },
+    "broadcast_to_prep": {
+      "samples": 6,
+      "median_seconds": 45.005661200000006,
+      "p95_seconds": 98.1847865,
+      "min_seconds": 40.5868411,
+      "max_seconds": 98.1847865
+    }
+  },
+  "operations": [
+    {
+      "ordinal": 1,
+      "txid": "96fece7a1f7c018f5306334c6eb15d28057472ddbb8a90772009e111531ac8c5",
+      "memo": "Zeer live receipt 01",
+      "fee_zat": "10000",
+      "note_value_zat": "100000"
+    },
+    {
+      "ordinal": 2,
+      "txid": "6c6155dda66054d1945a94d1c63e2891a82578608aff97b5c9dc3d25b58a1eb4",
+      "memo": "Zeer live receipt 02",
+      "fee_zat": "10000",
+      "note_value_zat": "100000"
+    },
+    {
+      "ordinal": 3,
+      "txid": "1f1b417569845115ff6dd0c0b0c7e5bc3975f12b5b2b4b6fc3e132e663ebba75",
+      "memo": "Zeer live receipt 03",
+      "fee_zat": "10000",
+      "note_value_zat": "100000"
+    },
+    {
+      "ordinal": 4,
+      "txid": "6f5f9cd70025f270c2f5e3e1c4bf0a65caf997355474eea1114806454821d27f",
+      "memo": "Zeer live receipt 04",
+      "fee_zat": "10000",
+      "note_value_zat": "100000"
+    },
+    {
+      "ordinal": 5,
+      "txid": "43354d5d065b51cf46a4205a6878fc44563002b01eeedff03e17c6070dd8f12e",
+      "memo": "Zeer live receipt 05",
+      "fee_zat": "10000",
+      "note_value_zat": "100000"
+    },
+    {
+      "ordinal": 6,
+      "txid": "0fce55bdd7e8858ffd02389d428c6eb4629e3f367bf1e6ac0bd1041edff09fc4",
+      "memo": "Zeer live receipt 06",
+      "fee_zat": "10000",
+      "note_value_zat": "100000"
+    }
+  ],
+  "total_fee_zat": "60000",
+  "errors": [],
+  "consumer_errors": [],
+  "api_statuses": {
+    "/status:200": 448,
+    "/graphql:200": 32
+  },
+  "consumer_outcomes": {
+    "INDEXER_BEHIND": 1,
+    "complete": 58,
+    "unchanged": 384,
+    "REVISION_CHANGED": 3
+  },
+  "resource": {
+    "peak_parent_rss_bytes": 86282240,
+    "peak_scanner_rss_not_measured": true,
+    "parent_cpu_seconds": 5.641
+  },
+  "producer_poll_seconds": 2,
+  "consumer_poll_seconds": 1,
+  "environment": {
+    "scanner_and_consumer": "Windows local; Node 24.18.0",
+    "prep_transport": "Authenticated candidate loopback HTTP through encrypted SSH from Windows; public ingress not exercised",
+    "database_transport": "PostgreSQL on VPS through encrypted SSH tunnel from Windows",
+    "prep_reader_cpu_quota": 0.5,
+    "prep_reader_memory_bytes": 1073741824,
+    "shared_pipeline_cpu_quota": 3,
+    "shared_pipeline_memory_bytes": 8589934592,
+    "production_ingestion_active": true
+  },
+  "source_canonicality": {
+    "network": "testnet",
+    "all_six_mined_canonical_at_source": true,
+    "checked_at_unix": 1792605019.501124,
+    "observations": [
+      {
+        "ordinal": 1,
+        "txid": "96fece7a1f7c018f5306334c6eb15d28057472ddbb8a90772009e111531ac8c5",
+        "height": 4526284,
+        "block_hash": "000006543dc20123b22d03fb381722baa5276eefeaea84dab02077eab93ddacc",
+        "confirmations_observed": 24
+      },
+      {
+        "ordinal": 2,
+        "txid": "6c6155dda66054d1945a94d1c63e2891a82578608aff97b5c9dc3d25b58a1eb4",
+        "height": 4526285,
+        "block_hash": "0000195791b5c7721d25d979dfe111bd2e2cc9e2b5d5a324e6f067e0fbba1bb7",
+        "confirmations_observed": 23
+      },
+      {
+        "ordinal": 3,
+        "txid": "1f1b417569845115ff6dd0c0b0c7e5bc3975f12b5b2b4b6fc3e132e663ebba75",
+        "height": 4526291,
+        "block_hash": "00001d981b3343761a39394e7f5fa44d32e7071be13da4649673f6fbe8d2afdd",
+        "confirmations_observed": 17
+      },
+      {
+        "ordinal": 4,
+        "txid": "6f5f9cd70025f270c2f5e3e1c4bf0a65caf997355474eea1114806454821d27f",
+        "height": 4526299,
+        "block_hash": "00000a08f2f8e8bf41f8d09e18ef261de556a95689347e118b54b9bc89e28c2e",
+        "confirmations_observed": 9
+      },
+      {
+        "ordinal": 5,
+        "txid": "43354d5d065b51cf46a4205a6878fc44563002b01eeedff03e17c6070dd8f12e",
+        "height": 4526303,
+        "block_hash": "00001e4e7a448e63410cb3e4c9e051efc9a95997fb9ef3811e91a7f7dc9c52ed",
+        "confirmations_observed": 5
+      },
+      {
+        "ordinal": 6,
+        "txid": "0fce55bdd7e8858ffd02389d428c6eb4629e3f367bf1e6ac0bd1041edff09fc4",
+        "height": 4526307,
+        "block_hash": "0000141b1bc88430789260c87081efc43f0a29c03de402c01d98682ea9b96c95",
+        "confirmations_observed": 1
+      }
+    ]
+  },
+  "restart": {
+    "passed": true,
+    "api_and_consumer_restarted": true,
+    "rows": 12,
+    "external_selected_notes": 6,
+    "duplicate_ids": 0,
+    "unchanged_sha256": "5dae210b06cde7501eb50269dfacc1b21d4201a1e5588c877d374cacac70dc88",
+    "checkpoint": {
+      "height": 4526307,
+      "hash": "0000141b1bc88430789260c87081efc43f0a29c03de402c01d98682ea9b96c95",
+      "anchorHash": "00002c12313c60b434be452811ab31c1210a1134089787e039f147cbb76ce351",
+      "status": "ready",
+      "undoFloor": 4526275
+    },
+    "viewing_key_loaded": false,
+    "canonicality_rechecked": true
+  },
+  "supervision": {
+    "started_at_utc": "2026-10-21T17:39:48.413Z",
+    "finished_at_utc": "2026-10-21T17:50:10.488Z",
+    "deadline_seconds": 2400,
+    "forced": false,
+    "outcome": "EXITED",
+    "exit": {
+      "code": 0,
+      "signal": null
+    }
+  },
+  "controlled_recovery": {
+    "source": "controlled-regtest-branches",
+    "live_shielded_latency": false,
+    "viewing_key_loaded": false,
+    "project": "ref_85409a255c19456aba37a8",
+    "checks": {
+      "killed_after_atomic_page": true,
+      "restart_resumed_opaque_cursor": true,
+      "completed_restart_no_duplicates": true,
+      "invalid_cursor_does_not_promote_staging": true,
+      "orphan_removal_and_reincluded_output_context": true,
+      "closed_gate_preserves_last_complete_observation": true,
+      "source_recovery_resumes": true,
+      "closed_http_connection_preserves_rows": true,
+      "http_transport_recovery": true,
+      "database_wire_disconnect_preserves_rows": true,
+      "database_connection_recovery": true,
+      "actual_graphql_409_observed": true
+    },
+    "process_runs": 12,
+    "final_count": 36,
+    "final_revision": "7",
+    "final_sha256": "af29ea02afcf37647003f0be97e7f808e9322bb9d8640d31e04bac6e21879a8d",
+    "api_requests": [
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 409
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/graphql",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 200
+      },
+      {
+        "path": "/status",
+        "status": 500
+      },
+      {
+        "path": "/status",
+        "status": 200
+      }
+    ],
+    "package_version": "0.2.0",
+    "workspace_link": false,
+    "passed": true,
+    "owned_fixture_namespace_removed": true
+  },
+  "registry": {
+    "version": "0.2.0",
+    "resolved": "https://registry.npmjs.org/@zeer-dev/chef/-/chef-0.2.0.tgz",
+    "integrity": "sha512-A5R3nL75KmonUAbGa1WTosXNgzkNYAmV3j9I5tufXqsPfRVMhYMEa2SX/mfGPA/BTtIMe6VSFMnDRdzglVaj+Q==",
+    "workspace_link": false
+  },
+  "viewing_key_remained_local": true,
+  "measurement": {
+    "clock": "One Windows monotonic clock; consumer event is an upper bound after a coherent committed SQLite read",
+    "processing_interval": "Matching raw transaction received from Prep to matching committed consumer projection",
+    "broadcast_interval": "Broadcast request to matching Prep response; includes mining, configured source confirmation, ingestion and polling; not pure block-production latency",
+    "confirmation_policy": "Source follower uses one confirmation; no additional settlement confirmation delay measured"
+  },
+  "setup_attempts": [
+    {
+      "id": "v1",
+      "new_broadcasts": 0,
+      "result": "Stopped before funding to tighten bootstrap readiness gate"
+    },
+    {
+      "id": "v2",
+      "new_broadcasts": 0,
+      "result": "Stopped before readiness: operator omitted local wallet/scanner path environment variables"
+    }
+  ],
+  "limitations": [
+    "Six live samples; nearest-rank p95 is the maximum, not a population tail estimate or SLA.",
+    "Owned self-transfers; no external sender attribution or financial settlement.",
+    "No natural reorg occurred in the live sample; recovery uses separate synthetic branches.",
+    "Internal change values, viewing/spending keys and credentials are excluded.",
+    "Scanner and child aggregate resource peaks were not measured.",
+    "Previous interrupted and catch-up runs remain separate historical evidence."
+  ],
+  "source": {
+    "files": {
+      "benchmarks/chef/reliability/receipt-live.mjs": "// Run from a copied, registry-installed receipt-consumer directory. Keys stay local.\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs/promises';\nimport {join,resolve} from 'node:path';\nimport {randomUUID,createHash} from 'node:crypto';\nimport {spawn} from 'node:child_process';\nimport {setTimeout as delay} from 'node:timers/promises';\nimport {DatabaseSync} from 'node:sqlite';\nimport {PrepClient} from '@zeer-dev/prep-client';\nimport {NativeReceiptSource,PostgresStore,parseModel,syncStep,createChefServer,decodeMemo} from '@zeer-dev/chef';\nimport {writeReport,safeFailure} from './report.mjs';\nimport {assertObserverReady} from './readiness.mjs';\n\nprocess.umask(0o077);\nconst root=process.cwd(),out=resolve(process.env.STUDY_DIRECTORY);await fs.mkdir(out,{recursive:false,mode:0o700});\nassert.equal(JSON.parse(await fs.readFile('node_modules/@zeer-dev/chef/package.json','utf8')).version,'0.2.0');\nassert.equal((await fs.lstat('node_modules/@zeer-dev/chef')).isSymbolicLink(),false);\nconst now=()=>process.hrtime.bigint().toString(),seconds=(end,start)=>Number(BigInt(end)-BigInt(start))/1e9;\nconst prepUrl=process.env.STUDY_PREP_URL??'https://zeer.endpx.cloud/api/prep',endpoint=new URL(prepUrl);\nassert.ok((endpoint.protocol==='https:'||endpoint.protocol==='http:'&&['127.0.0.1','localhost','[::1]'].includes(endpoint.hostname))&&!endpoint.username&&!endpoint.password&&!endpoint.search&&!endpoint.hash);\nconst prep=new PrepClient({url:prepUrl,...(process.env.STUDY_PREP_TOKEN?{token:process.env.STUDY_PREP_TOKEN}:{}),timeoutMs:15000});\nconst meta=await prep.getHeight();assert.equal(meta.network,'testnet');assert.ok(meta.ready);\nconst from=process.env.STUDY_FROM_HEIGHT?Number(process.env.STUDY_FROM_HEIGHT):meta.indexed_height,project='live_'+randomUUID().replaceAll('-','').slice(0,22);assert.ok(Number.isInteger(from)&&from>=meta.indexed_height-100&&from<=meta.indexed_height);\nconst account=JSON.parse(await fs.readFile(process.env.ZEER_ACCOUNT_FILE,'utf8'));\nconst scanner=new NativeReceiptSource({executable:process.env.ZEER_SCANNER_EXECUTABLE,keyFile:process.env.ZEER_VIEWING_KEY_FILE,accountId:account.account_id,keyFingerprint:account.key_fingerprint});\nconst model=parseModel(await fs.readFile('schema.graphql','utf8'));\nconst store=new PostgresStore(process.env.DATABASE_URL,{project,fingerprint:'receipt-live-v1',model,network:'testnet',startHeight:from,reorgWindow:100});\nconst proof={format:'zeer-live-receipt-v1',status:'RUNNING',started_at_utc:new Date().toISOString(),project,from_height:from,sample_goal:6,deadline_seconds:2400,chef_version:'0.2.0',prep_url:prepUrl,producer_poll_seconds:2,consumer_poll_seconds:1,consumer_clock:'parent receipt of child post-SQLite-commit event; upper bound',database_transport:'PostgreSQL on VPS through encrypted SSH tunnel from Windows',viewing_key_remained_local:true,events:[],observations:{},consumer_events:[],errors:[],api_statuses:{},resource:{peak_parent_rss_bytes:0,peak_scanner_rss_not_measured:true}};\nconst rows=proof.observations,entry=txid=>rows[txid]??=( {txid} );\nconst client={getHeight:(...args)=>prep.getHeight(...args),get:async(...args)=>{const start=now();const page=await prep.get(...args),at=now();for(const tx of page.data.transactions??[]){const r=entry(tx.txid);r.prep_ns??=at;r.prep_request_ns??=start;r.height??=tx.block_height;}return page;}};\nconst originalScan=scanner.scan.bind(scanner);scanner.scan=async(input,signal)=>{const start=now();const receipts=await originalScan(input,signal);const at=now();const r=entry(input.transaction.txid);r.decrypt_start_ns??=start;r.decrypt_ns??=at;r.hash=input.block.hash;return receipts;};\nconst originalApply=store.applyBatch.bind(store);store.applyBatch=async(blocks,handler)=>{await originalApply(blocks,handler);const at=now();for(const r of Object.values(rows))if(blocks.some(b=>b.height===r.height)&&r.handler_end_ns&&!r.commit_ns)r.commit_ns=at;};\nconst indexer={async receipt({block,receipt,context}){const r=entry(receipt.txid);r.handler_start_ns??=now();await context.entities.set('ReadableNote',{id:receipt.id,txid:receipt.txid,pool:receipt.pool,outputIndex:receipt.output_index,blockHeight:block.height,blockHash:block.hash,valueZat:BigInt(receipt.value_zat),receiver:receipt.receiver,memoHex:receipt.memo_hex,...decodeMemo(receipt.memo_hex),scope:receipt.scope,origin:receipt.origin,coinbase:receipt.is_coinbase});r.handler_end_ns=now();}};\nconst dbFile=join(out,'consumer.sqlite'),token=process.env.CHEF_API_TOKEN;let server,child,fatal=null,buffer='';\nconst save=()=>writeReport(out,proof,{onRetry:event=>{proof.storage_retries??=[];proof.storage_retries.push({...event,at_ns:now()});}});\nconst fail=(code,error)=>{fatal??=code;if(error)proof.failure_detail=safeFailure(error,'consumer_event');};\ntry{\n await store.migrate();await store.acquire();server=createChefServer({store,model,token});server.on('request',(req,res)=>res.once('finish',()=>{const key=`${req.url}:${res.statusCode}`;proof.api_statuses[key]=(proof.api_statuses[key]??0)+1;}));\n await new Promise(r=>server.listen(0,'127.0.0.1',r));\n const origin=`http://127.0.0.1:${server.address().port}`;\n child=spawn(process.execPath,['consume.mjs','--db',dbFile,'--from',String(from),'--project',project,'--rounds','3600','--interval-seconds','1','--deadline-seconds','2400'],{cwd:root,env:{...process.env,CHEF_URL:origin},windowsHide:true,stdio:['ignore','pipe','pipe']});\n child.on('error',()=>fail('CONSUMER_SPAWN_FAILED'));child.on('exit',(code,signal)=>{if(!proof.stopping)fail('CONSUMER_EXITED');proof.consumer_exit={code,signal};});\n let errorBuffer='';child.stderr.on('data',chunk=>{proof.consumer_stderr_events=(proof.consumer_stderr_events??0)+1;errorBuffer+=chunk;if(errorBuffer.length>16384){errorBuffer='';return;}for(;;){const end=errorBuffer.indexOf('\\n');if(end<0)break;const line=errorBuffer.slice(0,end);errorBuffer=errorBuffer.slice(end+1);try{const value=JSON.parse(line).error;if(value){proof.consumer_errors??=[];proof.consumer_errors.push({stage:'consumer',code:typeof value.code==='string'&&/^[A-Z_0-9]+$/.test(value.code)?value.code:'UNKNOWN',nativeCode:typeof value.nativeCode==='string'&&/^[A-Z_0-9]+$/.test(value.nativeCode)?value.nativeCode:undefined,sqliteCode:Number.isSafeInteger(value.sqliteCode)?value.sqliteCode:undefined});}}catch{ /* Native warnings contain no structured diagnostic. */ }}});\n child.stdout.on('data',chunk=>{try{buffer+=chunk;if(buffer.length>100000)throw Error();for(;;){const i=buffer.indexOf('\\n');if(i<0)break;const line=buffer.slice(0,i);buffer=buffer.slice(i+1);if(!line)continue;const value=JSON.parse(line),at=now();proof.consumer_events.push({...value,received_ns:at});if(value.event==='page'&&value.state==='complete'){\n  const db=new DatabaseSync(dbFile,{readOnly:true});try{db.exec('BEGIN');const snapshot=JSON.parse(db.prepare('SELECT payload FROM state WHERE singleton=1').get().payload);const items=db.prepare('SELECT payload FROM entities').all();db.exec('COMMIT');const storedAt=now();if(snapshot.complete?.revision===value.revision)for(const item of items){const note=JSON.parse(item.payload);if(note.scope==='external'&&/^Zeer live receipt 0[1-6]$/.test(note.memoText??'')){const r=entry(note.txid);r.consumer_ns??=storedAt;r.output_id=note.id;r.output_index=note.outputIndex;r.memo=note.memoText;r.value_zat=note.valueZat;r.pool=note.pool;r.scope=note.scope;r.receiver_sha256=createHash('sha256').update(note.receiver).digest('hex');r.consumer_hash=note.blockHash;r.consumer_height=note.blockHeight;}}}finally{db.close();}\n }}}catch(error){fail('CONSUMER_EVENT_INVALID',error);}});\n const bootstrap=await syncStep({client,store,indexer,receiptSource:scanner,network:'testnet',startHeight:from,reorgWindow:100,pageSize:16,batchSize:1,transactionFilter:{shielded_pools:['sapling','orchard','ironwood']}});proof.events.push({at_ns:now(),bootstrap:true,...bootstrap});\n await delay(500);if(fatal)throw Error(fatal);await assertObserverReady(bootstrap,store,child);await save();\n proof.ready_ns=now();await fs.writeFile(join(out,'ready.json'),JSON.stringify({project,from_height:from,pid:process.pid,origin,ready_ns:proof.ready_ns}));\n console.log(JSON.stringify({state:'ready',project,from_height:from}));\n const start=Date.now(),cpu=process.cpuUsage();\n while(Date.now()-start<2400000){\n  if(fatal)throw Error(fatal);if(await fs.stat(join(out,'stop')).then(()=>true,()=>false))break;\n  const tick=Date.now();try{const result=await syncStep({client,store,indexer,receiptSource:scanner,network:'testnet',startHeight:from,reorgWindow:100,pageSize:16,batchSize:1,transactionFilter:{shielded_pools:['sapling','orchard','ironwood']}});proof.events.push({at_ns:now(),...result});}\n  catch(error){proof.errors.push({at_ns:now(),code:typeof error.code==='string'?error.code:'SYNC_FAILED',status:error.status??0});if(![429,409,500,502,503,504].includes(error.status??0))throw Error('NONRECOVERABLE_SYNC_ERROR');}\n  proof.resource.peak_parent_rss_bytes=Math.max(proof.resource.peak_parent_rss_bytes,process.memoryUsage().rss);await save();await delay(Math.max(0,2000-(Date.now()-tick)));\n }\n proof.resource.parent_cpu_seconds=(process.cpuUsage(cpu).user+process.cpuUsage(cpu).system)/1e6;\n const expected=JSON.parse(await fs.readFile(join(out,'expected-operations.json'),'utf8'));\n assert.equal(expected.length,6);assert.deepEqual(expected.map(r=>r.ordinal),[1,2,3,4,5,6]);assert.equal(new Set(expected.map(r=>r.txid)).size,6);\n const selected=expected.map(operation=>{const r=rows[operation.txid];assert.ok(r?.consumer_ns,'LIVE_SAMPLE_GOAL_NOT_MET');assert.equal(r.memo,`Zeer live receipt 0${operation.ordinal}`);r.observation_mode=operation.observation_mode??'live';if(r.observation_mode==='live'){assert.match(operation.broadcast_ns,/^[0-9]+$/);assert.ok(BigInt(operation.broadcast_ns)>BigInt(proof.ready_ns)&&BigInt(r.prep_ns)>=BigInt(operation.broadcast_ns));assert.ok(r.height>from);r.broadcast_ns=operation.broadcast_ns;}return r;});assert.equal(new Set(selected.map(r=>r.height)).size,6);assert.equal(new Set(selected.map(r=>r.receiver_sha256)).size,1);\n for(const r of selected){assert.equal(r.value_zat,'100000');assert.equal(r.pool,'ironwood');assert.equal(r.hash,r.consumer_hash);assert.equal(r.height,r.consumer_height);assert.ok(BigInt(r.prep_ns)<=BigInt(r.decrypt_start_ns)&&BigInt(r.decrypt_ns)<=BigInt(r.handler_start_ns)&&BigInt(r.handler_end_ns)<=BigInt(r.commit_ns));\n  const page=await prep.get({from_block:r.height,to_block:r.height+1,field_selection:{block:['height','hash'],transaction:[]}});assert.equal(page.data.blocks[0].hash,r.hash);r.canonical_rechecked_at=new Date().toISOString();\n  r.seconds={prep_to_decrypted:seconds(r.decrypt_ns,r.prep_ns),decrypt_service:seconds(r.decrypt_ns,r.decrypt_start_ns),decrypted_to_commit:seconds(r.commit_ns,r.decrypt_ns),commit_to_consumer:seconds(r.consumer_ns,r.commit_ns),prep_to_consumer:seconds(r.consumer_ns,r.prep_ns)};\n }\n proof.selected=selected;proof.live_sample_count=selected.filter(r=>r.observation_mode==='live').length;proof.catch_up_sample_count=selected.length-proof.live_sample_count;proof.original_live_goal_met=proof.live_sample_count===6;proof.receipt_checks_passed=true;proof.status=proof.original_live_goal_met?'PASS':'RECEIPT_CHECKS_PASS_LIVE_GOAL_UNMET';\n}catch(error){proof.status='INCOMPLETE';proof.failure=error.message?.match(/^[A-Z_]+$/)?.[0]??'STUDY_FAILED';proof.diagnostic=error.diagnostic??safeFailure(error,'observer');process.stderr.write(JSON.stringify({event:'observer_failure',...proof.diagnostic})+'\\n');process.exitCode=1;}\nfinally{proof.stopping=true;if(child&&child.exitCode===null){const exit=new Promise(r=>child.once('exit',r));child.kill('SIGTERM');await Promise.race([exit,delay(3000)]);if(child.exitCode===null)child.kill('SIGKILL');}\n if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}await scanner.close();await store.close();proof.completed_at_utc=new Date().toISOString();try{await save();await fs.writeFile(join(out,'raw-private.json'),JSON.stringify(proof,null,2),{flag:'wx',mode:0o600});}catch(error){process.stderr.write(JSON.stringify({event:'terminal_report_unavailable',...(error.diagnostic??safeFailure(error,'terminal_report'))})+'\\n');process.exitCode=1;}console.log(JSON.stringify({status:proof.status,samples:Object.values(rows).filter(r=>r.consumer_ns).length,failure:proof.failure}));}\n",
+      "benchmarks/chef/reliability/receipt-supervisor.mjs": "// Independent Windows process-tree deadline for the local live-receipt study.\nimport {spawn} from 'node:child_process';\nimport {writeFile} from 'node:fs/promises';\nimport {join} from 'node:path';\nimport assert from 'node:assert/strict';\nassert.equal(process.platform,'win32');\nconst out=process.env.STUDY_DIRECTORY;assert.ok(out);\nconst deadlineSeconds=Number(process.env.STUDY_DEADLINE_SECONDS??2400);assert.ok(Number.isInteger(deadlineSeconds)&&deadlineSeconds>=1&&deadlineSeconds<=2400);\nconst started=new Date().toISOString();let forced=false;\nconst child=spawn(process.execPath,['--env-file=.env','receipt-live.mjs'],{cwd:process.cwd(),env:process.env,windowsHide:true,stdio:'inherit'});\nconst timer=setTimeout(()=>{forced=true;if(child.exitCode===null&&child.signalCode===null){const kill=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});kill.on('error',()=>{process.exitCode=1;});}},deadlineSeconds*1000);\nconst exit=await new Promise((resolve,reject)=>{child.once('exit',(code,signal)=>resolve({code,signal}));child.once('error',reject);});clearTimeout(timer);\nawait writeFile(join(out,'supervision.json'),JSON.stringify({started_at_utc:started,finished_at_utc:new Date().toISOString(),deadline_seconds:deadlineSeconds,forced,outcome:forced?'INCOMPLETE_DEADLINE':'EXITED',exit},null,2));\nprocess.exitCode=forced||exit.code!==0?1:0;\n",
+      "benchmarks/chef/reliability/report.mjs": "import fs from 'node:fs/promises';\nimport {join} from 'node:path';\nimport {randomUUID} from 'node:crypto';\nimport {setTimeout as delay} from 'node:timers/promises';\n\nexport function safeFailure(error,stage){\n const safe=(value,pattern)=>typeof value==='string'&&pattern.test(value)?value:undefined;\n return {stage,code:safe(error?.code,/^[A-Z_0-9]+$/)??'UNKNOWN',name:safe(error?.name,/^[A-Za-z]+$/)??'Error',syscall:safe(error?.syscall,/^[a-z]+$/),...(Number.isSafeInteger(error?.errcode)?{sqliteCode:error.errcode}:{})};\n}\n\n// The last complete report remains visible until its successor is synced and\n// renamed. A report is diagnostic evidence, never the consumer's checkpoint.\nexport async function writeReport(directory,value,{operations=fs,pause=delay,onRetry=()=>{}}={}){\n const names=(await operations.readdir(directory)).filter(snapshotName);\n if(names.length>=64)throw Object.assign(new Error('REPORT_RETENTION_LIMIT'),{code:'REPORT_RETENTION_LIMIT'});\n const body=JSON.stringify(value,null,2);if(Buffer.byteLength(body)>4*1024*1024)throw Object.assign(new Error('REPORT_SIZE_LIMIT'),{code:'REPORT_SIZE_LIMIT'});\n const temporary=join(directory,`.report-${randomUUID()}.tmp`),target=join(directory,`report-${process.hrtime.bigint().toString().padStart(20,'0')}-${randomUUID()}.json`);\n let stage='report_open';\n try{\n  for(let attempt=0;;attempt++){\n   let handle;\n   try{\n    stage='report_open';handle=await operations.open(temporary,'wx',0o600);\n    stage='report_write';await handle.writeFile(body);\n    stage='report_sync';await handle.sync();await handle.close();handle=null;\n    stage='report_rename';await operations.rename(temporary,target);break;\n   }catch(error){\n    await handle?.close().catch(()=>{});await operations.unlink(temporary).catch(()=>{});\n    if(!['EPERM','EBUSY','EACCES'].includes(error.code)||attempt===4)throw error;\n    onRetry({...safeFailure(error,stage),attempt});await pause(50*2**attempt);\n   }\n  }\n }catch(error){\n  const failure=new Error('REPORT_WRITE_FAILED',{cause:error});failure.code='REPORT_WRITE_FAILED';failure.diagnostic=safeFailure(error,stage);throw failure;\n }finally{await operations.unlink(temporary).catch(()=>{});}\n // Readers can keep old immutable snapshots open. Cleanup failures never undo a\n // published successor; the hard retention bound prevents unlimited accumulation.\n const published=(await operations.readdir(directory)).filter(snapshotName).sort();\n for(const name of published.slice(0,-4))await operations.unlink(join(directory,name)).catch(error=>onRetry({...safeFailure(error,'report_gc'),attempt:0}));\n}\n\nconst snapshotName=name=>/^report-[0-9]{20}-[a-f0-9-]{36}\\.json$/.test(name);\nexport async function readLatestReport(directory,{operations=fs,pause=delay}={}){\n for(let attempt=0;attempt<4;attempt++){\n  const name=(await operations.readdir(directory)).filter(snapshotName).sort().at(-1);\n  if(!name)throw Object.assign(new Error('REPORT_UNAVAILABLE'),{code:'REPORT_UNAVAILABLE'});\n  try{return JSON.parse(await operations.readFile(join(directory,name),'utf8'));}\n  catch(error){if(error.code!=='ENOENT'||attempt===3)throw error;await pause(20);}\n }\n}\n",
+      "benchmarks/chef/reliability/readiness.mjs": "import assert from 'node:assert/strict';\n\n// A resolved syncStep can still have closed the read gate. Never advertise a\n// funding-ready observer until its persisted projection and child are usable.\nexport async function assertObserverReady(bootstrap, store, child) {\n  assert.ok(['progress', 'caught_up'].includes(bootstrap.state), 'BOOTSTRAP_NOT_READY');\n  const checkpoint = await store.checkpoint();\n  assert.equal(checkpoint.status, 'ready', 'CHECKPOINT_NOT_READY');\n  assert.ok(child?.pid && child.exitCode === null && child.signalCode === null && !child.killed, 'CONSUMER_NOT_RUNNING');\n  process.kill(child.pid, 0);\n}\n",
+      "examples/receipt-consumer/consume.mjs": "import {RangeConsumer,ConsumerError} from './consumer.mjs';\nimport {setTimeout as delay} from 'node:timers/promises';\n\nconst args=process.argv.slice(2),flags=new Map();\nconst allowed=new Set(['--db','--from','--to','--project','--rounds','--interval-seconds','--deadline-seconds','--max-pages']);\ntry{\n  for(let i=0;i<args.length;i++){\n    const key=args[i],value=args[++i];\n    if(!allowed.has(key)||flags.has(key)||value===undefined||value.startsWith('--'))throw new ConsumerError('INVALID_ARGUMENTS');\n    flags.set(key,value);\n  }\n  const number=(key,fallback,min,max)=>{\n    const text=flags.get(key)??String(fallback);\n    if(!/^(0|[1-9][0-9]*)$/.test(text)||Number(text)<min||Number(text)>max)throw new ConsumerError('INVALID_ARGUMENTS');\n    return Number(text);\n  };\n  if(!flags.has('--db')||!flags.has('--from')||!flags.has('--project'))throw new ConsumerError('USE_DB_FROM_PROJECT_FLAGS');\n  const rounds=number('--rounds',1,1,3600),interval=number('--interval-seconds',2,1,30),deadline=number('--deadline-seconds',300,1,3600);\n  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(new ConsumerError('DEADLINE_EXCEEDED')),deadline*1000);\n  const stop=()=>controller.abort(new ConsumerError('STOPPED'));\n  process.once('SIGINT',stop);process.once('SIGTERM',stop);process.umask(0o077);\n  let consumer;\n  try{\n    consumer=new RangeConsumer({file:flags.get('--db'),url:process.env.CHEF_URL??'http://127.0.0.1:39370',token:process.env.CHEF_API_TOKEN,\n      project:flags.get('--project'),from:number('--from',undefined,0,2147483647),...(flags.has('--to')?{to:number('--to',undefined,0,2147483647)}:{}),\n      onPage:async page=>process.stdout.write(JSON.stringify({event:'page',...page})+'\\n')});\n    let last;\n    for(let round=0;round<rounds;round++){\n      controller.signal.throwIfAborted();\n      const result=await consumer.step({maxPages:number('--max-pages',20,1,100),signal:controller.signal});last=result;\n      process.stdout.write(JSON.stringify(result)+'\\n');\n      if(round+1<rounds)await delay(interval*1000,undefined,{signal:controller.signal});\n    }\n    if(!['complete','unchanged'].includes(last?.state))process.exitCode=2;\n  }finally{\n    clearTimeout(timer);process.off('SIGINT',stop);process.off('SIGTERM',stop);consumer?.close();\n  }\n}catch(error){\n  // Never echo network bodies, URLs, keys or private note fields.\n  const code=error instanceof ConsumerError?error.code:error?.name==='AbortError'?'STOPPED':'CONSUMER_FAILED';\n  const nativeCode=typeof error?.code==='string'&&/^[A-Z_0-9]+$/.test(error.code)?error.code:undefined;\n  const sqliteCode=Number.isSafeInteger(error?.errcode)?error.errcode:undefined;\n  process.stderr.write(JSON.stringify({error:{code,nativeCode,sqliteCode,stage:'consumer'}})+'\\n');process.exitCode=1;\n}\n",
+      "examples/receipt-consumer/consumer.mjs": "import {DatabaseSync} from 'node:sqlite';\nimport {mkdirSync,existsSync,lstatSync,openSync,closeSync} from 'node:fs';\nimport {dirname} from 'node:path';\nimport {createHash} from 'node:crypto';\n\nexport class ConsumerError extends Error {\n  constructor(code){super(code);this.code=code;}\n}\nconst requireValue=(ok,code)=>{if(!ok)throw new ConsumerError(code);};\nconst integer=value=>Number.isInteger(value)&&value>=0&&value<=2147483647;\nconst name=value=>typeof value==='string'&&/^[_A-Za-z][_0-9A-Za-z]{0,63}$/.test(value)&&!value.startsWith('__');\nconst hash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);\nconst revision=value=>typeof value==='string'&&/^(0|[1-9][0-9]*)$/.test(value);\nconst compare=(a,b)=>a.height-b.height||Buffer.compare(Buffer.from(a.id),Buffer.from(b.id));\nconst defaultFields=['id','txid','pool','outputIndex','blockHeight','blockHash','valueZat','receiver','memoHex','memoKind','memoText','scope','origin','coinbase'];\n\n/** A bounded, reversible local projection. Completing a sweep replaces the range. */\nexport class RangeConsumer {\n  constructor({file,url,token,project,from,to,entity='ReadableNote',heightField='blockHeight',fields=defaultFields,pageSize=25,maxRange=1000,maxRows=10000,maxAgeSeconds=30,fetchImpl=fetch,onPage=()=>{}}){\n    const endpoint=new URL(url);\n    requireValue(/^https?:$/.test(endpoint.protocol)&&!endpoint.username&&!endpoint.password&&!endpoint.search&&!endpoint.hash,'INVALID_ENDPOINT');\n    requireValue(endpoint.protocol==='https:'||['localhost','127.0.0.1','[::1]'].includes(endpoint.hostname),'HTTPS_OR_LOOPBACK_REQUIRED');\n    requireValue(endpoint.pathname==='/'||endpoint.pathname==='','ENDPOINT_MUST_BE_ORIGIN');\n    requireValue(typeof token==='string'&&Buffer.byteLength(token)>=16&&Buffer.byteLength(token)<=4096&&!/[\\r\\n]/.test(token),'INVALID_API_TOKEN');\n    requireValue(typeof project==='string'&&/^[a-z][a-z0-9_]{0,31}$/.test(project),'INVALID_PROJECT');\n    requireValue(integer(from)&&(to===undefined||integer(to)&&to>=from),'INVALID_RANGE');\n    requireValue(integer(maxRange)&&maxRange>=1&&maxRange<=1000&&integer(maxRows)&&maxRows>=1&&maxRows<=100000,'INVALID_BUDGET');\n    requireValue(integer(pageSize)&&pageSize>=1&&pageSize<=100&&Number.isFinite(maxAgeSeconds)&&maxAgeSeconds>=1&&maxAgeSeconds<=120,'INVALID_LIMIT');\n    requireValue(name(entity)&&name(heightField)&&heightField!=='id'&&Array.isArray(fields)&&fields.length<=24&&fields.every(name),'INVALID_FIELDS');\n    fields=[...new Set(['id',heightField,...fields])].sort();\n    requireValue(fields.length<=24,'INVALID_FIELDS');\n    mkdirSync(dirname(file),{recursive:true,mode:0o700});\n    const existing=existsSync(file);\n    requireValue(!existing||lstatSync(file).isFile()&&!lstatSync(file).isSymbolicLink(),'INVALID_DATABASE_FILE');\n    const fd=openSync(file,'a',0o600);closeSync(fd);\n    this.db=new DatabaseSync(file);\n    if(existing&&this.db.prepare('PRAGMA application_id').get().application_id!==0x5a454552){this.db.close();throw new ConsumerError('UNMARKED_DATABASE');}\n    if(!existing)this.db.exec(`PRAGMA application_id=${0x5a454552}`);\n    this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; CREATE TABLE IF NOT EXISTS state(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL,identity TEXT NOT NULL,payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS staging(id TEXT PRIMARY KEY,height INTEGER NOT NULL,payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS entities(id TEXT PRIMARY KEY,height INTEGER NOT NULL,payload TEXT NOT NULL)');\n    this.options={url:endpoint.origin,token,project,from,to,entity,heightField,fields,pageSize,maxRange,maxRows,maxAgeSeconds};\n    this.fetch=fetchImpl;this.onPage=onPage;this.busy=false;\n    const identity=createHash('sha256').update(JSON.stringify({url:endpoint.origin,project,from,to:to??null,entity,heightField,fields,maxRange,maxRows})).digest('hex');\n    this.db.prepare('INSERT OR IGNORE INTO state VALUES(1,0,?,?)').run(identity,JSON.stringify({scan:null,complete:null}));\n    if(this.db.prepare('SELECT identity FROM state WHERE singleton=1').get().identity!==identity){this.db.close();throw new ConsumerError('CONSUMER_IDENTITY_MISMATCH');}\n  }\n  state(){const row=this.db.prepare('SELECT version,payload FROM state WHERE singleton=1').get();return {version:row.version,...JSON.parse(row.payload)};}\n  update(expected,change){\n    this.db.exec('BEGIN IMMEDIATE');\n    try{\n      const current=this.state();requireValue(current.version===expected,'CONSUMER_BUSY');\n      const next=change(current);\n      this.db.prepare('UPDATE state SET version=version+1,payload=? WHERE singleton=1').run(JSON.stringify({scan:next.scan,complete:next.complete}));\n      this.db.exec('COMMIT');return this.state();\n    }catch(error){try{this.db.exec('ROLLBACK');}catch{/* SQLite may already have rolled the transaction back. */}throw error;}\n  }\n  reset(current){return this.update(current.version,state=>{this.db.exec('DELETE FROM staging');return {...state,scan:null};});}\n  async request(path,payload,signal){\n    const timeout=AbortSignal.timeout(5000);\n    let response;\n    try{response=await this.fetch(this.options.url+path,{method:payload?'POST':'GET',headers:{authorization:`Bearer ${this.options.token}`,...(payload?{'content-type':'application/json'}:{})},body:payload?JSON.stringify(payload):undefined,redirect:'error',signal:signal?AbortSignal.any([signal,timeout]):timeout});}\n    catch{if(signal?.aborted)throw signal.reason;return {wait:'TRANSPORT_UNAVAILABLE'};}\n    let value;\n    try{\n      const reader=response.body.getReader();let size=0;const chunks=[];\n      try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>2*1024*1024){await reader.cancel();throw new ConsumerError('RESPONSE_TOO_LARGE');}chunks.push(value);}}\n      finally{reader.releaseLock();}\n      value=JSON.parse(Buffer.concat(chunks).toString('utf8'));\n    }catch(error){if(error instanceof ConsumerError)throw error;if(signal?.aborted)throw signal.reason;return {wait:'RESPONSE_UNAVAILABLE'};}\n    if(response.status===401||response.status===403)throw new ConsumerError('API_UNAUTHORIZED');\n    if(response.status===409&&value.errors?.[0]?.extensions?.code==='CURSOR_INVALIDATED')return {invalidated:true};\n    if(response.status===429||response.status>=500)return {wait:`HTTP_${response.status}`};\n    requireValue(response.status===200,'API_PROTOCOL_ERROR');return {value};\n  }\n  fresh(status){\n    requireValue(status&&status.project===this.options.project,'PROJECT_IDENTITY_CHANGED');\n    requireValue(typeof status.generation==='string'&&status.generation.length>0&&revision(status.revision),'INVALID_STATUS');\n    const cp=status.checkpoint;\n    requireValue(cp&&['ready','reconciling','blocked'].includes(cp.status),'INVALID_STATUS');\n    if(cp.status!=='ready')return 'INDEXER_'+cp.status.toUpperCase();\n    const source=status.source,now=Date.now(),age=this.options.maxAgeSeconds*1000;\n    if(source?.status!=='available'||!integer(source.prepIndexedHeight)||!integer(source.sourceObservedHeight)||!Number.isSafeInteger(source.sourceObservedAt))return 'SOURCE_UNKNOWN_OR_UNAVAILABLE';\n    const checked=Date.parse(source.checkedAt),observed=source.sourceObservedAt*1000;\n    if(!Number.isFinite(checked)||checked>now+60000||observed>now+60000||now-checked>age||now-observed>age)return 'SOURCE_OBSERVATION_STALE';\n    if(!integer(cp.height)||!hash(cp.hash)||cp.height<this.options.from)return 'INDEXER_BEHIND';\n    return null;\n  }\n  async step({maxPages=20,signal}={}){\n    requireValue(!this.busy,'CONSUMER_BUSY');requireValue(integer(maxPages)&&maxPages>=1&&maxPages<=100,'INVALID_PAGE_BUDGET');\n    this.busy=true;\n    try{\n      const statusResponse=await this.request('/status',undefined,signal);if(statusResponse.wait)return {state:'waiting',reason:statusResponse.wait};\n      requireValue(statusResponse.value,'INVALID_STATUS');const status=statusResponse.value,wait=this.fresh(status);\n      if(wait)return {state:'waiting',reason:wait};\n      let current=this.state();\n      if(current.complete)requireValue(current.complete.generation===status.generation,'PROJECT_GENERATION_CHANGED');\n      if(current.scan)requireValue(current.scan.generation===status.generation,'PROJECT_GENERATION_CHANGED');\n      if(!current.scan){\n        const target=this.options.to??status.checkpoint.height;\n        if(target>status.checkpoint.height)return {state:'waiting',reason:'INDEXER_BEHIND'};\n        const end=Math.max(target,current.complete?.to??target);\n        requireValue(end-this.options.from+1<=this.options.maxRange,'WATCHED_RANGE_LIMIT');\n        if(current.complete?.revision===status.revision&&current.complete.to===end)return {state:'unchanged',revision:status.revision};\n        current=this.update(current.version,state=>{this.db.exec('DELETE FROM staging');return {...state,scan:{to:end,generation:status.generation,revision:status.revision,checkpoint:status.checkpoint,after:null,last:null,pages:0}};});\n      }\n      for(let page=0;page<maxPages;page++){\n        signal?.throwIfAborted();const scan=current.scan;\n        const {entity,heightField,fields,from,pageSize}=this.options;\n        const query=`query Page($after:ID){ ${entity}List(first:${pageSize},after:$after,range:{${heightField}:{gte:${from},lte:${scan.to}}},orderBy:[{${heightField}:ASC},{id:ASC}]){items{${fields.join(' ')}}nextCursor} _meta{project generation revision height hash status} }`;\n        const response=await this.request('/graphql',{query,variables:{after:scan.after}},signal);\n        if(response.wait)return {state:'waiting',reason:response.wait};\n        if(response.invalidated){this.reset(current);return {state:'restarting',reason:'CURSOR_INVALIDATED'};}\n        const result=response.value;requireValue(result&&!result.errors&&result.data,'INVALID_PAGE');\n        const meta=result.data._meta;\n        requireValue(meta?.project===this.options.project&&meta.status==='ready'&&meta.generation===scan.generation&&revision(meta.revision)&&integer(meta.height)&&hash(meta.hash),'INVALID_PAGE_METADATA');\n        if(meta.revision!==scan.revision||meta.height!==scan.checkpoint.height||meta.hash!==scan.checkpoint.hash){this.reset(current);return {state:'restarting',reason:'REVISION_CHANGED'};}\n        const rows=result.data[`${entity}List`];requireValue(rows&&Array.isArray(rows.items)&&rows.items.length<=pageSize,'INVALID_PAGE');\n        const after=rows.nextCursor;requireValue(after===null||typeof after==='string'&&after.length>0&&after.length<=2048&&rows.items.length>0&&after!==scan.after,'INVALID_CURSOR');\n        if(after===null){\n          const latest=await this.request('/status',undefined,signal);if(latest.wait)return {state:'waiting',reason:latest.wait};\n          const stale=this.fresh(latest.value);if(stale)return {state:'waiting',reason:stale};\n          requireValue(latest.value.generation===scan.generation,'PROJECT_GENERATION_CHANGED');\n          if(latest.value.revision!==scan.revision||latest.value.checkpoint.height!==scan.checkpoint.height||latest.value.checkpoint.hash!==scan.checkpoint.hash){this.reset(current);return {state:'restarting',reason:'REVISION_CHANGED'};}\n        }\n        let last=scan.last;\n        for(const row of rows.items){\n          requireValue(row&&typeof row.id==='string'&&row.id.length>0&&!row.id.includes('\\0')&&Buffer.byteLength(row.id)<=256&&integer(row[heightField])&&row[heightField]>=from&&row[heightField]<=scan.to&&Buffer.byteLength(JSON.stringify(row))<=32768,'INVALID_ENTITY');\n          const key={id:row.id,height:row[heightField]};requireValue(last===null||compare(key,last)>0,'INVALID_PAGE_ORDER');last=key;\n        }\n        current=this.update(current.version,state=>{\n          const put=this.db.prepare('INSERT INTO staging VALUES(?,?,?)');\n          for(const row of rows.items)put.run(row.id,row[heightField],JSON.stringify(row));\n          const count=this.db.prepare('SELECT count(*) AS count FROM staging').get().count;requireValue(count<=this.options.maxRows,'ROW_LIMIT');\n          if(after!==null)return {...state,scan:{...scan,after,last,pages:scan.pages+1}};\n          // An incomplete scan never mutates the visible projection. Removal and\n          // replacement happen atomically only on the final compatible page.\n          this.db.prepare('DELETE FROM entities WHERE height>=? AND height<=?').run(from,scan.to);\n          this.db.exec('INSERT INTO entities SELECT * FROM staging; DELETE FROM staging');\n          return {scan:null,complete:{from,to:scan.to,generation:scan.generation,revision:scan.revision,checkpoint:scan.checkpoint,count,observedAt:new Date().toISOString()}};\n        });\n        await this.onPage({state:current.scan?'staged':'complete',pages:scan.pages+1,count:rows.items.length,revision:scan.revision});\n        if(!current.scan)return {state:'complete',...current.complete};\n      }\n      return {state:'paused',pages:current.scan.pages};\n    }finally{this.busy=false;}\n  }\n  rows(){return this.db.prepare('SELECT payload FROM entities ORDER BY height,id COLLATE BINARY').all().map(row=>JSON.parse(row.payload));}\n  close(){requireValue(!this.busy,'CONSUMER_BUSY');this.db.close();}\n}\n",
+      "examples/receipt-consumer/verify-recovery.mjs": "// Controlled-branch acceptance. This script never loads a viewing key or signs.\nimport assert from 'node:assert/strict';\nimport {randomUUID,createHash} from 'node:crypto';\nimport {readFile,writeFile,mkdir,lstat} from 'node:fs/promises';\nimport {resolve,join,dirname} from 'node:path';\nimport {fileURLToPath} from 'node:url';\nimport {spawn} from 'node:child_process';\nimport {createServer as createTcpServer} from 'node:net';\nimport {DatabaseSync} from 'node:sqlite';\nimport pg from 'pg';\nimport {PostgresStore,parseModel,syncStep,createChefServer} from '@zeer-dev/chef';\nimport {RangeConsumer} from './consumer.mjs';\n\nconst root=dirname(fileURLToPath(import.meta.url));\nconst project=`ref_${randomUUID().replaceAll('-','').slice(0,22)}`;\nconst directory=join(root,'private',project);await mkdir(directory,{recursive:true,mode:0o700});\nconst token=process.env.CHEF_API_TOKEN;assert.ok(typeof token==='string'&&token.length>=16);\nassert.ok(process.env.DATABASE_URL);\nconst proof={source:'controlled-regtest-branches',live_shielded_latency:false,viewing_key_loaded:false,project,checks:{}};\nconst h=n=>BigInt(n).toString(16).padStart(64,'0');\nlet epoch='1',ready=true;\nconst original=[40,41,42,43].map(height=>({height,hash:h(height+1),previousHash:h(height),time:1700000000+height,txid:h(1000+height)}));\nlet blocks=original.slice(0,3);\nconst client={\n  async getHeight(){return {network:'regtest',payload_kind:'full-v1',ready,archive_height:blocks.at(-1).height,indexed_height:blocks.at(-1).height,source_height:blocks.at(-1).height+1,source_observed_at:Math.floor(Date.now()/1000),start_block:40,epoch};},\n  async get(query){const selected=blocks.filter(b=>b.height>=query.from_block&&b.height<query.to_block).slice(0,query.limit);return {network:'regtest',epoch,from_block:query.from_block,next_block:selected.at(-1).height+1,data:{blocks:selected.map(b=>({height:b.height,hash:b.hash,previous_hash:b.previousHash,time:b.time})),transactions:query.field_selection.transaction.length?selected.map(b=>({block_height:b.height,index:0,txid:b.txid,version:6,locktime:0})):[]}};},\n};\nconst model=parseModel(await readFile(join(root,'schema.graphql'),'utf8'));\nconst storeOptions={project,fingerprint:'standalone-recovery-v1',model,network:'regtest',startHeight:40,reorgWindow:10};\nlet store=new PostgresStore(process.env.DATABASE_URL,storeOptions);\nconst indexer={async transactionMetadata({block,transaction,context}){\n  for(let index=0;index<12;index++)await context.entities.set('ReadableNote',{\n    id:`${transaction.txid}:${String(index).padStart(2,'0')}`,txid:transaction.txid,pool:'ironwood',outputIndex:index,\n    blockHeight:block.height,blockHash:block.hash,valueZat:BigInt(100000+index),receiver:'synthetic-receiver',memoHex:'00'.repeat(512),memoKind:'text',memoText:'controlled fixture',scope:'external',origin:'unknown',coinbase:false,\n  });\n}};\nconst step=()=>syncStep({client,store,indexer,network:'regtest',startHeight:40,reorgWindow:10,pageSize:16});\nlet server,disconnectServer,passed=false;const children=new Set(),http=[];\ntry{\n  await store.migrate();await store.acquire();await step();\n  server=createChefServer({store,model,token});server.on('request',(request,response)=>response.once('finish',()=>http.push({path:request.url,status:response.statusCode})));\n  await new Promise(r=>server.listen(0,'127.0.0.1',r));\n  const origin=`http://127.0.0.1:${server.address().port}`;\n  const envFile=join(directory,'consumer.env');await writeFile(envFile,`CHEF_URL=${origin}\\nCHEF_API_TOKEN=${token}\\n`,{mode:0o600});\n  const database=join(directory,'consumer.sqlite');\n  const local=()=>new RangeConsumer({file:database,url:origin,token,project,from:40});\n  const snapshot=()=>{const c=local();try{return {state:c.state(),rows:c.rows()};}finally{c.close();}};\n  async function run({killAfterPage=false,maxPages=20,rounds=1}={}){\n    const child=spawn(process.execPath,['--env-file='+envFile,join(root,'consume.mjs'),'--db',database,'--project',project,'--from','40','--max-pages',String(maxPages),'--rounds',String(rounds),'--deadline-seconds','60'],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']});children.add(child);\n    const events=[];let buffer='',stderr='',killed=false;\n    const timeout=setTimeout(()=>child.kill('SIGKILL'),65000);\n    child.stdout.on('data',chunk=>{buffer+=chunk;for(;;){const index=buffer.indexOf('\\n');if(index<0)break;const line=buffer.slice(0,index);buffer=buffer.slice(index+1);if(!line)continue;const value=JSON.parse(line);events.push(value);if(killAfterPage&&value.event==='page'&&value.state==='staged'&&!killed){killed=true;child.kill('SIGKILL');}}});\n    child.stderr.on('data',chunk=>stderr+=chunk);\n    const exit=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',(code,signal)=>resolve({code,signal}));});\n    clearTimeout(timeout);children.delete(child);\n    if(killAfterPage)assert.ok(killed,'Child must reach a committed staged page before termination');\n    else assert.ok(exit.code===0||exit.code===2,'Consumer failed; inspect protected logs');\n    await writeFile(join(directory,`child-${proof.process_runs??0}.json`),JSON.stringify({events,exit,killed,stderr}));proof.process_runs=(proof.process_runs??0)+1;\n    return {events,exit,killed};\n  }\n  await run({killAfterPage:true,maxPages:1,rounds:10});\n  let state=snapshot();assert.equal(state.rows.length,0);assert.ok(state.state.scan.after.length>256);proof.checks.killed_after_atomic_page=true;\n  await run();state=snapshot();assert.equal(state.rows.length,36);assert.equal(new Set(state.rows.map(r=>r.id)).size,36);proof.checks.restart_resumed_opaque_cursor=true;\n  await run();assert.deepEqual(snapshot().rows,state.rows);proof.checks.completed_restart_no_duplicates=true;\n\n  blocks=original;await step();await run({killAfterPage:true,maxPages:1,rounds:10});\n  const previous=snapshot().rows;assert.equal(previous.length,36);\n  epoch='2';blocks=[original[0],{...original[1],hash:h(941),previousHash:original[0].hash,txid:h(9041)},\n    {...original[2],hash:h(942),previousHash:h(941),txid:original[1].txid}];\n  await step();assert.equal((await store.checkpoint()).status,'ready');\n  const restart=await run();assert.ok(restart.events.some(e=>e.reason==='CURSOR_INVALIDATED'));\n  assert.deepEqual(snapshot().rows,previous);assert.equal(snapshot().state.scan,null);proof.checks.invalid_cursor_does_not_promote_staging=true;\n  await run();const recovered=snapshot();\n  assert.equal(recovered.rows.length,36);assert.equal(new Set(recovered.rows.map(r=>r.id)).size,36);\n  const expectedIds=new Set(blocks.flatMap(b=>Array.from({length:12},(_,i)=>`${b.txid}:${String(i).padStart(2,'0')}`)));\n  assert.deepEqual(new Set(recovered.rows.map(r=>r.id)),expectedIds);\n  for(const row of recovered.rows){const b=blocks.find(b=>b.txid===row.txid);assert.equal(row.blockHeight,b.height);assert.equal(row.blockHash,b.hash);assert.equal(row.valueZat,String(100000+row.outputIndex));}\n  assert.ok(recovered.rows.filter(r=>r.txid===original[1].txid).every(r=>r.blockHeight===42));\n  assert.equal(recovered.rows.some(r=>r.txid===original[2].txid||r.txid===original[3].txid),false);\n  proof.checks.orphan_removal_and_reincluded_output_context=true;\n\n  ready=false;await step();const waiting=await run();assert.ok(waiting.events.some(e=>e.reason==='INDEXER_RECONCILING'));\n  assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.closed_gate_preserves_last_complete_observation=true;\n  ready=true;await step();await run();assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.source_recovery_resumes=true;\n\n  const port=server.address().port;\n  server.closeAllConnections();await new Promise(r=>server.close(r));server=undefined;\n  const disconnected=await run();assert.ok(disconnected.events.some(e=>e.reason==='TRANSPORT_UNAVAILABLE'));\n  assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.closed_http_connection_preserves_rows=true;\n  const serve=async()=>{server=createChefServer({store,model,token});server.on('request',(request,response)=>response.once('finish',()=>http.push({path:request.url,status:response.statusCode})));await new Promise(r=>server.listen(port,'127.0.0.1',r));};\n  await serve();await run();assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.http_transport_recovery=true;\n\n  // Simulate a wire disconnect only for this owned API's database connection.\n  // The shared PostgreSQL service and every other namespace remain untouched.\n  server.closeAllConnections();await new Promise(r=>server.close(r));server=undefined;await store.close();\n  let refusedConnections=0;disconnectServer=createTcpServer(socket=>{refusedConnections++;socket.destroy();});await new Promise(r=>disconnectServer.listen(0,'127.0.0.1',r));\n  const unavailable=new URL(process.env.DATABASE_URL);unavailable.hostname='127.0.0.1';unavailable.port=String(disconnectServer.address().port);\n  store=new PostgresStore(unavailable.href,storeOptions);await serve();\n  const databaseFailure=await run();assert.ok(refusedConnections>0);assert.ok(databaseFailure.events.some(e=>e.reason==='HTTP_500'||e.reason==='TRANSPORT_UNAVAILABLE'));\n  assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.database_wire_disconnect_preserves_rows=true;\n  server.closeAllConnections();await new Promise(r=>server.close(r));server=undefined;await store.close();await new Promise(r=>disconnectServer.close(r));disconnectServer=undefined;\n  store=new PostgresStore(process.env.DATABASE_URL,storeOptions);await store.migrate();await store.acquire();await step();await serve();await run();assert.deepEqual(snapshot().rows,recovered.rows);proof.checks.database_connection_recovery=true;\n  assert.ok(http.some(row=>row.path==='/graphql'&&row.status===409));\n  proof.checks.actual_graphql_409_observed=true;\n  proof.final_count=recovered.rows.length;proof.final_revision=recovered.state.complete.revision;\n  proof.final_sha256=createHash('sha256').update(JSON.stringify(recovered.rows)).digest('hex');\n  proof.api_requests=http;proof.package_version=JSON.parse(await readFile(join(root,'node_modules/@zeer-dev/chef/package.json'),'utf8')).version;\n  proof.workspace_link=(await lstat(join(root,'node_modules/@zeer-dev/chef'))).isSymbolicLink();assert.equal(proof.package_version,'0.2.0');assert.equal(proof.workspace_link,false);\n  passed=true;proof.passed=true;\n}finally{\n  for(const child of children)child.kill('SIGKILL');\n  if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}\n  if(disconnectServer)await new Promise(r=>disconnectServer.close(r));\n  await store.close();\n  if(passed){const db=new pg.Client({connectionString:process.env.DATABASE_URL,connectionTimeoutMillis:5000});await db.connect();try{assert.match(project,/^ref_[a-f0-9]{22}$/);await db.query(`DROP SCHEMA \"chef_${project}\" CASCADE`);proof.owned_fixture_namespace_removed=true;}finally{await db.end();}}\n  await writeFile(join(directory,'proof.json'),JSON.stringify(proof,null,2)+'\\n');\n}\nconsole.log(JSON.stringify({passed:proof.passed,package:proof.package_version,synthetic_reorg:true,process_runs:proof.process_runs,checks:proof.checks,proof:join(directory,'proof.json')}));\n",
+      "examples/receipt-consumer/schema.graphql": "type ReadableNote {\n  id: ID!\n  txid: String!\n  pool: String!\n  outputIndex: Int!\n  blockHeight: Int! @index\n  blockHash: String!\n  valueZat: BigInt!\n  receiver: String!\n  memoHex: String!\n  memoKind: String!\n  memoText: String\n  scope: String!\n  origin: String!\n  coinbase: Boolean!\n}\n",
+      "examples/receipt-consumer/chef.config.mjs": "import {defineConfig,decodeMemo} from '@zeer-dev/chef';\n\nexport default defineConfig({\n  project:process.env.ZEER_PROJECT??'receipt_reference',\n  network:'testnet',\n  startHeight:Number(process.env.ZEER_BIRTHDAY_HEIGHT),\n  schema:'./schema.graphql',handlerVersion:'receipt-reference-v1',reorgWindow:100,\n  shielded:{accountId:process.env.ZEER_ACCOUNT_ID??'inbox',keyFingerprint:process.env.ZEER_KEY_FINGERPRINT??''},\n  sync:{pageSize:16,batchSize:1,transactionFilter:{shielded_pools:['sapling','orchard','ironwood']}},\n  indexer:{async receipt({block,receipt,context}){\n    await context.entities.set('ReadableNote',{\n      id:receipt.id,txid:receipt.txid,pool:receipt.pool,outputIndex:receipt.output_index,\n      blockHeight:block.height,blockHash:block.hash,valueZat:BigInt(receipt.value_zat),\n      receiver:receipt.receiver,memoHex:receipt.memo_hex,...decodeMemo(receipt.memo_hex),\n      scope:receipt.scope,origin:receipt.origin,coinbase:receipt.is_coinbase,\n    });\n  }},\n});\n",
+      "examples/receipt-consumer/package.json": "{\n  \"name\": \"zeer-receipt-consumer-reference\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"chef\": \"node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js\",\n    \"consume\": \"node --env-file=.env consume.mjs\",\n    \"test\": \"node --test consumer.test.mjs\",\n    \"verify:recovery\": \"node --env-file=.env verify-recovery.mjs\"\n  },\n  \"engines\": { \"node\": \">=24.14.0\" },\n  \"dependencies\": { \"@zeer-dev/chef\": \"0.2.0\", \"@zeer-dev/prep-client\": \"0.1.0\" },\n  \"devDependencies\": { \"pg\": \"8.23.1\" }\n}\n",
+      "examples/receipt-consumer/verify-live-restart.mjs": "import fs from 'node:fs/promises';import {join} from 'node:path';import {spawn} from 'node:child_process';import {createHash} from 'node:crypto';import {DatabaseSync} from 'node:sqlite';import assert from 'node:assert/strict';import {PostgresStore,parseModel,createChefServer} from '@zeer-dev/chef';import {PrepClient} from '@zeer-dev/prep-client';\r\nconst out=process.env.STUDY_DIRECTORY,ready=JSON.parse(await fs.readFile(join(out,'ready.json'),'utf8')),raw=JSON.parse(await fs.readFile(join(out,'raw-private.json'),'utf8'));assert.ok(raw.selected?.length===6);assert.equal(raw.stopping,true);\r\nconst read=()=>{const db=new DatabaseSync(join(out,'consumer.sqlite'),{readOnly:true});try{return db.prepare('SELECT id,height,payload FROM entities ORDER BY id').all();}finally{db.close();}};\r\nconst before=read(),digest=rows=>createHash('sha256').update(JSON.stringify(rows)).digest('hex');assert.equal(before.length,12);\r\nconst model=parseModel(await fs.readFile('schema.graphql','utf8')),store=new PostgresStore(process.env.DATABASE_URL,{project:ready.project,fingerprint:'receipt-live-v1',model,network:'testnet',startHeight:ready.from_height,reorgWindow:100});let server;\r\ntry{await store.migrate();const checkpoint=await store.checkpoint(),prep=new PrepClient({url:process.env.STUDY_PREP_URL??'https://zeer.endpx.cloud/api/prep',token:process.env.STUDY_PREP_TOKEN}),meta=await prep.getHeight(),header=await prep.get({from_block:checkpoint.height,to_block:checkpoint.height+1,field_selection:{block:['height','hash'],transaction:[]}});assert.equal(header.data.blocks[0].hash,checkpoint.hash);assert.equal(meta.network,'testnet');assert.ok(meta.ready);\r\n await store.acquire();await store.recordSourceObservation({status:'available',prepIndexedHeight:meta.indexed_height,sourceObservedHeight:meta.source_height,sourceObservedAt:meta.source_observed_at});\r\n server=createChefServer({store,model,token:process.env.CHEF_API_TOKEN});await new Promise(r=>server.listen(Number(new URL(ready.origin).port),'127.0.0.1',r));\r\n const child=spawn(process.execPath,['consume.mjs','--db',join(out,'consumer.sqlite'),'--from',String(ready.from_height),'--project',ready.project],{env:{...process.env,CHEF_URL:ready.origin},windowsHide:true,stdio:['ignore','pipe','pipe']});let output='';child.stdout.on('data',v=>output+=v);child.stderr.resume();const timer=setTimeout(()=>child.kill('SIGKILL'),30000);const exit=await new Promise((r,j)=>{child.once('exit',r);child.once('error',j);});clearTimeout(timer);assert.equal(exit,0);assert.equal(JSON.parse(output.trim()).state,'unchanged');const after=read();assert.equal(digest(before),digest(after));\r\n const proof={passed:true,api_and_consumer_restarted:true,rows:after.length,external_selected_notes:6,duplicate_ids:after.length-new Set(after.map(r=>r.id)).size,unchanged_sha256:digest(after),checkpoint,viewing_key_loaded:false,canonicality_rechecked:true};await fs.writeFile(join(out,'restart-proof.json'),JSON.stringify(proof,null,2));console.log(JSON.stringify(proof));\r\n}finally{if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}await store.close();}\r\n"
+    },
+    "sha256": {
+      "benchmarks/chef/reliability/receipt-live.mjs": "470d8353c492fb7fd530ba4170c9db7d76c1d418154da106c7f9199ebdcc9321",
+      "benchmarks/chef/reliability/receipt-supervisor.mjs": "aac68aa0c3d3241419ec77f0569605ff1e4d16a218e50cbb1e3c18a7e96c175b",
+      "benchmarks/chef/reliability/report.mjs": "7e5fef36550ac46a5e4bfbefededa4479cdb8f5b99aa5f2445daaf1cda179f3f",
+      "benchmarks/chef/reliability/readiness.mjs": "98305753f2ce23fe4fc2a3d4879c16c488ce942d564e762cc89816ae89e2a9e9",
+      "examples/receipt-consumer/consume.mjs": "e4ed9deaaaec8948f6b0454e59c1522834e9e4800d3e00dac793b72f077580e8",
+      "examples/receipt-consumer/consumer.mjs": "8a053f6c4a4cefa3f578e0f64504272d95c7c11f7119fb0c41c54eb0def24cd5",
+      "examples/receipt-consumer/verify-recovery.mjs": "6289552af4b95ca4537d4a0739d92d14ba3317424b2754553f595031e8fd790a",
+      "examples/receipt-consumer/schema.graphql": "b24cd8df17b6566593f2780e15967c125a7ded3bbd336bdab838814d4582a2cf",
+      "examples/receipt-consumer/chef.config.mjs": "d8dea05f281e172c7df40dc7fabbfa47eae7e92456db0ee1bb1fa25d8bfddd40",
+      "examples/receipt-consumer/package.json": "a5747afa4c9e90a5e2ae9232fa748e99ce28ea33b2d4837e2f9d050bebb0c8ba",
+      "examples/receipt-consumer/verify-live-restart.mjs": "1ce348e70eab050efae60e2f6a0ef1989bfe991807dc27160dc66ee7da1e60f3"
+    }
+  },
+  "scanner_sha256": "7a12fef0b56e30ef1658500e3c07ba9a70c7cadec862680b988a6c855f501398"
+}

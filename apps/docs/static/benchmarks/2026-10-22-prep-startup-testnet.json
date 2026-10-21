@@ -1,0 +1,479 @@
+{
+  "format": "zeer-prep-full-history-startup-v1",
+  "recorded_at": "2026-10-21",
+  "network": "testnet",
+  "baseline_commit": "d35d2eb",
+  "units": "seconds",
+  "sample_count_per_variant": 1,
+  "dataset": {
+    "source_catalog_sha256": "b046bf47c5515d6c67432762b92f91c30a056bb9779989383e61f604e3f48f28",
+    "catalog_sha256": "28333727472b9359d278aad89c9ede074ed87df6b67cca9dea65d9c0f90c0415",
+    "network": "testnet",
+    "start": 0,
+    "head": 4526099,
+    "head_hash": "00002c1c4a66965065adf46425d615069fa5f1883cbc0a143c412c7facf26aa1",
+    "segments": 13513,
+    "linked_files": 27026,
+    "raw_data_copied": false,
+    "host_caches_cleared": false
+  },
+  "resource_limits": {
+    "reader_cpu_quota": 0.5,
+    "reader_memory_bytes": 1073741824,
+    "shared_cpu_quota": 3,
+    "shared_memory_bytes": 8589934592,
+    "production_ingestion_active": true
+  },
+  "cache": {
+    "fresh_processes": true,
+    "host_caches_cleared": false,
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "disk_cold_claim": false,
+    "note": "Metadata pinning and the sequential runs can affect shared filesystem cache; no repeated medians or SLA."
+  },
+  "runs": [
+    {
+      "status": "PASS",
+      "variant": "baseline",
+      "deadline_seconds": 1800,
+      "readiness_gate_seconds": 1200,
+      "binary_sha256": "fb46f9db5771785195a9e83b254ccce94452bda32aa71b93014bd42529a9510e",
+      "pin": {
+        "source_catalog_sha256": "b046bf47c5515d6c67432762b92f91c30a056bb9779989383e61f604e3f48f28",
+        "catalog_sha256": "28333727472b9359d278aad89c9ede074ed87df6b67cca9dea65d9c0f90c0415",
+        "network": "testnet",
+        "start": 0,
+        "head": 4526099,
+        "head_hash": "00002c1c4a66965065adf46425d615069fa5f1883cbc0a143c412c7facf26aa1",
+        "segments": 13513,
+        "linked_files": 27026,
+        "raw_data_copied": false,
+        "host_caches_cleared": false
+      },
+      "cache": "fresh process; host filesystem cache not cleared; preparation/cache sharing disclosed",
+      "returncode": 0,
+      "admission_seconds": 1098.547186043,
+      "phases_seconds": {
+        "catalog": 0.11128195,
+        "compact_manifest": 15.620857879,
+        "decompression": 107.689675424,
+        "integrity_decode": 74.254282001,
+        "manifest_hash": 2.890441454,
+        "optional_index_finish": 0.267848078,
+        "optional_metadata_build": 31.209964524,
+        "optional_protobuf_decode": 3.972951457,
+        "payload_hash": 70.418845031,
+        "raw_reference_expansion": 551.401095451,
+        "record_io": 49.756551881,
+        "reference_manifest": 25.796405444,
+        "segment_hash": 105.297715873,
+        "store_manifest": 23.515096881
+      },
+      "readiness_gate_met": true,
+      "wall_seconds": 1098.9435822610394,
+      "cpu_stat": "usage_usec 549229462\nuser_usec 496594810\nsystem_usec 52634651\ncore_sched.force_idle_usec 0\nnr_periods 10991\nnr_throttled 10958\nthrottled_usec 509128038\nnr_bursts 0\nburst_usec 0\n",
+      "peak_memory_bytes": 1073741824,
+      "profile": {
+        "filename": "2026-10-22-prep-startup-baseline-profile.json.gz",
+        "gzip_sha256": "2ebd9e5187a0973fb7f290a690f4a935a42dc8135727919c6be9977b419f032b",
+        "json_sha256": "6784e64159112095a6b553f3c1a02d18349085031ec428961c33c1fc1810aeb0",
+        "phases": {
+          "catalog": {
+            "calls": 1,
+            "ns": 111281950
+          },
+          "compact_manifest": {
+            "calls": 13513,
+            "ns": 15620857879
+          },
+          "decompression": {
+            "calls": 4526100,
+            "ns": 107689675424
+          },
+          "integrity_decode": {
+            "calls": 4526100,
+            "ns": 74254282001
+          },
+          "manifest_hash": {
+            "calls": 13513,
+            "ns": 2890441454
+          },
+          "optional_index_finish": {
+            "calls": 548,
+            "ns": 267848078
+          },
+          "optional_metadata_build": {
+            "calls": 2065341,
+            "ns": 31209964524
+          },
+          "optional_protobuf_decode": {
+            "calls": 2065341,
+            "ns": 3972951457
+          },
+          "payload_hash": {
+            "calls": 4526100,
+            "ns": 70418845031
+          },
+          "raw_reference_expansion": {
+            "calls": 4526100,
+            "ns": 551401095451
+          },
+          "record_io": {
+            "calls": 4526100,
+            "ns": 49756551881
+          },
+          "reference_manifest": {
+            "calls": 13513,
+            "ns": 25796405444
+          },
+          "segment_hash": {
+            "calls": 13513,
+            "ns": 105297715873
+          },
+          "store_manifest": {
+            "calls": 13513,
+            "ns": 23515096881
+          }
+        },
+        "segment_count": 13513,
+        "archive_budget_bytes": 67108864,
+        "segment_budget_bytes": 16777216,
+        "native_metadata_row_bytes": 72,
+        "native_index_fixed_bytes": 96,
+        "native_offset_bytes": 8,
+        "native_secondary_entry_bytes": 4,
+        "proc_io": "rchar: 44481773388\nwchar: 89470\nsyscr: 9657433\nsyscw: 30298\nread_bytes: 20632608768\nwrite_bytes: 241664\ncancelled_write_bytes: 0\n"
+      }
+    },
+    {
+      "status": "PASS",
+      "variant": "candidate",
+      "deadline_seconds": 1800,
+      "readiness_gate_seconds": 1200,
+      "binary_sha256": "026d36aecabc94ea0bc8ea8766d0a9522bb9ddb0dd157d56c0fc340d97636794",
+      "pin": {
+        "source_catalog_sha256": "b046bf47c5515d6c67432762b92f91c30a056bb9779989383e61f604e3f48f28",
+        "catalog_sha256": "28333727472b9359d278aad89c9ede074ed87df6b67cca9dea65d9c0f90c0415",
+        "network": "testnet",
+        "start": 0,
+        "head": 4526099,
+        "head_hash": "00002c1c4a66965065adf46425d615069fa5f1883cbc0a143c412c7facf26aa1",
+        "segments": 13513,
+        "linked_files": 27026,
+        "raw_data_copied": false,
+        "host_caches_cleared": false
+      },
+      "cache": "fresh process; host filesystem cache not cleared; preparation/cache sharing disclosed",
+      "returncode": 0,
+      "admission_seconds": 897.791157246,
+      "phases_seconds": {
+        "catalog": 0.116668388,
+        "compact_manifest": 15.908609546,
+        "decompression": 105.162849978,
+        "integrity_decode": 55.927366468,
+        "manifest_hash": 2.248539374,
+        "optional_index_finish": 0.285914271,
+        "optional_metadata_build": 31.380200143,
+        "optional_protobuf_decode": 4.254406725,
+        "payload_hash": 67.176308757,
+        "raw_reference_expansion": 390.533952237,
+        "raw_reference_fast_path": 0.0,
+        "raw_reference_legacy_path": 0.0,
+        "record_io": 45.744106374,
+        "reference_manifest": 27.467411789,
+        "segment_hash": 103.920335304,
+        "store_manifest": 23.74312849
+      },
+      "readiness_gate_met": true,
+      "wall_seconds": 898.1128968489938,
+      "cpu_stat": "usage_usec 447994911\nuser_usec 395153419\nsystem_usec 52841491\ncore_sched.force_idle_usec 0\nnr_periods 8982\nnr_throttled 8877\nthrottled_usec 403519838\nnr_bursts 0\nburst_usec 0\n",
+      "peak_memory_bytes": 1073741824,
+      "profile": {
+        "filename": "2026-10-22-prep-startup-candidate-profile.json.gz",
+        "gzip_sha256": "934c5b08997d1464298ac1bb19d4bc432d5d97786ba60392c8a0ae0615461d68",
+        "json_sha256": "a84940eab1be999ec9e06bb96748025789e7ba93bf1472077a0c2cfe10f8bfbd",
+        "phases": {
+          "catalog": {
+            "calls": 1,
+            "ns": 116668388
+          },
+          "compact_manifest": {
+            "calls": 13513,
+            "ns": 15908609546
+          },
+          "decompression": {
+            "calls": 4526100,
+            "ns": 105162849978
+          },
+          "integrity_decode": {
+            "calls": 4526100,
+            "ns": 55927366468
+          },
+          "manifest_hash": {
+            "calls": 13513,
+            "ns": 2248539374
+          },
+          "optional_index_finish": {
+            "calls": 548,
+            "ns": 285914271
+          },
+          "optional_metadata_build": {
+            "calls": 2065341,
+            "ns": 31380200143
+          },
+          "optional_protobuf_decode": {
+            "calls": 2065341,
+            "ns": 4254406725
+          },
+          "payload_hash": {
+            "calls": 4526100,
+            "ns": 67176308757
+          },
+          "raw_reference_expansion": {
+            "calls": 4526100,
+            "ns": 390533952237
+          },
+          "raw_reference_fast_path": {
+            "calls": 4462737,
+            "ns": 0
+          },
+          "raw_reference_legacy_path": {
+            "calls": 63363,
+            "ns": 0
+          },
+          "record_io": {
+            "calls": 4526100,
+            "ns": 45744106374
+          },
+          "reference_manifest": {
+            "calls": 13513,
+            "ns": 27467411789
+          },
+          "segment_hash": {
+            "calls": 13513,
+            "ns": 103920335304
+          },
+          "store_manifest": {
+            "calls": 13513,
+            "ns": 23743128490
+          }
+        },
+        "segment_count": 13513,
+        "archive_budget_bytes": 67108864,
+        "segment_budget_bytes": 16777216,
+        "native_metadata_row_bytes": 72,
+        "native_index_fixed_bytes": 96,
+        "native_offset_bytes": 8,
+        "native_secondary_entry_bytes": 4,
+        "proc_io": "rchar: 44481773392\nwchar: 100125\nsyscr: 9657433\nsyscw: 34096\nread_bytes: 20457857024\nwrite_bytes: 249856\ncancelled_write_bytes: 0\n"
+      }
+    }
+  ],
+  "source_archives": [
+    {
+      "variant": "baseline",
+      "filename": "2026-10-22-prep-startup-baseline-source.tar.gz",
+      "sha256": "76bb74bb8c85a7037f401f511a429912ab05482dc2cd5508671409c2d3c1340f"
+    },
+    {
+      "variant": "candidate",
+      "filename": "2026-10-22-prep-startup-candidate-source.tar.gz",
+      "sha256": "829daf510c51e823b6f090aae32bf8b9136bfa302cbc91161a8372e0308ae633"
+    }
+  ],
+  "ordinary_native_sha256": "d788ea8b25216b4e0fe21b3336bf4955fa670f890a764ca6adab91da6758c414",
+  "live_http_readiness": {
+    "status": "READY",
+    "full_archive_validated": true,
+    "seconds": 837.4246019860147,
+    "indexed_height": 4526247,
+    "port": 49380,
+    "production_route_changed": false
+  },
+  "query_equality": {
+    "status": "PASS",
+    "head_compared": 4526253,
+    "source": "independent configured Zebra header and TX-ID reference",
+    "cases": [
+      {
+        "window": "first",
+        "mode": "metadata",
+        "from": 0,
+        "to_exclusive": 16,
+        "blocks": 16,
+        "transactions": 16,
+        "old_new_equal": true,
+        "node_headers_and_txids_equal": true,
+        "data_sha256": "e4e8bcfd222082a9f8026545838c1c453251f66fa594f0c23252ff9709bcb4f1"
+      },
+      {
+        "window": "first",
+        "mode": "raw_decoded",
+        "from": 0,
+        "to_exclusive": 16,
+        "blocks": 16,
+        "transactions": 16,
+        "old_new_equal": true,
+        "node_headers_and_txids_equal": true,
+        "data_sha256": "f75e19eb74549543660c6c6a88e4e4c21462f53d231af835426c9a5d81e1418c"
+      },
+      {
+        "window": "middle",
+        "mode": "metadata",
+        "from": 2263126,
+        "to_exclusive": 2263142,
+        "blocks": 16,
+        "transactions": 16,
+        "old_new_equal": true,
+        "node_headers_and_txids_equal": true,
+        "data_sha256": "726912beb2e6bf23397b57857933b4206004af3e211f1afd95e131b81aef11a0"
+      },
+      {
+        "window": "middle",
+        "mode": "raw_decoded",
+        "from": 2263126,
+        "to_exclusive": 2263142,
+        "blocks": 16,
+        "transactions": 16,
+        "old_new_equal": true,
+        "node_headers_and_txids_equal": true,
+        "data_sha256": "e4858cf299d15a881e1923c53d0c7769ed9ca2d1c024b93aa813ab590fec1af4"
+      },
+      {
+        "window": "modern_tail",
+        "mode": "metadata",
+        "from": 4526238,
+        "to_exclusive": 4526254,
+        "blocks": 16,
+        "transactions": 18,
+        "old_new_equal": true,
+        "node_headers_and_txids_equal": true,
+        "data_sha256": "4bfe36d9ffa76470c70a8bb00330ef726bf801b6ddf83dd86e284434a2b1d7f6"
+      },
+      {
+        "window": "modern_tail",
+        "mode": "raw_decoded",
+        "from": 4526238,
+        "to_exclusive": 4526254,
+        "blocks": 16,
+        "transactions": 18,
+        "old_new_equal": true,
+        "node_headers_and_txids_equal": true,
+        "data_sha256": "d68736269950842c8b6cdd355d5ba94c4a11655ff356cf743a3e0037016f74d4"
+      }
+    ],
+    "checked_at_unix": 1792603936.5100403
+  },
+  "validation": {
+    "linux_prep_unit_tests": 74,
+    "linux_prep_integration_tests": 7,
+    "linux_prep_store_tests": 61,
+    "feature_clippy_passed": true,
+    "ordinary_and_profile_release_builds_passed": true,
+    "linux_build_test_log": "info: downloading component clippy\n   Compiling prep-proto v0.1.0 (/work/crates/prep-proto)\n   Compiling prep-store v0.1.0 (/work/crates/prep-store)\n   Compiling prep v0.1.0 (/work/crates/prep)\n    Finished `test` profile [unoptimized] target(s) in 56.51s\n     Running unittests src/lib.rs (/target/debug/deps/prep-16f80e3b89208299)\n\nrunning 74 tests\ntest capabilities::tests::advertised_fields_are_accepted_by_query_validation ... ok\ntest follow::tests::cancellation_interrupts_backoff_and_releases_writer ... ok\ntest follow::tests::exhausted_budget_historical_mode_and_authorization_errors_exit ... ok\ntest follow::tests::follow_recovers_after_http_outage_without_restarting_or_duplicate_segments ... ok\ntest follow::tests::retries_are_bounded_exponential_resettable_and_typed ... ok\ntest follower::tests::corrupted_source_and_disk_admission_never_publish_segments ... ok\ntest follower::tests::genesis_backfill_restart_and_reorg_never_request_negative_height ... ok\ntest follower::tests::http_source_backfill_restart_growth_and_confirmation_policy ... ok\ntest follower::tests::shallow_reorg_replaces_segments_and_deep_reorg_fails_closed ... ok\ntest follower::tests::shortened_source_rolls_back_without_claiming_future_data ... ok\ntest follower::tests::source_fork_during_capture_cannot_publish_stale_segment ... ok\ntest follower::tests::verified_prefix_remains_ready_during_slow_append ... ok\ntest full_source::tests::compact_size_rejects_noncanonical_and_truncated_values ... ok\ntest full_source::tests::failed_full_rpc_does_not_wait_for_pending_sibling ... ok\ntest full_source::tests::full_bytes_extensions_and_non_sha256d_v5_ids_are_preserved ... ok\ntest full_source::tests::full_rpc_requests_overlap_and_preserve_validated_content ... ok\ntest full_source::tests::genesis_requires_a_zero_predecessor ... ok\ntest full_source::tests::header_identity_transaction_inclusion_and_counts_are_checked ... ok\ntest full_source::tests::only_temporary_http_statuses_and_connection_failures_are_retryable ... ok\ntest full_source::tests::test_rpc_alias_uses_exact_genesis_and_lookup_errors_fail_closed ... ok\ntest http::tests::actual_batch_http_is_complete_and_snapshot_conflicts_precede_source_readiness ... ok\ntest http::tests::actual_http_auth_append_cursor_and_reorg_rejection ... ok\ntest http::tests::actual_http_disconnect_cancels_queued_handler_before_deadline ... ok\ntest http::tests::actual_http_disconnect_cancels_queued_metadata ... ok\ntest http::tests::batch_lookup_and_query_share_admission_and_retained_response_frames ... ok\ntest http::tests::bounded_admission_is_fifo_and_cancelled_waiters_release_slots ... ok\ntest http::tests::historical_status_survives_age_but_follow_stale_and_revision_mismatch_fail ... ok\ntest http::tests::metadata_authentication_precedes_queueing_and_queue_timeout_is_bounded ... ok\ntest http::tests::metadata_waits_for_capacity_then_reads_the_current_snapshot ... ok\ntest http::tests::queue_deadline_and_shutdown_release_all_waiting_slots ... ok\ntest http::tests::queued_reads_refresh_snapshot_and_source_only_after_admission ... ok\ntest http::tests::transport_frame_keeps_admission_after_body_drop ... ok\ntest live::tests::actual_rpc_pending_mined_absent_and_reorg_observations_remain_distinct ... ok\ntest live::tests::mempool_shapes_do_not_invent_waiting_times_or_accept_invalid_ids ... ok\ntest query::tests::adaptive_byte_target_finishes_the_block_and_preserves_continuation ... ok\ntest query::tests::adaptive_mode_is_cursor_bound_and_preserves_fields_and_byte_limits ... ok\ntest query::tests::adaptive_payload_fallback_keeps_store_reads_bounded_across_windows ... ok\ntest query::tests::adaptive_response_ceiling_does_not_change_fixed_page_capacity ... ok\ntest query::tests::adaptive_sparse_scan_uses_bounded_index_windows_and_exact_continuation ... ok\ntest query::tests::adaptive_time_slice_returns_progress_but_explicit_cancellation_never_returns_success ... ok\ntest query::tests::aggregate_data_size_matches_json_across_empty_and_nonempty_groups ... ok\ntest query::tests::block_decoded_preserves_all_source_fields_and_exact_numbers_without_tx_selection ... ok\ntest query::tests::budget_pagination_retains_identical_whole_blocks_and_transactions ... ok\ntest query::tests::coinbase_classification_uses_actual_inputs_not_position_or_transaction_version ... ok\ntest query::tests::compact_index_and_checked_payload_have_identical_projection_and_pagination ... ok\ntest query::tests::compact_projection_obeys_whole_block_response_boundary ... ok\ntest query::tests::compact_projection_rejects_malformed_metadata_and_checked_size_mismatch ... ok\ntest query::tests::counting_writer_matches_wire_bytes_and_checks_limits_and_cancellation ... ok\ntest query::tests::cursor_rejects_changed_selection_and_unknown_inputs ... ok\ntest query::tests::decoded_amounts_are_lossless_strings_and_public_address_filter_works ... ok\ntest query::tests::empty_ranges_compact_archives_and_cancel_are_explicit ... ok\ntest query::tests::filter_only_empty_pages_still_advance_whole_blocks ... ok\ntest query::tests::final_metadata_plus_data_size_enforces_exact_response_byte_limit ... ok\ntest query::tests::full_query_uses_one_lazy_range_per_page_and_checks_record_order ... ok\ntest query::tests::header_only_projection_and_cursor_anchor_never_read_full_payloads ... ok\ntest query::tests::incremental_projection_budget_matches_every_field_and_exact_block_boundary ... ok\ntest query::tests::ironwood_queries_never_infer_absence_from_legacy_metadata ... ok\ntest query::tests::omitted_limit_automatically_uses_bounded_adaptive_scanning ... ok\ntest query::tests::oversized_decoded_field_is_rejected_before_materializing_its_projection ... ok\ntest query::tests::pages_stop_at_captured_head_and_survive_append ... ok\ntest query::tests::per_block_metadata_cancellation_stops_before_the_next_read ... ok\ntest query::tests::per_block_metadata_without_locations_preserves_exact_id_filtering_and_pages ... ok\ntest query::tests::pool_filter_cache_and_payload_match_and_legacy_cursor_fingerprints_are_preserved ... ok\ntest query::tests::public_shielded_counts_and_pool_union_preserve_projection_order_and_and_semantics ... ok\ntest query::tests::response_cap_stops_before_entire_block_or_fails_first_block ... ok\ntest query::tests::rollback_and_rebuilt_prefix_invalidate_cursor ... ok\ntest query::tests::shielded_counts_reject_malformed_bundles_and_use_payload_when_cache_lacks_counts ... ok\ntest query::tests::txid_index_skips_payloads_but_never_filters_selected_blocks ... ok\ntest repack::tests::conversion_preserves_genesis_records_and_refuses_active_or_existing_targets ... ok\ntest transactions::tests::duplicates_multiple_locations_missing_and_legacy_fallback_are_complete ... ok\ntest transactions::tests::lookup_drains_multiple_bounded_pages_without_false_missing_or_duplicate_rows ... ok\ntest transactions::tests::malformed_request_shapes_fields_and_bounds_are_rejected ... ok\ntest transactions::tests::row_byte_cancellation_and_read_failures_never_report_missing_success ... ok\ntest transactions::tests::snapshot_append_is_safe_but_epoch_boundary_or_identity_conflicts_are_not ... ok\n\ntest result: ok. 74 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.01s\n\n     Running unittests src/main.rs (/target/debug/deps/prep-5f5236ed915c428e)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/integration.rs (/target/debug/deps/integration-85d84a928b887f9c)\n\nrunning 7 tests\ntest actual_grpc_two_clients_subranges_and_full_shielded_payloads ... ok\ntest byte_bounded_batch_splits_large_blocks ... ok\ntest cancellation_and_shutdown_release_backpressured_producers ... ok\ntest importer_grpc_preserves_payload_and_publishes_only_after_anchor_checks ... ok\ntest native_server_shutdown_is_bounded_with_unread_large_response ... ok\ntest short_unread_responses_keep_permits_until_stream_drop ... ok\ntest url_and_listener_policies_reject_credentials_and_implicit_exposure ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.44s\n\n     Running unittests src/lib.rs (/target/debug/deps/prep_store-85dd2bf711cd57c6)\n\nrunning 61 tests\ntest archive::catalog_limit_tests::extended_catalog_still_has_explicit_count_and_byte_bounds ... ok\ntest archive::catalog_limit_tests::live_catalog_can_cross_old_ten_thousand_segment_boundary ... ok\ntest archive::tests::append_cross_segment_reads_and_restart ... ok\ntest archive::tests::corrupt_catalog_checksum_is_rejected ... ok\ntest archive::tests::disk_snapshots_survive_rollback_replacement_and_reuse_unchanged_segments ... ok\ntest archive::tests::empty_archive_is_explicit_and_reopens ... ok\ntest archive::tests::exclusive_writer_lock_released_on_drop ... ok\ntest archive::tests::header_and_hash_lookup_route_across_segment_boundaries ... ok\ntest archive::tests::invalid_link_or_gap_cannot_publish ... ok\ntest archive::tests::metadata_cache_is_shared_across_append_refresh_and_replaced_after_rollback ... ok\ntest archive::tests::offline_disk_budget_includes_retired_sidecars_and_orphan_pending_files ... ok\ntest archive::tests::offline_disk_builder_reserves_existing_files_and_excludes_writer ... ok\ntest archive::tests::one_unindexed_overlap_requires_fallback_even_for_absent_or_empty_ids ... ok\ntest archive::tests::partial_unreferenced_directories_are_ignored ... ok\ntest archive::tests::payload_kinds_cannot_be_mixed ... ok\ntest archive::tests::profiling_budget_preserves_integrity_and_payloads ... ok\ntest archive::tests::refresh_preserves_old_snapshot_and_reuses_immutable_cache ... ok\ntest archive::tests::rollback_removes_overlap_invalidates_epoch_and_retains_files ... ok\ntest archive::tests::same_epoch_refresh_rejects_truncated_or_replaced_history ... ok\ntest archive::tests::unsafe_paths_and_symlinks_are_rejected ... ok\ntest disk_index::tests::compares_source_then_rehashes_query_bytes_and_disables_on_corruption ... ok\ntest disk_index::tests::rejects_wrong_identity_version_trailing_rows_and_source_mismatch ... ok\ntest disk_index::tests::replaced_path_cannot_substitute_valid_rows_from_another_source ... ok\ntest disk_index::tests::transient_handles_are_bounded_but_many_admitted_segments_keep_coverage ... ok\ntest raw_refs::tests::canonical_splicing_matches_legacy_for_numbers_arrays_and_pointer_paths ... ok\ntest raw_refs::tests::exact_roundtrip_including_escaped_paths_and_nulls ... ok\ntest raw_refs::tests::malformed_metadata_never_decodes ... ok\ntest raw_refs::tests::noncanonical_and_reserved_objects_keep_legacy_acceptance_and_rejection ... ok\ntest tests::compact_manifest_defaults_preserve_legacy_identity_and_serialization ... ok\ntest tests::complete_snapshot_reopens_and_preserves_exact_bytes ... ok\ntest tests::compressed_declared_length_is_bounded_before_decode ... ok\ntest tests::compressed_records_reopen_and_packed_headers_preserve_exact_payloads ... ok\ntest tests::construction_rejects_heights_beyond_zcash_u32_range ... ok\ntest tests::corrupt_indexed_time_is_rejected_during_open ... ok\ntest tests::corrupt_length_prefix_is_rejected_without_large_allocation ... ok\ntest tests::corruption_after_open_is_checked_on_each_read ... ok\ntest tests::corruption_truncation_and_extra_bytes_are_rejected ... ok\ntest tests::disk_metadata_build_publish_reopen_fallback_and_bounds ... ok\ntest tests::disk_projection_covers_rows_beyond_ram_budget_without_row_cache ... ok\ntest tests::existing_output_even_empty_is_never_overwritten ... ok\ntest tests::full_payload_larger_than_compact_limit_reopens_with_full_profile ... ok\ntest tests::full_payload_requires_raw_bytes_and_valid_object_json ... ok\ntest tests::gaps_duplicates_and_wrong_parents_poison_writer ... ok\ntest tests::incomplete_or_dropped_writer_never_publishes ... ok\ntest tests::indexed_full_header_matches_payload_without_payload_io ... ok\ntest tests::legacy_full_header_without_time_uses_checked_payload_fallback ... ok\ntest tests::manifest_offset_and_dataset_identity_are_checked ... ok\ntest tests::manifest_rejects_heights_beyond_zcash_u32_range ... ok\ntest tests::metadata_must_match_protobuf ... ok\ntest tests::optional_transaction_index_admits_legacy_and_malformed_fallback_safely ... ok\ntest tests::publication_does_not_clobber_an_existing_manifest ... ok\ntest tests::range_is_contained_and_bounded ... ok\ntest tests::raw_referenced_storage_reads_identically_with_packed_metadata ... ok\ntest tests::snapshot_identity_changes_with_network_and_anchors ... ok\ntest tests::subranges_have_independent_seek_positions ... ok\ntest tests::total_and_per_block_limits_are_enforced_before_publish ... ok\ntest tests::wrong_tip_never_publishes ... ok\ntest transaction_index::tests::budgets_include_reserved_rows_offsets_and_secondary_capacity ... ok\ntest transaction_index::tests::exact_minimum_budget_boundary_is_all_or_nothing ... ok\ntest transaction_index::tests::streaming_metadata_keeps_duplicate_locations_and_exact_public_fields ... ok\ntest transaction_index::tests::unsupported_metadata_never_publishes_a_partial_negative_index ... ok\n\ntest result: ok. 61 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.93s\n\n   Doc-tests prep\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests prep_store\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Compiling prep-proto v0.1.0 (/work/crates/prep-proto)\n    Checking prep-store v0.1.0 (/work/crates/prep-store)\n    Checking prep v0.1.0 (/work/crates/prep)\n    Finished `dev` profile [unoptimized] target(s) in 15.80s\n   Compiling prep-proto v0.1.0 (/work/crates/prep-proto)\n   Compiling prep-store v0.1.0 (/work/crates/prep-store)\n    Finished `release` profile [optimized] target(s) in 17.63s\n   Compiling prep-proto v0.1.0 (/work/crates/prep-proto)\n   Compiling prep-store v0.1.0 (/work/crates/prep-store)\n   Compiling prep v0.1.0 (/work/crates/prep)\n    Finished `release` profile [optimized] target(s) in 1m 52s\n",
+    "linux_build_test_log_sha256": "16eea4ef0f0f5e6e93c948b5de05499d1960d3275ba305ebf4583b23950e4292"
+  },
+  "limitations": [
+    "One sequential fresh-process run per variant; no cache clearing or resource-isolated repetition.",
+    "Both pinned runs passed the 1200-second gate. The previous failed live-archive attempt is a different observation.",
+    "Startup admission is not retrieval latency, Chef throughput, note decryption or consensus validation.",
+    "Memory peak is cgroup charged memory including file cache, not process RSS alone.",
+    "Independent query checks sample 48 blocks; admission still runs the mandatory checks on every retained record."
+  ],
+  "source": {
+    "files": {
+      "profile-run.py": "from pathlib import Path\nimport subprocess,json,time,sys,hashlib\nroot=Path('/opt/zeer-testnet/startup-20261021');variant=sys.argv[1];assert variant in ['baseline','candidate']\nout=root/(variant+'-profile');assert not out.exists();out.mkdir()\nbinary=root/'bin'/('startup-profile-'+variant);pin=json.loads((root/'pin.json').read_text())\nreport={'status':'RUNNING','variant':variant,'deadline_seconds':1800,'readiness_gate_seconds':1200,'binary_sha256':hashlib.sha256(binary.read_bytes()).hexdigest(),'pin':pin,'cache':'fresh process; host filesystem cache not cleared; preparation/cache sharing disclosed'}\ndef save():(out/'execution.json').write_text(json.dumps(report,indent=2)+'\\n')\nsave();started=time.monotonic()\ntry:\n with (out/'stdout.json').open('wb') as stdout,(out/'progress.jsonl').open('wb') as stderr:\n  result=subprocess.run([str(binary),str(root/'pinned-full')],stdout=stdout,stderr=stderr,timeout=1800)\n report['returncode']=result.returncode;assert result.returncode==0,'Native profile failed'\n profile=json.loads((out/'stdout.json').read_text());assert profile['catalog_sha256']==pin['catalog_sha256'] and profile['head']==pin['head'] and profile['head_hash']==pin['head_hash']\n report['status']='PASS';report['admission_seconds']=profile['profile']['admission_ns']/1e9\n report['phases_seconds']={k:v['ns']/1e9 for k,v in profile['profile']['phases'].items()}\n report['readiness_gate_met']=report['admission_seconds']<=1200\nexcept BaseException as error:\n report['status']='FAIL';report['failure_type']=type(error).__name__;raise\nfinally:\n report['wall_seconds']=time.monotonic()-started\n path=Path('/sys/fs/cgroup')/Path('/proc/self/cgroup').read_text().strip().split('::',1)[1].lstrip('/')\n report['cpu_stat']=(path/'cpu.stat').read_text();report['peak_memory_bytes']=int((path/'memory.peak').read_text());save()\n",
+      "launch-profile.py": "from pathlib import Path\nimport subprocess,json,sys\nroot=Path('/opt/zeer-testnet/startup-20261021');variant=sys.argv[1];assert variant in ['baseline','candidate']\nassert subprocess.run(['systemctl','is-active','--quiet','zeer-testnet-web-build.service']).returncode!=0\nassert json.loads(subprocess.check_output(['python3','/opt/zeer-testnet/guard.py','--check'],timeout=110))['status']=='PASS'\nif variant=='baseline':\n container=json.loads(subprocess.check_output(['docker','inspect','zeer-testnet-prep-build'],timeout=20))[0];assert not container['State']['Running'] and container['State']['ExitCode']==0\n (root/'baseline-build.log').write_bytes(subprocess.check_output(['docker','logs','zeer-testnet-prep-build'],stderr=subprocess.STDOUT,timeout=20))\n (root/'bin').mkdir(exist_ok=True);subprocess.run(['docker','cp','zeer-testnet-prep-build:/target/release/examples/startup_profile',str(root/'bin/startup-profile-baseline')],check=True,timeout=30);(root/'bin/startup-profile-baseline').chmod(0o755)\n # Preserve optional native sidecars too; never change original inode permissions.\n import os\n catalog=json.loads((root/'pinned-full/catalog.json').read_text());count=0\n for reference in catalog['segments']:\n  relative=Path(reference['directory']);assert len(relative.parts)==2 and relative.parts[0]=='segments' and '..' not in relative.parts\n  source=Path('/opt/zeer-testnet/storage-v3-20261018/archives/full')/relative/'transactions-v1.bin'\n  if source.exists():\n   assert source.is_file() and not source.is_symlink();destination=root/'pinned-full'/relative/source.name;assert not destination.exists();os.link(source,destination);count+=1\n (root/'optional-sidecars.json').write_text(json.dumps({'linked':count}))\nelse:\n container=json.loads(subprocess.check_output(['docker','inspect','zeer-testnet-prep-build'],timeout=20))[0];assert not container['State']['Running'] and container['State']['ExitCode']==0\n (root/'candidate-build.log').write_bytes(subprocess.check_output(['docker','logs','zeer-testnet-prep-build'],stderr=subprocess.STDOUT,timeout=20))\n for original,destination in [('/target/startup-profile-candidate','startup-profile-candidate'),('/target/release/prep','prep-optimized')]:\n  subprocess.run(['docker','cp','zeer-testnet-prep-build:'+original,str(root/'bin'/destination)],check=True,timeout=30);(root/'bin'/destination).chmod(0o755)\nsubprocess.run(['systemd-run','--collect','--unit=zeer-testnet-web-build','-p','Slice=zeertestnet.slice','-p','CPUQuota=50%','-p','MemoryMax=1G','-p','MemorySwapMax=0','-p','TasksMax=128','-p','RuntimeMaxSec=1850','-p','User=root','-p','NoNewPrivileges=true','-p','ProtectSystem=strict','-p','ReadWritePaths='+str(root),'-p','ReadOnlyPaths='+str(root/'pinned-full'),'-p','PrivateTmp=true','-p','StandardOutput=append:'+str(root/(variant+'-launcher.log')),'-p','StandardError=append:'+str(root/(variant+'-launcher-errors.log')),'/usr/bin/python3',str(root/'profile-run.py'),variant],check=True,timeout=30)\nprint('Bounded pinned full-history profile started; existing services unchanged.')\n",
+      "pin.py": "from pathlib import Path\nimport os,json,hashlib,subprocess\nroot=Path('/opt/zeer-testnet/startup-20261021');source=Path('/opt/zeer-testnet/storage-v3-20261018/archives/full');target=root/'pinned-full'\nassert not target.exists() and source.is_dir() and not source.is_symlink()\nassert target.resolve().is_relative_to(root.resolve())\nassert json.loads(subprocess.check_output(['python3','/opt/zeer-testnet/guard.py','--check'],timeout=110))['status']=='PASS'\nraw=(source/'catalog.json').read_bytes();catalog=json.loads(raw);assert catalog['network']=='testnet' and catalog['payload_kind']=='full-v1'\ntarget.mkdir();(target/'segments').mkdir();(target/'catalog.json').write_bytes(raw)\ncount=0\nfor reference in catalog['segments']:\n relative=Path(reference['directory']);assert len(relative.parts)==2 and relative.parts[0]=='segments' and '..' not in relative.parts\n parent=source/relative;assert parent.is_dir() and not parent.is_symlink();destination=target/relative;destination.mkdir()\n manifest=(parent/'manifest.json').read_bytes();assert hashlib.sha256(manifest).hexdigest()==reference['manifest_sha256']\n for filename in ['manifest.json','segment.bin','transaction-metadata.idx']:\n  path=parent/filename\n  if not path.exists():assert filename=='transaction-metadata.idx';continue\n  assert path.is_file() and not path.is_symlink();os.link(path,destination/filename);count+=1\nproof={'source_catalog_sha256':hashlib.sha256(raw).hexdigest(),'catalog_sha256':catalog['catalog_sha256'],'network':catalog['network'],'start':catalog['start_height'],'head':catalog['segments'][-1]['end_height'],'head_hash':catalog['segments'][-1]['end_hash'],'segments':len(catalog['segments']),'linked_files':count,'raw_data_copied':False,'host_caches_cleared':False}\n(root/'pin.json').write_text(json.dumps(proof,indent=2));print(json.dumps(proof))\n"
+    },
+    "sha256": {
+      "profile-run.py": "2a6805404fe8f143566115e5507361ee9a0e55c12ff8664704d0dc135b5a47f6",
+      "launch-profile.py": "df85a9fdb0b519d24d4ad26a5e048714477dd024e51a1ac3b7aac4676c33fcbb",
+      "pin.py": "f857ec7c51dc9c80c05b38e0f7749631c0e84246c1ccf3ddb0a5043350e3f094"
+    }
+  },
+  "observed_admission_reduction_percent": 18.274684178121582,
+  "optional_disk_sidecars": 0,
+  "rollout": {
+    "status": "ACTIVATED",
+    "switched_at_utc": "2026-10-21T17:51:37Z",
+    "switch_seconds": 12.928011930023786,
+    "source_height_compared": 4526310,
+    "data_equal": true,
+    "canonicality_gates_preserved": true,
+    "ingress_limits_changed": false,
+    "original_native_retained_warm": true,
+    "existing_chef_namespaces_changed": false,
+    "public_prep_upstream_changed": true
+  },
+  "public_smoke": {
+    "status": "PASS",
+    "checked_at_unix": 1792605177.5104535,
+    "origin": "https://zeer.endpx.cloud",
+    "prep_start": 0,
+    "prep_height": 4526315,
+    "all_six_public_transaction_observations_match_source": true,
+    "existing_chef_available": true,
+    "recent_headers_available": true,
+    "public_max_active_queries": 2,
+    "requests": [
+      {
+        "path": "/api/prep/height",
+        "status": 200,
+        "response_sha256": "4d0c2ec70395be4c1fa8865827f326c5c4bfcfb30a94fe7ef92b1a6f92c2684b"
+      },
+      {
+        "path": "/api/prep/capabilities",
+        "status": 200,
+        "response_sha256": "b2f0651c1e02ab3bbaafca5ef08cdb329b6106d2d79a1a54c59325bc9f45bfc7"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "e0f4deac25b3a798df33ea4c1f056c3d029df82fa0987d7d281d5b5cf33fadd4"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "386e3d200f4f0ec76fbf456cbf025fa80581cd21d342cdd1c4497c4fac87aed2"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "6d8f03f1e08edda406f64bdbbd3205cfff4089d307ae1f2f105c9da0e008b9d1"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "5d8c051e577d6a4a76a66edbcc2130c7f50a90b99293f921ae92cdd40ba78f11"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "e9230f89abc2ef6aec2a7f10caff47fd83479b3bc027cbb4de019dec996dc826"
+      },
+      {
+        "path": "/api/prep/transaction",
+        "status": 200,
+        "response_sha256": "add6e6ca66ec4b87b43e0b323555629021c5dcc7dac1320696d59ca863b396b8"
+      },
+      {
+        "path": "/api/status",
+        "status": 200,
+        "response_sha256": "5aa6d1ee1b8be444f2199b56e11e21ae11538b1b9c629cde12a3933ccaed021d"
+      }
+    ]
+  },
+  "post_activation_guard": {
+    "checked_at_utc": "2026-10-21T17:54:48.929019+00:00",
+    "status": "PASS",
+    "pipeline_limit_violations": [],
+    "envelope_invalid": false,
+    "combined_cpu_limit": 3,
+    "combined_memory_mib": 8192,
+    "zebra_oom_killed": false
+  }
+}

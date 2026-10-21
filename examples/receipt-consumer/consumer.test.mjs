@@ -99,3 +99,22 @@ test('source availability is checked again before final promotion',async t=>{
   f.state.available=true;assert.equal((await consumer.step()).state,'complete');assert.equal(consumer.rows().length,3);
   assert.throws(()=>f.open({file:join(f.directory,'insecure.sqlite'),url:'http://example.com'}),{code:'HTTPS_OR_LOOPBACK_REQUIRED'});
 });
+
+test('SQLite write denial and transport loss preserve committed rows and resume without duplicates',async t=>{
+ const f=await fixture(t);const consumer=f.open();await consumer.step();const before=consumer.state(),rows=consumer.rows();
+ f.state.revision='2';consumer.db.exec('PRAGMA query_only=ON');
+ await assert.rejects(consumer.step(),error=>error.code==='ERR_SQLITE_ERROR');
+ assert.deepEqual(consumer.state(),before);assert.deepEqual(consumer.rows(),rows);consumer.db.exec('PRAGMA query_only=OFF');
+ const read=consumer.fetch;consumer.fetch=async()=>{throw new Error('private connection details');};
+ assert.deepEqual(await consumer.step(),{state:'waiting',reason:'TRANSPORT_UNAVAILABLE'});assert.deepEqual(consumer.rows(),rows);
+ consumer.fetch=read;assert.equal((await consumer.step()).state,'complete');assert.deepEqual(consumer.rows(),rows);assert.equal(new Set(consumer.rows().map(row=>row.id)).size,rows.length);
+});
+
+test('SQLite automatic rollback preserves the original database error and completed projection',async t=>{
+ const f=await fixture(t);const consumer=f.open();await consumer.step();const rows=consumer.rows();
+ f.state.revision='2';await consumer.step({maxPages:1});const state=consumer.state();
+ consumer.db.exec("CREATE TRIGGER fail_staging BEFORE INSERT ON staging BEGIN SELECT RAISE(ROLLBACK,'controlled rollback'); END");
+ await assert.rejects(consumer.step(),error=>error.code==='ERR_SQLITE_ERROR'&&error.errcode===1811);
+ assert.deepEqual(consumer.state(),state);assert.deepEqual(consumer.rows(),rows);
+ consumer.db.exec('DROP TRIGGER fail_staging');assert.equal((await consumer.step()).state,'complete');assert.deepEqual(consumer.rows(),rows);
+});

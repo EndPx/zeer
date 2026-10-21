@@ -744,18 +744,20 @@ impl Store {
         if segment.metadata()?.len() != manifest.segment_bytes {
             return Err(Error::Invalid("segment length differs from manifest"));
         }
-        let mut digest = Sha256::new();
-        let mut buffer = [0_u8; 64 * 1024];
-        loop {
-            let n = segment.read(&mut buffer)?;
-            if n == 0 {
-                break;
+        profile_phase!("segment_hash", {
+            let mut digest = Sha256::new();
+            let mut buffer = [0_u8; 64 * 1024];
+            loop {
+                let n = segment.read(&mut buffer)?;
+                if n == 0 {
+                    break;
+                }
+                digest.update(&buffer[..n]);
             }
-            digest.update(&buffer[..n]);
-        }
-        if hex::encode(digest.finalize()) != manifest.segment_sha256 {
-            return Err(Error::Invalid("segment checksum mismatch"));
-        }
+            if hex::encode(digest.finalize()) != manifest.segment_sha256 {
+                return Err(Error::Invalid("segment checksum mismatch"));
+            }
+        });
         let mut disk_index = (manifest.payload_kind == FULL_KIND)
             .then(|| {
                 disk_index::DiskIndex::candidate(
@@ -1051,20 +1053,26 @@ fn read_record(
     }
     let mut payload = vec![0_u8; length as usize];
     file.read_exact(&mut payload)?;
+    #[cfg(feature = "admission-profile")]
+    drop(io_phase);
     if let Some(length) = entry.uncompressed_length {
         if length == 0 || u64::from(length) > max_bytes {
             return Err(Error::Limit("uncompressed record length"));
         }
-        payload = zstd::bulk::decompress(&payload, length as usize)?;
+        payload = profile_phase!(
+            "decompression",
+            zstd::bulk::decompress(&payload, length as usize)
+        )?;
         if entry.raw_refs {
-            payload = raw_refs::decode(&payload, length as usize)?;
+            payload = profile_phase!(
+                "raw_reference_expansion",
+                raw_refs::decode(&payload, length as usize)
+            )?;
         }
         if payload.len() != length as usize {
             return Err(Error::Invalid("decompressed record length mismatch"));
         }
     }
-    #[cfg(feature = "admission-profile")]
-    drop(io_phase);
     if profile_phase!("payload_hash", sha256(&payload)) != entry.payload_sha256 {
         return Err(Error::Invalid("block payload checksum mismatch"));
     }
