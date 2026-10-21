@@ -38,10 +38,10 @@ function temporarySourceError(error: unknown): boolean {
 const commandHelp: Record<string, string> = {
   init: "zeer init [--dir NEW_DIRECTORY] [--project NAME] [--start-height latest|HEIGHT] [--prep-url URL]\nMissing options are asked on a terminal. Start block defaults to latest, captured once from Prep /height with a 5-second timeout.\nSource: --prep-url, then PREP_URL, then the public testnet Prep. PREP_API_TOKEN is used only with an explicitly configured source.\nScripts must provide --dir, --project and --start-height. An explicit numeric height works offline.\nCreates new project files only. Does not install packages, start services or overwrite an existing directory.",
   codegen: "zeer codegen [--config chef.config.ts]\nRead the schema and write chef.generated.ts beside the config. Does not connect to Prep or PostgreSQL. Run typecheck separately.",
-  migrate: "zeer migrate [--config chef.config.ts]\nExplicitly initialize/migrate the compatible project namespace and its declared indexes. Does not replay blocks or reset an incompatible project.",
+  migrate: "zeer migrate [--config chef.config.ts]\nExplicitly initialize/migrate the compatible project namespace and its declared indexes. Stop the follower and API before upgrading an existing namespace. Does not replay blocks or reset an incompatible project.",
   sync: "zeer sync [--config chef.config.ts] [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nDefault: capture the available Prep tip, index through it and exit. --follow keeps polling; --to is an inclusive finite target.\n--poll-seconds accepts 1..60 and is used while following. Compatible restarts resume the durable checkpoint. Ctrl+C stops with committed progress retained.",
   status: "zeer status [--config chef.config.ts]\nRead the durable checkpoint and inspect Prep with a 5-second timeout. Does not take a writer lock or change the database.\nUnavailable, incompatible and unreconciled states return nonzero diagnostics.",
-  serve: "zeer serve [--config chef.config.ts] [--listen 127.0.0.1] [--port 39370]\nServe authenticated read-only GraphQL over committed entities. Requires CHEF_API_TOKEN of at least 16 bytes.\nDoes not run the writer; run sync or sync --follow separately. Port accepts 1..65535. Ctrl+C stops this server.",
+  serve: "zeer serve [--config chef.config.ts] [--listen 127.0.0.1] [--port 39370]\nServe authenticated read-only GraphQL over committed entities and cached freshness at GET /status. Status makes no Prep request. Requires CHEF_API_TOKEN of at least 16 bytes.\nDoes not run the writer; run sync or sync --follow separately. Port accepts 1..65535. Ctrl+C stops this server.",
 };
 
 export async function main(args = process.argv.slice(2), dependencies: {
@@ -219,8 +219,10 @@ export async function main(args = process.argv.slice(2), dependencies: {
         const start = performance.now();
         let meta;
         try { meta = await client.getHeight({ signal: controller.signal }); }
-        catch (error) { await store.markReconciling(); if (!controller.signal.aborted && temporarySourceError(error)) await report("source_unavailable"); throw error; }
+        catch (error) { await store.recordSourceObservation?.({status:"unavailable",prepIndexedHeight:null,sourceObservedHeight:null,sourceObservedAt:null}); await store.markReconciling(); if (!controller.signal.aborted && temporarySourceError(error)) await report("source_unavailable"); throw error; }
         totals.fetchMs += performance.now() - start;
+        await store.recordSourceObservation?.({ status: meta.network === config.network && meta.payload_kind === "full-v1" && meta.ready && meta.archive_height !== null && meta.archive_height >= config.startHeight ? "available" : "unavailable",
+          prepIndexedHeight: meta.indexed_height ?? null, sourceObservedHeight: meta.source_height ?? null, sourceObservedAt: meta.source_observed_at ?? null });
         if (!meta.ready || meta.archive_height === null || meta.archive_height < config.startHeight) {
           await store.markReconciling(); await report("source_unavailable"); throw new CliError("SOURCE_UNAVAILABLE");
         }

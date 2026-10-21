@@ -16,7 +16,7 @@ Initialize a standalone project with:
 Requires Node 24.14+ on Linux x86_64 or WSL2, pnpm (or npm) and PostgreSQL.
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.1.3 dlx zeer init
+pnpm --package=@zeer-dev/chef@0.2.0 dlx zeer init
 cd my-indexer
 pnpm install
 pnpm run codegen
@@ -32,8 +32,8 @@ the public testnet Prep is selected and written to the new `.env`. Existing priv
 tokens are not sent to that default source or copied into generated files.
 
 For a short command after one global installation, use
-`pnpm add -g @zeer-dev/chef@0.1.3`, then `zeer init`. The `zeer-chef` alias remains.
-With npm, use `npx @zeer-dev/chef@0.1.3 init` and the matching npm project scripts.
+`pnpm add -g @zeer-dev/chef@0.2.0`, then `zeer init`. The `zeer-chef` alias remains.
+With npm, use `npx @zeer-dev/chef@0.2.0 init` and the matching npm project scripts.
 Scripts should supply all three setup flags and `--json`; redirected sessions
 never prompt. Use `zeer <command> --help` for details and `zeer --version` to check
 the installed version. Cancelled questions or height lookups create no project.
@@ -213,8 +213,11 @@ deterministic and use only the entity context for effects; network calls, paymen
 email, randomness and wall-clock inputs are outside this supported contract.
 There is no transactional outbox in this slice.
 
-GraphQL supports scalar entities, equality filters, ID-order cursor pagination
-and `_meta` checkpoint data. It has no mutations, relations, subscriptions,
+GraphQL supports scalar equality, bounded ranges on required indexed Int fields,
+deterministic Int/ID ordering, signed revision-bound cursors and `_meta` checkpoint data.
+Authenticated `GET /status` reads cached source freshness without RPC and remains
+available during entity reconciliation. See [the consumption API contract](../../docs/CHEF_CONSUMPTION_API.md)
+for cursor recovery and the required additive migration from 0.1.x. It has no mutations, relations, subscriptions,
 introspection, fragments or executable directives. A bearer token is required.
 See the example for request, response and concurrency bounds. No public
 production endpoint or Neon compatibility result is claimed.

@@ -4,7 +4,12 @@ export interface Field { name: string; scalar: Scalar; required: boolean; indexe
 export interface EntityDefinition { name: string; fields: Record<string, Field> }
 export interface Model { entities: Record<string, EntityDefinition>; fingerprint: string }
 export type StoredEntity = Record<string, string | number | boolean | null> & { id: string };
-export interface ListOptions { first: number; after?: string; where?: Record<string, unknown> }
+export interface EntityRange { field: string; gte?: number; lte?: number }
+export interface EntityOrder { field: string; direction: "ASC" | "DESC" }
+export interface ListOptions {
+  first: number; after?: string; where?: Record<string, unknown>;
+  range?: EntityRange; order?: EntityOrder; position?: { id: string; value?: number };
+}
 export interface EntityAccess<E extends object = Record<string, Record<string, unknown>>> {
   get<K extends keyof E & string>(entity: K, id: string): Promise<E[K] | null>;
   set<K extends keyof E & string>(entity: K, value: E[K]): Promise<void>;
@@ -44,16 +49,32 @@ export interface Indexer<E extends object = Record<string, Record<string, unknow
   transactionMetadata?: (args: { block: PublicBlock; transaction: TransactionMetadata; context: HandlerContext<E> }) => Promise<void> | void;
 }
 export interface Checkpoint { height: number | null; hash: string | null; anchorHash: string | null; status: "ready" | "reconciling" | "blocked"; reconcileKind?: "source" | "reorg" | "unknown"; undoFloor?: number }
+export interface SourceObservation {
+  status: "available" | "unavailable";
+  prepIndexedHeight: number | null; sourceObservedHeight: number | null;
+  /** Unix seconds reported by Prep, not the time of this API request. */
+  sourceObservedAt: number | null;
+}
+export interface ConsumptionStatus {
+  project: string; generation: string; revision: string; checkpoint: Checkpoint;
+  /** Database timestamp recorded in the committing transaction, not an fsync measurement. */
+  lastCommitAt: string | null;
+  source: Omit<SourceObservation, "status"> & { status: "unknown" | SourceObservation["status"]; checkedAt: string | null };
+}
 export interface ReadView {
   get(entity: string, id: string): Promise<StoredEntity | null>;
   list(entity: string, options: ListOptions): Promise<StoredEntity[]>;
   checkpoint: Checkpoint;
+  /** Same repeatable-read snapshot as the entities. Required for cursor pagination. */
+  consumption?: ConsumptionStatus;
 }
 export interface ChefStore {
   migrate(): Promise<void>;
   acquire(): Promise<void>;
   release(): Promise<void>;
   checkpoint(): Promise<Checkpoint>;
+  consumptionStatus?(): Promise<ConsumptionStatus>;
+  recordSourceObservation?(observation: SourceObservation): Promise<void>;
   blockHash(height: number): Promise<string | null>;
   apply(block: PublicBlock, handler: (entities: EntityAccess) => Promise<void>): Promise<void>;
   applyBatch?(blocks: PublicBlock[], handler: (block: PublicBlock, entities: EntityAccess) => Promise<void>): Promise<void>;

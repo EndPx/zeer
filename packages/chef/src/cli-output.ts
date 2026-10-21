@@ -64,9 +64,10 @@ export function cliFailure(error: unknown, knownCode?: string): { error: { code:
   if (!code && error && typeof error === "object") {
     const detail = error as { code?: unknown; message?: unknown };
     if (detail.code === "42P01" || detail.code === "3F000"
-      || detail.message === "Chef state migration required; run migrate before restarting this version") code = "MIGRATION_REQUIRED";
+      || detail.message === "Chef state migration required; run migrate before restarting this version"
+      || detail.message === "Chef consumption migration required; stop writers and run migrate") code = "MIGRATION_REQUIRED";
     else if (detail.message === "Chef project identity mismatch; use a new project namespace") code = "PROJECT_IDENTITY_MISMATCH";
-    else if (detail.message === "Chef project already has an active writer") code = "WRITER_ALREADY_ACTIVE";
+    else if (detail.message === "Chef project already has an active writer" || detail.message === "Stop the project writer before consumption migration") code = "WRITER_ALREADY_ACTIVE";
   }
   code ??= "CHEF_COMMAND_FAILED";
   return { error: { code }, help: guidance[code] ?? "Check --help and the configuration values before retrying." };

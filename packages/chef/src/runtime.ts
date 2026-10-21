@@ -99,14 +99,20 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   const fetched = async <T>(read: () => Promise<T>): Promise<T> => {
     const start = performance.now();
     try { return await read(); }
-    catch (error) { await store.markReconciling(error instanceof ReorgError ? "reorg" : "source"); throw error; }
+    catch (error) {
+      await store.recordSourceObservation?.({status: "unavailable", prepIndexedHeight: null, sourceObservedHeight: null, sourceObservedAt: null});
+      await store.markReconciling(error instanceof ReorgError ? "reorg" : "source"); throw error;
+    }
     finally { fetchMs += performance.now() - start; }
   };
   signal?.throwIfAborted();
   const meta: Height = await fetched(() => client.getHeight({ signal }));
   if (meta.network !== options.network || meta.payload_kind !== "full-v1") {
+    await store.recordSourceObservation?.({status: "unavailable", prepIndexedHeight: null, sourceObservedHeight: null, sourceObservedAt: null});
     await store.markReconciling(); throw new ChefError("SOURCE_NETWORK_OR_KIND_MISMATCH");
   }
+  await store.recordSourceObservation?.({ status: meta.ready && meta.archive_height !== null ? "available" : "unavailable",
+    prepIndexedHeight: meta.indexed_height ?? null, sourceObservedHeight: meta.source_height ?? null, sourceObservedAt: meta.source_observed_at ?? null });
   const base = { blocks: 0, transactions: 0, height: checkpoint.height, sourceHeight: meta.archive_height,
     sourceEpoch: meta.epoch, fetchMs, handlerIncludingEntityIoMs: 0, transactionOverheadMs: 0 };
   if (!meta.ready || meta.archive_height === null || meta.archive_height < options.startHeight) {

@@ -1,4 +1,5 @@
 import test from 'node:test';
+import cursorFixture from './fixtures/chef-consumption-cursor.json' with {type:'json'};
 import assert from 'node:assert/strict';
 import {parse} from 'graphql';
 import {demoQueryError} from '../src/lib/chef-demo-validation.ts';
@@ -22,10 +23,17 @@ test('example continuation uses an escaped cursor and leaves custom queries alon
  const tricky='id"\\\n';assert.doesNotThrow(()=>parse(chefExampleQuery(tricky)));
 });
 test('missing or malformed continuations never produce a next-page action',()=>{
- for(const r of [undefined,null,{}, {data:null},{errors:[{}]},response(null),response(''),response('x'.repeat(257)),response(123)]) assert.equal(chefExampleCursor(chefExampleQuery(),r),null);
+ for(const r of [undefined,null,{}, {data:null},{errors:[{}]},response(null),response(''),response('x'.repeat(2049)),response(123)]) assert.equal(chefExampleCursor(chefExampleQuery(),r),null);
 });
 test('empty entities get guidance without treating metadata, failures or populated results as empty',()=>{
  assert.equal(chefResponseEmpty({data:{BlockSummaryById:null,_meta:{height:4519999}}}),true);
  assert.equal(chefResponseEmpty({data:{BlockSummaryList:{items:[],nextCursor:null}}}),true);
  for(const data of [null,{}, {data:{_meta:{height:4519999}}},response('4510002'),{errors:[{message:'unavailable'}],data:{BlockSummaryById:null}},{data:{a:null,b:{height:4510000}}}]) assert.equal(chefResponseEmpty(data),false);
+});
+
+
+test('Chef 0.2 opaque cursors retain the existing example continuation',()=>{
+ const cursor=cursorFixture.cursor;assert.ok(cursor.length>256 && cursor.length<=2048);
+ assert.equal(chefExampleCursor(chefExampleQuery(),response(cursor)),cursor);
+ assert.doesNotThrow(()=>parse(chefExampleQuery(cursor)));
 });

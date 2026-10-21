@@ -129,3 +129,5 @@ The generated scripts load `.env` and work with pnpm or npm. With npm, put forwa
 | `REBUILD_REQUIRED` | Keep the old namespace for inspection and follow the recovery procedure |
 
 Chef currently has no managed deployment, database reset, `dev` process supervisor or Prometheus `metrics` command. Use [self-hosting](/docs/chef/self-hosting/), [environment variables](/docs/chef/environment-variables/) and the [performance guides](/docs/chef/benchmarking/) for the supported workflow.
+
+The server also exposes authenticated `GET /status` for [cached freshness metadata](/docs/chef/graphql/#check-freshness-without-calling-rpc). This differs from the CLI `status` command, which actively checks Prep. Upgrades from 0.1.x require stopping the follower and API, running the additive migration with the same config, then restarting both.

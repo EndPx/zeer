@@ -29,7 +29,7 @@ query {
 
 Replace the example height with a block your project has committed. An index helps locate matching rows; it does not create missing history.
 
-Chef supports argument-free `@index` on `Int`, `Boolean`, `BigInt` and non-primary `ID` fields, with at most eight field indexes per project. Primary `id` already has an index. String indexes, composite declarations, range filters and custom sort orders are outside this profile. See [Equality query indexes](/docs/chef/indexes/) for the complete contract.
+Chef supports argument-free `@index` on `Int`, `Boolean`, `BigInt` and non-primary `ID` fields, with at most eight field indexes per project. Primary `id` already has an index. Chef 0.2.0 also supports bounded ranges and Int/ID ordering on required indexed Int fields. String indexes, composite declarations and other custom sort orders remain outside this profile. See [Equality query indexes](/docs/chef/indexes/) for the complete contract.
 
 Declared indexes are created by explicit `migrate`, before indexing. Adding or removing an annotation changes project identity: use [a new namespace and replay](/docs/chef/evolution/) before switching readers. Chef does not defer index creation until backfill finishes or create indexes on the first query.
 
@@ -53,7 +53,7 @@ PostgreSQL's [EXPLAIN guide](https://www.postgresql.org/docs/current/using-expla
 
 ## Keep reads bounded
 
-Use `first` and the returned `nextCursor`; Chef permits at most 100 items per page. Select only the fields the caller needs. List order is ID order, so a string ID containing a block height does not imply numeric height order.
+Use `first` and the returned `nextCursor`; Chef permits at most 100 items per page. Select only the fields the caller needs. The default order is ID order. For numeric height order, use `orderBy: [{height: ASC}, {id: ASC}]` on a required `Int! @index` field in Chef 0.2.0. A string ID containing a height does not imply numeric order. Cursors are revision-bound; restart the range if Chef returns `CURSOR_INVALIDATED`.
 
 GraphQL reads use a committed snapshot and its checkpoint. Run `serve` separately from `sync --follow` when the application needs queries during ingestion. Long reads and a busy writer still share your database's CPU, memory and storage budget.
 

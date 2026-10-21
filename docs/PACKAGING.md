@@ -144,3 +144,7 @@ exclude local results, credentials, databases and generated runtime state. MIT
 licenses travel in both npm packages; generated Rust protobuf material retains
 its separately attributed source notices in the source checkout. No performance,
 full-mainnet, private-scanning or public-deployment claim follows from this gate.
+
+## Chef 0.2.0 candidate
+
+The consumption API candidate adds ordered ranges, revision-bound cursors and cached status. It passed isolated tarball installation and the tests recorded in [the consumption verification](CHEF_CONSUMPTION_VERIFICATION.json). Publication is awaiting npm account verification; the registry and hosted services remain at their verified versions above until that completes.

@@ -1,0 +1,86 @@
+{
+  "recorded_date": "2026-10-21",
+  "chef_version": "0.2.0",
+  "release_state": "candidate-awaiting-npm-verification",
+  "source_base_commit": "f76077a",
+  "local_suite": {
+    "tests": 127,
+    "passed": 86,
+    "failed": 0,
+    "skipped": 41,
+    "node": "24.18.0"
+  },
+  "postgres_suite": {
+    "tests": 38,
+    "passed": 37,
+    "failed": 0,
+    "skipped": 1,
+    "node": "24.14.0",
+    "postgres": "16.14",
+    "dedicated_disposable_database": true,
+    "aggregate_cpu_quota": 3,
+    "aggregate_memory_mib": 8192,
+    "worker_cpu_quota": 0.5,
+    "worker_memory_mib": 1024
+  },
+  "skip_note": "Native scanner tests were not rerun without their executable. PostgreSQL tests used synthetic chain fixtures, not a live shielded receipt latency measurement.",
+  "web_pagination_tests_passed": 5,
+  "docs_pages_checked": 44,
+  "reviews": {
+    "standards": "PASS after corrections",
+    "intent": "PASS after corrections"
+  },
+  "package_install": {
+    "version": "0.2.0",
+    "platform": "win32",
+    "node": "v24.18.0",
+    "isolated_install": true,
+    "cli_version": true,
+    "offline_numeric_init": true,
+    "generated_typecheck": true,
+    "consumption_types": true,
+    "standalone_types_option": "node",
+    "integrity": "sha512-A5R3nL75KmonUAbGa1WTosXNgzkNYAmV3j9I5tufXqsPfRVMhYMEa2SX/mfGPA/BTtIMe6VSFMnDRdzglVaj+Q=="
+  },
+  "postgres_log_sha256": "3d0f6ed4c79c5377a677355d852309e3b71c7a2cccfe4cb94df935aa291f254b",
+  "cleanup": {
+    "disposable_database_dropped": true,
+    "disposable_role_dropped": true,
+    "private_environment_removed": true,
+    "resource_guard": "PASS",
+    "production_services_restarted": false
+  },
+  "live_latency_results_version": "0.1.3; unchanged and separate from these API correctness tests",
+  "source_lf_sha256": {
+    "packages/chef/src/admission.ts": "485f3620660136b46c2b24f74bc9b5ed7f5657e75b1b2055091104335a7cb7f6",
+    "packages/chef/src/cli-output.ts": "2594b1a699c442569c15b828b2a7371e098e08e73b4445376b3e98ace975e1d6",
+    "packages/chef/src/cli.ts": "4d989d3c9751a40067dca582dcab4edf5d05aacfc1ef92980f1cc2104b483a40",
+    "packages/chef/src/consumption.ts": "11b48195a91a99face1fa285802dd6c05248e4aceffe39e347e69045a4baf244",
+    "packages/chef/src/graphql.ts": "456d21a682d8f0adc3fbd010786527e8b8c945d57b15d3f4cb2f1a696e49545a",
+    "packages/chef/src/index.ts": "1be3423f85584ad08e7ebaa719437ec3e7f304014564eb98bc589b09fdfc9384",
+    "packages/chef/src/init.ts": "0023787cec6de3844013874c6d7b30055a2fcc808c0ac6261bc5daa2820a7cf5",
+    "packages/chef/src/read-receipts.ts": "a134bea4b8bf5ce71d1c8cd6e026d3710790d12e9b3bbceea4fd20d88daddfc5",
+    "packages/chef/src/receipts.ts": "fbe46a22b8a40135b2c4a15143b44dc80559d28420ca4e2aaa2f02acebf7bb2a",
+    "packages/chef/src/runtime.ts": "51c5b135da94b975013a1fb6488863a6c91afd84de8172c4dbf07cfd1e9b9a22",
+    "packages/chef/src/scaffold.ts": "63a31754ecd6b67d75903fa5def153b553e1f1ad91a5d28b73069b7041090ca4",
+    "packages/chef/src/schema.ts": "59aabc76bb5879edcb9c93d13712c3d5c225e20c5b0597ad8baada89a6713e38",
+    "packages/chef/src/store.ts": "09636635fb4bd4a4c7666feb7c7a2d26d0336627872921ae27d15ead35f42398",
+    "packages/chef/src/types.ts": "235bda9cdd8b93c65277fa9c9f5ca21cb923ea470e4ff6634665af2d02ed913e"
+  },
+  "dist_sha256": {
+    "admission.js": "8c26b71c78cc34be94335a9c1daf3ad4cce778754267b5f7f797ca84b3811674",
+    "cli-output.js": "eeafea223236c0aa26504a5cccd5231cf4685889bbe4e1ba6f1b7d28097970f6",
+    "cli.js": "654a007b4dc9c8125234261d7d5bb12c5e5e3ce1e3824a1349b4123d67b94b95",
+    "consumption.js": "8febd7b21229a644c2cb989f02a230cdd8a6e3a9aee2ef8966b93770363841c0",
+    "graphql.js": "bb955723555537404213de9861936a74f56bcbf1fa1f8ad8c3c432ef47035329",
+    "index.js": "f7560b964a859e464b38a84e20d2ce425d1c5078ceb980a269522610c4e4a251",
+    "init.js": "db0a4c2d896841ecb948d3b0968fa64f622f7632991ae33ea114fd1e63955c47",
+    "read-receipts.js": "588364cc93a74ebe2db4da1db07c2983488f76f8077e1e03768a2ff9ed35c80a",
+    "receipts.js": "7bd9bc655185ff393392f3a0456d38695a3a877c9f287e9357a10ef39b67b8e4",
+    "runtime.js": "f01ac6c212780f4b9ef3fb4b3240060eb4eb564549e4027f15660abd63380b11",
+    "scaffold.js": "f2d54465d718dff15e34ee2ea2d789ae070e12d412af68a5ed5efe86eaa6b9eb",
+    "schema.js": "84b512bb04f2f2bca875b01d816af73a0abbdc69c5b60e7391f970783b4f54a4",
+    "store.js": "17b8f254bbff033e180f81b9ea78bbc5aef46f62b90666289568b27cda9b1d4e",
+    "types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+  }
+}

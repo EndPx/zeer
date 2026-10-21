@@ -2,11 +2,12 @@ import { createServer, type IncomingMessage, type Server } from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import { buildSchema, execute, GraphQLScalarType, Kind, parse, validate, visit, type DocumentNode, type ExecutionResult } from "graphql";
 import { decodeEntity, encodeEntity } from "./schema.js";
+import { CursorInvalidatedError, QueryInputError, consumptionNames, decodeCursor, encodeCursor, orderedInt, queryShape, validateSelection } from "./consumption.js";
 import { StoreNotReadyError } from "./store.js";
 import { AdmissionError, RequestAdmission } from "./admission.js";
-import type { ChefStore, Model, ReadView } from "./types.js";
+import type { ChefStore, Model, ReadView, EntityRange, EntityOrder } from "./types.js";
 
-class InputError extends Error {}
+class InputError extends QueryInputError {}
 class UnreadyError extends Error {}
 const MAX_BODY = 65536;
 const MAX_RESPONSE = 2 * 1024 * 1024;
@@ -62,11 +63,14 @@ function readBody(request: IncomingMessage, signal: AbortSignal): Promise<Buffer
 
 export function createChefServer({ store, model, token }: { store: ChefStore; model: Model; token: string }): Server {
   if (typeof token !== "string" || Buffer.byteLength(token) < 16 || Buffer.byteLength(token) > 4096 || /[\r\n]/.test(token)) throw new Error("Chef API token must contain 16 to 4096 bytes without line breaks");
+  const names = consumptionNames(model);
   const definition = Object.values(model.entities).map((entity) => {
     const fields = Object.values(entity.fields);
-    return `type ${entity.name} { ${fields.map((f) => `${f.name}: ${f.scalar}${f.required ? "!" : ""}`).join(" ")} }\ninput ${entity.name}Filter { ${fields.map((f) => `${f.name}: ${f.scalar}`).join(" ")} }\ntype ${entity.name}Page { items: [${entity.name}!]! nextCursor: ID }`;
+    const ints = fields.filter(f => orderedInt(model, entity.name, f.name));
+    const rangeType = ints.length ? `input ${names.entities[entity.name]!.range} { ${ints.map(f=>`${f.name}: ${names.bounds}`).join(" ")} }` : "";
+    return `${rangeType}\ninput ${names.entities[entity.name]!.order} { id: ${names.direction} ${ints.map(f=>`${f.name}: ${names.direction}`).join(" ")} }\ntype ${entity.name} { ${fields.map((f) => `${f.name}: ${f.scalar}${f.required ? "!" : ""}`).join(" ")} }\ninput ${entity.name}Filter { ${fields.map((f) => `${f.name}: ${f.scalar}`).join(" ")} }\ntype ${entity.name}Page { items: [${entity.name}!]! nextCursor: ID }`;
   }).join("\n");
-  const schema = buildSchema(`scalar BigInt\n${definition}\ntype ChefCheckpoint { height: Int hash: String anchorHash: String status: String! }\ntype Query { _meta: ChefCheckpoint! ${Object.keys(model.entities).map((name) => `${name}ById(id: ID!): ${name} ${name}List(first: Int = 25, after: ID, where: ${name}Filter): ${name}Page!`).join(" ")} }`);
+  const schema = buildSchema(`scalar BigInt\nenum ${names.direction} { ASC DESC }\ninput ${names.bounds} { gte: Int lte: Int }\n${definition}\ntype ChefCheckpoint { height: Int hash: String anchorHash: String status: String! project: String generation: String revision: String lastCommitAt: String }\ntype Query { _meta: ChefCheckpoint! ${Object.keys(model.entities).map((name) => `${name}ById(id: ID!): ${name} ${name}List(first: Int = 25, after: ID, where: ${name}Filter, ${Object.keys(model.entities[name]!.fields).some(f=>orderedInt(model,name,f)) ? `range: ${names.entities[name]!.range},` : ""} orderBy: [${names.entities[name]!.order}!]): ${name}Page!`).join(" ")} }`);
   const bigint = schema.getType("BigInt") as GraphQLScalarType;
   bigint.coerceOutputValue = bigintValue;
   bigint.coerceInputValue = bigintValue;
@@ -75,15 +79,33 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
     return bigintValue(node.value);
   };
   const root: Record<string, unknown> = Object.create(null);
-  root._meta = (_args: unknown, view: ReadView) => view.checkpoint;
+  root._meta = (_args: unknown, view: ReadView) => ({ ...view.checkpoint, ...(view.consumption ? { project: view.consumption.project, generation: view.consumption.generation, revision: view.consumption.revision, lastCommitAt: view.consumption.lastCommitAt } : {}) });
   for (const [name, entity] of Object.entries(model.entities)) {
     root[`${name}ById`] = async ({ id }: { id: string }, view: ReadView) => {
       const row = await view.get(name, checkedId(id));
       return row === null ? null : decodeEntity(model, name, row);
     };
-    root[`${name}List`] = async ({ first = 25, after, where }: { first?: number; after?: string | null; where?: Record<string, unknown> | null }, view: ReadView) => {
+    root[`${name}List`] = async ({ first = 25, after, where, range, orderBy }: { first?: number; after?: string | null; where?: Record<string, unknown> | null; range?: Record<string, { gte?: number | null; lte?: number | null } | null> | null; orderBy?: Record<string, "ASC" | "DESC" | null>[] | null }, view: ReadView) => {
       if (!Number.isInteger(first) || first < 1 || first > 100) throw new InputError("first must be between 1 and 100");
-      if (after !== undefined && after !== null) checkedId(after);
+      if (!view.consumption) throw new StoreNotReadyError("blocked");
+      let selectionRange: EntityRange | undefined;
+      if (range != null) {
+        const entries = Object.entries(range);
+        if (entries.length !== 1 || entries[0]![1] === null) throw new InputError("Choose one range field");
+        const [field, bounds] = entries[0]!;
+        if (bounds!.gte === null || bounds!.lte === null) throw new InputError("Range bounds cannot be null");
+        selectionRange = { field, ...bounds! } as EntityRange;
+      }
+      let order: EntityOrder = { field: "id", direction: "ASC" };
+      if (orderBy != null) {
+        if (orderBy.length < 1 || orderBy.length > 2 || orderBy.some(o=>Object.keys(o).length !== 1)) throw new InputError("Choose an ordered Int followed by id, or id alone");
+        const entries = orderBy.map(o=>Object.entries(o)[0]!);
+        const [field, direction] = entries[0]!;
+        if (!direction) throw new InputError("Order direction cannot be null");
+        order = { field, direction };
+        if (entries.length === 2 && (field === "id" || entries[1]![0] !== "id" || entries[1]![1] !== direction)) throw new InputError("id tie-breaker must follow the Int in the same direction");
+      }
+      validateSelection(model, name, selectionRange, order);
       const normalized: Record<string, unknown> = Object.create(null);
       for (const [field, value] of Object.entries(where ?? {})) {
         try {
@@ -92,9 +114,13 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
           normalized[field] = encodeEntity(subset, name, { id: "filter", [field]: value })[field];
         } catch { throw new InputError(`Invalid equality filter: ${field}`); }
       }
-      const rows = await view.list(name, { first: first + 1, ...(after == null ? {} : { after }), where: normalized });
+      const shape = queryShape({ entity: name, where: normalized, range: selectionRange ?? null, order });
+      const position = after == null ? undefined : decodeCursor(token, after, view.consumption, shape);
+      if (position && order.field !== "id" && position.value === undefined) throw new CursorInvalidatedError(view.consumption);
+      const rows = await view.list(name, { first: first + 1, ...(position ? { position } : {}), where: normalized, range: selectionRange, order });
       const items = rows.slice(0, first).map((row) => decodeEntity(model, name, row));
-      return { items, nextCursor: rows.length > first ? rows[first - 1]!.id : null };
+      const last = rows[first - 1];
+      return { items, nextCursor: rows.length > first && last ? encodeCursor(token, view.consumption, shape, { id: last.id, ...(order.field === "id" ? {} : { value: last[order.field] as number }) }) : null };
     };
   }
   const expected = Buffer.from(`Bearer ${token}`);
@@ -116,8 +142,9 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
     const fail = (status: number, message: string) => send(status, { errors: [{ message }] });
     const provided = Buffer.from(request.headers.authorization ?? "");
     if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) { request.resume(); fail(401, "Unauthorized"); return; }
-    if (request.url !== "/graphql" || request.method !== "POST") { request.resume(); fail(404, "Use POST /graphql"); return; }
-    if (!(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) { request.resume(); fail(400, "Content-Type must be application/json"); return; }
+    const statusRequest = request.url === "/status" && request.method === "GET";
+    if (!statusRequest && (request.url !== "/graphql" || request.method !== "POST")) { request.resume(); fail(404, "Use POST /graphql or GET /status"); return; }
+    if (!statusRequest && !(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) { request.resume(); fail(400, "Content-Type must be application/json"); return; }
     request.pause();
     const cancellation = new AbortController();
     const cancel = () => cancellation.abort(new Error("Request interrupted"));
@@ -152,6 +179,11 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
     response.once("finish", finishResponse); response.once("close", finishResponse);
     if (response.destroyed || response.writableFinished) finishResponse();
     try {
+      if (statusRequest) {
+        request.resume();
+        if (!store.consumptionStatus) { fail(503, "Consumption metadata is unavailable"); return; }
+        send(200, await store.consumptionStatus()); return;
+      }
       let body: unknown;
       try { body = JSON.parse((await readBody(request, cancellation.signal)).toString("utf8")); } catch (error) { throw error instanceof InputError ? error : new InputError("Invalid JSON body"); }
       if (!body || typeof body !== "object" || Array.isArray(body)) throw new InputError("Expected a GraphQL request object");
@@ -184,7 +216,14 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
         return await execute({ schema, document, rootValue: root, contextValue: view, variableValues: payload.variables as Record<string, unknown> | undefined, operationName: payload.operationName as string | undefined });
       });
       if (result.errors?.length) {
-        if (result.errors.every((error) => !error.path || error.originalError instanceof InputError)) fail(400, "Invalid query arguments");
+        const invalidated = result.errors.find(error => error.originalError instanceof CursorInvalidatedError)?.originalError as CursorInvalidatedError | undefined;
+        if (invalidated) {
+          const { project, generation, revision, checkpoint } = invalidated.current;
+          send(409, { errors: [{ message: invalidated.message, extensions: { code: invalidated.code, recovery: "RESTART_WITHOUT_CURSOR", project, generation, revision, checkpoint } }] });
+          return;
+        }
+        if (result.errors.some(error=>error.originalError instanceof StoreNotReadyError)) throw new StoreNotReadyError("blocked");
+        if (result.errors.every((error) => !error.path || error.originalError instanceof QueryInputError)) fail(400, "Invalid query arguments");
         else fail(500, "Query execution failed");
       } else send(200, result);
     } catch (error) {

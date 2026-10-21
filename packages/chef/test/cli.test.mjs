@@ -275,3 +275,15 @@ context.entities.set("PublicTransaction", { id: "tx", minedHeight: 1, version: 4
   assert.equal(second.status, 0, second.stderr);
   assert.equal(await readFile(result.output, "utf8"), text);
 });
+
+
+test("finite sync caches unavailable preflight observations without another source request", async t => {
+ const {config}=await fixture(t);await withCliEnvironment(t);
+ for(const fail of [false,true]) {
+  const observations=[];let reads=0;
+  const store={checkpoint:async()=>({height:1,hash:"a".repeat(64),anchorHash:"b".repeat(64),status:"ready"}),acquire:async()=>{},close:async()=>{},markReconciling:async()=>{},recordSourceObservation:async o=>observations.push(o)};
+  const client={getHeight:async()=>{reads++;if(fail)throw new PrepError("unavailable",503);return {network:"mainnet",payload_kind:"full-v1",ready:false,archive_height:null,indexed_height:null,source_height:null,source_observed_at:null};}};
+  await assert.rejects(main(["sync","--config",config,"--json"],{store,client,write:()=>{}}));
+  assert.equal(reads,1);assert.deepEqual(observations,[{status:"unavailable",prepIndexedHeight:null,sourceObservedHeight:null,sourceObservedAt:null}]);
+ }
+});

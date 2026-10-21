@@ -79,8 +79,10 @@ existing semantics. BigInt values remain strings in PostgreSQL/GraphQL and
 `bigint` in handlers; no floating-point or numeric cast is introduced.
 
 With equality fixed on the indexed field, the second index key preserves the
-existing ID cursor order. This adds no range filtering, numerical BigInt ordering,
-height ordering, text search, compound-field declaration or query hint. The
+existing ID cursor order. Chef 0.2.0 also uses this index for bounded ranges and deterministic ordering on
+required Int fields, followed by ID in the same direction. Numerical BigInt
+ordering, text search, compound-field declaration and query hints remain unsupported.
+See [the consumption API contract](CHEF_CONSUMPTION_API.md). The
 planner chooses whether to use an index, and low-selectivity filters may still
 benefit little or use another plan.
 

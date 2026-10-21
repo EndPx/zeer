@@ -93,6 +93,8 @@ test("error guidance is fixed and never echoes third-party messages or arbitrary
   assert.equal(cliFailure(new PrepError(secret, 401)).error.code, "PREP_UNAUTHORIZED");
   assert.equal(cliFailure(new ReorgError()).error.code, "SOURCE_CHANGED_DURING_REPLAY");
   assert.equal(cliFailure({ code: "42P01", message: secret }).error.code, "MIGRATION_REQUIRED");
+  assert.equal(cliFailure(new Error("Chef consumption migration required; stop writers and run migrate")).error.code, "MIGRATION_REQUIRED");
+  assert.equal(cliFailure(new Error("Stop the project writer before consumption migration")).error.code, "WRITER_ALREADY_ACTIVE");
   assert.equal(cliFailure(new Error("Chef project identity mismatch; use a new project namespace")).error.code, "PROJECT_IDENTITY_MISMATCH");
   assert.match(cliFailure(null, "REBUILD_REQUIRED").help, /fresh project name/);
 });

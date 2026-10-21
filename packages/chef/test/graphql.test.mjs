@@ -8,17 +8,18 @@ import { parseModel } from "../dist/schema.js";
 import { StoreNotReadyError } from "../dist/store.js";
 
 const token = "chef-test-token-0123456789";
-const model = parseModel("type Payment { id: ID! amount: BigInt! height: Int! memo: String }");
+const model = parseModel("type Payment { id: ID! amount: BigInt! height: Int! @index memo: String }");
 const checkpoint = { height: 42, hash: "abc", anchorHash: "start", status: "ready" };
 async function fixture(t, overrides = {}) {
   const calls = [];
   const rows = ["a", "b", "c"].map((id) => ({ id, amount: "9007199254740993123", height: 42, memo: null }));
   const view = {
     checkpoint: { ...checkpoint },
+    consumption: { project:"test", generation:"generation-1", revision:"1", checkpoint:{...checkpoint}, lastCommitAt:null, source:{status:"unknown",checkedAt:null,prepIndexedHeight:null,sourceObservedHeight:null,sourceObservedAt:null} },
     async get(name, id) { calls.push(["get", name, id]); return rows.find((r) => r.id === id) ?? null; },
     async list(name, options) {
       calls.push(["list", name, options]);
-      return rows.filter((row) => (!options.after || row.id > options.after) && Object.entries(options.where ?? {}).every(([key, value]) => row[key] === value)).slice(0, options.first);
+      return rows.filter((row) => (!options.position || row.id > options.position.id) && Object.entries(options.where ?? {}).every(([key, value]) => row[key] === value)).slice(0, options.first);
     },
     ...overrides.view,
   };
@@ -191,11 +192,12 @@ test("GraphQL shares one read view, returns exact integers and stable ID paginat
   const { request, calls } = await fixture(t);
   const first = await request('{ PaymentList(first: 2) { items { id amount } nextCursor } PaymentById(id:"a") { height } _meta { height hash status } }');
   assert.equal(first.status, 200);
-  assert.deepEqual(first.body.data.PaymentList, { items: [{id:"a",amount:"9007199254740993123"},{id:"b",amount:"9007199254740993123"}], nextCursor:"b" });
+  assert.deepEqual(first.body.data.PaymentList.items, [{id:"a",amount:"9007199254740993123"},{id:"b",amount:"9007199254740993123"}]);
+  assert.match(first.body.data.PaymentList.nextCursor,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
   assert.deepEqual(first.body.data._meta, {height:42,hash:"abc",status:"ready"});
   assert.equal(calls.filter(([kind]) => kind === "read").length, 1);
   assert.equal(calls.find(([kind]) => kind === "list")[2].first, 3);
-  const second = await request('query($after: ID!) { PaymentList(first: 2, after: $after) { items { id } nextCursor } }', { payload:{variables:{after:"b"}} });
+  const second = await request('query($after: ID!) { PaymentList(first: 2, after: $after) { items { id } nextCursor } }', { payload:{variables:{after:first.body.data.PaymentList.nextCursor}} });
   assert.deepEqual(second.body.data.PaymentList, {items:[{id:"c"}], nextCursor:null});
 });
 

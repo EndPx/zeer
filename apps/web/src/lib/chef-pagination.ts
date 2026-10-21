@@ -13,7 +13,7 @@ export function chefExampleCursor(query: string, result: unknown, after?: string
   const page = data.BlockSummaryList;
   if (!page || typeof page !== "object" || !("nextCursor" in page)) return null;
   const cursor = page.nextCursor;
-  return typeof cursor === "string" && cursor.length > 0 && cursor.length <= 256 ? cursor : null;
+  return typeof cursor === "string" && cursor.length > 0 && cursor.length <= 2048 ? cursor : null;
 }
 
 export function chefResponseEmpty(result: unknown): boolean {

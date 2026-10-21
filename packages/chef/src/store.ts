@@ -1,8 +1,10 @@
 import pg, { type PoolClient } from "pg";
+import { randomUUID } from "node:crypto";
+import { validateSelection } from "./consumption.js";
 import { encodeEntity, decodeEntity, queryIndexes } from "./schema.js";
-import type { ChefStore, Checkpoint, EntityAccess, PublicBlock, ReadView, StoredEntity, StoreOptions } from "./types.js";
+import type { ChefStore, Checkpoint, EntityAccess, PublicBlock, ReadView, StoredEntity, StoreOptions, ConsumptionStatus, SourceObservation } from "./types.js";
 
-type State = { fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reconcile_kind?: Checkpoint["reconcileKind"]; reorg_window: number; undo_floor: number };
+type State = { generation?: string; data_revision?: string; last_commit_at?: Date | null; source_observation?: ConsumptionStatus["source"]; fingerprint: string; model: string; network: string; start_height: number; height: number | null; hash: string | null; anchor_hash: string | null; status: Checkpoint["status"]; reconcile_kind?: Checkpoint["reconcileKind"]; reorg_window: number; undo_floor: number };
 const MAX_MUTATIONS = 10_000;
 const MAX_CACHE_ENTRIES = 10_000;
 const MAX_CACHE_BYTES = 16 * 1024 * 1024;
@@ -54,7 +56,12 @@ export class PostgresStore implements ChefStore {
     }
     if (!allowLegacy && (!Number.isInteger(value.undo_floor) || value.undo_floor < value.start_height - 1
       || value.undo_floor > (value.height ?? value.start_height - 1))) throw new Error("Chef state migration required; run migrate before restarting this version");
+    if (!allowLegacy && (!value.generation || !/^(0|[1-9][0-9]*)$/.test(value.data_revision ?? "") || !value.source_observation)) throw new Error("Chef consumption migration required; stop writers and run migrate");
     return value;
+  }
+  private consumptionOf(state: State): ConsumptionStatus {
+    return { project: this.options.project, generation: state.generation!, revision: state.data_revision!, checkpoint: this.checkpointOf(state),
+      lastCommitAt: state.last_commit_at?.toISOString() ?? null, source: state.source_observation! };
   }
   private checkpointOf(state: State): Checkpoint {
     return { height: state.height, hash: state.hash, anchorHash: state.anchor_hash, status: state.status, undoFloor: state.undo_floor,
@@ -77,7 +84,7 @@ export class PostgresStore implements ChefStore {
         const marker = await client.query<{ relation: string | null }>("SELECT to_regclass($1)::text AS relation", [`${this.namespace}.chef_owned_namespace`]);
         if (!marker.rows[0]?.relation) throw new Error("Refusing existing unmarked database namespace");
         const version = await client.query(`SELECT version FROM ${this.sql}.chef_owned_namespace WHERE singleton = true`);
-        if (version.rows[0]?.version !== 1) throw new Error("Unsupported Chef namespace version");
+        if (![1, 2].includes(version.rows[0]?.version)) throw new Error("Unsupported Chef namespace version");
         await this.state(client, false, true);
       } else {
         await client.query(`CREATE SCHEMA ${this.sql}`);
@@ -97,6 +104,17 @@ export class PostgresStore implements ChefStore {
       await client.query(`ALTER TABLE ${this.sql}.state ADD COLUMN IF NOT EXISTS undo_floor bigint`);
       await client.query(`UPDATE ${this.sql}.state SET undo_floor=CASE WHEN height IS NULL THEN start_height-1 ELSE GREATEST(start_height-1,height-reorg_window,COALESCE((SELECT MIN(height) FROM ${this.sql}.blocks),height)) END WHERE undo_floor IS NULL`);
       await client.query(`ALTER TABLE ${this.sql}.state ALTER COLUMN undo_floor SET NOT NULL`);
+      const current = await this.state(client, false, true);
+      if (!current.generation) {
+        const writer = await client.query<{ locked: boolean }>("SELECT pg_try_advisory_xact_lock(hashtextextended($1, 0)) AS locked", [this.namespace]);
+        if (!writer.rows[0]?.locked) throw new Error("Stop the project writer before consumption migration");
+      }
+      await client.query(`ALTER TABLE ${this.sql}.state ADD COLUMN IF NOT EXISTS generation text NOT NULL DEFAULT '${randomUUID()}', ADD COLUMN IF NOT EXISTS data_revision bigint NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS last_commit_at timestamptz, ADD COLUMN IF NOT EXISTS source_observation jsonb NOT NULL DEFAULT '{"status":"unknown","checkedAt":null,"prepIndexedHeight":null,"sourceObservedHeight":null,"sourceObservedAt":null}'::jsonb`);
+      // The database increments the revision even if an older writer is resumed.
+      // Rollback then replay to the same height/hash cannot restore an old cursor.
+      await client.query(`CREATE OR REPLACE FUNCTION ${this.sql}.advance_revision() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.height IS DISTINCT FROM OLD.height OR NEW.hash IS DISTINCT FROM OLD.hash THEN NEW.data_revision := OLD.data_revision + 1; NEW.last_commit_at := clock_timestamp(); END IF; RETURN NEW; END $$`);
+      await client.query(`CREATE OR REPLACE TRIGGER chef_revision BEFORE UPDATE OF height,hash ON ${this.sql}.state FOR EACH ROW EXECUTE FUNCTION ${this.sql}.advance_revision()`);
+      await client.query(`UPDATE ${this.sql}.chef_owned_namespace SET version=2 WHERE singleton=true`);
       for (const { name, entity, field } of this.indexes) {
         // Descriptor names are validated even for models supplied programmatically.
         // Native JSONB equality preserves scalar/null semantics and the ID cursor.
@@ -142,6 +160,30 @@ export class PostgresStore implements ChefStore {
     try { return await fn(client, await this.state(client)); } finally { client.release(); }
   }
   async checkpoint(): Promise<Checkpoint> { return this.inspect(async (_client, state) => this.checkpointOf(state)); }
+  async consumptionStatus(): Promise<ConsumptionStatus> {
+    this.ensureOpen();
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      await client.query("SET LOCAL statement_timeout = 5000");
+      const result = this.consumptionOf(await this.state(client));
+      await client.query("COMMIT");
+      return result;
+    } catch (error) { await client.query("ROLLBACK").catch(() => {}); throw error; }
+    finally { client.release(); }
+  }
+  async recordSourceObservation(observation: SourceObservation): Promise<void> {
+    if (!["available", "unavailable"].includes(observation.status)) throw new Error("Invalid source status");
+    for (const value of [observation.prepIndexedHeight, observation.sourceObservedHeight]) {
+      if (value !== null && (!Number.isInteger(value) || value < 0 || value > 0xffffffff)) throw new Error("Invalid observed height");
+    }
+    if (observation.sourceObservedAt !== null && (!Number.isSafeInteger(observation.sourceObservedAt) || observation.sourceObservedAt < 0)) throw new Error("Invalid source observation time");
+    await this.write(async client => {
+      await this.state(client);
+      const value = observation.status === "unavailable" ? { status: "unavailable", prepIndexedHeight: null, sourceObservedHeight: null, sourceObservedAt: null } : observation;
+      await client.query(`UPDATE ${this.sql}.state SET source_observation=$1::jsonb || jsonb_build_object('checkedAt',clock_timestamp()) WHERE singleton=true`, [JSON.stringify(value)]);
+    });
+  }
   async blockHash(height: number): Promise<string | null> {
     return this.inspect(async (client, state) => {
       if (height === this.options.startHeight - 1) return state.anchor_hash;
@@ -300,7 +342,7 @@ export class PostgresStore implements ChefStore {
       } finally { active = false; }
   }
 
-  private async status(status: Checkpoint["status"]): Promise<void> {
+  private async setStatus(status: Checkpoint["status"]): Promise<void> {
     await this.write(async client => {
       await this.state(client);
       await client.query(`UPDATE ${this.sql}.state SET status=$1,reconcile_kind=CASE WHEN $1='ready' THEN 'unknown' ELSE reconcile_kind END WHERE singleton=true`, [status]);
@@ -312,8 +354,8 @@ export class PostgresStore implements ChefStore {
       await client.query(`UPDATE ${this.sql}.state SET reconcile_kind=CASE WHEN status='reconciling' AND reconcile_kind IN ('reorg','unknown') THEN reconcile_kind ELSE $1 END,status='reconciling' WHERE singleton=true`, [kind]);
     });
   }
-  async markReady(): Promise<void> { await this.status("ready"); }
-  async markBlocked(): Promise<void> { await this.status("blocked"); }
+  async markReady(): Promise<void> { await this.setStatus("ready"); }
+  async markBlocked(): Promise<void> { await this.setStatus("blocked"); }
   async rollback(height: number, hash: string): Promise<void> {
     if (!Number.isInteger(height) || !hashPattern.test(hash)) throw new Error("Invalid rollback ancestor");
     await this.write(async client => {
@@ -361,6 +403,7 @@ export class PostgresStore implements ChefStore {
       if (state.status !== "ready") throw new StoreNotReadyError(state.status);
       const view: ReadView = {
         checkpoint: this.checkpointOf(state),
+        consumption: this.consumptionOf(state),
         get: async (entity, id) => {
           check(entity); this.id(id);
           return (await client.query<{ data: StoredEntity }>(`SELECT data FROM ${this.sql}.entities WHERE entity=$1 AND id=$2`, [entity, id])).rows[0]?.data ?? null;
@@ -370,6 +413,27 @@ export class PostgresStore implements ChefStore {
           if (!Number.isInteger(options.first) || options.first < 1 || options.first > 101) throw new Error("first must be 1..101");
           const values: unknown[] = [entity];
           const clauses = ["entity=$1"];
+          validateSelection(this.options.model, entity, options.range, options.order);
+          const order = options.order ?? { field: "id", direction: "ASC" };
+          const expr = order.field === "id" ? "id" : `(data -> '${order.field}')`;
+          const comparison = order.direction === "ASC" ? ">" : "<";
+          if (options.after !== undefined && (options.position || order.field !== "id" || order.direction !== "ASC")) throw new Error("Legacy after is incompatible with ordered pagination");
+          if (options.position) {
+            this.id(options.position.id);
+            if (order.field === "id") { values.push(options.position.id); clauses.push(`id ${comparison} $${values.length}`); }
+            else {
+              const value = options.position.value;
+              if (!Number.isInteger(value) || value! < -2147483648 || value! > 2147483647) throw new Error("Invalid cursor position");
+              values.push(JSON.stringify(value), options.position.id);
+              clauses.push(`(${expr},id) ${comparison} ($${values.length-1}::jsonb,$${values.length}::text COLLATE "C")`);
+            }
+          }
+          if (options.range) {
+            for (const [bound, op] of [["gte", ">="], ["lte", "<="]] as const) {
+              const value = options.range[bound];
+              if (value !== undefined) { values.push(JSON.stringify(value)); clauses.push(`(data -> '${options.range.field}') ${op} $${values.length}::jsonb`); }
+            }
+          }
           if (options.after !== undefined) { this.id(options.after); values.push(options.after); clauses.push(`id > $${values.length}`); }
           for (const [field, value] of Object.entries(options.where ?? {})) {
             const definition = this.options.model.entities[entity]?.fields[field];
@@ -384,7 +448,7 @@ export class PostgresStore implements ChefStore {
             clauses.push(`data -> $${values.length - 1}::text = $${values.length}::jsonb`);
           }
           values.push(options.first);
-          return (await client.query<{ data: StoredEntity }>(`SELECT data FROM ${this.sql}.entities WHERE ${clauses.join(" AND ")} ORDER BY id ASC LIMIT $${values.length}`, values)).rows.map(row => row.data);
+          return (await client.query<{ data: StoredEntity }>(`SELECT data FROM ${this.sql}.entities WHERE ${clauses.join(" AND ")} ORDER BY ${expr} ${order.direction}${order.field === "id" ? "" : `, id ${order.direction}`} LIMIT $${values.length}`, values)).rows.map(row => row.data);
         },
       };
       const result = await handler(view);
