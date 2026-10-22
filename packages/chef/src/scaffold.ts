@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { applyTemplate, validateTemplate } from "./scaffold-templates.js";
 import type { StarterTemplate } from "./scaffold-templates.js";
 import { ScaffoldError } from "./scaffold-error.js";
+import { deploymentFiles } from "./deployment.js";
 export { ScaffoldError } from "./scaffold-error.js";
 
 export function validateProjectName(project: string): void {
@@ -33,6 +34,13 @@ POSTGRES_PASSWORD=${secret ? password : "REPLACE_WITH_RANDOM_PASSWORD"}
 DATABASE_URL=postgresql://chef:${secret ? password : "REPLACE_WITH_RANDOM_PASSWORD"}@127.0.0.1:39472/chef
 CHEF_API_TOKEN=${secret ? token : "REPLACE_WITH_AT_LEAST_16_RANDOM_BYTES"}
 CHEF_URL=http://127.0.0.1:39370
+# Container runtime uses its internal postgres host and this database name.
+CHEF_DATABASE_NAME=chef
+CHEF_UID=1000
+CHEF_GID=1000
+CHEF_HEALTH_MAX_AGE_SECONDS=60
+CHEF_POSTGRES_PORT=39472
+CHEF_API_PORT=39370
 `;
   const launch = "node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js";
   const files: Record<string, string> = {
@@ -82,7 +90,7 @@ services:
       POSTGRES_USER: chef
       POSTGRES_DB: chef
       POSTGRES_PASSWORD: \${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-    ports: ["127.0.0.1:39472:5432"]
+    ports: ["127.0.0.1:\${CHEF_POSTGRES_PORT:-39472}:5432"]
     volumes: [postgres:/var/lib/postgresql/data]
     cpus: 0.5
     mem_limit: 512m
@@ -223,6 +231,16 @@ Codegen and strict typechecking are both needed: Node type stripping does not ty
 `,
   };
   await applyTemplate(files, template, project, startHeight);
+  Object.assign(files, await deploymentFiles(template));
+  const generatedManifest = JSON.parse(files["package.json"]!);
+  for (const action of ["build", "migrate", "check", "up", "stop", "logs", "status"]) {
+    generatedManifest.scripts[`runtime:${action}`] = `node --env-file=.env runtime-control.mjs ${action}`;
+  }
+  generatedManifest.scripts["db:backup"] = "node --env-file=.env backup.mjs backup";
+  generatedManifest.scripts["db:restore"] = "node --env-file=.env backup.mjs restore";
+  files["package.json"] = JSON.stringify(generatedManifest, null, 2) + "\n";
+  files[".gitignore"] += "backups/\n*.dump\n*.dump.*\n";
+  files["README.md"] += "\n## Background runtime and recovery\n\nKeep pnpm-lock.yaml. Run pnpm run runtime:build, then explicitly run\npnpm run runtime:migrate and pnpm run runtime:up. The follower and API run\nas separate containers; runtime:stop retains PostgreSQL and its volume.\nUse runtime:status and runtime:logs to inspect them.\n\nCreate a private backups directory before using db:backup --file NEW_FILE.\nRestore only into a fresh database with db:restore --file FILE --database NEW_DB.\nSwitch database settings only after verifying the restored data. Full commands,\nkey-file ownership and recovery steps: https://zeer.endpx.cloud/docs/chef/self-hosting/.\n";
   try { await mkdir(directory, { mode: 0o700 }); }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EEXIST") throw new ScaffoldError("PROJECT_DIRECTORY_EXISTS");

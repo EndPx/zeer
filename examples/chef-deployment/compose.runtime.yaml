@@ -1,0 +1,66 @@
+# Overlay on compose.yaml. Build and migrate explicitly before runtime:up.
+x-runtime: &runtime
+  image: ${COMPOSE_PROJECT_NAME:-zeer-chef}-runtime:local
+  build:
+    context: .
+    args:
+      INSTALL_SCANNER: "0"
+  user: "${CHEF_UID:-1000}:${CHEF_GID:-1000}"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777"]
+  cpus: 0.5
+  mem_limit: 512m
+  memswap_limit: 512m
+  pids_limit: 64
+  stop_grace_period: 15s
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+x-project-environment: &project-environment
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+  CHEF_DATABASE_NAME: ${CHEF_DATABASE_NAME:-chef}
+  PREP_URL: ${PREP_URL:?Set PREP_URL in .env}
+  PREP_API_TOKEN: ${PREP_API_TOKEN:-}
+  ZEER_ACCOUNT_ID: ${ZEER_ACCOUNT_ID:-inbox}
+  ZEER_KEY_FINGERPRINT: ${ZEER_KEY_FINGERPRINT:-}
+
+services:
+  follower:
+    <<: *runtime
+    command: [follower]
+    environment: *project-environment
+    restart: unless-stopped
+
+  api:
+    <<: *runtime
+    command: [api]
+    # Explicit allowlist: no env_file and no viewing-key path or mount.
+    environment:
+      <<: *project-environment
+      CHEF_API_TOKEN: ${CHEF_API_TOKEN:?Set CHEF_API_TOKEN in .env}
+      CHEF_HEALTH_MAX_AGE_SECONDS: ${CHEF_HEALTH_MAX_AGE_SECONDS:-60}
+    ports: ["127.0.0.1:${CHEF_API_PORT:-39370}:39370"]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, node, healthcheck.mjs]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  migrate:
+    <<: *runtime
+    profiles: [tools]
+    command: [migrate]
+    environment: *project-environment
+    restart: "no"
+
+  check:
+    <<: *runtime
+    profiles: [tools]
+    command: [check]
+    environment: *project-environment
+    restart: "no"

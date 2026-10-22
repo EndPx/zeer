@@ -2,6 +2,42 @@
 
 Updated: 2026-10-22 (Asia/Jakarta).
 
+## Completed feature delivery: generated-project deployment and recovery
+
+The user approved a background deployment recipe, backup/restore proof and a
+walkthrough from real execution. The [delivery contract](docs/CHEF_DEPLOYMENT_PLAN.md)
+defines the matching Chef/launcher 0.5.0 release. Existing hosted namespaces,
+ZeeSwap settlement and a durable change feed are outside this milestone.
+
+- [x] Generate a pinned application image and separate follower/API Compose
+  services with persistent PostgreSQL, explicit migration and read-only checks.
+- [x] Keep viewing keys outside image layers and available only to the shielded
+  follower through an owner-protected read-only mount.
+- [x] Verify stop/restart and namespace backup/restore into a new database,
+  compare checkpoint/entities, then prove indexing can continue.
+- [x] Capture a real terminal walkthrough; update existing self-hosting and
+  quickstart chapters without adding a navigation product.
+- [x] Complete independent review, publish matching package versions, verify
+  registry installation and activate the corresponding docs.
+
+Close this reviewed delivery with one grouped commit/push.
+
+Chef/launcher 0.5.0 are published and anonymous registry bytes match the tested
+candidates. All 178 Linux SDK tests passed; fresh registry installs verified
+three starters and the launcher. Real candidate containers passed public indexing,
+follower-only shielded keys, decoded image scanning and fresh-database recovery.
+The additional registry-locator Docker rebuild was not run after the monitor
+incident; the package and container evidence retain that transport distinction.
+
+The temporary monitor undercounted image storage and later halted the pipeline
+during a stale-inventory cleanup race. These were operational failures. Its
+resources/hooks were retired and the original guard restored. Node/Prep/Chef/web
+and the published memo were verified healthy at 11:30 UTC; the legacy memo
+reader database host was repaired and follower CPU restored to 50%. The 44-page
+docs release is live and browser-verified. See docs/PACKAGING.md for this bounded
+delivery record, including the expensive Prep cold start. No signer, payout or
+hosted namespace upgrade was added.
+
 ## Completed delivery: Chef dev and doctor
 
 The user approved a grouped Chef/launcher 0.4.0 release for the next onboarding
@@ -29,7 +65,7 @@ migrated, and no signer or settlement behavior was added.
 Release acceptance passed: all 156 Linux SDK tests with PostgreSQL and the
 published scanner; Windows 116 passed with 40 environment-specific skips;
 three generated standalone starters recovered from source interruption and
-restart; public testnet blocks 4,528,205–4,528,206 matched Prep. This is bounded
+restart; public testnet blocks 4,528,205â€“4,528,206 matched Prep. This is bounded
 onboarding evidence, not a throughput or funded-payment benchmark.
 
 **Status: Prep supports public historical queries and live node observations. Chef implements public handlers and an opt-in local testnet receipt preview with a native watch-only scanner. Whole-chain Chef execution and production readiness remain unproven. The hosted demo remains public-data only. All benchmark results and detailed proof reports remain local-only; source, methodology and fixtures remain public.**

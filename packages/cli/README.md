@@ -25,7 +25,7 @@ pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init
 Keep an exact version for reproducible automation:
 
 ```sh
-pnpx @zeer-dev/cli@0.4.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json
+pnpx @zeer-dev/cli@0.5.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json
 ```
 
 Generated projects pin their SDK version and retain their own lockfile. Running
@@ -40,6 +40,12 @@ Dev generates types and typechecks first; it does not start Docker or install
 dependencies. Later runs use `pnpm run dev`. Run `pnpm run query` in another
 terminal, and use Ctrl+C to stop both managed processes. The installed project's
 scripts use its pinned Chef dependency rather than a new launcher resolution.
+
+For background operation, new projects include `runtime:build`, explicit
+`runtime:migrate`, and `runtime:up` for separate follower/API containers.
+`runtime:stop` retains PostgreSQL. Follow the
+[self-hosting guide](https://zeer.endpx.cloud/docs/chef/self-hosting/) before
+deploying or restoring a project backup into a fresh database.
 
 [Quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) ·
 [CLI reference](https://zeer.endpx.cloud/docs/chef/cli-commands/)

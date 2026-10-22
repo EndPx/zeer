@@ -167,3 +167,72 @@ lookup and raw mempool lookup. `/transaction` and `/mempool` share the Prep HTTP
 authentication, two active request permits, bounded queue and work deadline.
 They return a visible unavailable response when the optional source cannot be
 verified; archive `/query` remains separate. See [live observation semantics](PUBLIC_SHIELDED.md).
+
+## Generated-project runtime and recovery
+
+The 0.5.0 generated-project recipe reuses the existing Chef process boundaries:
+one `sync --follow` writer and a separate `serve` reader. It does not change the
+database format, project fingerprint or read gate. See the
+[deployment contract](CHEF_DEPLOYMENT_PLAN.md) for the required checks. The
+execution record separates real public testnet indexing from unfunded shielded
+fixtures.
+
+Keep the project's `pnpm-lock.yaml`, schema, configuration and handler files with
+the deployment. Use pnpm 10.21.0 and Node 24.14+ on Linux x86_64 with Docker Compose
+v2. `runtime:build` generates types, checks TypeScript and builds the digest-pinned
+Node 24.14.0 Debian Trixie image. Frozen-lockfile installation rejects disagreement
+between the retained pnpm lockfile and package manifest. The build context excludes
+environment files, keys, private state and dumps. Runtime never installs dependencies.
+
+Use `runtime:migrate` explicitly to initialize a compatible namespace and
+`runtime:check` for the SDK's read-only `status` checks. This is not Doctor and
+does not inspect the local scanner or viewing key. `runtime:up` starts existing images;
+it does not build or migrate. `runtime:stop` retains persistent PostgreSQL data.
+No generated operation deletes a database volume. Do not run dev or another
+follower against the same project while the container writer owns it.
+
+The API binds host loopback on `CHEF_API_PORT` (default 39370); PostgreSQL binds
+loopback on `CHEF_POSTGRES_PORT` (default 39472). Update host `CHEF_URL` or
+`DATABASE_URL` when changing the matching port. Containers retain their internal
+service ports. Container database selection uses `CHEF_DATABASE_NAME`, default `chef`.
+
+The API checks namespace/source state before listening; unavailable sources or a
+reconciling project prevent startup. Let the follower recover and the restart
+policy retry the reader, inspecting logs rather than assuming readiness. Its
+health check reads authenticated cached `/status` metadata with a ready read gate,
+available source observation and maximum age `CHEF_HEALTH_MAX_AGE_SECONDS` (default
+60). It makes no fresh Prep/RPC request. Monitor the writer too and evaluate the
+observation timestamp, checkpoint and lag separately; container health does not
+prove catch-up or network finality.
+
+Shielded deployments grant the protected UFVK file only to the follower through
+a read-only bind mount using the absolute host `ZEER_VIEWING_KEY_FILE`. Set
+`CHEF_UID` / `CHEF_GID` (defaults 1000 / 1000) to match the non-root owner of the
+mode-0600 host file. The API and one-shot tools receive account/fingerprint
+identity but no viewing key or key path. Their status check does not prove key
+readability or note decryption. The database and backup may hold decrypted receipt data; they need their
+own access control. A watch-only receipt does not authorize spending or settlement.
+
+`db:backup --file NEW_FILE` writes a custom-format dump of the configured Chef
+namespace with a checksum/project metadata companion. Keep both files together
+in protected storage. The target is exclusive and failed artifacts remain marked
+incomplete; never infer success from a file's presence alone. Backup needs no key.
+
+`db:restore --file FILE --database NEW_DATABASE` validates the backup's metadata
+and refuses an existing target before creating a fresh database. It never drops
+the source or target automatically. Failure leaves the target for diagnosis; a
+retry must use another fresh name. The archive is a trusted operator input, not
+an untrusted upload endpoint.
+
+Before cutover, confirm successful restore and independently compare the restored
+namespace's project identity, checkpoint and entities against the backup/source
+records with database tools. For exact comparison, stop follower/API before
+recording the source snapshot and taking the dump; keep PostgreSQL running and
+the writer stopped until the backup completes. Compare against that frozen
+reference after the original runtime resumes. Preserve the original database. After verification,
+stop this project's writer and API, then select the restored name through both
+`CHEF_DATABASE_NAME` (containers) and the database component of `DATABASE_URL`
+(host tools). Run the read-only runtime check, start services and compare GraphQL
+results. Continue indexing from the restored checkpoint before retiring the
+original database. An old backup still requires source
+reconciliation and may need a rebuild if the retained recovery window is exceeded.

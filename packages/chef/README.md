@@ -118,6 +118,14 @@ Node 24.14+ is required
 for the validated native TypeScript config path. Use erasable TS syntax.
 
 For a standalone testnet project, use **[Run your own Chef project](https://github.com/EndPx/zeer/blob/main/docs/CHEF_QUICKSTART.md)**.
+
+Generated projects also include a background Docker runtime with separate
+follower and API services. Retain `pnpm-lock.yaml`, run `runtime:build`, start
+PostgreSQL with `db:up`, then run `runtime:migrate` and `runtime:up` explicitly.
+`runtime:stop` retains database state. `db:backup` exports the project namespace;
+`db:restore` only restores into a fresh database. Follow the
+[self-hosting guide](https://zeer.endpx.cloud/docs/chef/self-hosting/) for resource
+limits, local key mounts, health checks and the verified recovery procedure.
 The launcher can scaffold it with `pnpx @zeer-dev/cli init`, or the installed CLI
 can use `zeer-chef init --dir ./my-indexer --project my_indexer --start-height 1000`.
 It creates config, schema, handlers, env files, optional local PostgreSQL and project

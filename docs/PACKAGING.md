@@ -1,6 +1,76 @@
 # Release package verification
 
-## Current release: Chef and launcher 0.4.0
+## Current release: Chef and launcher 0.5.0
+
+`@zeer-dev/chef@0.5.0` and `@zeer-dev/cli@0.5.0` were published on
+22 October 2026. Both anonymous registry downloads matched the audited release
+tarballs, both `latest` tags select 0.5.0, and the launcher pins Chef 0.5.0.
+Prep client remains 0.1.0. The database format and core indexing/query API are
+unchanged from 0.4.0.
+
+```sh
+pnpx @zeer-dev/cli@0.5.0 init
+```
+
+New projects include a pinned Docker image, separate follower/API services,
+explicit migration and status scripts, and namespace backup/restore helpers.
+The [deployment contract](CHEF_DEPLOYMENT_PLAN.md) and
+[self-hosting guide](https://zeer.endpx.cloud/docs/chef/self-hosting/) describe the
+boundaries. Upgrading an existing SDK dependency does not add scaffold files.
+
+Release evidence is retained locally under the 22 October deployment run:
+
+- All 178 Linux SDK tests passed with PostgreSQL and the published native scanner,
+  with no skipped tests. The CLI test suite passed all three tests.
+- Standalone registry installations generated Blank/Public/Shielded starters and
+  passed typechecking. Public/shielded codegen passed; blank correctly refused
+  codegen until an application entity was defined. Repeated init refused to
+  overwrite the project. Refreshed `pnpx @zeer-dev/cli@latest init` selected 0.5.0
+  and recorded public Prep start height 4,528,727.
+- Real public testnet state was backed up at block 4,528,626. A fresh-database
+  restore exactly matched state, entities, blocks, undo and indexes, preserved the
+  original database and continued through block 4,528,627 after explicit cutover.
+  The custom archive was 9,426 bytes, mode 0600, with verified SHA-256 metadata.
+- An unfunded public fixture produced six native-scanned notes: three Sapling,
+  one Orchard and two Ironwood. Only the follower mounted the protected local
+  key; the API had neither its path nor its mount. Both application containers
+  ran non-root with read-only filesystems. This is fixture evidence, not a new
+  funded shielded payment.
+- All saved image layers were decoded before scanning for generated credentials,
+  the fixture viewing key and canaries. The recording contains selected actual
+  commands; its animation is an accelerated edit, not a performance benchmark.
+
+The temporary image accounting initially omitted unpacked containerd storage.
+Its earlier storage PASS was invalidated: the corrected run was approximately
+199 MiB above the 59 GiB safety threshold, below the 60 GiB hard budget. Owned
+resources were cleaned and accounting was corrected before another image build
+was attempted. At 10:41:29 UTC, a separate stale-name race in the temporary
+admission filter triggered `another_zeer_workload_is_running` during cleanup.
+The guard stopped Zeer's node and application services. This was an operational
+test failure. The original guard was restored after the transient resources
+were removed. Fresh verification at 11:30 UTC confirmed all prior services active,
+ready Prep data, a modern header matching the node, the public overview and the
+published memo receipt. The follower CPU limit was restored to 50%. The legacy
+memo reader's database host was repaired after PostgreSQL's container IP changed;
+its credentials, database and projection were preserved.
+Preserve both incidents and the final corrected checks alongside the release
+record; do not describe every initial operational attempt as passing.
+
+The additional Docker rebuild using a registry dependency locator was not run
+after the monitor incident. Container evidence uses the tested local SDK tarball;
+its bytes are identical to the published package. Separate fresh registry SDK
+and launcher installations, all three generated starters and an actual refreshed
+pnpx invocation were verified. Keep that distinction in release claims.
+
+Temporary containers/images/volume/network and admission hooks were removed, the
+original guard was restored byte-for-byte, and the reservation and child-slice
+overrides were stopped/retired. The 44-page docs release was activated with a
+rollback target. Final public browser verification is retained locally.
+
+Package publication does not upgrade hosted namespaces or prove production
+readiness. This delivery did not optimize Prep's full-archive cold start.
+
+## Previous release: Chef and launcher 0.4.0
 
 `@zeer-dev/cli@0.4.0` and `@zeer-dev/chef@0.4.0` were published on
 22 October 2026. The launcher pins the exact Chef version; Prep client remains

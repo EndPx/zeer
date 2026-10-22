@@ -1,0 +1,20 @@
+# Only the follower can read the protected host UFVK. Match its owner's UID/GID.
+services:
+  follower:
+    build:
+      args:
+        INSTALL_SCANNER: "1"
+    environment:
+      ZEER_SCANNER_EXECUTABLE: /opt/zeer-scanner/scanner-v0.1.0-testnet.1/zeer-scanner
+      ZEER_VIEWING_KEY_FILE: /run/secrets/zeer-ufvk
+    volumes:
+      - type: bind
+        source: ${ZEER_VIEWING_KEY_FILE:?Set the absolute protected UFVK file path}
+        target: /run/secrets/zeer-ufvk
+        read_only: true
+        bind:
+          create_host_path: false
+  api:
+    build:
+      args:
+        INSTALL_SCANNER: "1"

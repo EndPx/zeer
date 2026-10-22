@@ -50,6 +50,7 @@ async function recorded(executable, argv, cwd, label, env) {
 }
 
 const tarballs = [];
+const runtimeTemplatePaths=['Dockerfile','.dockerignore','compose.runtime.yaml','compose.shielded.yaml','runtime.mjs','healthcheck.mjs','runtime-control.mjs','backup.mjs'].map(name=>'templates/runtime/'+name);
 const shieldedTemplatePaths = ['schema.graphql', 'consumer.mjs', 'consume.mjs', 'query.mjs', 'query.graphql', 'read-transaction.mjs', 'install-scanner.mjs', 'CONSUMER.md', 'LICENSE'].map(name => `templates/shielded/${name}`);
 for (const name of ['prep-client', 'chef']) {
   const packed = JSON.parse(await recorded('npm', ['pack', '.', '--pack-destination', output, '--json'], join(root, 'packages', name), `pack-${name}`));
@@ -57,10 +58,10 @@ for (const name of ['prep-client', 'chef']) {
   const manifest = packed[0];
   const paths = manifest.files.map(file => file.path);
   const required = name === 'chef' ? ['LICENSE', 'package.json', 'README.md', 'dist/index.js', 'dist/index.d.ts', 'dist/cli.js'] : ['LICENSE', 'package.json', 'README.md', 'src/index.js', 'src/index.d.ts'];
-  if (name === 'chef') required.push(...shieldedTemplatePaths);
+  if (name === 'chef') required.push(...shieldedTemplatePaths,...runtimeTemplatePaths);
   for (const path of required) assert.ok(paths.includes(path), `Missing ${name} package entry: ${path}`);
-  for (const path of paths) assert.ok(['LICENSE', 'package.json', 'README.md'].includes(path) || (name === 'chef' ? /^dist\/[a-z][a-z-]*\.(?:js|d\.ts)$/.test(path) || shieldedTemplatePaths.includes(path) : /^src\/index\.(?:js|d\.ts)$/.test(path)), `Unexpected packaged path: ${path}`);
-  assert.equal(manifest.version, name === 'chef' ? '0.4.0' : '0.1.0', 'Update candidate compatibility contract before changing version');
+  for (const path of paths) assert.ok(['LICENSE', 'package.json', 'README.md'].includes(path) || (name === 'chef' ? /^dist\/[a-z][a-z-]*\.(?:js|d\.ts)$/.test(path) || (shieldedTemplatePaths.includes(path)||runtimeTemplatePaths.includes(path)) : /^src\/index\.(?:js|d\.ts)$/.test(path)), `Unexpected packaged path: ${path}`);
+  assert.equal(manifest.version, name === 'chef' ? '0.5.0' : '0.1.0', 'Update candidate compatibility contract before changing version');
   tarballs.push(join(output, manifest.filename));
 }
 await writeFile(join(consumer, 'package.json'), JSON.stringify({ name: 'zeer-tarball-consumer', private: true, type: 'module' }));
@@ -143,5 +144,5 @@ if (integration) {
   assert.equal(repeated.state, 'complete');
   assert.equal(repeated.blocks, 0);
 }
-await writeFile(join(output, 'acceptance.json'), JSON.stringify({ status: 'PASS', versions: { chef: '0.4.0', prepClient: '0.1.0' }, consumer, project, installedBin: true, strictTypes: true, fixtureIntegration: integration, indexedSchema: indexed, scope: integration ? 'Fixed mainnet fixture replay; not live node or reorg proof' : 'Package installation only; no pipeline evidence' }, null, 2));
+await writeFile(join(output, 'acceptance.json'), JSON.stringify({ status: 'PASS', versions: { chef: '0.5.0', prepClient: '0.1.0' }, consumer, project, installedBin: true, strictTypes: true, fixtureIntegration: integration, indexedSchema: indexed, scope: integration ? 'Fixed mainnet fixture replay; not live node or reorg proof' : 'Package installation only; no pipeline evidence' }, null, 2));
 console.log(JSON.stringify({ status: 'PASS', output, consumer, fixtureIntegration: integration }));

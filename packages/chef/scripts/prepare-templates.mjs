@@ -14,3 +14,8 @@ const sources={
 };
 for(const [name,source]of Object.entries(sources))await copyFile(new URL('../../../'+source,import.meta.url),new URL(name,output));
 console.error(`Prepared ${Object.keys(sources).length} explicit shielded template assets.`);
+const runtime=new URL('../templates/runtime/',import.meta.url);
+await mkdir(runtime,{recursive:true});
+const runtimeNames=['Dockerfile','.dockerignore','compose.runtime.yaml','compose.shielded.yaml','runtime.mjs','healthcheck.mjs','runtime-control.mjs','backup.mjs'];
+for(const name of runtimeNames)await copyFile(new URL('../../../examples/chef-deployment/'+name,import.meta.url),new URL(name,runtime));
+console.error(`Prepared ${runtimeNames.length} explicit deployment template assets.`);

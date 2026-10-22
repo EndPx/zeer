@@ -14,7 +14,7 @@ pnpx @zeer-dev/cli --help
 
 `pnpm dlx @zeer-dev/cli init` is equivalent. npm users can run `npx @zeer-dev/cli@latest init`. The `zeer` launcher uses the matching published Chef CLI, including the same wizard and error handling. The SDK remains `@zeer-dev/chef`; generated projects declare their own exact dependency.
 
-`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.4.0 init` for reproducible scripts. Launcher and Chef versions are published together.
+`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.5.0 init` for reproducible scripts. Launcher and Chef versions are published together.
 
 An existing global `zeer` / `zeer-chef` command remains usable. The commands below show that executable form; prefix them with `pnpx` when using the launcher, for example `pnpx @zeer-dev/cli status --config chef.config.ts`.
 
@@ -175,6 +175,24 @@ Serve authenticated read-only GraphQL; the writer runs separately with `sync` or
 Without an output flag, terminal output is readable and redirected output is JSON. Successful commands exit with code 0; errors return nonzero. Cancelling init returns 130. Logs omit third-party error details that could contain credentials.
 
 The generated scripts load `.env` and work with pnpm or npm. With npm, put forwarded options after an extra separator: `npm run sync -- --to 4522799 --json`. A direct invocation can load the environment with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js status --json`.
+
+## Background runtime and backups
+
+The 0.5.0 starter adds these package scripts to generated projects. They wrap the project's Docker Compose recipe; they are separate from the `zeer` subcommands above. Keep the pnpm lockfile and configure the project before using them.
+
+| Script | Action |
+| --- | --- |
+| `pnpm run runtime:build` | Generate types, typecheck and build the pinned application image |
+| `pnpm run runtime:migrate` | Explicitly initialize a compatible namespace |
+| `pnpm run runtime:check` | Check namespace and source state without reading a viewing key |
+| `pnpm run runtime:up` | Start separate follower/API containers using existing images |
+| `pnpm run runtime:stop` | Stop follower/API and retain PostgreSQL |
+| `pnpm run runtime:status` | Show Compose service state |
+| `pnpm run runtime:logs` | Show the latest follower/API log entries |
+| `pnpm run db:backup --file backups/chef.dump` | Create a new namespace archive and checksum metadata |
+| `pnpm run db:restore --file backups/chef.dump --database chef_restored` | Restore a verified archive into a fresh database |
+
+Use [Self-hosting & backups](/docs/chef/self-hosting/) for database startup, private key mounts, health checks and the required checks before switching to a restored database. Upgrading an existing SDK dependency does not add scaffold files to that project.
 
 ## Troubleshooting
 
