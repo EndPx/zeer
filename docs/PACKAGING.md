@@ -1,12 +1,18 @@
 # Release package verification
 
-The one-time CLI entry point is `@zeer-dev/cli@0.3.0`:
+## Current release: Chef and launcher 0.4.0
+
+`@zeer-dev/cli@0.4.0` and `@zeer-dev/chef@0.4.0` were published on
+22 October 2026. The launcher pins the exact Chef version; Prep client remains
+`0.1.0`. Anonymous registry downloads matched the audited release tarballs.
+
+The one-time CLI entry point is:
 
 ```sh
-pnpx @zeer-dev/cli init
+pnpx @zeer-dev/cli@0.4.0 init
 ```
 
-It contains one executable and pins `@zeer-dev/chef@0.3.0`. The SDK keeps both
+It contains one executable and pins `@zeer-dev/chef@0.4.0`. The SDK keeps both
 legacy executable aliases. The launcher imports Chef's actual CLI entry point
 in the same process, preserving terminal cancellation and sanitized errors.
 Run `npm run test:cli` before publishing a matching launcher/SDK pair. Verify
@@ -17,15 +23,58 @@ An unscoped `zeer` publication was rejected by npm's similar-name policy. Do not
 document `pnpx zeer init` as available. `pnpx @zeer-dev/cli@latest init` selects
 the latest launcher tag subject to pnpm's cache and resolution settings; generated
 projects keep exact SDK dependencies. See the [CLI reference](https://zeer.endpx.cloud/docs/chef/cli-commands/)
-for refresh behavior and the [launcher verification](PNPX_LAUNCHER_VERIFICATION_20261022.json).
+for refresh behavior. The [earlier 0.3.0 launcher verification](PNPX_LAUNCHER_VERIFICATION_20261022.json)
+retains its historical version and results.
 
-The current published npm versions are `@zeer-dev/prep-client@0.1.0` and
-`@zeer-dev/chef@0.3.0`. Chef 0.3.0 adds blank, public-data and shielded-inbox
-templates to guided init. Blank contains no sample model or handler. Shielded
-requires an explicit numeric wallet birthday and keeps viewing keys local. The
-package includes nine explicitly listed scanner/consumer template assets. The
-canonical verifier requires each and rejects unexpected package entries. This
-release does not change the database format or upgrade hosted projects.
+Chef 0.4.0 adds two commands and matching scripts in generated projects:
+
+- `pnpm run doctor` performs bounded, read-only checks of project configuration,
+  source compatibility and coverage, the PostgreSQL namespace, API token, listen
+  port and optional local scanner/key identity. It reports fixed codes and
+  guidance without migrating, changing read gates or uploading viewing keys.
+- `pnpm run dev` generates entity types, runs the installed project's TypeScript
+  compiler when `tsconfig.json` exists, and checks setup. It starts the API before
+  the follower, stops both on cancellation, and stops the peer if a child exits
+  unexpectedly. It does not install dependencies or start Docker. A prepared,
+  compatible namespace is required by default.
+- `pnpm run dev --migrate` explicitly permits the existing compatible migration
+  path when migration is the only blocking diagnostic. It never resets an
+  unmarked or incompatible namespace. With npm, use `npm run dev -- --migrate`.
+
+The release preserves existing project fingerprints, database format,
+canonicality gates and the three init templates. Blank requires an application
+model and handlers before indexing. Shielded requires an explicit numeric wallet
+birthday and protected local viewing-key configuration. The nine listed
+scanner/consumer template assets remain part of the package allowlist.
+
+The release gate includes installed-package checks for public, blank and
+unfunded shielded-fixture projects, real child lifecycle on Windows and Linux,
+missing migration, type errors, port conflicts, source interruption, peer
+failure, cancellation and restart. Keep those observations separate from funded
+or live shielded payment evidence. Publish the audited Chef tarball first, then
+the matching launcher after the registry can resolve its exact dependency.
+Verify downloaded package bytes and fresh registry projects before deploying
+the corresponding docs. npm publication does not migrate hosted namespaces or
+restart their processes.
+
+Release acceptance covered all 156 Linux SDK tests with PostgreSQL and the
+released scanner, three registry-installed starter profiles, compatible
+0.3.0-to-0.4.0 continuation without migration, public testnet source equality,
+and launcher installation on Linux and Windows. Actual pnpx commands used a
+fresh Linux cache; the terminal wizard cancelled without creating a project.
+The shielded starter checks used a public unfunded fixture. They do not measure
+live payment discovery or establish whole-chain execution. Detailed local
+reports remain outside version control; reproducible checks are in
+[dev and doctor acceptance](../benchmarks/chef/dev-doctor/README.md).
+
+## Earlier published releases
+
+The last recorded published baseline on 22 October 2026 was
+`@zeer-dev/prep-client@0.1.0`, `@zeer-dev/chef@0.3.0` and
+`@zeer-dev/cli@0.3.0`. Chef 0.3.0 added blank, public-data and shielded-inbox
+templates to guided init. Its package verification required all nine listed
+scanner/consumer template assets and rejected unexpected package entries. That
+release did not change the database format or upgrade hosted projects.
 
 Chef 0.1.3 introduced guided setup with a `latest` default: one bounded
 Prep metadata read captures the available testnet archive height and persists a

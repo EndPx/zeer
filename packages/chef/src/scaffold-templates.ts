@@ -43,8 +43,9 @@ chef.config.ts. Keep .env private. Configure your own PostgreSQL DATABASE_URL,
 or run \`pnpm run db:up\` for the loopback Docker Compose service. Its port 39472
 must be free; change both compose.yaml and DATABASE_URL if needed.
 
-After defining the model and handlers, run codegen, typecheck and migrate.
-Run \`pnpm run follow\` and \`pnpm run serve\` in separate terminals. Customize
+After defining the model and handlers, run \`pnpm run doctor\`, then
+\`pnpm run dev --migrate\` for the first compatible startup. Dev generates types,
+typechecks, starts the API and follows in one terminal. Customize
 query.graphql and run \`pnpm run query\`. Ctrl+C stops each process; compatible
 restarts resume the checkpoint. Model/handler changes require explicit project
 evolution. \`pnpm run db:stop\` retains the database volume.
@@ -132,8 +133,11 @@ changes require a fresh project namespace or explicit supported evolution.
 
 ## Follow, query and consume
 
-Run \`pnpm run codegen\`, \`pnpm run typecheck\`, then \`pnpm run migrate\`.
-Run \`pnpm run follow\` and \`pnpm run serve\` in separate terminals.
+Run \`pnpm run doctor\` after configuring your protected local key and scanner.
+Before first migration, MIGRATION_REQUIRED is expected; resolve other failed
+checks, then run \`pnpm run dev --migrate\`. Later use \`pnpm run dev\`.
+Dev generates types, checks TypeScript and starts the API and follower together.
+It does not install the scanner or handle keys for you.
 \`pnpm run query\` reads indexed memos from the private API. A raw transaction read
 is available through \`pnpm run read:transaction TX_ID\` (replace TX_ID with the
 transaction's lowercase 64-character ID).

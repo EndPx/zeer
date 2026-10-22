@@ -3,6 +3,16 @@ import type { Height, PrepClient } from "@zeer-dev/prep-client";
 import type { Checkpoint, ChefStore } from "./types.js";
 
 const guidance: Record<string, string> = {
+  DOCTOR_NOT_READY: "Resolve the failed doctor checks, then run doctor again. No setup changes were made by the diagnostic.",
+  DEV_PREFLIGHT_FAILED: "Resolve the failed doctor checks before starting dev. For a new compatible namespace, explicitly use dev --migrate or run migrate first.",
+  DEV_RECONCILIATION_REQUIRED: "The readable checkpoint is ahead of Prep. Run follow to close the read gate and reconcile, stop it after recovery, then restart dev. Dev has not started its API.",
+  PROJECT_TYPESCRIPT_REQUIRED: "Install the project's declared TypeScript dependency before running dev. No compiler is downloaded automatically.",
+  TYPECHECK_FAILED: "Run the project's typecheck command to see compiler diagnostics, fix the errors, then retry dev. No services were started.",
+  DEV_CHILD_START_FAILED: "The owned API or follower process could not start. Check the installed SDK and Node version, then retry dev.",
+  DEV_API_START_TIMEOUT: "The API did not report listening within 15 seconds. Check database connectivity and the selected address and port, then retry dev.",
+  DEV_API_EXITED: "The API exited unexpectedly. Dev stopped its follower; resolve any reported diagnostic and restart from the retained checkpoint.",
+  DEV_FOLLOWER_EXITED: "The follower exited unexpectedly. Dev stopped its API; resolve any reported diagnostic and restart from the retained checkpoint.",
+  DEV_SHUTDOWN_FAILED: "An owned development process could not be stopped. Inspect its process before starting another writer.",
   INVALID_INIT_TEMPLATE: "Choose blank, public or shielded. Guided setup accepts choices 1, 2 and 3 as well.",
   SHIELDED_BIRTHDAY_REQUIRED: "Choose an explicit numeric wallet birthday at or before your first relevant note. Shielded inbox does not silently start at latest or genesis.",
   EMPTY_SCHEMA_ADD_ENTITY: "This project has no entities yet. Define at least one entity with id: ID! in schema.graphql, then run codegen and implement handlers.ts before indexing.",
@@ -129,6 +139,21 @@ export function formatOutput(value: Record<string, unknown>, human: boolean): st
     return `Chef error: ${error.code}\n${value.help}\n`;
   }
   const lines = [`Chef ${value.command}: ${value.state ?? value.status ?? "status"}${value.project ? ` (${value.project})` : ""}`];
+  if (value.role) lines.push(`Process: ${value.role}`);
+  if (value.command === "doctor" && Array.isArray(value.checks)) {
+    for (const check of value.checks as Array<{name:string;status:string;code:string;help:string}>) {
+      lines.push(`${check.status.toUpperCase()} ${check.name}: ${check.code}`, `  ${check.help}`);
+    }
+  }
+  if (value.status === "typecheck_skipped") lines.push("No tsconfig.json; JavaScript is validated at startup, without a TypeScript check.");
+  if (value.command === "dev") {
+    const checkpoint = value.checkpoint as {height?: number;status?: string} | undefined;
+    if (checkpoint) lines.push(`Persisted checkpoint: ${checkpoint.height ?? "none"}; read gate: ${checkpoint.status}`);
+    const source = value.source as {availability?: string;indexedHeight?: number;chefPrepLagBlocks?:number} | undefined;
+    if (source) lines.push(`Prep: ${source.availability}; indexed height: ${source.indexedHeight ?? "unknown"}; Chef lag: ${source.chefPrepLagBlocks ?? "unknown"} blocks`);
+    if (value.host) lines.push(`Listening: ${value.host}:${value.port}`);
+    return `${lines.join("\n")}\n`;
+  }
   const checkpoint = value.checkpoint as Checkpoint | undefined;
   if (checkpoint) lines.push(`Persisted checkpoint: ${checkpoint.height ?? "none"}; read gate: ${checkpoint.status}`);
   if (value.invocationMode) lines.push(`Invocation: ${value.invocationMode}${value.targetHeight === undefined ? "" : `; target: ${value.targetHeight}`}`);

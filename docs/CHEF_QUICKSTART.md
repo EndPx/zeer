@@ -17,7 +17,7 @@ explicitly labeled mainnet fixtures and is not a live testnet service.
 
 ## Requirements
 
-- Linux x86_64 or WSL2; Node 24.14+ and npm.
+- Linux x86_64 or WSL2; Node 24.14+ and pnpm (or npm).
 - A compatible Prep endpoint and token if the operator requires one.
 - Your own PostgreSQL database; the starter also includes optional local Docker
   Compose configuration. Docker Engine and Compose v2 are needed only for that option.
@@ -38,7 +38,7 @@ Prep archive height once; explicit `0` includes genesis history. The chosen
 source URL is recorded in `.env`. npm users can run `npx @zeer-dev/cli@latest init`.
 `pnpx @zeer-dev/cli@latest init` explicitly selects the latest launcher tag,
 subject to pnpm's dlx cache. For reproducible scripts, use
-`pnpx @zeer-dev/cli@0.3.0 init --template public --dir DIR --project NAME --start-height HEIGHT --json`.
+`pnpx @zeer-dev/cli@0.4.0 init --template public --dir DIR --project NAME --start-height HEIGHT --json`.
 The `zeer-chef` command remains an alias. Only terminal sessions ask questions.
 
 The directory must not already exist. Its parent must exist and be writable.
@@ -65,13 +65,13 @@ Inside the new project (use your chosen folder if different):
 
 ```sh
 cd my-indexer
-npm install
-npm run codegen
-npm run typecheck
+pnpm install
 ```
 
 No files are imported from the Zeer checkout. Keep the generated lockfile with
-your project. Type stripping does not replace explicit typechecking.
+your project. Dev generates the schema types and runs the project's TypeScript
+compiler before starting services. `pnpm run codegen` and `pnpm run typecheck`
+remain available separately. npm users can use `npm install` and `npm run`.
 
 For an unpublished source candidate, the [packaging verifier](PACKAGING.md)
 describes building and installing both local tarballs together.
@@ -89,7 +89,7 @@ local database command. Keep all connection strings and tokens server-side.
 For the included local database:
 
 ```sh
-npm run db:up
+pnpm run db:up
 ```
 
 Postgres binds loopback port 39472, with persistent project-scoped storage. If the
@@ -97,41 +97,41 @@ port is occupied, update both Compose and DATABASE_URL. Multiple starter project
 need distinct Compose names and host ports. The template's resource ceilings are
 0.5 CPU / 512 MiB for Postgres, not a limit on your whole Chef application.
 
-## 4. Index and serve GraphQL
+## 4. Check the setup
 
 ```sh
-npm run migrate
-npm run status
+pnpm run doctor
 ```
 
-Use an available inclusive end height. Omit `--to` to capture Prep's current
-indexed height. `migrate` creates a project namespace, not the database server.
-Status compares source coverage with the persisted checkpoint. A new empty
-project may be ready to backfill; it is not caught up merely because it connects.
+Doctor checks the configured project, source compatibility and coverage,
+database namespace, API token and listen port. It reports failures with fixed
+codes and next actions. A new namespace normally reports `MIGRATION_REQUIRED`:
+it has not been initialized yet. Resolve other failures before continuing.
+Doctor is read-only; it does not start PostgreSQL, migrate or change a read gate.
 
-Start the API in terminal A so it can serve each committed prefix immediately:
+## 5. Index and serve GraphQL
+
+On the first run, explicitly permit compatible namespace initialization:
 
 ```sh
-npm run serve
+pnpm run dev --migrate
 ```
 
-Start indexing in terminal B, using the same config and environment:
+Dev generates types, typechecks and runs setup checks, then starts the API before
+the follower. `--migrate` uses the existing migration path only when migration is
+the sole blocker. It never resets incompatible or unmarked data. It creates a
+project namespace, not the database server. It does not install dependencies or
+start Docker. Later runs can use `pnpm run dev` without the migration flag.
+
+Run a query in another terminal while indexing is active:
 
 ```sh
-npm run sync
-# Or keep following new available blocks:
-# npm run follow
+pnpm run query
 ```
 
-Run a query in terminal C while indexing is active:
-
-```sh
-npm run query
-```
-
-These are separate Node processes. Both use the same PostgreSQL project; only
-sync/follow acquires the writer lock. Do not run sync and follow concurrently for
-the same project. `_meta.height` identifies the committed prefix currently served.
+Dev manages separate API and follower Node processes using the same PostgreSQL
+project; only the follower acquires the writer lock. Do not run another dev,
+sync or follow for the same project. `_meta.height` identifies the committed prefix currently served.
 A prefix can be useful before catch-up finishes, but it is not complete history.
 The API may return a temporary unavailable response during source reconciliation.
 
@@ -140,9 +140,17 @@ generated token. Entity results must match the indexed source; `_meta` reports
 the persisted checkpoint. Responses return BigInt values as decimal strings.
 Lists sort by ID; use an equality filter on `height` for a particular block.
 
-For ongoing indexing, run `npm run follow` separately alongside `npm run serve`.
-Ctrl+C stops each process. The next sync resumes from PostgreSQL; repeating a
-completed range should commit no new blocks. `npm run db:stop` retains local data.
+Ctrl+C stops both processes. An unexpected child exit stops its peer and fails
+dev. The next run resumes from PostgreSQL. `pnpm run db:stop` retains local data.
+With npm, forward dev options as `npm run dev -- --migrate`.
+
+For bounded historical work, prepare the namespace with `pnpm run migrate`, then
+use `pnpm run sync --to HEIGHT` and `pnpm run serve` independently. The target is
+inclusive and must be within Prep coverage at or after your configured start.
+Omit `--to` to capture Prep's available tip once and exit when reached. Repeating
+a completed range should commit no new blocks. `pnpm run status` compares the
+saved checkpoint with a bounded source observation; connecting successfully
+does not mean the project has caught up.
 
 ## Scope and recovery
 

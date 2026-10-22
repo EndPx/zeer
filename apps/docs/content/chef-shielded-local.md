@@ -52,7 +52,7 @@ The project name and numeric start height are already written to `chef.config.ts
 
 Never paste key contents into a command, chat, public API or source file. Keep `.env`, PostgreSQL data and the consumer's SQLite file private: receipts contain plaintext note observations.
 
-## 3. Prepare the database and types
+## 3. Check the local setup
 
 Use your PostgreSQL database, or start the generated loopback database with Docker Engine and Compose v2:
 
@@ -63,28 +63,22 @@ pnpm run db:up
 Port `39472` must be free. If you change it, update both `compose.yaml` and `DATABASE_URL`. Then:
 
 ```sh
-pnpm run codegen
-pnpm run typecheck
-pnpm run migrate
+pnpm run doctor
 ```
 
-The generated codegen script loads the account identity from `.env`. Migration initializes the project's namespace; it does not create the PostgreSQL server.
+Doctor checks the local account configuration, scanner protocol and viewing-key identity alongside the source, database, API token and port. Key inspection stays on this machine. It does not scan transactions, migrate tables or upload the key. A fresh namespace reports `MIGRATION_REQUIRED`; resolve other failures before starting it.
 
 ## 4. Follow, query and consume
 
 In terminal A:
 
 ```sh
-pnpm run follow
+pnpm run dev --migrate
 ```
 
-In terminal B:
+Dev loads the account identity from `.env`, generates entity types, typechecks and checks setup. The explicit `--migrate` flag allows compatible namespace initialization; it does not create PostgreSQL. Dev then starts the API and follower together. Later runs use `pnpm run dev`.
 
-```sh
-pnpm run serve
-```
-
-In terminal C:
+In another terminal:
 
 ```sh
 pnpm run query
@@ -107,11 +101,11 @@ For a known transaction, replace `TX_ID` with its lowercase 64-character ID:
 pnpm run read:transaction TX_ID
 ```
 
-With npm, use `npm install --ignore-scripts` and `npm run SCRIPT -- ...` when forwarding arguments. Stop processes with Ctrl+C. `pnpm run db:stop` retains the database volume.
+With npm, use `npm install --ignore-scripts` and `npm run SCRIPT -- ...` when forwarding arguments, including `npm run dev -- --migrate`. Ctrl+C stops both dev children; the consumer runs separately and needs its own stop. `follow` and `serve` are still available for separate process management. `pnpm run db:stop` retains the database volume.
 
 ## Alternative installation
 
-The [scanner release](https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1) also includes a standalone `shielded-inbox.tar.gz` tested with Chef 0.2.0. It has its own README and `chef.config.mjs`; follow its commands rather than mixing them with the generated 0.3.0 project's scripts.
+The [scanner release](https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1) also includes a standalone `shielded-inbox.tar.gz` tested with Chef 0.2.0. It has its own README and `chef.config.mjs`; follow its commands rather than mixing them with the generated 0.4.0 project's scripts.
 
 Other platforms retain the source-build path. From a checkout with the pinned Rust 1.99.0 toolchain:
 

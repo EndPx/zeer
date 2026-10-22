@@ -83,7 +83,7 @@ test("installed CLI runs help and codegen through a symlinked executable path", 
   }
   const help = spawnSync(process.execPath, [entry, "--help"], { cwd: path, env, encoding: "utf8", timeout: 15000 });
   assert.equal(help.status, 0, help.stderr);
-  assert.match(help.stdout, /zeer-chef <codegen\|migrate\|sync\|serve\|status>/);
+  assert.match(help.stdout, /zeer-chef <codegen\|migrate\|sync\|serve\|status\|dev\|doctor>/);
   const result = spawnSync(process.execPath, [entry, "codegen", "--config", config, "--json"], { cwd: path, env, encoding: "utf8", timeout: 15000 });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(JSON.parse(result.stdout).status, "complete");

@@ -1,6 +1,6 @@
 # Chef CLI commands
 
-The `@zeer-dev/chef` package installs `zeer` and its compatible alias `zeer-chef`. The commands create projects, generate types, migrate a compatible namespace, index data and serve GraphQL.
+The `@zeer-dev/chef` package installs `zeer` and its compatible alias `zeer-chef`. The commands create projects, check their setup, generate types, migrate a compatible namespace, index data and serve GraphQL. In a generated project, `pnpm run dev` manages the API and follower together.
 
 ## Install and inspect
 
@@ -14,7 +14,7 @@ pnpx @zeer-dev/cli --help
 
 `pnpm dlx @zeer-dev/cli init` is equivalent. npm users can run `npx @zeer-dev/cli@latest init`. The `zeer` launcher uses the matching published Chef CLI, including the same wizard and error handling. The SDK remains `@zeer-dev/chef`; generated projects declare their own exact dependency.
 
-`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.3.0 init` for reproducible scripts. Launcher and Chef versions are published together.
+`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.4.0 init` for reproducible scripts. Launcher and Chef versions are published together.
 
 An existing global `zeer` / `zeer-chef` command remains usable. The commands below show that executable form; prefix them with `pnpx` when using the launcher, for example `pnpx @zeer-dev/cli status --config chef.config.ts`.
 
@@ -26,6 +26,9 @@ For any command, `zeer <command> --help` prints its options without loading proj
 | --- | --- |
 | `init` | Ask for missing setup options and create a new testnet project |
 | `codegen` | Generate `chef.generated.ts` from the entity schema |
+| `doctor` | Read setup diagnostics without changing the project or database |
+| `dev` | Generate types, typecheck, check setup, then run API and follower together |
+| `dev --migrate` | Explicitly permit compatible namespace migration before starting dev |
 | `migrate` | Explicitly initialize/migrate a compatible project namespace and its indexes |
 | `sync` | Index through a captured available Prep tip, then exit |
 | `sync --to HEIGHT` | Index through an inclusive target height, then exit |
@@ -91,6 +94,47 @@ pnpm run migrate
 
 The generated script loads `.env`. Migration validates namespace ownership and identity, then initializes or upgrades its compatible tables and declared indexes. It does not replay history, drop a namespace or make an incompatible schema safe to reuse. Use [a fresh project and replay](/docs/chef/evolution/) for identity changes.
 
+## doctor
+
+```sh
+pnpm run doctor
+pnpm run doctor --json
+```
+
+Check the configured project before starting it. Doctor uses bounded reads to inspect the model and handlers, Prep compatibility and coverage, PostgreSQL namespace identity, API token and requested listen port. A shielded project also checks its local scanner and configured viewing-key identity. Key inspection runs locally; neither a key nor a decoded receipt is sent to Prep.
+
+Each check has a status, a fixed diagnostic code and a suggested next action. JSON output includes `ready`, `status` and a `checks` array, so scripts can distinguish a failed check from one skipped because an earlier dependency was unavailable. Failed checks return a nonzero exit code. A warning can describe recoverable reconciliation without declaring the project blocked.
+
+Doctor does not generate code, migrate tables, acquire the writer lock, change a read gate, start Docker or install packages. It checks the observed setup; a successful result does not reserve the port, prove another writer is absent or guarantee that the source stays available.
+
+For a fresh project, `MIGRATION_REQUIRED` means migration is still needed. Run `pnpm run migrate`, or explicitly allow it with `pnpm run dev --migrate`. Identity mismatches and blocked namespaces need the [recovery procedure](/docs/chef/recovery/), rather than an automatic reset.
+
+## dev
+
+```sh
+# First run against the intended new namespace:
+pnpm run dev --migrate
+# Continue a prepared project:
+pnpm run dev
+```
+
+Dev first writes the generated entity types and runs the installed project's TypeScript compiler when `tsconfig.json` exists. A JavaScript-only project without that file reports typechecking as skipped; configuration and handler validation still apply. With a TypeScript project, install its declared development dependencies before running dev.
+
+After setup checks pass, dev starts GraphQL, waits for it to listen, then starts the follower. Both use the same installed Chef version, configuration and environment. The API defaults to `127.0.0.1:39370`; the follower retains the normal polling and recovery behavior. The generated scripts load the project's `.env`.
+
+`--migrate` permits the existing migration path only when missing migration is the sole blocking check. It never resets an incompatible or unmarked namespace, forces a blocked read gate open or replaces existing application data. A compatible namespace does not need another migration. Dev does not start PostgreSQL or install dependencies.
+
+Ctrl+C or SIGTERM stops both child processes, retaining committed work. If either child exits unexpectedly, dev stops its peer and exits with a failure. Startup checks cannot eliminate races: a port claimed after inspection or an existing writer still causes startup to fail. Run only one dev/follow/sync writer for a project.
+
+Use `serve` and `follow` separately for independently managed processes. Dev is a local process supervisor; it does not install an operating-system service or provide a deployment manager.
+
+| Option | Commands | Default / rule |
+| --- | --- | --- |
+| `--listen HOST` | `doctor`, `dev`, `serve` | `127.0.0.1` |
+| `--port PORT` | `doctor`, `dev`, `serve` | `39370`; integer from 1 through 65535 |
+| `--poll-seconds SECONDS` | `dev`, `sync --follow` | `5`; integer from 1 through 60 |
+| `--migrate` | `dev` | Off; explicitly permits compatible migration when it is the only blocker |
+
 ## sync
 
 ```sh
@@ -141,10 +185,23 @@ The generated scripts load `.env` and work with pnpm or npm. With npm, put forwa
 | `INIT_PREP_NOT_READY` | Inspect `/height` and require a ready full-data testnet source |
 | `PROJECT_DIRECTORY_EXISTS` | Choose a new target folder |
 | `MIGRATION_REQUIRED` | Run migration with the same project and database |
+| `DOCTOR_NOT_READY` | Inspect the failed checks and resolve their individual diagnostic codes |
+| `PROJECT_TYPESCRIPT_REQUIRED` | Install the project's declared TypeScript development dependency |
+| `TYPECHECK_FAILED` | Run the project's typecheck, fix errors and retry dev |
+| `DEV_PREFLIGHT_FAILED` | Resolve the setup failures before starting the API or follower |
+| `DEV_API_START_TIMEOUT` | Inspect API startup and whether the configured host/port can listen |
+| `DEV_API_EXITED` / `DEV_FOLLOWER_EXITED` | Resolve the reported child failure; dev has stopped its peer |
 | `PROJECT_IDENTITY_MISMATCH` | Restore the original config or replay into a fresh namespace |
 | `WRITER_ALREADY_ACTIVE` | Stop the other writer for this project |
 | `REBUILD_REQUIRED` | Keep the old namespace for inspection and follow the recovery procedure |
 
-Chef currently has no managed deployment, database reset, `dev` process supervisor or Prometheus `metrics` command. Use [self-hosting](/docs/chef/self-hosting/), [environment variables](/docs/chef/environment-variables/) and the [performance guides](/docs/chef/benchmarking/) for the supported workflow.
+Chef currently has no managed deployment, database reset or Prometheus `metrics` command. Use [self-hosting](/docs/chef/self-hosting/), [environment variables](/docs/chef/environment-variables/) and the [performance guides](/docs/chef/benchmarking/) for the supported workflow.
 
 The server also exposes authenticated `GET /status` for [cached freshness metadata](/docs/chef/graphql/#check-freshness-without-calling-rpc). This differs from the CLI `status` command, which actively checks Prep. Upgrades from 0.1.x require stopping the follower and API, running the additive migration with the same config, then restarting both.
+
+Chef 0.4.0 adds dev and doctor without changing the stored project fingerprint or database format. Existing 0.3.0 projects keep their package version until you explicitly upgrade it. Add `dev` and `doctor` scripts matching the generated launch command, or invoke the upgraded local CLI with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js dev`. Keep your config, schema and namespace identity unchanged for compatible continuation.
+
+If Doctor reports a **readable checkpoint ahead of Prep**, `dev` stops with
+`DEV_RECONCILIATION_REQUIRED` before starting the API. Run `pnpm run follow`
+to reconcile, stop it after recovery, then restart `dev`. A checkpoint whose
+read gate is already closed can recover under `dev`.

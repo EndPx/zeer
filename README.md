@@ -79,8 +79,12 @@ This is the core Zeer monorepo. See [accepted product responsibilities and plann
 ## Chef public developer experience
 
 Start with [Run your own Chef project](docs/CHEF_QUICKSTART.md): create a standalone
-testnet project with `zeer-chef init`, connect your Prep endpoint and PostgreSQL,
-then run codegen, migrate, sync and GraphQL. Both packages are available on npm:
+testnet project with `pnpx @zeer-dev/cli init`, connect your Prep endpoint and
+PostgreSQL, then check it with `pnpm run doctor`. `pnpm run dev --migrate`
+explicitly permits compatible namespace initialization, generates types,
+typechecks and starts GraphQL with a follower. Subsequent runs use
+`pnpm run dev`; the separate migrate, sync and serve commands remain available.
+The SDK and Prep client are available on npm:
 [`@zeer-dev/chef`](https://www.npmjs.com/package/@zeer-dev/chef) and
 [`@zeer-dev/prep-client`](https://www.npmjs.com/package/@zeer-dev/prep-client).
 

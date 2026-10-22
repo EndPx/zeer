@@ -1,6 +1,36 @@
 # Zeer planning entry point
 
-Updated: 2026-10-20 (Asia/Jakarta).
+Updated: 2026-10-22 (Asia/Jakarta).
+
+## Completed delivery: Chef dev and doctor
+
+The user approved a grouped Chef/launcher 0.4.0 release for the next onboarding
+step. Scope and acceptance gates are recorded in
+[Chef dev and doctor](docs/CHEF_DEV_DOCTOR_PLAN.md). This section tracks that
+delivery; older dated milestones below retain their historical status.
+
+- [x] Add read-only `doctor` diagnostics for the project, source, PostgreSQL,
+  API token, port and optional local scanner/key identity. No schema creation,
+  writer lock, key upload or read-gate mutation belongs to diagnostics.
+- [x] Add `dev` with code generation, project-local typechecking, setup checks,
+  API-first startup, follower supervision and bounded shutdown. Migration is
+  explicit through `--migrate` and never resets incompatible data.
+- [x] Verify cancellation, child failures, source interruption and compatible
+  restarts on installed packages; preserve existing project fingerprints.
+- [x] Publish matching Chef and launcher packages, verify standalone registry
+  installation, then deploy the corresponding existing documentation pages.
+
+Chef and launcher 0.4.0 are published, their registry bytes match the audited
+tarballs, and fresh registry projects passed. The existing public docs were
+activated and all 44 pages passed browser checks. The dedicated test database,
+role and temporary credentials were removed. No hosted indexer namespace was
+migrated, and no signer or settlement behavior was added.
+
+Release acceptance passed: all 156 Linux SDK tests with PostgreSQL and the
+published scanner; Windows 116 passed with 40 environment-specific skips;
+three generated standalone starters recovered from source interruption and
+restart; public testnet blocks 4,528,205–4,528,206 matched Prep. This is bounded
+onboarding evidence, not a throughput or funded-payment benchmark.
 
 **Status: Prep supports public historical queries and live node observations. Chef implements public handlers and an opt-in local testnet receipt preview with a native watch-only scanner. Whole-chain Chef execution and production readiness remain unproven. The hosted demo remains public-data only. All benchmark results and detailed proof reports remain local-only; source, methodology and fixtures remain public.**
 

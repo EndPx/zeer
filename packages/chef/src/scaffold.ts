@@ -37,7 +37,7 @@ CHEF_URL=http://127.0.0.1:39370
   const launch = "node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js";
   const files: Record<string, string> = {
     "package.json": JSON.stringify({ name: project.replaceAll("_", "-"), private: true, type: "module", engines: { node: ">=24.14.0" },
-      scripts: { codegen: "zeer-chef codegen", typecheck: "tsc --noEmit", migrate: `${launch} migrate`,
+      scripts: { dev: `${launch} dev`, doctor: `${launch} doctor`, codegen: "zeer-chef codegen", typecheck: "tsc --noEmit", migrate: `${launch} migrate`,
         sync: `${launch} sync`, follow: `${launch} sync --follow`, status: `${launch} status`, serve: `${launch} serve`, query: "node --env-file=.env query.mjs",
         "db:up": "docker compose up -d --wait postgres", "db:stop": "docker compose stop postgres" },
       dependencies: { "@zeer-dev/chef": manifest.version, "@zeer-dev/prep-client": manifest.dependencies["@zeer-dev/prep-client"] },
@@ -164,39 +164,38 @@ Use a unique Compose project name when running more than one copy of this starte
 
 ## Index and query
 
-\`\`\`sh
-pnpm run migrate
-pnpm run status
-\`\`\`
-
-Start the API first in terminal A:
+Check the setup, then start a new compatible namespace explicitly:
 
 \`\`\`sh
-pnpm run serve
+pnpm run doctor
+pnpm run dev --migrate
 \`\`\`
 
-In terminal B, start indexing with the same config and environment:
+Before the first migration, doctor reports MIGRATION_REQUIRED and exits nonzero.
+Resolve any other failures before starting. Dev generates types, runs the installed
+TypeScript compiler, checks setup, starts the API and then follows Prep in one
+terminal. It never installs packages or starts Docker. --migrate uses Chef's safe
+migration path; it does not reset incompatible data. On later starts use:
 
 \`\`\`sh
-pnpm run sync --to AVAILABLE_HEIGHT
-# Or keep following after historical catch-up:
-# pnpm run follow
+pnpm run dev
 \`\`\`
 
-AVAILABLE_HEIGHT is an inclusive height covered by Prep. Omit --to to capture
-Prep's current indexed height. Run either sync or follow, never both for the
-same project. Migrate creates the project namespace, not the database server.
-
-The API binds 127.0.0.1:39370. Query in terminal C while indexing is active:
+Query in a second terminal while dev runs:
 
 \`\`\`sh
 pnpm run query
 \`\`\`
 
-API and indexing run in separate Node processes. The API serves committed data;
-\`_meta.height\` shows its current coverage. A partial prefix is not full history.
-Source reconciliation may temporarily make reads unavailable. Initial history
-must already be present in Prep; HTTP availability alone does not establish readiness.
+The API binds 127.0.0.1:39370. Ctrl+C stops the follower and API; a child failure
+stops its peer. Committed progress survives a compatible restart. The API serves
+committed data; \`_meta.height\` shows its current coverage. Source reconciliation
+may temporarily make reads unavailable. Initial history must already be in Prep.
+
+For separate process management, keep using migrate, sync, follow and serve.
+For a finite replay: pnpm run sync --to AVAILABLE_HEIGHT, where the height is
+inclusive and covered by Prep. Run either dev, sync or follow for a project,
+never multiple writers. Migrate creates the namespace, not the database server.
 
 Lists sort by entity ID, not numeric height. Use \`where: { height: N }\` for a
 specific block. query.graphql contains a larger example. The API is read-only:
@@ -232,5 +231,5 @@ Codegen and strict typechecking are both needed: Node type stripping does not ty
   for (const [name, body] of Object.entries(files)) {
     await writeFile(resolve(directory, name), body, { flag: "wx", mode: name === ".env" ? 0o600 : 0o644 });
   }
-  return { directory, template, files: Object.keys(files), nextSteps: ["Install the generated project's dependencies (see README.md).", ...(template === "blank" ? ["Define your entities in schema.graphql and implement handlers.ts before indexing."] : template === "shielded" ? ["Install the scanner, inspect your protected local UFVK and configure its paths/fingerprint in .env."] : []), "Set PREP_URL and database settings in .env.", "Run codegen, typecheck, migrate; run follow and serve in separate terminals."] };
+  return { directory, template, files: Object.keys(files), nextSteps: ["Install the generated project's dependencies (see README.md).", ...(template === "blank" ? ["Define your entities in schema.graphql and implement handlers.ts before indexing."] : template === "shielded" ? ["Install the scanner, inspect your protected local UFVK and configure its paths/fingerprint in .env."] : []), "Set PREP_URL and database settings in .env.", "Run doctor, resolve any failed checks, then use dev --migrate for the first compatible startup; query from a second terminal."] };
 }

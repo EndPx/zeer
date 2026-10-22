@@ -19,13 +19,21 @@ Requires Node 24.14+ on Linux x86_64 or WSL2, pnpm (or npm) and PostgreSQL.
 pnpx @zeer-dev/cli init
 cd my-indexer
 pnpm install
-pnpm run codegen
-pnpm run typecheck
+pnpm run db:up
+pnpm run doctor
+pnpm run dev --migrate
 ```
 
 Choose a template, then answer the project name, folder, Prep endpoint and start
 block questions. Choose **Public chain indexer** for the commands above. The
 project and folder defaults are `my_indexer` and `my-indexer`.
+
+Use the included database only when Docker Engine and Compose v2 are available;
+otherwise set `DATABASE_URL` to your own PostgreSQL database and skip `db:up`.
+Doctor reports a fresh namespace as `MIGRATION_REQUIRED`. The explicit
+`dev --migrate` flag permits compatible migration before dev starts the API and
+follower. Later runs use `pnpm run dev`. Query in another terminal with
+`pnpm run query`; Ctrl+C stops both managed processes and retains committed work.
 
 | Template | Included application |
 | --- | --- |
@@ -58,14 +66,14 @@ directory, run `pnpm install --ignore-scripts` and `pnpm run scanner:install`.
 The installer verifies a pinned Linux/WSL2 x64 glibc binary before keyless
 execution. Keep your testnet UFVK in an owner-only file outside the project;
 inspect its fingerprint with the installed scanner and configure the file path,
-executable path and fingerprint in `.env`. Then run `pnpm run codegen`,
-`pnpm run typecheck` and `pnpm run migrate`. Run `follow` and `serve` in separate
-terminals, `query` to read memos and `consume --mode continuous --follow` with
+executable path and fingerprint in `.env`. Then run `pnpm run doctor` and
+`pnpm run dev --migrate`. Use `query` to read memos and
+`consume --mode continuous --follow` in another terminal with
 the project, birthday and private SQLite path to follow receipts. The generated
 README gives complete commands. Init never reads a key or starts a service.
 
-Set `PREP_URL` and database settings in the generated `.env`, then migrate before
-running sync and serve. Follow the [complete quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/)
+Set `PREP_URL` and database settings in the generated `.env`. Follow the
+[complete quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/)
 for source coverage, database setup and your first GraphQL query.
 
 For filtered indexing from block 0, see the
@@ -110,8 +118,8 @@ Node 24.14+ is required
 for the validated native TypeScript config path. Use erasable TS syntax.
 
 For a standalone testnet project, use **[Run your own Chef project](https://github.com/EndPx/zeer/blob/main/docs/CHEF_QUICKSTART.md)**.
-After obtaining the local package artifacts, the installed CLI can scaffold a new
-directory with `zeer-chef init --dir ./my-indexer --project my_indexer --start-height 1000`.
+The launcher can scaffold it with `pnpx @zeer-dev/cli init`, or the installed CLI
+can use `zeer-chef init --dir ./my-indexer --project my_indexer --start-height 1000`.
 It creates config, schema, handlers, env files, optional local PostgreSQL and project
 commands for the full GraphQL workflow. It never overwrites existing directories,
 installs dependencies or starts services automatically. A Prep URL with matching
@@ -125,7 +133,14 @@ node --env-file=.env packages/chef/dist/cli.js sync --config examples/chef-publi
 node --env-file=.env packages/chef/dist/cli.js serve --config examples/chef-public/chef.config.ts
 ```
 
-For an interactive demo, start `serve` before starting `sync` or `follow` in a
+For an interactive demo, `dev` manages the API and follower together. It generates
+types, checks the installed project's TypeScript and runs read-only diagnostics
+before starting either service. It never installs dependencies, starts Docker or
+resets existing data. Without `--migrate`, prepare the compatible namespace with
+`migrate` first. If a managed child exits unexpectedly, dev stops its peer and
+exits nonzero. A source interruption retains the follower's normal recovery path.
+
+For separate process management, start `serve` before `sync` or `follow` in a
 second terminal. The API and writer can run as separate Node processes against
 the same project. Queries expose committed data with `_meta.height` as their
 coverage; source reconciliation may temporarily close the read gate. Run only

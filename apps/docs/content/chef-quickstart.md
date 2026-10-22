@@ -43,8 +43,6 @@ The folder must not already exist. Inside it:
 ```sh
 cd my-indexer
 pnpm install
-pnpm run codegen
-pnpm run typecheck
 ```
 
 Use your chosen folder if different. `my_indexer` creates the isolated PostgreSQL namespace `chef_my_indexer`. Keep the generated `pnpm-lock.yaml` with the project. If using npm, use `npm install` and the matching `npm run` commands with `package-lock.json` instead.
@@ -66,38 +64,37 @@ Keep the generated `CHEF_API_TOKEN` private. Start the included database:
 pnpm run db:up
 ```
 
-If using an existing PostgreSQL database, set `DATABASE_URL` instead and skip `db:up`. Initialize the namespace:
+If using an existing PostgreSQL database, set `DATABASE_URL` instead and skip `db:up`. Check the setup:
 
 ```sh
-pnpm run migrate
-pnpm run status
+pnpm run doctor
 ```
+
+Doctor checks the project, Prep source, database namespace, API token and listen port. A fresh project's `MIGRATION_REQUIRED` result means the database is reachable but its Chef namespace needs initialization. Doctor only reports what it finds; it does not create tables or start services.
 
 ## 3. Run and query
 
-Run the API in terminal A:
+Start the API and follower together:
 
 ```sh
-pnpm run serve
+pnpm run dev --migrate
 ```
 
-Follow available blocks in terminal B:
+On the first run, `--migrate` explicitly allows Chef to initialize a compatible namespace. Dev generates entity types, checks the project's TypeScript, then checks the setup before starting the API and follower. It does not install dependencies or start PostgreSQL. For later runs, use `pnpm run dev`; you can also run `pnpm run migrate` separately before it.
 
-```sh
-pnpm run follow
-```
-
-Query your entities in terminal C:
+Query your entities in another terminal:
 
 ```sh
 pnpm run query
 ```
 
-The response contains `BlockSummary` records from the configured start through the committed checkpoint. Immediately after a latest setup there may be only one block. `_meta.height` identifies what has actually committed. The API listens on `127.0.0.1:39370` and serves committed data while indexing continues.
+The response contains `BlockSummary` records from the configured start through the committed checkpoint. Immediately after a latest setup there may be only one block. `_meta.height` identifies what has actually committed. The API listens on `127.0.0.1:39370` and serves committed data while indexing continues. Ctrl+C stops both processes and retains committed progress. If either process exits unexpectedly, dev stops the other and reports a failure.
+
+`follow` and `serve` remain available for running the writer and API independently. Run only one writer per project. For setup failures, use `pnpm run doctor --json` for structured checks and the [CLI reference](/docs/chef/cli-commands/) for recovery guidance.
 
 ## Historical indexing
 
-For a new historical project, choose `0` during setup. To index only blocks 0 and 1, run `pnpm run sync --to 1` instead of `follow`. With npm the equivalent is `npm run sync -- --to 1`.
+For a new historical project, choose `0` during setup. To index only blocks 0 and 1, run `pnpm run migrate`, then `pnpm run sync --to 1` instead of dev. Start `pnpm run serve` separately to query that bounded result. With npm the sync equivalent is `npm run sync -- --to 1`.
 
 Changing an existing project's start height changes its identity. Create a fresh project namespace and replay rather than editing the retained checkpoint. Read [restart and reorg handling](/docs/chef/recovery/) for compatible continuation.
 
@@ -107,4 +104,4 @@ Choose `1` or `blank` to begin without sample entities. Install dependencies and
 
 Blank and public projects default to `latest`. A shielded inbox asks for a numeric birthday with no default: starting after a payment's block would miss that note. Init never reads a key, installs dependencies or starts a service.
 
-For unattended setup, use `pnpx @zeer-dev/cli@0.3.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json`. An exact launcher version makes automation repeatable. See the [CLI reference](/docs/chef/cli-commands/) for cache refresh and other commands, and [Performance](/docs/chef/benchmarking/) for measurement.
+For unattended setup, use `pnpx @zeer-dev/cli@0.4.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json`. An exact launcher version makes automation repeatable. With npm, forward dev options as `npm run dev -- --migrate`. See the [CLI reference](/docs/chef/cli-commands/) for cache refresh and other commands, and [Performance](/docs/chef/benchmarking/) for measurement.

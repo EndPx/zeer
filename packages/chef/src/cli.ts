@@ -1,42 +1,41 @@
 #!/usr/bin/env node
-import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 import { createInterface } from "node:readline/promises";
 import { PrepClient, PrepError } from "@zeer-dev/prep-client";
 import type { Height } from "@zeer-dev/prep-client";
-import { parseModel, generateTypes } from "./schema.js";
+import { generateTypes } from "./schema.js";
 import { PostgresStore } from "./store.js";
-import { ChefError, isSourceUnavailable, syncStep, validateSyncOptions } from "./runtime.js";
+import { ChefError, isSourceUnavailable, syncStep } from "./runtime.js";
 import { createChefServer } from "./graphql.js";
 import { cliFailure, formatOutput, readStatus, sourceObservation } from "./cli-output.js";
-import type { ChefConfig, ChefStore } from "./types.js";
+import type { ChefStore } from "./types.js";
 import { ScaffoldError, scaffoldProject } from "./scaffold.js";
 import { NativeReceiptSource, ReceiptSourceError } from "./receipts.js";
 import { collectInitAnswers, initPrepUrl, PUBLIC_TESTNET_PREP, resolveStartHeight, validateBirthday } from "./init.js";
 import { validateTemplate } from "./scaffold-templates.js";
 
-class CliError extends Error { constructor(readonly code: string) { super(code); } }
-const help = "zeer-chef <codegen|migrate|sync|serve|status> [--config chef.config.ts] [--json | --human]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nOutput defaults to readable text on a terminal and JSON elsewhere. status observes Prep with a 5-second timeout without changing the database.\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
+import { CliError } from "./cli-error.js";
+import { loadProject, assertRunnable, projectEnvironment, projectFingerprint, envName } from "./project.js";
+import { inspectProject } from "./doctor.js";
+import { prepareProject, preflightDev, superviseDev } from "./dev.js";
+const help = "zeer-chef <codegen|migrate|sync|serve|status|dev|doctor> [--config chef.config.ts] [--json | --human]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nOutput defaults to readable text on a terminal and JSON elsewhere. status observes Prep with a 5-second timeout without changing the database.\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
 function integer(value: string | undefined, minimum: number, maximum: number, code: string): number {
   if (value === undefined || !/^(0|[1-9][0-9]*)$/.test(value)) throw new CliError(code);
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed < minimum || parsed > maximum) throw new CliError(code);
   return parsed;
 }
-function envName(value: unknown, fallback: string): string {
-  if (value === undefined) return fallback;
-  if (typeof value !== "string" || !/^[A-Z][A-Z0-9_]{0,63}$/.test(value)) throw new CliError("INVALID_ENV_NAME");
-  return value;
-}
 function temporarySourceError(error: unknown): boolean {
   return isSourceUnavailable(error) || (error instanceof PrepError && error.code === "TRANSPORT_ERROR") || (error instanceof DOMException && error.name === "TimeoutError");
 }
 
 const commandHelp: Record<string, string> = {
+  doctor: "zeer doctor [--config chef.config.ts] [--listen 127.0.0.1] [--port 39370]\nBounded read-only checks for project, source, database, API token, port and optional local scanner. Does not generate files, migrate, start services or change read gates. Nonzero when not ready.",
+  dev: "zeer dev [--config chef.config.ts] [--listen 127.0.0.1] [--port 39370] [--poll-seconds 5] [--migrate]\nGenerate types, run the installed project TypeScript compiler if tsconfig.json exists, then inspect setup. Starts the API before the follower. Ctrl+C or either child failing stops both. Requires migrated compatible state; --migrate explicitly permits existing safe migration only when that is the sole blocker. Never installs packages or starts Docker.",
   init: "zeer init [--template blank|public|shielded] [--dir NEW_DIRECTORY] [--project NAME] [--start-height latest|HEIGHT] [--prep-url URL]\nGuided setup offers Blank project, Public chain indexer and Shielded payment inbox.\nPublic/blank default to latest indexed, captured once from Prep /height with a 5-second timeout. Shielded requires an explicit numeric wallet birthday.\nSource: --prep-url, then PREP_URL, then the public testnet Prep. PREP_API_TOKEN is sent only to the matching explicitly configured source.\nScripts must provide --dir, --project and --start-height; omitted template retains the public default. Numeric heights work offline.\nBlank has no sample entity/handler. Shielded includes a pinned scanner installer and local receipt consumer.\nCreates new files only; no key contents are collected, no packages installed, no services started and no existing directory overwritten.",
   codegen: "zeer codegen [--config chef.config.ts]\nRead the schema and write chef.generated.ts beside the config. Does not connect to Prep or PostgreSQL. Run typecheck separately.",
   migrate: "zeer migrate [--config chef.config.ts]\nExplicitly initialize/migrate the compatible project namespace and its declared indexes. Stop the follower and API before upgrading an existing namespace. Does not replay blocks or reset an incompatible project.",
@@ -54,16 +53,16 @@ export async function main(args = process.argv.slice(2), dependencies: {
     process.stdout.write(`${JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")).version}\n`); return;
   }
   const command = args[0]!;
-  if (!["init", "codegen", "migrate", "sync", "serve", "status"].includes(command)) throw new CliError("UNKNOWN_COMMAND");
+  if (!["init", "codegen", "migrate", "sync", "serve", "status", "dev", "doctor"].includes(command)) throw new CliError("UNKNOWN_COMMAND");
   if (args.length === 2 && args[1] === "--help") {
     process.stdout.write(`${commandHelp[command]}\nOutput: --json or --human (exclusive). Defaults to readable terminal text and JSON elsewhere.\n`); return;
   }
   const flags = new Map<string, string>();
   for (let index = 1; index < args.length; index++) {
     const name = args[index]!;
-    const allowed = command === "init" ? ["--dir", "--project", "--start-height", "--prep-url", "--template", "--json", "--human"] : ["--config", "--json", "--human", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : []), ...(command === "serve" ? ["--listen", "--port"] : [])];
+    const allowed = command === "init" ? ["--dir", "--project", "--start-height", "--prep-url", "--template", "--json", "--human"] : ["--config", "--json", "--human", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : command === "dev" ? ["--poll-seconds", "--migrate"] : []), ...(["serve", "doctor", "dev"].includes(command) ? ["--listen", "--port"] : [])];
     if (!allowed.includes(name) || flags.has(name)) throw new CliError("INVALID_OR_DUPLICATE_FLAG");
-    const value = ["--follow", "--json", "--human"].includes(name) ? "true" : args[++index];
+    const value = ["--follow", "--migrate", "--json", "--human"].includes(name) ? "true" : args[++index];
     if (!value || value.startsWith("--")) throw new CliError("MISSING_FLAG_VALUE");
     flags.set(name, value);
   }
@@ -114,47 +113,45 @@ export async function main(args = process.argv.slice(2), dependencies: {
   if (follow && flags.has("--to")) throw new CliError("FOLLOW_AND_TO_ARE_EXCLUSIVE");
   const pollSeconds = integer(flags.get("--poll-seconds") ?? "5", 1, 60, "INVALID_POLL_SECONDS");
   const configPath = resolve(flags.get("--config") ?? "chef.config.ts");
-  const bytes = await readFile(configPath).catch(() => { throw new CliError("CONFIG_FILE_UNREADABLE"); });
-  if (bytes.length > 1024 * 1024) throw new CliError("CONFIG_TOO_LARGE");
-  const loaded: unknown = (await import(pathToFileURL(configPath).href)).default;
-  if (!loaded || typeof loaded !== "object" || Array.isArray(loaded)) throw new CliError("INVALID_CONFIG");
-  const config = loaded as ChefConfig;
-  if (!/^[a-z][a-z0-9_]{0,31}$/.test(config.project) || !["mainnet", "testnet", "regtest"].includes(config.network)
-    || !Number.isInteger(config.startHeight) || config.startHeight < 0 || config.startHeight > 0xffff_fffe
-    || typeof config.schema !== "string" || !config.schema || typeof config.handlerVersion !== "string" || !config.handlerVersion.length || config.handlerVersion.length > 128
-    || !config.indexer || typeof config.indexer !== "object" || Array.isArray(config.indexer)
-    || [config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata, config.indexer.receipt].some((handler) => handler !== undefined && typeof handler !== "function")
-    || (config.indexer.transaction && config.indexer.transactionMetadata)) throw new CliError("INVALID_CONFIG");
-  if (config.sync !== undefined && (!config.sync || typeof config.sync !== "object" || Array.isArray(config.sync)
-    || Object.keys(config.sync).some(key => !["pageSize", "batchSize", "transactionFilter", "adaptiveScan"].includes(key)))) throw new CliError("INVALID_SYNC_OPTIONS");
-  validateSyncOptions(config.sync ?? {});
-  if (config.sync?.transactionFilter && !config.indexer.transaction && !config.indexer.transactionMetadata && !config.indexer.receipt) throw new CliError("FILTER_REQUIRES_TRANSACTION_HANDLER");
-  if (!!config.shielded !== !!config.indexer.receipt) throw new CliError("SHIELDED_CONFIG_AND_RECEIPT_HANDLER_REQUIRED");
-  if (config.shielded && (config.network !== "testnet" || typeof config.shielded !== "object" || Array.isArray(config.shielded)
-    || !/^[a-zA-Z0-9_-]{1,64}$/.test(config.shielded.accountId) || !/^[0-9a-f]{64}$/.test(config.shielded.keyFingerprint)
-    || Object.keys(config.shielded).some(key => !["accountId", "keyFingerprint", "executableEnv", "keyFileEnv", "timeoutMs"].includes(key)))) throw new CliError("INVALID_SHIELDED_CONFIG");
-  if (config.shielded) {
-    envName(config.shielded.executableEnv, "ZEER_SCANNER_EXECUTABLE"); envName(config.shielded.keyFileEnv, "ZEER_VIEWING_KEY_FILE");
-    if (config.shielded.timeoutMs !== undefined && (!Number.isInteger(config.shielded.timeoutMs) || config.shielded.timeoutMs < 100 || config.shielded.timeoutMs > 120000)) throw new CliError("INVALID_SHIELDED_CONFIG");
-  }
-  const reorgWindow = config.reorgWindow ?? 100;
-  if (!Number.isInteger(reorgWindow) || reorgWindow < 1 || reorgWindow > 1000) throw new CliError("INVALID_REORG_WINDOW");
-  let end = flags.has("--to") ? integer(flags.get("--to"), config.startHeight, 0xffff_fffe, "INVALID_END_HEIGHT") : undefined;
   const port = integer(flags.get("--port") ?? "39370", 1, 65535, "INVALID_PORT");
-  const schemaPath = resolve(dirname(configPath), config.schema);
-  const schema = await readFile(schemaPath, "utf8").catch(() => { throw new CliError("SCHEMA_FILE_UNREADABLE"); });
-  if (!schema.replace(/#[^\r\n]*/g, "").trim()) throw new CliError("EMPTY_SCHEMA_ADD_ENTITY");
-  const model = parseModel(schema);
+  const host = flags.get("--listen") ?? "127.0.0.1";
+  if (["doctor", "dev"].includes(command)) {
+    const controller = new AbortController();
+    const abort = () => controller.abort(new DOMException("Stopped", "AbortError"));
+    process.once("SIGINT", abort); process.once("SIGTERM", abort);
+    try {
+      if (command === "doctor") {
+        const report = await inspectProject({ configPath, host, port, signal: controller.signal, store: dependencies.store, client: dependencies.client });
+        out(report as unknown as Record<string, unknown>);
+        if (!report.ready) throw new CliError("DOCTOR_NOT_READY");
+      } else {
+        const project = await loadProject(configPath);
+        await prepareProject(project, out, controller.signal);
+        await preflightDev({
+          inspect: () => inspectProject({ configPath, project, host, port, signal: controller.signal }),
+          migrate: () => main(["migrate", "--config", configPath, "--json"], { write: dependencies.write }),
+          allowMigration: flags.has("--migrate"), emit: out,
+        });
+        controller.signal.throwIfAborted();
+        await superviseDev({ configPath, host, port, pollSeconds, signal: controller.signal, emit: out });
+      }
+    } catch (error) {
+      if (!controller.signal.aborted) throw error;
+      out({ command, status: "stopped" });
+    } finally { process.off("SIGINT", abort); process.off("SIGTERM", abort); }
+    return;
+  }
+  const project = await loadProject(configPath);
+  const { config, model, reorgWindow } = project;
+  let end = flags.has("--to") ? integer(flags.get("--to"), config.startHeight, 0xffff_fffe, "INVALID_END_HEIGHT") : undefined;
   if (command === "codegen") {
     const generated = resolve(dirname(configPath), "chef.generated.ts");
     await writeFile(generated, generateTypes(model), "utf8");
     out({ command, status: "complete", schemaFingerprint: model.fingerprint, output: generated });
     return;
   }
-  if (![config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata, config.indexer.receipt].some(handler => typeof handler === "function")) throw new CliError("INDEXER_HANDLER_REQUIRED");
-  const prepUrl = process.env[envName(config.prepUrlEnv, "PREP_URL")];
-  const databaseUrl = process.env[envName(config.databaseUrlEnv, "DATABASE_URL")];
-  const prepToken = process.env[envName(config.prepTokenEnv, "PREP_API_TOKEN")];
+  assertRunnable(project);
+  const {prepUrl, databaseUrl, prepToken} = projectEnvironment(project);
   if (!prepUrl || !databaseUrl) throw new CliError("PREP_URL_AND_DATABASE_URL_REQUIRED");
   let prep: Pick<PrepClient, "get" | "getHeight">;
   try { prep = dependencies.client ?? new PrepClient({ url: prepUrl, ...(prepToken ? { token: prepToken } : {}) }); }
@@ -171,12 +168,12 @@ export async function main(args = process.argv.slice(2), dependencies: {
       try { lastMeta = await prep.getHeight(...args); return lastMeta; } catch (error) { lastMeta = undefined; throw error; }
     },
   };
-  const normalizedUrl = new URL(prepUrl); if (!normalizedUrl.pathname.endsWith("/")) normalizedUrl.pathname += "/";
-  const fingerprint = createHash("sha256").update(bytes).update("\0").update(JSON.stringify({ schema: model.fingerprint, project: config.project, network: config.network, startHeight: config.startHeight, reorgWindow, handlerVersion: config.handlerVersion, prepUrl: normalizedUrl.href,
-    ...(config.shielded ? { shielded: { protocol: 1, accountId: config.shielded.accountId, keyFingerprint: config.shielded.keyFingerprint } } : {}) })).digest("hex");
+  const fingerprint = projectFingerprint(project, prepUrl);
   const controller = new AbortController();
   const abort = () => controller.abort(new DOMException("Stopped", "AbortError"));
+  const stopMessage = (message: unknown) => { if (message && typeof message === "object" && (message as {type?: unknown}).type === "zeer-stop") abort(); };
   process.once("SIGINT", abort); process.once("SIGTERM", abort);
+  process.on("message", stopMessage);
   const store = dependencies.store ?? new PostgresStore(databaseUrl, { project: config.project, network: config.network, startHeight: config.startHeight, reorgWindow, model, fingerprint });
   let receiptSource: NativeReceiptSource | undefined;
   try {
@@ -276,6 +273,8 @@ export async function main(args = process.argv.slice(2), dependencies: {
     }
   } finally {
     process.off("SIGINT", abort); process.off("SIGTERM", abort);
+    process.off("message", stopMessage);
+    if (process.connected) process.disconnect();
     await receiptSource?.close();
     await store.close();
   }

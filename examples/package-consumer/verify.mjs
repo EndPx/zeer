@@ -60,7 +60,7 @@ for (const name of ['prep-client', 'chef']) {
   if (name === 'chef') required.push(...shieldedTemplatePaths);
   for (const path of required) assert.ok(paths.includes(path), `Missing ${name} package entry: ${path}`);
   for (const path of paths) assert.ok(['LICENSE', 'package.json', 'README.md'].includes(path) || (name === 'chef' ? /^dist\/[a-z][a-z-]*\.(?:js|d\.ts)$/.test(path) || shieldedTemplatePaths.includes(path) : /^src\/index\.(?:js|d\.ts)$/.test(path)), `Unexpected packaged path: ${path}`);
-  assert.equal(manifest.version, name === 'chef' ? '0.3.0' : '0.1.0', 'Update candidate compatibility contract before changing version');
+  assert.equal(manifest.version, name === 'chef' ? '0.4.0' : '0.1.0', 'Update candidate compatibility contract before changing version');
   tarballs.push(join(output, manifest.filename));
 }
 await writeFile(join(consumer, 'package.json'), JSON.stringify({ name: 'zeer-tarball-consumer', private: true, type: 'module' }));
@@ -143,5 +143,5 @@ if (integration) {
   assert.equal(repeated.state, 'complete');
   assert.equal(repeated.blocks, 0);
 }
-await writeFile(join(output, 'acceptance.json'), JSON.stringify({ status: 'PASS', versions: { chef: '0.3.0', prepClient: '0.1.0' }, consumer, project, installedBin: true, strictTypes: true, fixtureIntegration: integration, indexedSchema: indexed, scope: integration ? 'Fixed mainnet fixture replay; not live node or reorg proof' : 'Package installation only; no pipeline evidence' }, null, 2));
+await writeFile(join(output, 'acceptance.json'), JSON.stringify({ status: 'PASS', versions: { chef: '0.4.0', prepClient: '0.1.0' }, consumer, project, installedBin: true, strictTypes: true, fixtureIntegration: integration, indexedSchema: indexed, scope: integration ? 'Fixed mainnet fixture replay; not live node or reorg proof' : 'Package installation only; no pipeline evidence' }, null, 2));
 console.log(JSON.stringify({ status: 'PASS', output, consumer, fixtureIntegration: integration }));

@@ -25,13 +25,21 @@ pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init
 Keep an exact version for reproducible automation:
 
 ```sh
-pnpx @zeer-dev/cli@0.3.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json
+pnpx @zeer-dev/cli@0.4.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json
 ```
 
 Generated projects pin their SDK version and retain their own lockfile. Running
 a newer launcher does not upgrade an existing project. Init creates files;
 install the generated dependencies and follow its README to configure your
 database and run the indexer. Shielded keys remain in protected local files.
+
+After configuring PostgreSQL, `pnpm run doctor` reports setup checks without
+changing it. On a fresh project, `pnpm run dev --migrate` explicitly permits
+compatible namespace initialization and starts the API and follower together.
+Dev generates types and typechecks first; it does not start Docker or install
+dependencies. Later runs use `pnpm run dev`. Run `pnpm run query` in another
+terminal, and use Ctrl+C to stop both managed processes. The installed project's
+scripts use its pinned Chef dependency rather than a new launcher resolution.
 
 [Quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) ·
 [CLI reference](https://zeer.endpx.cloud/docs/chef/cli-commands/)

@@ -3,13 +3,13 @@
 Open a working directory in your coding assistant and paste this prompt. You need Node 24.14+, Linux/WSL2 and PostgreSQL. The assistant should follow the same [Quickstart](/docs/chef/quickstart/) you would use manually.
 
 ```text
-Create a standalone Zeer Chef 0.3.0 testnet project in a fresh directory.
+Create a standalone Zeer Chef 0.4.0 testnet project in a fresh directory.
 
 Read https://zeer.endpx.cloud/docs/chef/quickstart/ and
 https://zeer.endpx.cloud/docs/chef/configuration/ before writing code.
 
 1. Use the public chain indexer template for this exercise. Run
-   pnpx @zeer-dev/cli@0.3.0 init with --template public,
+   pnpx @zeer-dev/cli@0.4.0 init with --template public,
    explicit --dir, --project and --start-height latest flags with --json,
    using a fresh directory and a new project name. Record the numeric startHeight
    returned by init; do not replace it with a later source tip.
@@ -17,14 +17,21 @@ https://zeer.endpx.cloud/docs/chef/configuration/ before writing code.
 3. Configure the public testnet Prep URL and the intended PostgreSQL database.
    Keep credentials in the generated private environment file.
 4. Use pnpm for dependency installation and project scripts (npm also works).
-   If the database is available, migrate the new namespace, serve GraphQL,
-   and sync through the captured startHeight. Compare the entity/checkpoint
-   against Prep at that exact height.
-5. Restart the same sync and confirm committed work is not duplicated.
+   Run pnpm run doctor. On a fresh namespace, MIGRATION_REQUIRED is expected;
+   other failed checks need to be resolved before starting.
+5. If the intended database and Prep service are available, run
+   pnpm run dev --migrate. This explicitly allows compatible migration;
+   dev generates types, typechecks and starts the API before the follower.
+   Query BlockSummary at the captured startHeight and compare its fields
+   with Prep at that exact height. Record the actual committed checkpoint.
+6. Stop dev with Ctrl+C and confirm both children stop. Restart with
+   pnpm run dev, then check that the same entity is retained without duplication
+   and the checkpoint continues from committed progress. Stop the test when done.
 
 Do not overwrite existing projects or databases. Keep handlers deterministic.
-If a runtime dependency is missing, report that check as pending. Show the
-commands and observed results separately from files merely prepared.
+If a runtime dependency is missing, report that check as pending. Do not start
+Docker, install dependencies or reset existing data as an implicit repair.
+Show commands and observed results separately from files merely prepared.
 ```
 
 For an application with your own model, replace `--template public` with `--template blank`. The assistant should install dependencies, verify that the blank starter typechecks, define entities in `schema.graphql`, generate their types and implement `handlers.ts` before indexing. It should not present an empty schema as a working application.
