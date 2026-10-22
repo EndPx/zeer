@@ -104,4 +104,4 @@ Choose `1` or `blank` to begin without sample entities. Install dependencies and
 
 Blank and public projects default to `latest`. A shielded inbox asks for a numeric birthday with no default: starting after a payment's block would miss that note. Init never reads a key, installs dependencies or starts a service.
 
-For unattended setup, use `pnpx @zeer-dev/cli@0.5.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json`. An exact launcher version makes automation repeatable. With npm, forward dev options as `npm run dev -- --migrate`. See the [CLI reference](/docs/chef/cli-commands/) for cache refresh and other commands, and [Performance](/docs/chef/benchmarking/) for measurement.
+For unattended setup, use `pnpx @zeer-dev/cli@0.6.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json`. An exact launcher version makes automation repeatable. With npm, forward dev options as `npm run dev -- --migrate`. See the [CLI reference](/docs/chef/cli-commands/) for cache refresh and other commands, and [Performance](/docs/chef/benchmarking/) for measurement.

@@ -1,0 +1,28 @@
+type Transaction {
+  id: ID!
+  height: Int! @index
+  version: Int!
+  inputs: [TransactionInput!]! @derivedFrom(field: "transaction")
+  outputs: [TransactionOutput!]! @derivedFrom(field: "transaction")
+}
+
+type TransactionInput {
+  id: ID!
+  transaction: Transaction! @index
+  inputIndex: Int!
+  resolution: String!
+  previousTxid: String
+  previousOutputIndex: Int
+  previousOutput: TransactionOutput
+  valueZat: BigInt
+  addresses: [String!]
+}
+
+type TransactionOutput {
+  id: ID!
+  transaction: Transaction! @index
+  outputIndex: Int!
+  valueZat: BigInt!
+  addresses: [String!]!
+  scriptHex: String
+}

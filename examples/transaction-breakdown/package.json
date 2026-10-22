@@ -1,0 +1,20 @@
+{
+  "name": "zeer-transaction-breakdown-example",
+  "private": true,
+  "type": "module",
+  "description": "Nested transaction input/output indexing with previous-output resolution",
+  "dependencies": {
+    "@zeer-dev/chef": "0.6.0"
+  },
+  "scripts": {
+    "codegen": "zeer codegen",
+    "typecheck": "tsc --noEmit",
+    "migrate": "zeer migrate",
+    "follow": "zeer sync --follow",
+    "serve": "zeer serve"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "@types/node": "24.19.2"
+  }
+}

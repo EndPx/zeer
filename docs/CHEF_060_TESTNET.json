@@ -1,0 +1,36 @@
+{
+  "network": "testnet",
+  "txid": "1dc8ca68f7fa920f4262cebaf70adbf21dcff6a2bf6d59908c3f5ecab9f8f751",
+  "height": 4515166,
+  "inputIndex": 0,
+  "inputValueZat": "247950000",
+  "resolution": "resolved",
+  "fundingTxid": "8a6abdc867dbed8f878bf5b3258253ed3e5f0bd634f839b4c30fa4b90517b69e",
+  "fundingHeight": 4515162,
+  "fundingOutputIndex": 2,
+  "fundingAddresses": [
+    "tmCARs7pqhUaYwev5vi3Fn3V7oB8PYzKmUS"
+  ],
+  "outputs": [
+    {
+      "outputIndex": 0,
+      "valueZat": "0",
+      "addresses": []
+    },
+    {
+      "outputIndex": 1,
+      "valueZat": "10000",
+      "addresses": [
+        "tm9iMLAuYMzJ6jtFLcA7rzUmfreGuKvr7Ma"
+      ]
+    },
+    {
+      "outputIndex": 2,
+      "valueZat": "247920000",
+      "addresses": [
+        "tmCARs7pqhUaYwev5vi3Fn3V7oB8PYzKmUS"
+      ]
+    }
+  ],
+  "verification": "Installed Chef 0.6.0 candidate; bounded live Prep replay; PostgreSQL; authenticated nested GraphQL; identical after restart"
+}

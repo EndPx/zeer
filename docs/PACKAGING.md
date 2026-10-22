@@ -1,6 +1,31 @@
 # Release package verification
 
-## Current release: Chef and launcher 0.5.0
+## Current release: Chef and launcher 0.6.0
+
+`@zeer-dev/chef@0.6.0` and `@zeer-dev/cli@0.6.0` were published and
+verified on 23 October 2026. Both `latest` tags select 0.6.0. Anonymous registry
+downloads matched the audited tarballs; the launcher pins Chef 0.6.0.
+Prep client remains 0.1.0.
+
+```sh
+pnpx @zeer-dev/cli@0.6.0 init
+```
+
+This release adds exact transparent input/output helpers, bounded previous-output
+lookup, scalar/reference lists and nested GraphQL relationships. The
+[transaction breakdown guide](TRANSACTION_BREAKDOWN.md) explains the model and
+its limits. Existing scalar-only schema fingerprints are preserved. Adding the
+breakdown model needs a fresh project namespace and replay; installing the
+package does not migrate hosted projects.
+
+The [release acceptance record](CHEF_060_ACCEPTANCE.md) contains the actual
+testnet transaction and checks: 187 Linux SDK tests with no skips, three launcher
+tests, an independent npm-installed testnet consumer, and all three registry
+starters. Shielded starter checks use an unfunded fixture fingerprint and do not
+claim a newly funded payment. The public docs describe the published API;
+the hosted Playground keeps its separately deployed schema.
+
+## Previous release: Chef and launcher 0.5.0
 
 `@zeer-dev/chef@0.5.0` and `@zeer-dev/cli@0.5.0` were published on
 22 October 2026. Both anonymous registry downloads matched the audited release

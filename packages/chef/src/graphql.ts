@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import { timingSafeEqual } from "node:crypto";
-import { buildSchema, execute, GraphQLScalarType, Kind, parse, validate, visit, type DocumentNode, type ExecutionResult } from "graphql";
+import { buildSchema, defaultFieldResolver, execute, GraphQLScalarType, Kind, parse, validate, visit, type DocumentNode, type ExecutionResult } from "graphql";
 import { decodeEntity, encodeEntity } from "./schema.js";
 import { CursorInvalidatedError, QueryInputError, consumptionNames, decodeCursor, encodeCursor, orderedInt, queryShape, validateSelection } from "./consumption.js";
 import { StoreNotReadyError } from "./store.js";
@@ -9,6 +9,10 @@ import type { ChefStore, Model, ReadView, EntityRange, EntityOrder } from "./typ
 
 class InputError extends QueryInputError {}
 class UnreadyError extends Error {}
+class RelationLimitError extends QueryInputError {
+  readonly code = "RELATION_LIMIT_EXCEEDED";
+  constructor(readonly entity: string, readonly field: string) { super(`Relation ${entity}.${field} exceeds its bound; query the child entity List with its reference filter and cursor`); }
+}
 const MAX_BODY = 65536;
 const MAX_RESPONSE = 2 * 1024 * 1024;
 const MAX_DOCUMENTS = 64;
@@ -68,7 +72,8 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
     const fields = Object.values(entity.fields);
     const ints = fields.filter(f => orderedInt(model, entity.name, f.name));
     const rangeType = ints.length ? `input ${names.entities[entity.name]!.range} { ${ints.map(f=>`${f.name}: ${names.bounds}`).join(" ")} }` : "";
-    return `${rangeType}\ninput ${names.entities[entity.name]!.order} { id: ${names.direction} ${ints.map(f=>`${f.name}: ${names.direction}`).join(" ")} }\ntype ${entity.name} { ${fields.map((f) => `${f.name}: ${f.scalar}${f.required ? "!" : ""}`).join(" ")} }\ninput ${entity.name}Filter { ${fields.map((f) => `${f.name}: ${f.scalar}`).join(" ")} }\ntype ${entity.name}Page { items: [${entity.name}!]! nextCursor: ID }`;
+    const type = (f: typeof fields[number]) => `${f.list ? `[${f.reference ?? f.scalar}${f.list.itemRequired ? "!" : ""}]` : f.reference ?? f.scalar}${f.required ? "!" : ""}`;
+    return `${rangeType}\ninput ${names.entities[entity.name]!.order} { id: ${names.direction} ${ints.map(f=>`${f.name}: ${names.direction}`).join(" ")} }\ntype ${entity.name} { ${fields.map((f) => `${f.name}${f.derivedFrom ? "(first: Int = 25)" : ""}: ${type(f)}`).join(" ")} }\ninput ${entity.name}Filter { ${fields.filter(f=>!f.list && !f.derivedFrom).map((f) => `${f.name}: ${f.scalar}`).join(" ")} }\ntype ${entity.name}Page { items: [${entity.name}!]! nextCursor: ID }`;
   }).join("\n");
   const schema = buildSchema(`scalar BigInt\nenum ${names.direction} { ASC DESC }\ninput ${names.bounds} { gte: Int lte: Int }\n${definition}\ntype ChefCheckpoint { height: Int hash: String anchorHash: String status: String! project: String generation: String revision: String lastCommitAt: String }\ntype Query { _meta: ChefCheckpoint! ${Object.keys(model.entities).map((name) => `${name}ById(id: ID!): ${name} ${name}List(first: Int = 25, after: ID, where: ${name}Filter, ${Object.keys(model.entities[name]!.fields).some(f=>orderedInt(model,name,f)) ? `range: ${names.entities[name]!.range},` : ""} orderBy: [${names.entities[name]!.order}!]): ${name}Page!`).join(" ")} }`);
   const bigint = schema.getType("BigInt") as GraphQLScalarType;
@@ -109,6 +114,7 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
       const normalized: Record<string, unknown> = Object.create(null);
       for (const [field, value] of Object.entries(where ?? {})) {
         try {
+          if (!entity.fields[field] || entity.fields[field]!.list || entity.fields[field]!.derivedFrom) throw new InputError("Unsupported filter");
           // Validate each equality operand using its actual scalar, without requiring unrelated fields.
           const subset: Model = { fingerprint: model.fingerprint, entities: { [name]: { name, fields: { id: { name: "id", scalar: "ID", required: true }, [field]: entity.fields[field]! } } } };
           normalized[field] = encodeEntity(subset, name, { id: "filter", [field]: value })[field];
@@ -213,9 +219,36 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
       const result = await store.read(async (view): Promise<ExecutionResult> => {
         cancellation.signal.throwIfAborted();
         if (view.checkpoint.status !== "ready") throw new UnreadyError();
-        return await execute({ schema, document, rootValue: root, contextValue: view, variableValues: payload.variables as Record<string, unknown> | undefined, operationName: payload.operationName as string | undefined });
+        let budget = 500;
+        const cache = new Map<string, Promise<unknown>>();
+        const consume = (count: number, entity: string, field: string) => { cancellation.signal.throwIfAborted(); budget -= count; if (budget < 0) throw new RelationLimitError(entity, field); };
+        const get = (entity: string, id: string, field: string) => {
+          const key = JSON.stringify([entity, id]);
+          if (!cache.has(key)) { consume(1, entity, field); cache.set(key, view.get(entity, checkedId(id)).then(row=>row === null ? null : decodeEntity(model, entity, row))); }
+          return cache.get(key)!;
+        };
+        return await execute({ schema, document, rootValue: root, contextValue: view, variableValues: payload.variables as Record<string, unknown> | undefined, operationName: payload.operationName as string | undefined,
+          fieldResolver: async (source, args, context, info) => {
+            const field = model.entities[info.parentType.name]?.fields[info.fieldName];
+            if (!field?.reference) return defaultFieldResolver(source, args, context, info);
+            if (field.derivedFrom) {
+              const first = args.first ?? 25;
+              if (!Number.isInteger(first) || first < 1 || first > 100) throw new InputError("Relation first must be 1..100");
+              // Reserve the requested row bound before I/O: concurrent sibling
+              // resolvers must not all issue reads before charging their results.
+              consume(first + 1, info.parentType.name, field.name);
+              const rows = await view.list(field.reference, { first: first + 1, where: { [field.derivedFrom]: source.id } });
+              if (rows.length > first) throw new RelationLimitError(info.parentType.name, field.name);
+              return rows.map(row=>decodeEntity(model, field.reference!, row));
+            }
+            const value = source[field.name];
+            if (value === null || value === undefined) return null;
+            return field.list ? Promise.all((value as (string | null)[]).map(id=>id === null ? null : get(field.reference!, id, field.name))) : get(field.reference, value as string, field.name);
+          } });
       });
       if (result.errors?.length) {
+        const relationError = result.errors.find(error=>error.originalError instanceof RelationLimitError)?.originalError as RelationLimitError | undefined;
+        if (relationError) { send(400, { errors: [{ message: relationError.message, extensions: { code: relationError.code, entity: relationError.entity, field: relationError.field, recovery: "QUERY_CHILD_LIST" } }] }); return; }
         const invalidated = result.errors.find(error => error.originalError instanceof CursorInvalidatedError)?.originalError as CursorInvalidatedError | undefined;
         if (invalidated) {
           const { project, generation, revision, checkpoint } = invalidated.current;

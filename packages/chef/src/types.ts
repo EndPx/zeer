@@ -1,9 +1,10 @@
 import type { Query } from "@zeer-dev/prep-client";
 export type Scalar = "ID" | "String" | "Boolean" | "Int" | "BigInt";
-export interface Field { name: string; scalar: Scalar; required: boolean; indexed?: true }
+export interface Field { name: string; scalar: Scalar; required: boolean; indexed?: true; list?: { itemRequired: boolean }; reference?: string; derivedFrom?: string }
 export interface EntityDefinition { name: string; fields: Record<string, Field> }
 export interface Model { entities: Record<string, EntityDefinition>; fingerprint: string }
-export type StoredEntity = Record<string, string | number | boolean | null> & { id: string };
+export type StoredScalar = string | number | boolean | null;
+export type StoredEntity = Record<string, StoredScalar | StoredScalar[]> & { id: string };
 export interface EntityRange { field: string; gte?: number; lte?: number }
 export interface EntityOrder { field: string; direction: "ASC" | "DESC" }
 export interface ListOptions {

@@ -19,8 +19,19 @@ export function queryIndexes(model: Model): { name: string; entity: string; fiel
     for (const [fieldName, field] of Object.entries(entity.fields).sort(compareNames)) {
       safeName(fieldName);
       if (field.name !== fieldName) throw new Error("Field definition name must match its key");
+      if (!scalars.has(field.scalar) || typeof field.required !== "boolean") throw new Error("Invalid scalar definition");
+      if (field.list && (typeof field.list !== "object" || Array.isArray(field.list) || Object.keys(field.list).length !== 1 || typeof field.list.itemRequired !== "boolean")) throw new Error("Invalid list definition");
+      if (field.reference) {
+        safeName(field.reference);
+        if (field.scalar !== "ID" || !model.entities[field.reference]) throw new Error("Invalid relation target");
+      }
+      if (field.derivedFrom) {
+        safeName(field.derivedFrom);
+        const inverse = model.entities[field.reference ?? ""]?.fields[field.derivedFrom];
+        if (!field.list || !inverse || inverse.reference !== entityName || inverse.list || inverse.derivedFrom || !inverse.indexed) throw new Error("Invalid derived relation");
+      }
       if (!Object.hasOwn(field, "indexed")) continue;
-      if (field.indexed !== true || fieldName === "id" || !["Int", "Boolean", "BigInt", "ID"].includes(field.scalar)) {
+      if (field.indexed !== true || fieldName === "id" || field.list || field.derivedFrom || !["Int", "Boolean", "BigInt", "ID"].includes(field.scalar)) {
         throw new Error("@index requires Int, Boolean, BigInt or a non-id ID field");
       }
       if (indexes.length === 8) throw new Error("A project supports at most 8 @index fields");
@@ -48,15 +59,31 @@ export function parseModel(sdl: string): Model {
       safeName(fieldName);
       if (fields[fieldName] || field.arguments?.length) throw new Error(`Invalid or duplicate field: ${fieldName}`);
       const directives = field.directives ?? [];
-      if (directives.length > 1 || (directives.length === 1 && (directives[0]!.name.value !== "index" || directives[0]!.arguments?.length))) {
-        throw new Error(`Only one argument-free @index directive is supported: ${fieldName}`);
+      if (directives.length > 1 || directives.some(d=>!["index", "derivedFrom"].includes(d.name.value))) {
+        throw new Error(`Use @index or @derivedFrom: ${fieldName}`);
       }
       const required = field.type.kind === Kind.NON_NULL_TYPE;
       const type = field.type.kind === Kind.NON_NULL_TYPE ? field.type.type : field.type;
-      if (type.kind !== Kind.NAMED_TYPE || !scalars.has(type.name.value as Scalar)) throw new Error("Entity fields must be ID, String, Boolean, Int, or BigInt; relations and lists are unsupported");
-      fields[fieldName] = { name: fieldName, scalar: type.name.value as Scalar, required, ...(directives.length ? { indexed: true as const } : {}) };
+      const item = type.kind === Kind.LIST_TYPE ? type.type : type;
+      const named = item.kind === Kind.NON_NULL_TYPE ? item.type : item;
+      if (named.kind !== Kind.NAMED_TYPE) throw new Error("Nested lists are unsupported");
+      const target = named.name.value;
+      safeName(target);
+      const reference = !scalars.has(target as Scalar);
+      const index = directives.find(d=>d.name.value === "index");
+      const derived = directives.find(d=>d.name.value === "derivedFrom");
+      if (index?.arguments?.length) throw new Error("@index takes no arguments");
+      let derivedFrom: string | undefined;
+      if (derived) {
+        const arg = derived.arguments?.[0];
+        if (derived.arguments?.length !== 1 || arg?.name.value !== "field" || arg.value.kind !== Kind.STRING || !reference || type.kind !== Kind.LIST_TYPE) throw new Error("@derivedFrom requires an entity list and one field string");
+        safeName(arg.value.value); derivedFrom = arg.value.value;
+      }
+      fields[fieldName] = { name: fieldName, scalar: reference ? "ID" : target as Scalar, required,
+        ...(index ? { indexed: true as const } : {}), ...(type.kind === Kind.LIST_TYPE ? { list: { itemRequired: item.kind === Kind.NON_NULL_TYPE } } : {}),
+        ...(reference ? { reference: target } : {}), ...(derivedFrom ? { derivedFrom } : {}) };
     }
-    if (fields.id?.scalar !== "ID" || !fields.id.required) throw new Error(`Entity ${name} requires id: ID!`);
+    if (fields.id?.scalar !== "ID" || !fields.id.required || fields.id.list || fields.id.reference) throw new Error(`Entity ${name} requires id: ID!`);
     entities[name] = { name, fields: Object.fromEntries(Object.entries(fields).sort(compareNames)) };
   }
   const names = new Set(["Query", "ChefCheckpoint", "ChefEntities", "ChefHandlerContext", "HandlerContext", ...scalars]);
@@ -67,6 +94,14 @@ export function parseModel(sdl: string): Model {
     }
   }
   const ordered = Object.fromEntries(Object.entries(entities).sort(compareNames));
+  for (const entity of Object.values(ordered)) for (const field of Object.values(entity.fields)) {
+    if (field.reference && !ordered[field.reference]) throw new Error(`Unknown relation target: ${field.reference}`);
+    if (field.derivedFrom) {
+      const inverse = ordered[field.reference!]!.fields[field.derivedFrom];
+      if (!inverse || inverse.reference !== entity.name || inverse.list || inverse.derivedFrom) throw new Error(`Invalid @derivedFrom inverse: ${entity.name}.${field.name}`);
+      if (!inverse.indexed) throw new Error(`@derivedFrom requires @index on ${field.reference}.${field.derivedFrom}`);
+    }
+  }
   const model = { entities: ordered, fingerprint: createHash("sha256").update(JSON.stringify(ordered)).digest("hex") };
   queryIndexes(model);
   return model;
@@ -78,12 +113,19 @@ export function encodeEntity(model: Model, name: string, input: unknown): Stored
   if (!input || typeof input !== "object" || Array.isArray(input) || ![Object.prototype, null].includes(Object.getPrototypeOf(input))) throw new Error("Entity must be a plain object");
   const value = input as Record<string, unknown>;
   if (Object.keys(value).some((key) => !Object.hasOwn(entity.fields, key))) throw new Error("Unknown entity field");
-  const stored: Record<string, string | number | boolean | null> = Object.create(null);
+  const stored: StoredEntity = Object.create(null);
   for (const field of Object.values(entity.fields)) {
+    if (field.derivedFrom) { if (Object.hasOwn(value, field.name)) throw new Error(`Derived field is read-only: ${field.name}`); continue; }
     const item = Object.hasOwn(value, field.name) ? value[field.name] : undefined;
     if (item === null || item === undefined) {
       if (field.required) throw new Error(`Missing required field: ${field.name}`);
       stored[field.name] = null;
+      continue;
+    }
+    if (field.list) {
+      if (!Array.isArray(item) || item.length > 100) throw new Error(`List requires at most 100 items: ${field.name}`);
+      const elementModel: Model = { fingerprint: model.fingerprint, entities: { Item: { name: "Item", fields: { id: { name: "id", scalar: "ID", required: true }, value: { name: "value", scalar: field.scalar, required: field.list.itemRequired } } } } };
+      stored[field.name] = item.map(element=>encodeEntity(elementModel, "Item", { id: "item", value: element }).value as string | number | boolean | null);
       continue;
     }
     switch (field.scalar) {
@@ -116,13 +158,14 @@ export function decodeEntity(model: Model, name: string, stored: StoredEntity): 
   const validated = encodeEntity(model, name, stored);
   const decoded: Record<string, unknown> = { ...validated };
   for (const field of Object.values(model.entities[name]!.fields)) {
-    if (field.scalar === "BigInt" && validated[field.name] !== null) decoded[field.name] = BigInt(validated[field.name] as string);
+    if (!field.derivedFrom && field.scalar === "BigInt" && validated[field.name] !== null) decoded[field.name] = field.list
+      ? (validated[field.name] as (string | null)[]).map(v=>v === null ? null : BigInt(v)) : BigInt(validated[field.name] as string);
   }
   return decoded;
 }
 
 export function generateTypes(model: Model): string {
   const scalarType = { ID: "string", String: "string", Boolean: "boolean", Int: "number", BigInt: "bigint" };
-  const entities = Object.values(model.entities).map((entity) => `export interface ${entity.name} {\n${Object.values(entity.fields).map((field) => `  ${field.name}: ${scalarType[field.scalar]}${field.required ? "" : " | null"};`).join("\n")}\n}`).join("\n\n");
+  const entities = Object.values(model.entities).map((entity) => `export interface ${entity.name} {\n${Object.values(entity.fields).filter(f=>!f.derivedFrom).map((field) => `  ${field.name}: ${field.list ? `(${scalarType[field.scalar]}${field.list.itemRequired ? "" : " | null"})[]` : scalarType[field.scalar]}${field.required ? "" : " | null"};`).join("\n")}\n}`).join("\n\n");
   return `// Generated by Zeer Chef. Schema fingerprint: ${model.fingerprint}\nimport type { HandlerContext } from "@zeer-dev/chef";\n\n${entities}\n\nexport interface ChefEntities {\n${Object.keys(model.entities).map((name) => `  ${name}: ${name};`).join("\n")}\n}\n\nexport type ChefHandlerContext = HandlerContext<ChefEntities>;\n`;
 }

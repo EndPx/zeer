@@ -62,7 +62,7 @@ test("programmatic index models are validated before database access or SQL cons
 test("schema rejects unsupported constructs and unsafe/colliding names", () => {
   for (const schema of [
     "type A { id: String! }", "type A { id: ID }", "type A { id: ID! x: Float }",
-    "type A { id: ID! x: [Int] }", "type A { id: ID! x(arg: Int): Int }",
+    "type A { id: ID! x: [[Int]] }", "type A { id: ID! x(arg: Int): Int }",
     "type A { id: ID! x: String @foo }", "type A @foo { id: ID! }",
     "type A implements B { id: ID! }", "scalar X", "enum X { A }",
     "type __A { id: ID! }", "type A { id: ID! constructor: String }",

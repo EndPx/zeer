@@ -1,0 +1,19 @@
+query TransactionBreakdown($txid: ID!) {
+  TransactionById(id: $txid) {
+    id
+    height
+    inputs(first: 100) {
+      inputIndex
+      resolution
+      valueZat
+      addresses
+      previousOutput {
+        outputIndex
+        valueZat
+        addresses
+        transaction { id }
+      }
+    }
+    outputs(first: 100) { outputIndex valueZat addresses }
+  }
+}

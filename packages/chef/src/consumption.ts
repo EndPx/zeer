@@ -20,7 +20,7 @@ export function consumptionNames(model: Model): { direction: string; bounds: str
 }
 export function orderedInt(model: Model, entity: string, field: string): boolean {
   const definition = model.entities[entity]?.fields[field];
-  return !!definition && definition.scalar === "Int" && definition.required && definition.indexed === true;
+  return !!definition && !definition.list && !definition.reference && !definition.derivedFrom && definition.scalar === "Int" && definition.required && definition.indexed === true;
 }
 export function validateSelection(model: Model, entity: string, range?: EntityRange, order?: EntityOrder): void {
   const int = (value: unknown) => Number.isInteger(value) && Number(value) >= -2147483648 && Number(value) <= 2147483647;

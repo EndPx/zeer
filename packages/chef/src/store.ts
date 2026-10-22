@@ -437,7 +437,7 @@ export class PostgresStore implements ChefStore {
           if (options.after !== undefined) { this.id(options.after); values.push(options.after); clauses.push(`id > $${values.length}`); }
           for (const [field, value] of Object.entries(options.where ?? {})) {
             const definition = this.options.model.entities[entity]?.fields[field];
-            if (!definition || !Object.hasOwn(this.options.model.entities[entity]!.fields, field)) throw new Error(`Unknown filter field: ${field}`);
+            if (!definition || definition.list || definition.derivedFrom || !Object.hasOwn(this.options.model.entities[entity]!.fields, field)) throw new Error(`Unknown filter field: ${field}`);
             let encoded: unknown = value;
             if (value === null) { if (definition.required) throw new Error("Required filter field cannot be null"); }
             else if (definition.scalar === "BigInt") { const integer = typeof value === "bigint" ? value.toString() : value; if (typeof integer !== "string" || !/^(0|-?[1-9][0-9]{0,127})$/.test(integer)) throw new Error("Invalid BigInt filter"); encoded = integer; }

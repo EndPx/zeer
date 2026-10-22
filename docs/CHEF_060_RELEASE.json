@@ -1,0 +1,92 @@
+{
+  "version": "0.6.0",
+  "verifiedOn": "2026-10-23",
+  "packages": {
+    "@zeer-dev/chef": {
+      "version": "0.6.0",
+      "latest": "0.6.0",
+      "sha256": "c07a13c130673e40cdf6d14234e8d76c56420624f2d34a18b5d351161cd790c6",
+      "sha512": "e18bcf6c7e8ad5fcaaa384494d5f53c293cc2519e44e1ae10ecb28b18b6596f35053cb17a910c37077208c546fa6d375d98c7cad25f14a8bb2a90bd359740748",
+      "bytes": 95899
+    },
+    "@zeer-dev/cli": {
+      "version": "0.6.0",
+      "latest": "0.6.0",
+      "chefDependency": "0.6.0",
+      "sha256": "bf0e06d3d97c67370e480d1ad0533a58cd7ce1738031d30e1b14253a94400641",
+      "sha512": "87f045133069228cb3a7754881b9ca0613222094e95c4912283dbee0a6b79a39da549dbbed5d4dae8c97f260a3c151f3e7095015877f2f5bef048ff201024d5a",
+      "bytes": 2636
+    }
+  },
+  "anonymousRegistryTarballsMatch": true,
+  "linuxTests": {
+    "sdkPassed": 187,
+    "sdkSkipped": 0,
+    "sdkFailed": 0,
+    "launcherPassed": 3
+  },
+  "registrySdkTestnetAcceptance": "PASS",
+  "registryLauncherStarters": {
+    "status": "PASS",
+    "version": "0.6.0",
+    "starters": [
+      {
+        "template": "blank",
+        "sdk": "0.6.0",
+        "registryInstall": true,
+        "codegen": "expected refusal until schema",
+        "typecheck": "not runnable until schema",
+        "noOverwrite": "PASS"
+      },
+      {
+        "template": "public",
+        "sdk": "0.6.0",
+        "registryInstall": true,
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS"
+      },
+      {
+        "template": "shielded",
+        "sdk": "0.6.0",
+        "registryInstall": true,
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS"
+      }
+    ],
+    "actualPnpmDlxVersion": "0.6.0"
+  },
+  "publicDocs": [
+    {
+      "url": "https://zeer.endpx.cloud/docs/chef/schema/",
+      "status": 200,
+      "contentVerified": [
+        "Chef 0.6.0",
+        "derivedFrom"
+      ]
+    },
+    {
+      "url": "https://zeer.endpx.cloud/docs/chef/quickstart/",
+      "status": 200,
+      "contentVerified": [
+        "0.6.0"
+      ]
+    },
+    {
+      "url": "https://zeer.endpx.cloud/docs/chef/cli-commands/",
+      "status": 200,
+      "contentVerified": [
+        "0.6.0"
+      ]
+    },
+    {
+      "url": "https://zeer.endpx.cloud/docs/chef/quickstart-ai/",
+      "status": 200,
+      "contentVerified": [
+        "0.6.0"
+      ]
+    }
+  ],
+  "hostedNamespacesMigrated": false
+}

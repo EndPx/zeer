@@ -327,3 +327,9 @@ CHEF_TEST_DATABASE_URL=postgresql://... npm run test:chef
 PostgreSQL tests skip when their environment variable is absent. Such a run is
 not a database integration proof. Keep database durability settings, source
 coverage and deployment limits explicit in evidence.
+
+## Transaction breakdown in 0.6.0
+
+Chef 0.6.0 adds exact transparent-output parsing, callback-based previous-output resolution and an explicit bounded Prep batch-prefetch helper. A canonical output index supplies values and script addresses to spending inputs; unavailable history stays unresolved with null values. It also adds scalar/reference lists, forward entity references and inverse `@derivedFrom` relationships read in the root query's snapshot. These additions extend the scalar-only 0.5.0 schema profile.
+
+See the [transaction breakdown example](../../examples/transaction-breakdown/README.md) and [implementation contract](../../docs/TRANSACTION_BREAKDOWN.md) for the supported schema, replay/coverage requirements, nested-query limits and cursor recovery.
