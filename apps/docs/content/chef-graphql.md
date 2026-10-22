@@ -1,6 +1,6 @@
 # Querying with GraphQL
 
-Chef serves authenticated, read-only queries for your project's entity schema. **Chef 0.2.0** adds bounded range queries, revision-bound cursors and cached source metadata. Existing 0.1.x projects need the additive migration below before using this API. These features apply to your project running 0.2.0; publishing the SDK does not automatically upgrade hosted Playground projects.
+Chef serves authenticated, read-only queries for your project's entity schema. **Chef 0.2.0 introduced** bounded range queries, revision-bound cursors and cached source metadata; Chef 0.3.0 retains the same API. Existing 0.1.x projects need the additive migration below before using it. These features apply to your own project running 0.2.0 or newer; publishing the SDK does not automatically upgrade hosted Playground projects.
 
 ```graphql
 query {
@@ -77,7 +77,7 @@ Status remains readable while entity reads are reconciling or blocked. It uses c
 
 ## Upgrade an existing project
 
-Stop its follower and API processes, keep the existing config and schema, install Chef 0.2.0, then run the project's `migrate` command before restarting both processes. The migration adds metadata and a revision trigger to the existing marked namespace; it preserves entities, checkpoints and undo history. It does not replay the chain. Back up the database before an operational upgrade.
+Stop its follower and API processes, keep the existing config and schema, install Chef 0.3.0, then run the project's `migrate` command before restarting both processes. The migration from 0.1.x adds metadata and a revision trigger to the existing marked namespace; it preserves entities, checkpoints and undo history. It does not replay the chain. Chef 0.3.0 introduces no further database-format change from 0.2.0. Back up the database before an operational upgrade.
 
 Do not change schema/handler identity merely to run this migration. Adding `@index` to a previously unindexed field changes model identity and requires a [new project namespace](/docs/chef/evolution/). A process using the new store refuses an unmigrated project. Custom stores must provide snapshot-consistent `ReadView.consumption` and implement ordered keysets before serving list queries; an absent context fails closed.
 

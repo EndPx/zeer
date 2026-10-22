@@ -59,3 +59,29 @@ test('init reports missing arguments and rejects conflicting flags',()=>{
     assert.equal(r.status,1); assert.ok(JSON.parse(r.stderr).error.code);
   }
 });
+
+test('blank scaffold has no sample model or application handler',async t=>{
+  const parent=await mkdtemp(join(tmpdir(),'zeer-blank-'));
+  const directory=join(parent,'blank');const result=await scaffoldProject({directory,project:'blank',startHeight:100,template:'blank'});
+  assert.equal(result.template,'blank');
+  const schema=await readFile(join(directory,'schema.graphql'),'utf8'),handlers=await readFile(join(directory,'handlers.ts'),'utf8');
+  assert.equal(schema.replace(/#[^\n]*/g,'').trim(),'');
+  assert.match(handlers,/defineIndexer\(\{\}\)/);assert.doesNotMatch(handlers,/async block|receipt|BlockSummary/);
+  assert.doesNotMatch(await readFile(join(directory,'chef.config.ts'),'utf8'),/chef.generated/);
+  assert.match((await readFile(join(directory,'README.md'),'utf8')),/Define your model/);
+});
+
+test('shielded scaffold packages receipt/query/consumer files and only local key paths',async()=>{
+  const parent=await mkdtemp(join(tmpdir(),'zeer-inbox-')),directory=join(parent,'inbox');
+  const result=await scaffoldProject({directory,project:'my_inbox',startHeight:4523000,template:'shielded'});
+  assert.equal(result.template,'shielded');
+  const manifest=JSON.parse(await readFile(join(directory,'package.json'),'utf8'));
+  assert.equal(manifest.scripts['scanner:install'],'node install-scanner.mjs');assert.match(manifest.scripts.consume,/--env-file/);
+  assert.match(await readFile(join(directory,'schema.graphql'),'utf8'),/type ReadableNote/);
+  assert.match(await readFile(join(directory,'handlers.ts'),'utf8'),/valueZat: BigInt\(receipt.value_zat\)/);
+  assert.match(await readFile(join(directory,'consumer.mjs'),'utf8'),/class ContinuousConsumer/);
+  assert.match(await readFile(join(directory,'.env'),'utf8'),/^ZEER_VIEWING_KEY_FILE=$/m);
+  assert.match(await readFile(join(directory,'.env'),'utf8'),/^ZEER_BIRTHDAY_HEIGHT=4523000$/m);
+  assert.match(await readFile(join(directory,'install-scanner.mjs'),'utf8'),/1a24bcc9f066466ec9dab902b21d8619c8a4a5fffdd1a2c2d8fc099b3fa6b00c/);
+  assert.ok(result.files.includes('read-transaction.mjs'));
+});

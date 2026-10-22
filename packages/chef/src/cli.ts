@@ -16,7 +16,8 @@ import { cliFailure, formatOutput, readStatus, sourceObservation } from "./cli-o
 import type { ChefConfig, ChefStore } from "./types.js";
 import { ScaffoldError, scaffoldProject } from "./scaffold.js";
 import { NativeReceiptSource, ReceiptSourceError } from "./receipts.js";
-import { collectInitAnswers, initPrepUrl, PUBLIC_TESTNET_PREP, resolveStartHeight } from "./init.js";
+import { collectInitAnswers, initPrepUrl, PUBLIC_TESTNET_PREP, resolveStartHeight, validateBirthday } from "./init.js";
+import { validateTemplate } from "./scaffold-templates.js";
 
 class CliError extends Error { constructor(readonly code: string) { super(code); } }
 const help = "zeer-chef <codegen|migrate|sync|serve|status> [--config chef.config.ts] [--json | --human]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nOutput defaults to readable text on a terminal and JSON elsewhere. status observes Prep with a 5-second timeout without changing the database.\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
@@ -36,7 +37,7 @@ function temporarySourceError(error: unknown): boolean {
 }
 
 const commandHelp: Record<string, string> = {
-  init: "zeer init [--dir NEW_DIRECTORY] [--project NAME] [--start-height latest|HEIGHT] [--prep-url URL]\nMissing options are asked on a terminal. Start block defaults to latest, captured once from Prep /height with a 5-second timeout.\nSource: --prep-url, then PREP_URL, then the public testnet Prep. PREP_API_TOKEN is used only with an explicitly configured source.\nScripts must provide --dir, --project and --start-height. An explicit numeric height works offline.\nCreates new project files only. Does not install packages, start services or overwrite an existing directory.",
+  init: "zeer init [--template blank|public|shielded] [--dir NEW_DIRECTORY] [--project NAME] [--start-height latest|HEIGHT] [--prep-url URL]\nGuided setup offers Blank project, Public chain indexer and Shielded payment inbox.\nPublic/blank default to latest indexed, captured once from Prep /height with a 5-second timeout. Shielded requires an explicit numeric wallet birthday.\nSource: --prep-url, then PREP_URL, then the public testnet Prep. PREP_API_TOKEN is sent only to the matching explicitly configured source.\nScripts must provide --dir, --project and --start-height; omitted template retains the public default. Numeric heights work offline.\nBlank has no sample entity/handler. Shielded includes a pinned scanner installer and local receipt consumer.\nCreates new files only; no key contents are collected, no packages installed, no services started and no existing directory overwritten.",
   codegen: "zeer codegen [--config chef.config.ts]\nRead the schema and write chef.generated.ts beside the config. Does not connect to Prep or PostgreSQL. Run typecheck separately.",
   migrate: "zeer migrate [--config chef.config.ts]\nExplicitly initialize/migrate the compatible project namespace and its declared indexes. Stop the follower and API before upgrading an existing namespace. Does not replay blocks or reset an incompatible project.",
   sync: "zeer sync [--config chef.config.ts] [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nDefault: capture the available Prep tip, index through it and exit. --follow keeps polling; --to is an inclusive finite target.\n--poll-seconds accepts 1..60 and is used while following. Compatible restarts resume the durable checkpoint. Ctrl+C stops with committed progress retained.",
@@ -48,7 +49,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
   store?: ChefStore; client?: Pick<PrepClient, "get" | "getHeight">;
   write?: (text: string) => void; tty?: boolean; prompt?: (question: string) => Promise<string>;
 } = {}): Promise<void> {
-  if (args.length === 0 || args[0] === "--help" || args[0] === "help") { process.stdout.write(`zeer init\nAsk for project name, folder and start block (default: latest indexed). All commands also accept the zeer-chef alias.\n${help}\ninit: [--dir NEW_DIRECTORY] [--project project_name] [--start-height latest|HEIGHT] [--prep-url URL]\nzeer <command> --help: command options and behavior. zeer --version: installed package version.\nFor scripts, supply all three init options with --json. Creates project files; latest reads Prep metadata once.\n`); return; }
+  if (args.length === 0 || args[0] === "--help" || args[0] === "help") { process.stdout.write(`Zeer Chef - Zcash Testnet\n${commandHelp.init}\n\n${help}\nAll commands also accept the zeer-chef alias.\nzeer <command> --help: command options and behavior. zeer --version: installed package version.\n`); return; }
   if (args.length === 1 && args[0] === "--version") {
     process.stdout.write(`${JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")).version}\n`); return;
   }
@@ -60,7 +61,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
   const flags = new Map<string, string>();
   for (let index = 1; index < args.length; index++) {
     const name = args[index]!;
-    const allowed = command === "init" ? ["--dir", "--project", "--start-height", "--prep-url", "--json", "--human"] : ["--config", "--json", "--human", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : []), ...(command === "serve" ? ["--listen", "--port"] : [])];
+    const allowed = command === "init" ? ["--dir", "--project", "--start-height", "--prep-url", "--template", "--json", "--human"] : ["--config", "--json", "--human", ...(command === "sync" ? ["--to", "--follow", "--poll-seconds"] : []), ...(command === "serve" ? ["--listen", "--port"] : [])];
     if (!allowed.includes(name) || flags.has(name)) throw new CliError("INVALID_OR_DUPLICATE_FLAG");
     const value = ["--follow", "--json", "--human"].includes(name) ? "true" : args[++index];
     if (!value || value.startsWith("--")) throw new CliError("MISSING_FLAG_VALUE");
@@ -71,6 +72,9 @@ export async function main(args = process.argv.slice(2), dependencies: {
   const out = (value: Record<string, unknown>) => (dependencies.write ?? ((text: string) => { process.stdout.write(text); }))(formatOutput(value, human));
   if (command === "init") {
     let directory = flags.get("--dir"), project = flags.get("--project"), start = flags.get("--start-height");
+    let template = flags.get("--template"), selectedSource = (flags.get("--prep-url") ?? process.env.PREP_URL) || undefined;
+    const explicitSource = selectedSource;
+    if (template !== undefined) validateTemplate(template);
     const controller = new AbortController();
     const cancel = () => controller.abort();
     process.once("SIGINT", cancel); process.once("SIGTERM", cancel);
@@ -82,19 +86,20 @@ export async function main(args = process.argv.slice(2), dependencies: {
         write("Zeer Chef · Zcash Testnet\nCreate a local indexer. Press Enter to use the defaults.\n");
         readline = dependencies.prompt ? undefined : createInterface({ input: process.stdin, output: process.stdout });
         readline?.once("SIGINT", cancel); readline?.once("close", cancel);
-        const answers = await collectInitAnswers({ directory, project, startHeight: start },
+        const answers = await collectInitAnswers({ directory, project, startHeight: start, template, prepUrl: selectedSource },
           dependencies.prompt ?? (question => readline!.question(question, { signal: controller.signal })),
           code => write(`${cliFailure(undefined, code).help}\n`));
-        ({ directory, project, startHeight: start } = answers);
+        ({ directory, project, startHeight: start, template, prepUrl: selectedSource } = answers);
       }
       if (!directory || !project || start === undefined) throw new CliError("INIT_OPTIONS_REQUIRED");
-      const explicitSource = (flags.get("--prep-url") ?? process.env.PREP_URL) || undefined;
-      const prepUrl = initPrepUrl(explicitSource ?? PUBLIC_TESTNET_PREP);
+      template ??= "public";
+      validateTemplate(template); validateBirthday(template, start);
+      const prepUrl = initPrepUrl(selectedSource ?? PUBLIC_TESTNET_PREP);
       const startHeight = await resolveStartHeight(start, { url: prepUrl,
-        token: explicitSource ? process.env.PREP_API_TOKEN || undefined : undefined,
+        token: explicitSource && initPrepUrl(explicitSource) === prepUrl ? process.env.PREP_API_TOKEN || undefined : undefined,
         client: dependencies.client, signal: controller.signal });
       controller.signal.throwIfAborted();
-      const result = await scaffoldProject({ directory, project, startHeight, prepUrl });
+      const result = await scaffoldProject({ directory, project, startHeight, prepUrl, template });
       out({ command, status: "complete", project, network: "testnet", startHeight,
         startSelection: start === "latest" ? "latest_indexed" : "explicit", ...result });
       return;
@@ -117,7 +122,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
   if (!/^[a-z][a-z0-9_]{0,31}$/.test(config.project) || !["mainnet", "testnet", "regtest"].includes(config.network)
     || !Number.isInteger(config.startHeight) || config.startHeight < 0 || config.startHeight > 0xffff_fffe
     || typeof config.schema !== "string" || !config.schema || typeof config.handlerVersion !== "string" || !config.handlerVersion.length || config.handlerVersion.length > 128
-    || !config.indexer || typeof config.indexer !== "object" || ![config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata, config.indexer.receipt].some((handler) => typeof handler === "function")
+    || !config.indexer || typeof config.indexer !== "object" || Array.isArray(config.indexer)
     || [config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata, config.indexer.receipt].some((handler) => handler !== undefined && typeof handler !== "function")
     || (config.indexer.transaction && config.indexer.transactionMetadata)) throw new CliError("INVALID_CONFIG");
   if (config.sync !== undefined && (!config.sync || typeof config.sync !== "object" || Array.isArray(config.sync)
@@ -137,13 +142,16 @@ export async function main(args = process.argv.slice(2), dependencies: {
   let end = flags.has("--to") ? integer(flags.get("--to"), config.startHeight, 0xffff_fffe, "INVALID_END_HEIGHT") : undefined;
   const port = integer(flags.get("--port") ?? "39370", 1, 65535, "INVALID_PORT");
   const schemaPath = resolve(dirname(configPath), config.schema);
-  const model = parseModel(await readFile(schemaPath, "utf8").catch(() => { throw new CliError("SCHEMA_FILE_UNREADABLE"); }));
+  const schema = await readFile(schemaPath, "utf8").catch(() => { throw new CliError("SCHEMA_FILE_UNREADABLE"); });
+  if (!schema.replace(/#[^\r\n]*/g, "").trim()) throw new CliError("EMPTY_SCHEMA_ADD_ENTITY");
+  const model = parseModel(schema);
   if (command === "codegen") {
     const generated = resolve(dirname(configPath), "chef.generated.ts");
     await writeFile(generated, generateTypes(model), "utf8");
     out({ command, status: "complete", schemaFingerprint: model.fingerprint, output: generated });
     return;
   }
+  if (![config.indexer.block, config.indexer.transaction, config.indexer.transactionMetadata, config.indexer.receipt].some(handler => typeof handler === "function")) throw new CliError("INDEXER_HANDLER_REQUIRED");
   const prepUrl = process.env[envName(config.prepUrlEnv, "PREP_URL")];
   const databaseUrl = process.env[envName(config.databaseUrlEnv, "DATABASE_URL")];
   const prepToken = process.env[envName(config.prepTokenEnv, "PREP_API_TOKEN")];

@@ -1,10 +1,18 @@
 import { ScaffoldError, validateProjectName, validateStartHeight } from "./scaffold.js";
 import { PrepClient } from "@zeer-dev/prep-client";
 import type { Height } from "@zeer-dev/prep-client";
+import { validateTemplate } from "./scaffold-templates.js";
+import type { StarterTemplate } from "./scaffold-templates.js";
 
 export const PUBLIC_TESTNET_PREP = "https://zeer.endpx.cloud/api/prep";
 
-export type InitAnswers = { directory?: string; project?: string; startHeight?: string };
+export type InitAnswers = { directory?: string; project?: string; startHeight?: string; template?: string; prepUrl?: string };
+export type ResolvedInitAnswers = Required<Omit<InitAnswers, "template">> & { template: StarterTemplate };
+
+export function validateBirthday(template: string, value: string): void {
+  height(value);
+  if (template === "shielded" && value === "latest") throw new ScaffoldError("SHIELDED_BIRTHDAY_REQUIRED");
+}
 
 function height(value: string): void {
   if (value === "latest") return;
@@ -44,12 +52,15 @@ export async function collectInitAnswers(
   supplied: InitAnswers,
   ask: (question: string) => Promise<string>,
   invalid: (code: string) => void,
-): Promise<Required<InitAnswers>> {
+): Promise<ResolvedInitAnswers> {
   if (supplied.project !== undefined) validateProjectName(supplied.project);
   if (supplied.startHeight !== undefined) height(supplied.startHeight);
+  if (supplied.template !== undefined) validateTemplate(supplied.template);
+  if (supplied.prepUrl !== undefined) initPrepUrl(supplied.prepUrl);
+  if (supplied.template && supplied.startHeight !== undefined) validateBirthday(supplied.template, supplied.startHeight);
   async function question(label: string, fallback: string, validate?: (value: string) => void): Promise<string> {
     for (;;) {
-      const answer = (await ask(`${label} (${fallback}): `)).trim() || fallback;
+      const answer = (await ask(`${label}${fallback ? ` (${fallback})` : ""}: `)).trim() || fallback;
       try { validate?.(answer); return answer; }
       catch (error) {
         if (!(error instanceof ScaffoldError)) throw error;
@@ -57,8 +68,15 @@ export async function collectInitAnswers(
       }
     }
   }
+  const selection = supplied.template ?? await question("Template: 1 Blank project, 2 Public chain indexer, 3 Shielded payment inbox", "public", value => {
+    validateTemplate(({ "1": "blank", "2": "public", "3": "shielded" } as Record<string, string>)[value] ?? value);
+  });
+  const template = ({ "1": "blank", "2": "public", "3": "shielded" } as Record<string, string>)[selection] ?? selection;
+  validateTemplate(template);
   const project = supplied.project ?? await question("Project name", "my_indexer", validateProjectName);
   const directory = supplied.directory ?? await question("Project folder", project.replaceAll("_", "-"));
-  const startHeight = supplied.startHeight ?? await question("Start block: latest indexed or a height", "latest", height);
-  return { project, directory, startHeight };
+  const prepUrl = initPrepUrl(supplied.prepUrl ?? await question("Prep endpoint", PUBLIC_TESTNET_PREP, initPrepUrl));
+  const startHeight = supplied.startHeight ?? await question(template === "shielded" ? "Wallet birthday: explicit block height" : "Start block: latest indexed or a height", template === "shielded" ? "" : "latest", value => validateBirthday(template, value));
+  validateBirthday(template, startHeight);
+  return { project, directory, startHeight, template, prepUrl };
 }

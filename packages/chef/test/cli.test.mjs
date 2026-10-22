@@ -39,6 +39,16 @@ test("CLI help succeeds without config, source or database", () => {
   }
 });
 
+test("blank setup reports empty schema and handlers without connecting; codegen works once a model exists", async t => {
+  const f=await fixture(t,'export default {project:"blank",network:"testnet",startHeight:1,schema:"schema.graphql",handlerVersion:"1",indexer:{}};');
+  await writeFile(join(f.path,'schema.graphql'),'# Empty on purpose\n');
+  await assert.rejects(main(['codegen','--config',f.config,'--json'],{write(){}}),{code:'EMPTY_SCHEMA_ADD_ENTITY'});
+  await writeFile(join(f.path,'schema.graphql'),'type Observation { id: ID! height: Int! }');
+  await main(['codegen','--config',f.config,'--json'],{write(){}});
+  assert.match(await readFile(join(f.path,'chef.generated.ts'),'utf8'),/interface Observation/);
+  await assert.rejects(main(['sync','--config',f.config,'--json'],{store:{checkpoint(){assert.fail('must not reach database');}},write(){}}),{code:'INDEXER_HANDLER_REQUIRED'});
+});
+
 test("CLI receipt projects require explicit testnet key identity and reject inline key/config fields", async t => {
   const base={project:'private_test',network:'testnet',startHeight:4200000,schema:'schema.graphql',handlerVersion:'1',shielded:{accountId:'inbox',keyFingerprint:'a'.repeat(64)}};
   const cases=[

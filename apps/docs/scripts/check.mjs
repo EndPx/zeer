@@ -159,7 +159,7 @@ try {
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
   const copy = page.getByRole('button', {name: /Copy code to clipboard/}).first();
   await copy.click({force: true});
-  assert.match(await page.evaluate(() => navigator.clipboard.readText()), /query.mjs/);
+  assert.match(await page.evaluate(() => navigator.clipboard.readText()), /pnpm run query/);
   report.interactions.push('Code clipboard copy');
   await page.setViewportSize({width: 375, height: 900});
   await page.getByRole('button', {name: 'Toggle navigation bar'}).click();

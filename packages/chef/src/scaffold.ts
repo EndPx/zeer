@@ -1,10 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-
-export class ScaffoldError extends Error {
-  constructor(readonly code: string) { super(code); }
-}
+import { applyTemplate, validateTemplate } from "./scaffold-templates.js";
+import type { StarterTemplate } from "./scaffold-templates.js";
+import { ScaffoldError } from "./scaffold-error.js";
+export { ScaffoldError } from "./scaffold-error.js";
 
 export function validateProjectName(project: string): void {
   if (!/^[a-z][a-z0-9_]{0,31}$/.test(project)) throw new ScaffoldError("INVALID_PROJECT_NAME");
@@ -15,10 +15,12 @@ export function validateStartHeight(startHeight: number): void {
 }
 
 /** Creates a new project only. It does not install packages, connect or migrate. */
-export async function scaffoldProject(options: { directory: string; project: string; startHeight: number; prepUrl?: string }) {
+export async function scaffoldProject(options: { directory: string; project: string; startHeight: number; prepUrl?: string; template?: StarterTemplate }) {
   const { project, startHeight } = options;
   validateProjectName(project);
   validateStartHeight(startHeight);
+  const template = options.template ?? "public";
+  validateTemplate(template);
   const directory = resolve(options.directory);
   const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const password = randomBytes(24).toString("hex");
@@ -30,6 +32,7 @@ PREP_API_TOKEN=
 POSTGRES_PASSWORD=${secret ? password : "REPLACE_WITH_RANDOM_PASSWORD"}
 DATABASE_URL=postgresql://chef:${secret ? password : "REPLACE_WITH_RANDOM_PASSWORD"}@127.0.0.1:39472/chef
 CHEF_API_TOKEN=${secret ? token : "REPLACE_WITH_AT_LEAST_16_RANDOM_BYTES"}
+CHEF_URL=http://127.0.0.1:39370
 `;
   const launch = "node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js";
   const files: Record<string, string> = {
@@ -98,7 +101,9 @@ volumes:
 const token = process.env.CHEF_API_TOKEN;
 if (!token) throw new Error("Set CHEF_API_TOKEN in .env");
 const query = await readFile(new URL("./query.graphql", import.meta.url), "utf8");
-const response = await fetch(process.env.CHEF_URL ?? "http://127.0.0.1:39370/graphql", {
+const url = new URL(process.env.CHEF_URL ?? "http://127.0.0.1:39370");
+if (url.pathname === "/") url.pathname = "/graphql";
+const response = await fetch(url, {
   method: "POST", redirect: "error", signal: AbortSignal.timeout(10000),
   headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
   body: JSON.stringify({ query }),
@@ -218,6 +223,7 @@ Do not run Docker prune or delete a populated volume as an onboarding step.
 Codegen and strict typechecking are both needed: Node type stripping does not typecheck handlers.
 `,
   };
+  await applyTemplate(files, template, project, startHeight);
   try { await mkdir(directory, { mode: 0o700 }); }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EEXIST") throw new ScaffoldError("PROJECT_DIRECTORY_EXISTS");
@@ -226,5 +232,5 @@ Codegen and strict typechecking are both needed: Node type stripping does not ty
   for (const [name, body] of Object.entries(files)) {
     await writeFile(resolve(directory, name), body, { flag: "wx", mode: name === ".env" ? 0o600 : 0o644 });
   }
-  return { directory, files: Object.keys(files), nextSteps: ["Install the generated project's dependencies (see README.md).", "Set PREP_URL and database settings in .env.", "Run codegen, typecheck, migrate, sync, then serve."] };
+  return { directory, template, files: Object.keys(files), nextSteps: ["Install the generated project's dependencies (see README.md).", ...(template === "blank" ? ["Define your entities in schema.graphql and implement handlers.ts before indexing."] : template === "shielded" ? ["Install the scanner, inspect your protected local UFVK and configure its paths/fingerprint in .env."] : []), "Set PREP_URL and database settings in .env.", "Run codegen, typecheck, migrate; run follow and serve in separate terminals."] };
 }

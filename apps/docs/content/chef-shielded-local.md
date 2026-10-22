@@ -1,95 +1,127 @@
 # Local viewing-key setup
 
-Run a private testnet inbox with the published Chef package and a local scanner. Requirements: **Linux/WSL2 x64 with glibc**, Node 24.14+, pnpm, PostgreSQL and a testnet UFVK containing Sapling and Orchard components. The release is tested with Chef **0.2.0**. Your key stays on the machine running the scanner; public Prep receives chain-data requests only.
+Create a private testnet payment inbox with Chef's shielded starter. You get a `ReadableNote` schema, a receipt handler, memo queries and a restartable SQLite consumer. Your UFVK stays on the machine running the scanner; public Prep receives public chain-data requests only.
 
-## 1. Install the scanner
+Requirements: **Linux/WSL2 x64 with glibc**, Node **24.14+**, pnpm and PostgreSQL. The scanner needs a testnet UFVK containing Sapling and Orchard components. Never use a seed or spending key.
 
-Download the installer and checksums from the [scanner release](https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1):
+## 1. Create the inbox
 
 ```sh
-mkdir zeer-inbox-setup
-cd zeer-inbox-setup
-curl -fLO https://github.com/EndPx/zeer/releases/download/scanner-v0.1.0-testnet.1/install-scanner.mjs
-curl -fLO https://github.com/EndPx/zeer/releases/download/scanner-v0.1.0-testnet.1/SHA256SUMS
-sha256sum --check --ignore-missing SHA256SUMS
-node install-scanner.mjs
+pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init
 ```
 
-The installer verifies the native binary against its pinned SHA-256 before running keyless compatibility checks. It creates a versioned installation under `~/.local/share/zeer`; it does not read a key or install npm dependencies. Checksums rely on your trust in the release source and are not a separate signature.
+Choose `3` / `shielded`, then a project name such as `payment_inbox` and folder `payment-inbox`. Select your Prep endpoint and enter an explicit numeric wallet birthday: a block at or before the first note you need to read. There is no `latest` default for this starter, because it could skip earlier payments.
 
-## 2. Get the inbox starter
+For unattended setup, replace the example height with your wallet's birthday:
 
 ```sh
-curl -fLO https://github.com/EndPx/zeer/releases/download/scanner-v0.1.0-testnet.1/shielded-inbox.tar.gz
-sha256sum --check --ignore-missing SHA256SUMS
-tar -xzf shielded-inbox.tar.gz
-cd shielded-inbox
+pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init --template shielded \
+  --dir payment-inbox --project payment_inbox --start-height 4523000 --json
+cd payment-inbox
 pnpm install --ignore-scripts
-cp .env.example .env
-chmod 600 .env
+pnpm run scanner:install
 ```
 
-This starter installs Chef 0.2.0 from npm and includes the receipt schema, handler and SQLite consumer. No Zeer checkout or Rust build is needed for this supported release target.
+The installer downloads the pinned [testnet scanner release](https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1), verifies its SHA-256 before execution and checks its protocol without loading a key. It prints the absolute installed executable path. Checksums rely on your trust in the release source; they are not a separate signature. No Zeer checkout or Rust compilation is needed on the supported release target.
 
-## 3. Configure your local key
+Init only creates files and local development credentials. It never reads your key, installs dependencies or starts services. Retain the generated lockfile.
 
-Keep the UFVK in an owner-only file outside the project. Use `0400` or `0600`; never supply a seed or spending key.
+## 2. Configure your local key
+
+Keep the UFVK in an owner-only file **outside the project**, with mode `0400` or `0600`. Run the installed executable to inspect its fingerprint:
 
 ```sh
-export ZEER_SCANNER_EXECUTABLE="$HOME/.local/share/zeer/scanner-v0.1.0-testnet.1/zeer-scanner"
-"$ZEER_SCANNER_EXECUTABLE" inspect-key --account inbox --key-file /protected/testnet.ufvk
+"$HOME/.local/share/zeer/scanner-v0.1.0-testnet.1/zeer-scanner" \
+  inspect-key --account inbox --key-file /protected/testnet.ufvk
 ```
 
-Set these values in `.env`:
+Set these values in the generated `.env`:
 
 | Variable | Value |
 | --- | --- |
-| `PREP_URL` | Compatible full-data testnet Prep; the starter uses the public endpoint |
-| `DATABASE_URL` | Your PostgreSQL database; the role must own its project schemas |
-| `CHEF_API_TOKEN` | A private random token of at least 16 bytes |
-| `ZEER_PROJECT` | Project name, such as `receipt_reference` |
+| `PREP_URL` | Compatible full-data testnet Prep; init records your selected endpoint |
+| `DATABASE_URL` | Your PostgreSQL database, or the generated local Compose connection |
+| `CHEF_API_TOKEN` | The generated private token, or your own random token of at least 16 bytes |
 | `ZEER_ACCOUNT_ID` | The account name used above, such as `inbox` |
 | `ZEER_SCANNER_EXECUTABLE` | Absolute installed scanner path |
 | `ZEER_VIEWING_KEY_FILE` | Absolute protected UFVK file path |
 | `ZEER_KEY_FINGERPRINT` | Fingerprint returned by `inspect-key` |
-| `ZEER_BIRTHDAY_HEIGHT` | Height at or before the first note you want to read |
+| `CHEF_URL` | Private Chef origin; the starter uses `http://127.0.0.1:39370` |
 
-Choose the birthday deliberately: starting later misses older notes, while starting at genesis replays unnecessary history. Keep `.env` and the SQLite database private; the local database contains plaintext receipt observations.
+The project name and numeric start height are already written to `chef.config.ts`; `ZEER_PROJECT` and `ZEER_BIRTHDAY_HEIGHT` in `.env` record the same choices for reference. Editing those environment values alone does not change the config. Account, fingerprint, birthday or schema changes require [explicit project evolution](/docs/chef/evolution/).
 
-## 4. Index, serve and consume
+Never paste key contents into a command, chat, public API or source file. Keep `.env`, PostgreSQL data and the consumer's SQLite file private: receipts contain plaintext note observations.
 
-```sh
-pnpm run chef codegen --config chef.config.mjs
-pnpm run chef migrate --config chef.config.mjs
-pnpm run chef sync --config chef.config.mjs --follow
-```
+## 3. Prepare the database and types
 
-In a second terminal:
+Use your PostgreSQL database, or start the generated loopback database with Docker Engine and Compose v2:
 
 ```sh
-pnpm run chef serve --config chef.config.mjs
+pnpm run db:up
 ```
 
-In a third terminal, replace the height with your chosen birthday:
+Port `39472` must be free. If you change it, update both `compose.yaml` and `DATABASE_URL`. Then:
+
+```sh
+pnpm run codegen
+pnpm run typecheck
+pnpm run migrate
+```
+
+The generated codegen script loads the account identity from `.env`. Migration initializes the project's namespace; it does not create the PostgreSQL server.
+
+## 4. Follow, query and consume
+
+In terminal A:
+
+```sh
+pnpm run follow
+```
+
+In terminal B:
+
+```sh
+pnpm run serve
+```
+
+In terminal C:
+
+```sh
+pnpm run query
+```
+
+The query returns readable notes with pool, block height, exact `valueZat`, memo kind and memo text. The full schema also records receiver components, output identity, block hash, scope, origin and coinbase status. A note's `internal` or `external` scope does not prove who sent it; `origin` remains `unknown`. A valid memo alone does not establish a received payment.
+
+Start the consumer in another terminal, using your chosen project and birthday:
 
 ```sh
 pnpm run consume --mode continuous --follow --db private/inbox.sqlite \
-  --project receipt_reference --from 4523000 --window-blocks 200 --page-size 100
+  --project payment_inbox --from 4523000 --window-blocks 200 --page-size 100
 ```
 
-The consumer processes history in windows and reconciles the mutable tail using Chef's retained recovery boundary. Restart the same command to resume. It preserves the last completed projection while the source is unavailable; that cached projection is not current authorization to act. Read the [consumer contract and recovery outcomes](https://github.com/EndPx/zeer/tree/main/examples/receipt-consumer#follow-continuously) before using another entity model.
+Restart the same command to resume. It processes history in windows and reconciles the mutable tail against Chef's retained recovery boundary. During a source outage it preserves the last complete projection; cached results are not current authorization to act. The generated `CONSUMER.md` explains storage budgets and explicit recovery errors. Use this project's scripts for setup rather than that reference document's checkout commands.
 
-With npm, use `npm install --ignore-scripts` and `npm run chef -- ...` / `npm run consume -- ...` for the same scripts.
+For a known transaction, replace `TX_ID` with its lowercase 64-character ID:
 
-## Build from source
+```sh
+pnpm run read:transaction TX_ID
+```
 
-Other platforms retain the source path. From a checkout with the pinned Rust 1.99.0 toolchain:
+With npm, use `npm install --ignore-scripts` and `npm run SCRIPT -- ...` when forwarding arguments. Stop processes with Ctrl+C. `pnpm run db:stop` retains the database volume.
+
+## Alternative installation
+
+The [scanner release](https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1) also includes a standalone `shielded-inbox.tar.gz` tested with Chef 0.2.0. It has its own README and `chef.config.mjs`; follow its commands rather than mixing them with the generated 0.3.0 project's scripts.
+
+Other platforms retain the source-build path. From a checkout with the pinned Rust 1.99.0 toolchain:
 
 ```sh
 cargo build --release --locked -p zeer-scanner
 target/release/zeer-scanner capabilities
 ```
 
-Use the resulting absolute executable path in the same configuration. A source build on a platform is not release-binary support for that platform. Changes to account, fingerprint, birthday or schema require [explicit project evolution](/docs/chef/evolution/).
+Use the resulting absolute executable path in local configuration. A source build on a platform does not establish release-binary support for that platform.
+
+These are note observations, not a spendable balance or settlement permission. Your application must validate its order, receiver, amount, deadline, confirmations and canonicality before external actions. No signer or payout code is included.
 
 Next: [Read receipts and memos](/docs/chef/shielded/memos/).

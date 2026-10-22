@@ -1,9 +1,9 @@
 # Reading receipts & memos
 
-From the released starter directory after [local setup](/docs/chef/shielded/local/), run the included authenticated query client:
+From your generated shielded project after [local setup](/docs/chef/shielded/local/), run the included authenticated query client:
 
 ```sh
-node --env-file=.env query.mjs
+pnpm run query
 ```
 
 The starter's `CHEF_URL` points to its local API on port 39370. This command prints private receipt data to your terminal. For the older repository-only example, use `node --env-file=/protected/inbox.env examples/shielded-inbox/query.mjs`; its fallback port is 39375.
@@ -42,13 +42,13 @@ Open the [Chef playground](https://zeer.endpx.cloud/app/chef), select **Read shi
 Install the published Chef package:
 
 ```sh
-npm install @zeer-dev/chef@0.2.0
+npm install @zeer-dev/chef@0.3.0
 ```
 
-The released starter already includes the package and `read-transaction.mjs`:
+The generated shielded starter already includes the package and `read-transaction.mjs`:
 
 ```sh
-node --env-file=.env read-transaction.mjs YOUR_64_HEX_TX_ID
+pnpm run read:transaction YOUR_64_HEX_TX_ID
 ```
 
 The [single-transaction example](https://github.com/EndPx/zeer/blob/main/examples/shielded-inbox/read-transaction.mjs) uses `readShieldedTransaction` to fetch public bytes from Prep and decrypt locally, then checks that the source still reports the same mined block. An archive gap or changed block is an error, not a confirmed empty deposit.

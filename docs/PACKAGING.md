@@ -1,7 +1,14 @@
 # Release package verification
 
 The current published npm versions are `@zeer-dev/prep-client@0.1.0` and
-`@zeer-dev/chef@0.2.0`. Chef 0.1.3 introduced guided setup with a `latest` default: one bounded
+`@zeer-dev/chef@0.3.0`. Chef 0.3.0 adds blank, public-data and shielded-inbox
+templates to guided init. Blank contains no sample model or handler. Shielded
+requires an explicit numeric wallet birthday and keeps viewing keys local. The
+package includes nine explicitly listed scanner/consumer template assets. The
+canonical verifier requires each and rejects unexpected package entries. This
+release does not change the database format or upgrade hosted projects.
+
+Chef 0.1.3 introduced guided setup with a `latest` default: one bounded
 Prep metadata read captures the available testnet archive height and persists a
 numeric start. Explicit numeric heights still initialize offline. Per-command
 help and `--version` are available; complete flags and `--json` keep scripts
@@ -24,8 +31,13 @@ receipt source. A fresh registry consumer passed strict TypeScript checks and
 read an actual mined testnet memo through public Prep and a local native scanner.
 The Prep HTTP API and Chef's exact `0.1.0` Prep-client dependency remain compatible.
 
-Both npm packages are public under `@zeer-dev` and were verified on
-21 October 2026. Rust Prep remains version `0.1.0` and is built from source.
+Both npm packages are public under `@zeer-dev`. The earlier Prep 0.1.0 / Chef
+0.2.0 registry checks were recorded on 21 October 2026. Chef 0.3.0 was published
+and verified on 22 October 2026: the registry tarball matched the accepted
+SHA-256, fresh registry installs generated all three templates, and the Linux
+SDK suite passed 132 tests with PostgreSQL and the released native scanner
+enabled. See [onboarding verification](CHEF_ONBOARDING_VERIFICATION_20261022.json).
+Rust Prep remains version `0.1.0` and is built from source.
 Prefer the
 [Chef quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) or
 [Prep quickstart](https://zeer.endpx.cloud/docs/prep/quickstart/) for npm installation.

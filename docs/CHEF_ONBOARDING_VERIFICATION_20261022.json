@@ -1,0 +1,1057 @@
+{
+  "format": "zeer-chef-onboarding-verification-v1",
+  "version": "0.3.0",
+  "functional_status": "PASS",
+  "release_status": "COMPLETE",
+  "base_commit": "10b8f15",
+  "local_candidate": {
+    "status": "PASS",
+    "candidate_sha256": "b96d9bc2d505667562f8b9b101eea9660a2c2556e22f00e945d96bca965ed955",
+    "outside_checkout": true,
+    "templates": [
+      {
+        "template": "blank",
+        "workspace_link": false,
+        "pnpm_version": "10.21.0",
+        "empty_typecheck": true,
+        "empty_codegen_actionable": true,
+        "codegen": true,
+        "typecheck": true
+      },
+      {
+        "template": "public",
+        "workspace_link": false,
+        "pnpm_version": "10.21.0",
+        "codegen": true,
+        "typecheck": true
+      },
+      {
+        "template": "shielded",
+        "workspace_link": false,
+        "pnpm_version": "10.21.0",
+        "codegen": true,
+        "typecheck": true
+      }
+    ],
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log"
+      },
+      {
+        "program": "node",
+        "exit_code": 0,
+        "log": "command-1.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-2.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-3.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-4.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-5.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-6.log"
+      },
+      {
+        "program": "node",
+        "exit_code": 0,
+        "log": "command-7.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-8.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-9.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-10.log"
+      },
+      {
+        "program": "node",
+        "exit_code": 0,
+        "log": "command-11.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-12.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-13.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-14.log"
+      }
+    ]
+  },
+  "linux_candidate": {
+    "status": "PASS",
+    "candidate_sha256": "7272c8a8778e7202308d9bb91281a0b1f0b92cadcfcc3b23ef2f5885c17730e4",
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log"
+      },
+      {
+        "program": "node",
+        "exit_code": 0,
+        "log": "command-1.log"
+      },
+      {
+        "program": "node",
+        "exit_code": 0,
+        "log": "command-2.log"
+      }
+    ],
+    "full_sdk_suite": {
+      "exit_code": 0,
+      "test_files": 16,
+      "scanner_is_published_linux_binary": true,
+      "postgres_enabled": true,
+      "log": "command-1.log"
+    },
+    "generated": {
+      "status": "PASS",
+      "chef_version": "0.3.0",
+      "workspace_link": false,
+      "candidate_tarball": true,
+      "live_network_receipt": false,
+      "operator_viewing_key_loaded": false,
+      "templates": [
+        {
+          "template": "blank",
+          "project": "init_1b6f87f5eca648a5b483",
+          "empty_typecheck": true,
+          "empty_codegen_actionable": true,
+          "codegen": true,
+          "typecheck": true,
+          "migrate_sync_api": true,
+          "passed": true,
+          "owned_namespace_removed": true
+        },
+        {
+          "template": "public",
+          "project": "init_f4b9eafde5f944a1854b",
+          "codegen": true,
+          "typecheck": true,
+          "migrate_sync_api": true,
+          "passed": true,
+          "owned_namespace_removed": true
+        },
+        {
+          "template": "shielded",
+          "project": "init_2d277fc96d434c80b8ea",
+          "codegen": true,
+          "typecheck": true,
+          "migrate_sync_api": true,
+          "memo_query_notes": 6,
+          "consumer_restart_unchanged": true,
+          "passed": true,
+          "owned_namespace_removed": true
+        }
+      ],
+      "commands": [
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-0.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-1.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-2.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 1,
+          "log": "command-3.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-4.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-5.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-6.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-7.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-8.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-9.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-10.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-11.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-12.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-13.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-14.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-15.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-16.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-17.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-18.log"
+        }
+      ]
+    }
+  },
+  "canonical_package_gate": {
+    "status": "PASS",
+    "versions": {
+      "chef": "0.3.0",
+      "prepClient": "0.1.0"
+    },
+    "consumer": "/tmp/zeer-package-consumer-pxqQfE",
+    "project": "pkg_mviytmci",
+    "installedBin": true,
+    "strictTypes": true,
+    "fixtureIntegration": false,
+    "indexedSchema": false,
+    "scope": "Package installation only; no pipeline evidence"
+  },
+  "full_sdk_suite": {
+    "tests": 132,
+    "passed": 132,
+    "skipped": 0,
+    "log_sha256": "73c2b259e783ed93bac47b3e4c6f5bc80b197c60b8db6637c0a7a93a5845f353"
+  },
+  "public_https_evidence": "benchmarks/chef/onboarding-public/2026-10-22-public-onboarding.json",
+  "publication_audit": {
+    "status": "PASS",
+    "checked_files_and_archive_members": 81,
+    "npm_entries": 44,
+    "exact_shielded_assets": [
+      "CONSUMER.md",
+      "LICENSE",
+      "consume.mjs",
+      "consumer.mjs",
+      "install-scanner.mjs",
+      "query.graphql",
+      "query.mjs",
+      "read-transaction.mjs",
+      "schema.graphql"
+    ],
+    "operator_secret_matches": 0,
+    "tarball_sha256": "bf8e520ceb8763486dc609e9257110664a3e990ea1ff759ecfc3ebeea43f7094",
+    "integrity": "sha512-XnCQfojG+Qls8QBwXSX1AJEyZpLQhJ2wgZcGsgzy5FioY6LaXW5FOVdf+8VjseX30A+9YaC2DvqEvd5VDYXxNw=="
+  },
+  "review": {
+    "intent": "PASS after indexed-memos wording fix",
+    "standards": "PASS after exact template allowlist and candidate version correction"
+  },
+  "setup_failures": [
+    "Local prepublication pnpm add tried unpublished version; explicit file dependency used in candidate acceptance only",
+    "Linux test replica lacked direct dependency/fixture inputs; repaired before full 132-test PASS",
+    "Canonical npm pack JSON polluted by build status stdout; moved diagnostic to stderr",
+    "Canonical source replica lacked public example fixture; copied before gate PASS"
+  ],
+  "limits": [
+    "Fixture receipts are public, unfunded and never broadcast; chain context is synthetic",
+    "Public HTTPS test measured a preliminary candidate; final registry acceptance is separate",
+    "No 429 or503 occurred in passing public phases, and peak observed active request count was one",
+    "No production Chef namespace migration, signer, settlement or funded transaction"
+  ],
+  "cleanup": {
+    "status": "PASS",
+    "publication_members_audited": 78,
+    "credential_matches": 0,
+    "owned_database_and_role_removed": "zeer_onboarding_20261022",
+    "active_connections_before_cleanup": 0,
+    "runtime_env_removed": true,
+    "generated_env_and_public_fixture_keys_removed": true,
+    "guard": {
+      "checked_at_utc": "2026-10-22T03:25:57.507357+00:00",
+      "limits": {
+        "node_budget_gib": 35,
+        "node_stop_gib": 34,
+        "aggregate_budget_gib": 60,
+        "aggregate_stop_gib": 59,
+        "minimum_host_free_gib": 25,
+        "minimum_available_memory_gib": 3
+      },
+      "node_bytes": 13858525184,
+      "zeer_bytes": 62814148194,
+      "free_bytes": 34866872320,
+      "available_memory_bytes": 9466056704,
+      "services": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "containers": {
+        "skripsi-kat-b-rust-1": true,
+        "stockpilot-app-1": true,
+        "stockpilot-redis-1": true,
+        "hermes-agent-e0qr-hermes-agent-1": true,
+        "sos-pg": true
+      },
+      "other_zeer_running": [],
+      "halted_latch": false,
+      "pipeline_units": {
+        "zeer-testnet-prep-optimized-native.service": "active",
+        "zeer-testnet-chef-memo-http.service": "active",
+        "zeer-testnet-prep-shielded.service": "inactive",
+        "zeer-testnet-chef-demo-http.service": "active",
+        "zeer-testnet-chef-demo-sync.service": "inactive",
+        "zeer-testnet-chef-demo-install.service": "inactive",
+        "zeer-testnet-prep-public.service": "active",
+        "zeer-testnet-prep-http.service": "active",
+        "zeer-testnet-prep-follow.service": "active",
+        "zeer-testnet-chef-http.service": "active",
+        "zeer-testnet-chef-follow.service": "active",
+        "zeer-testnet-repack.service": "inactive",
+        "zeer-testnet-web.service": "active",
+        "zeer-testnet-web-build.service": "inactive"
+      },
+      "pipeline_limit_violations": [],
+      "envelope_invalid": false,
+      "combined_cpu_limit": 3,
+      "combined_memory_mib": 8192,
+      "zebra_running": true,
+      "zebra_oom_killed": false,
+      "reasons": [],
+      "status": "PASS"
+    }
+  },
+  "registry_linux": {
+    "status": "PASS",
+    "chef_version": "0.3.0",
+    "candidate_tarball": false,
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log"
+      },
+      {
+        "program": "node",
+        "exit_code": 0,
+        "log": "command-1.log"
+      },
+      {
+        "program": "node",
+        "exit_code": 0,
+        "log": "command-2.log"
+      }
+    ],
+    "dist": {
+      "shasum": "1530f8b1c5ac02f652508697555d2ae173df477c",
+      "tarball": "https://registry.npmjs.org/@zeer-dev/chef/-/chef-0.3.0.tgz",
+      "fileCount": 44,
+      "integrity": "sha512-XnCQfojG+Qls8QBwXSX1AJEyZpLQhJ2wgZcGsgzy5FioY6LaXW5FOVdf+8VjseX30A+9YaC2DvqEvd5VDYXxNw==",
+      "signatures": [
+        {
+          "sig": "MEQCICDkThIcJWBIau55wrQRE9KpUTkuYYFfq01BnZNt1YYiAiApKt8OLwZVt30u8hf7ZDgYuNioXL1vVuHI3SbOctXGDA==",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        },
+        {
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+          "sig": "MEUCIQDjvVfxZVSt0xkRAxG6CzsepZmPiN7YkVc2J5MbTRsaeQIgAzmVrCTiVtE8ZPruTSHidWsaeTpJZ6NfsPww15VgLhg="
+        }
+      ],
+      "unpackedSize": 248428
+    },
+    "registry_tarball_sha256": "bf8e520ceb8763486dc609e9257110664a3e990ea1ff759ecfc3ebeea43f7094",
+    "full_sdk_suite": {
+      "test_files": 16,
+      "passed": true,
+      "log": "command-1.log",
+      "postgres_enabled": true,
+      "published_scanner_enabled": true
+    },
+    "generated": {
+      "status": "PASS",
+      "chef_version": "0.3.0",
+      "workspace_link": false,
+      "candidate_tarball": false,
+      "live_network_receipt": false,
+      "operator_viewing_key_loaded": false,
+      "templates": [
+        {
+          "template": "blank",
+          "project": "init_7152d4c1e1664e398e23",
+          "empty_typecheck": true,
+          "empty_codegen_actionable": true,
+          "codegen": true,
+          "typecheck": true,
+          "migrate_sync_api": true,
+          "passed": true,
+          "owned_namespace_removed": true
+        },
+        {
+          "template": "public",
+          "project": "init_7ec72ce677db47d2bf84",
+          "codegen": true,
+          "typecheck": true,
+          "migrate_sync_api": true,
+          "passed": true,
+          "owned_namespace_removed": true
+        },
+        {
+          "template": "shielded",
+          "project": "init_b7d1356316de48309a52",
+          "codegen": true,
+          "typecheck": true,
+          "migrate_sync_api": true,
+          "memo_query_notes": 6,
+          "consumer_restart_unchanged": true,
+          "passed": true,
+          "owned_namespace_removed": true
+        }
+      ],
+      "commands": [
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-0.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-1.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-2.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 1,
+          "log": "command-3.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-4.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-5.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-6.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-7.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-8.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-9.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-10.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-11.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-12.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-13.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-14.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-15.log"
+        },
+        {
+          "program": "pnpm",
+          "exit_code": 0,
+          "log": "command-16.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-17.log"
+        },
+        {
+          "program": "node",
+          "exit_code": 0,
+          "log": "command-18.log"
+        }
+      ]
+    },
+    "recorded_at_utc": "2026-10-22T04:26:33.842066+00:00"
+  },
+  "registry_local": {
+    "status": "PASS",
+    "version": "0.3.0",
+    "source": "npm-registry",
+    "workspace_link": false,
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-1.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-2.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-3.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-4.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-5.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-6.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-7.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-8.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-9.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-10.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-11.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-12.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-13.log"
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-14.log"
+      }
+    ],
+    "templates": [
+      {
+        "template": "blank",
+        "registry_install": true,
+        "empty_typecheck": true,
+        "empty_codegen_actionable": true,
+        "codegen": true,
+        "typecheck": true
+      },
+      {
+        "template": "public",
+        "registry_install": true,
+        "codegen": true,
+        "typecheck": true
+      },
+      {
+        "template": "shielded",
+        "registry_install": true,
+        "codegen": true,
+        "typecheck": true
+      }
+    ],
+    "pnpm_dlx_alias": true,
+    "public_latest_height": 4527834
+  },
+  "registry_full_sdk_suite": {
+    "tests": 132,
+    "passed": 132,
+    "skipped": 0,
+    "log_sha256": "1046dbd236144dd5a4c9f3c6189c1be033b7c5b3cdd3300639c0d9de7148e38b"
+  },
+  "registry_cleanup": {
+    "status": "PASS",
+    "publication_members_audited": 80,
+    "credential_matches": 0,
+    "owned_database_and_role_removed": "zeer_onboarding_registry_20261022",
+    "active_connections_before_cleanup": 0,
+    "runtime_env_removed": true,
+    "generated_env_and_public_fixture_keys_removed": true,
+    "guard": {
+      "checked_at_utc": "2026-10-22T04:28:06.076103+00:00",
+      "limits": {
+        "node_budget_gib": 35,
+        "node_stop_gib": 34,
+        "aggregate_budget_gib": 60,
+        "aggregate_stop_gib": 59,
+        "minimum_host_free_gib": 25,
+        "minimum_available_memory_gib": 3
+      },
+      "node_bytes": 13860122624,
+      "zeer_bytes": 62823642722,
+      "free_bytes": 34826534912,
+      "available_memory_bytes": 9420763136,
+      "services": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "containers": {
+        "skripsi-kat-b-rust-1": true,
+        "stockpilot-app-1": true,
+        "stockpilot-redis-1": true,
+        "hermes-agent-e0qr-hermes-agent-1": true,
+        "sos-pg": true
+      },
+      "other_zeer_running": [],
+      "halted_latch": false,
+      "pipeline_units": {
+        "zeer-testnet-prep-optimized-native.service": "active",
+        "zeer-testnet-chef-memo-http.service": "active",
+        "zeer-testnet-prep-shielded.service": "inactive",
+        "zeer-testnet-chef-demo-http.service": "active",
+        "zeer-testnet-chef-demo-sync.service": "inactive",
+        "zeer-testnet-chef-demo-install.service": "inactive",
+        "zeer-testnet-prep-public.service": "active",
+        "zeer-testnet-prep-http.service": "active",
+        "zeer-testnet-prep-follow.service": "active",
+        "zeer-testnet-chef-http.service": "active",
+        "zeer-testnet-chef-follow.service": "active",
+        "zeer-testnet-repack.service": "inactive",
+        "zeer-testnet-web.service": "active",
+        "zeer-testnet-web-build.service": "inactive"
+      },
+      "pipeline_limit_violations": [],
+      "envelope_invalid": false,
+      "combined_cpu_limit": 3,
+      "combined_memory_mib": 8192,
+      "zebra_running": true,
+      "zebra_oom_killed": false,
+      "reasons": [],
+      "status": "PASS"
+    }
+  },
+  "public_docs": {
+    "activation": {
+      "status": "PASS",
+      "previous": "/opt/zeer-docs/releases/20261022-continuous-v1",
+      "release": "/opt/zeer-docs/releases/20261022-onboarding-v1",
+      "pages": 44,
+      "application_services_restarted": false
+    },
+    "served_html": {
+      "status": "PASS",
+      "pages": [
+        {
+          "path": "/docs/chef/quickstart/",
+          "bytes": 30653,
+          "sha256": "fe2a2fc72899c7a8c5101271f8767bad58b72a7d927ff267bfa8acbf499edcb7",
+          "byte_equality": true
+        },
+        {
+          "path": "/docs/chef/cli-commands/",
+          "bytes": 38060,
+          "sha256": "c856b9d55d199a70588bb3ac2c0c70f5e11014b1086565b135200de6ce5e49cd",
+          "byte_equality": true
+        },
+        {
+          "path": "/docs/chef/shielded/local/",
+          "bytes": 34480,
+          "sha256": "06e6c30fecab6e7845e7dc581837c682466f0dbefe99a29dfec53c82f076a9e0",
+          "byte_equality": true
+        }
+      ]
+    },
+    "first_browser_attempt": {
+      "status": "FAIL",
+      "error": "Loading chunk9187 failed for9665a629.2f927d5a.js"
+    },
+    "browser": {
+      "origin": "https://zeer.endpx.cloud",
+      "pages": [
+        {
+          "pathname": "/docs/",
+          "title": "Build with Zeer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/architecture/",
+          "title": "From source to API",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/overview/",
+          "title": "Zeer Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart/",
+          "title": "Your first Prep query",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/getting-started/",
+          "title": "Getting started with Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/clients/",
+          "title": "Prep clients",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/benchmarks/",
+          "title": "Prep retrieval benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/curl/",
+          "title": "cURL examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tokens/",
+          "title": "API access & tokens",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/networks/",
+          "title": "Supported networks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/troubleshooting/",
+          "title": "Troubleshooting",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/query/",
+          "title": "Query & response",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/fields/",
+          "title": "Filters & field selection",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/continuation/",
+          "title": "Continuation & historical scans",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/address-outputs/",
+          "title": "Find payments to a transparent address",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/inspect-transaction/",
+          "title": "Inspect a Zcash transaction",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/shielded/",
+          "title": "Public shielded activity",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/transactions/",
+          "title": "Transaction lookup & mempool",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/examples/",
+          "title": "Prep examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/public-api/",
+          "title": "Coverage, access & preview limits",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/overview/",
+          "title": "Zeer Chef",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart/",
+          "title": "Run your own Chef project",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarks/",
+          "title": "Chef indexing benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/configuration/",
+          "title": "Configuration file",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/schema/",
+          "title": "Entity schema",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/handlers/",
+          "title": "Transaction handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/block-handlers/",
+          "title": "Block handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/environment-variables/",
+          "title": "Environment variables",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/cli-commands/",
+          "title": "Chef CLI commands",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/database-performance/",
+          "title": "Database performance",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/latency-at-head/",
+          "title": "Latency at the chain head",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarking/",
+          "title": "Benchmark your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/graphql/",
+          "title": "Querying with GraphQL",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/overview/",
+          "title": "Shielded receipts & privacy",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/local/",
+          "title": "Local viewing-key setup",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/memos/",
+          "title": "Reading receipts & memos",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/examples/",
+          "title": "Chef examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/testing/",
+          "title": "Testing your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/recovery/",
+          "title": "Checkpoints, restart & reorgs",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/evolution/",
+          "title": "Schema & handler evolution",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/indexes/",
+          "title": "Equality query indexes",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/self-hosting/",
+          "title": "Self-hosting & troubleshooting",
+          "status": 200
+        }
+      ],
+      "viewports": [
+        {
+          "width": 375,
+          "viewport": 375,
+          "document": 375,
+          "axeViolations": 0
+        },
+        {
+          "width": 768,
+          "viewport": 768,
+          "document": 768,
+          "axeViolations": 0
+        },
+        {
+          "width": 1440,
+          "viewport": 1440,
+          "document": 1440,
+          "axeViolations": 0
+        }
+      ],
+      "interactions": [
+        "Chef and Prep onboarding sidebar order and AI guide navigation",
+        "Chef Guides and Prep Tutorials: order, collapse/expand and chapter navigation",
+        "Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment",
+        "Product-specific benchmark navigation and downloads; quickstart, guide, tutorial and benchmark reflow/accessibility",
+        "Ctrl+K search and memo result navigation",
+        "Empty search, Escape dismissal and focus return",
+        "Code clipboard copy",
+        "Mobile drawer product navigation",
+        "Long reference reflow with reduced motion",
+        "Existing website Get started link enters the new docs"
+      ]
+    },
+    "fresh_browser_retry": "PASS; same JavaScript asset returned HTTP200; first chunk-load cause unclassified"
+  }
+}

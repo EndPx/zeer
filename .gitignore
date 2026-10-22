@@ -33,6 +33,7 @@ tmp/
 node_modules/
 target/
 dist/
+/packages/chef/templates/
 build/
 coverage/
 .turbo/

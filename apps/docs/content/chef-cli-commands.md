@@ -7,13 +7,13 @@ The `@zeer-dev/chef` package installs `zeer` and its compatible alias `zeer-chef
 Requires Node.js 24.14+ on Linux x86_64 or WSL2. With a configured pnpm global bin directory, install once:
 
 ```sh
-pnpm add -g @zeer-dev/chef@0.2.0
+pnpm add -g @zeer-dev/chef@0.3.0
 zeer --version
 zeer --help
 zeer init
 ```
 
-Without a global install, use `pnpm --package=@zeer-dev/chef@0.2.0 dlx zeer init`. The executable name is explicit because the package has two aliases. npm users can use `npm install -g @zeer-dev/chef@0.2.0` or the one-time `npx @zeer-dev/chef@0.2.0 init`.
+Without a global install, use `pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init`. The executable name is explicit because the package has two aliases. npm users can use `npm install -g @zeer-dev/chef@0.3.0` or the one-time `npx @zeer-dev/chef@0.3.0 init`.
 
 For any command, `zeer <command> --help` prints its options without loading project configuration or contacting services. `zeer --version` prints the installed package version.
 
@@ -36,10 +36,17 @@ For any command, `zeer <command> --help` prints its options without loading proj
 zeer init
 ```
 
-The terminal asks for project name, folder and start block. Enter accepts `my_indexer`, `my-indexer` and `latest`. Supplied flags are retained and only missing options are asked.
+Guided setup asks for a template, project name, folder, Prep endpoint and start block. Select `1` / `blank`, `2` / `public`, or `3` / `shielded`. Enter selects the public starter. Supplied flags are retained and only missing options are asked.
+
+| Template | Generated application |
+| --- | --- |
+| `blank` | Empty schema and handler module, config, environment, PostgreSQL recipe and scripts. Define your model and handlers before indexing. |
+| `public` | `BlockSummary` entities, block and transaction-metadata handlers, and a sample GraphQL query. |
+| `shielded` | `ReadableNote` receipt entities, memo queries, pinned scanner installer and continuous SQLite consumer. Configure your own local viewing-key file separately. |
 
 | Option | Default / rule |
 | --- | --- |
+| `--template blank\|public\|shielded` | Starter selection; fully supplied scripts that omit it retain the public default |
 | `--dir DIR` | New target folder; never overwrite an existing file, directory or symlink |
 | `--project NAME` | Lowercase letter followed by lowercase letters, digits or underscores; at most 32 characters |
 | `--start-height latest` | Capture Prep's available indexed height once and persist the numeric value |
@@ -47,17 +54,21 @@ The terminal asks for project name, folder and start block. Enter accepts `my_in
 | `--prep-url URL` | Source selection before `PREP_URL`; defaults to the public testnet Prep URL |
 | `--json`, `--human` | Structured or readable output; mutually exclusive |
 
+Blank and public guided setup default to `latest`. The shielded template requires an explicit numeric wallet birthday and rejects `latest`; choose a height at or before the notes you need. Starting later misses older notes.
+
 Latest lookup requires a ready `full-v1` testnet archive and has a **5-second** timeout. It selects the indexed archive height, not an unindexed source tip. A failed lookup does not fall back to genesis. Explicit numeric heights support offline initialization; runtime still checks source compatibility and coverage.
 
 The chosen URL is saved in `.env`. An existing `PREP_API_TOKEN` is used only with an explicitly configured URL, never automatically sent to the default public source, and never copied into generated files or printed. Configure the generated project's private token yourself if needed.
 
-For scripts or AI agents, provide all three setup values:
+For scripts or AI agents, select a template and provide all three setup values:
 
 ```sh
-zeer init --dir my-indexer --project my_indexer --start-height latest --json
+zeer init --template public --dir my-indexer --project my_indexer --start-height latest --json
+zeer init --template blank --dir custom-indexer --project custom_indexer --start-height latest --json
+zeer init --template shielded --dir payment-inbox --project payment_inbox --start-height 4523000 --json
 ```
 
-Use `--start-height 0` for a deterministic genesis project. `--json` and non-terminal sessions never prompt. Ctrl+C or end-of-input while answering or looking up the height cancels before scaffolding. Init creates project files; it does not install dependencies, start Docker, migrate a database or begin indexing.
+The shielded height above is illustrative: replace it with your wallet's birthday. Existing scripts with `--dir`, `--project` and `--start-height` but no `--template` still create the public starter. Use `--start-height 0` for a deterministic genesis project. `--json` and non-terminal sessions never prompt. Ctrl+C or end-of-input while answering or looking up the height cancels before scaffolding. Init creates project files; it does not load a viewing key, install dependencies, start Docker, migrate a database or begin indexing.
 
 ## codegen
 
@@ -66,6 +77,8 @@ zeer codegen --config chef.config.ts
 ```
 
 Read the TypeScript config and GraphQL schema, then write `chef.generated.ts` beside the config. No Prep or database connection is needed. Code generation does not typecheck your handlers; run the project's `typecheck` script separately.
+
+The blank starter can typecheck while still empty. Add entity types with `id: ID!` before codegen, then implement handlers in `handlers.ts` before indexing. In a shielded project, use `pnpm run codegen`: its script loads the local account identity from `.env`.
 
 ## migrate
 
@@ -120,6 +133,7 @@ The generated scripts load `.env` and work with pnpm or npm. With npm, put forwa
 
 | Diagnostic | Next action |
 | --- | --- |
+| `SHIELDED_BIRTHDAY_REQUIRED` | Choose a numeric wallet birthday at or before the notes you need |
 | `INIT_PREP_UNAVAILABLE` | Check the source URL/access, retry, or provide an explicit numeric height |
 | `INIT_PREP_NOT_READY` | Inspect `/height` and require a ready full-data testnet source |
 | `PROJECT_DIRECTORY_EXISTS` | Choose a new target folder |

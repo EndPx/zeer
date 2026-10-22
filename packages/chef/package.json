@@ -1,6 +1,6 @@
 {
   "name": "@zeer-dev/chef",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
   "repository": {"type": "git", "url": "git+https://github.com/EndPx/zeer.git", "directory": "packages/chef"},
   "homepage": "https://zeer.endpx.cloud/docs/chef/overview/",
@@ -10,8 +10,8 @@
   "description": "Experimental TypeScript indexing over Zeer Prep with optional local shielded receipts",
   "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}},
   "bin": {"zeer": "./dist/cli.js", "zeer-chef": "./dist/cli.js"},
-  "files": ["dist", "README.md", "LICENSE"],
-  "scripts": {"build": "tsc -p tsconfig.json", "prepack": "npm run build", "test": "node --test test/*.test.mjs"},
+  "files": ["dist", "templates", "README.md", "LICENSE"],
+  "scripts": {"build": "tsc -p tsconfig.json && node scripts/prepare-templates.mjs", "prepack": "npm run build", "test": "node --test test/*.test.mjs"},
   "engines": {"node": ">=24.14.0"},
   "dependencies": {"@types/node": "24.19.2", "@zeer-dev/prep-client": "0.1.0", "graphql": "17.0.2", "pg": "8.23.1"},
   "devDependencies": {"@types/pg": "8.23.1", "typescript": "7.0.2"},

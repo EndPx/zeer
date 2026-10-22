@@ -9,9 +9,9 @@ import {collectInitAnswers, resolveStartHeight, PUBLIC_TESTNET_PREP} from '../di
 import {main} from '../dist/cli.js';
 
 test('guided init retries invalid answers and accepts project-derived defaults', async () => {
-  const questions = [], errors = [], answers = ['bad-name', 'payments', '', '-1', '1.5', '4294967295', ''];
+  const questions = [], errors = [], answers = ['', 'bad-name', 'payments', '', '', '-1', '1.5', '4294967295', ''];
   const result = await collectInitAnswers({}, async question => {questions.push(question); return answers.shift();}, code => errors.push(code));
-  assert.deepEqual(result, {project: 'payments', directory: 'payments', startHeight: 'latest'});
+  assert.deepEqual(result, {project: 'payments', directory: 'payments', startHeight: 'latest', template: 'public', prepUrl: PUBLIC_TESTNET_PREP});
   assert.deepEqual(errors, ['INVALID_PROJECT_NAME', 'INVALID_START_HEIGHT', 'INVALID_START_HEIGHT', 'INVALID_START_HEIGHT']);
   assert.ok(questions.includes('Project folder (payments): '));
 });
@@ -86,8 +86,8 @@ test('failed latest lookup creates no files and does not silently choose genesis
 test('guided init respects flags and validates them before asking anything', async () => {
   const questions = [];
   const ask = async question => {questions.push(question); return '';};
-  assert.deepEqual(await collectInitAnswers({project: 'my_app', startHeight: '42'}, ask, () => {}),
-    {project: 'my_app', directory: 'my-app', startHeight: '42'});
+  assert.deepEqual(await collectInitAnswers({project: 'my_app', startHeight: '42', template: 'public', prepUrl: PUBLIC_TESTNET_PREP}, ask, () => {}),
+    {project: 'my_app', directory: 'my-app', startHeight: '42', template: 'public', prepUrl: PUBLIC_TESTNET_PREP});
   assert.deepEqual(questions, ['Project folder (my-app): ']);
   for (const supplied of [{project: 'bad-name'}, {startHeight: '01'}, {startHeight: 'Infinity'}]) {
     await assert.rejects(collectInitAnswers(supplied, () => assert.fail('must not prompt'), () => {}));
@@ -97,7 +97,7 @@ test('guided init respects flags and validates them before asking anything', asy
 test('CLI guided init creates the answered project without contacting services', async t => {
   const parent = await mkdtemp(join(tmpdir(), 'zeer-guided-'));
   t.after(() => rm(parent, {recursive: true, force: true}));
-  const directory = join(parent, 'indexer'), answers = ['payment_indexer', directory, '42'];
+  const directory = join(parent, 'indexer'), answers = ['2', 'payment_indexer', directory, '', '42'];
   let output = '';
   await main(['init'], {tty: true, prompt: async () => answers.shift(), write: text => {output += text;}});
   assert.match(await readFile(join(directory, 'chef.config.ts'), 'utf8'), /project: "payment_indexer"/);
@@ -106,6 +106,27 @@ test('CLI guided init creates the answered project without contacting services',
   const env = await readFile(join(directory, '.env'), 'utf8');
   assert.equal(output.includes(env.match(/^CHEF_API_TOKEN=(.+)$/m)[1]), false);
   await assert.rejects(lstat(join(directory, 'node_modules')), {code: 'ENOENT'});
+});
+
+test('guided shielded selection requires a numeric birthday; blank and custom source are selectable', async () => {
+  const errors=[],answers=['3','inbox','', '', '', 'latest', '4523000'];
+  const shielded=await collectInitAnswers({},async()=>answers.shift(),code=>errors.push(code));
+  assert.equal(shielded.template,'shielded');assert.equal(shielded.startHeight,'4523000');
+  assert.deepEqual(errors,['INVALID_START_HEIGHT','SHIELDED_BIRTHDAY_REQUIRED']);
+  const blankAnswers=['1','custom','', 'https://example.invalid/prep','0'];
+  const blank=await collectInitAnswers({},async()=>blankAnswers.shift(),()=>assert.fail());
+  assert.equal(blank.template,'blank');assert.equal(blank.prepUrl,'https://example.invalid/prep');
+  for(const supplied of [{template:'other'},{template:'shielded',startHeight:'latest'},{prepUrl:'https://user:secret@example.invalid'}])
+    await assert.rejects(collectInitAnswers(supplied,()=>assert.fail('must validate before prompting'),()=>{}));
+});
+
+test('invalid template or shielded latest creates no directory and makes no source request', async t => {
+  const parent=await mkdtemp(join(tmpdir(),'zeer-template-gates-'));t.after(()=>rm(parent,{recursive:true,force:true}));
+  for(const [template,code]of [['other','INVALID_INIT_TEMPLATE'],['shielded','SHIELDED_BIRTHDAY_REQUIRED']]){
+    const directory=join(parent,template);
+    await assert.rejects(main(['init','--template',template,'--dir',directory,'--project','inbox','--start-height','latest','--json'],{client:{getHeight(){assert.fail('must not contact Prep');}},write(){}}),{code});
+    await assert.rejects(lstat(directory),{code:'ENOENT'});
+  }
 });
 
 test('scripts never prompt, complete flags bypass questions, cancellation writes nothing', async t => {

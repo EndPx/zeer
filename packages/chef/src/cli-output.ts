@@ -3,6 +3,10 @@ import type { Height, PrepClient } from "@zeer-dev/prep-client";
 import type { Checkpoint, ChefStore } from "./types.js";
 
 const guidance: Record<string, string> = {
+  INVALID_INIT_TEMPLATE: "Choose blank, public or shielded. Guided setup accepts choices 1, 2 and 3 as well.",
+  SHIELDED_BIRTHDAY_REQUIRED: "Choose an explicit numeric wallet birthday at or before your first relevant note. Shielded inbox does not silently start at latest or genesis.",
+  EMPTY_SCHEMA_ADD_ENTITY: "This project has no entities yet. Define at least one entity with id: ID! in schema.graphql, then run codegen and implement handlers.ts before indexing.",
+  INDEXER_HANDLER_REQUIRED: "Implement at least one block, transaction or receipt handler. A blank project intentionally starts without application logic.",
   INIT_OPTIONS_REQUIRED: "Run zeer init in a terminal for guided setup, or supply --dir NEW_DIRECTORY --project project_name --start-height HEIGHT for scripts. No installation or service startup is automatic.",
   INIT_CANCELLED: "Setup cancelled before creating project files. Run zeer init when you are ready.",
   INIT_PREP_UNAVAILABLE: "Could not read Prep's indexed height within 5 seconds. Retry with --prep-url URL or PREP_URL, or choose an explicit --start-height HEIGHT. No project files were created.",

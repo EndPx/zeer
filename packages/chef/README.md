@@ -16,15 +16,24 @@ Initialize a standalone project with:
 Requires Node 24.14+ on Linux x86_64 or WSL2, pnpm (or npm) and PostgreSQL.
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.2.0 dlx zeer init
+pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init
 cd my-indexer
 pnpm install
 pnpm run codegen
 pnpm run typecheck
 ```
 
-Answer the project name, folder and start block questions. The defaults are
-`my_indexer`, `my-indexer` and `latest`. Latest reads the chosen Prep's ready,
+Choose a template, then answer the project name, folder, Prep endpoint and start
+block questions. Choose **Public chain indexer** for the commands above. The
+project and folder defaults are `my_indexer` and `my-indexer`.
+
+| Template | Included application |
+| --- | --- |
+| `blank` | Config, an empty schema and handler module, environment, local PostgreSQL recipe and project scripts. Define your own model before codegen and handlers before indexing. The empty project can already typecheck. |
+| `public` | `BlockSummary` entities containing height, hash, time and transaction count; block and transaction-metadata handlers; an example GraphQL query. No wallet is needed. |
+| `shielded` | `ReadableNote` entities, typed receipt handler, exact zatoshi values, memo queries, pinned scanner installer and a restartable SQLite consumer. Configure your own protected local UFVK separately. |
+
+Blank and public default to `latest`. Latest reads the chosen Prep's ready,
 full-data testnet archive height once and saves a numeric start. Use an explicit
 `0` for genesis history or another height for offline setup. Lookup failures do
 not silently choose a different range. `--prep-url` overrides `PREP_URL`; otherwise
@@ -32,11 +41,25 @@ the public testnet Prep is selected and written to the new `.env`. Existing priv
 tokens are not sent to that default source or copied into generated files.
 
 For a short command after one global installation, use
-`pnpm add -g @zeer-dev/chef@0.2.0`, then `zeer init`. The `zeer-chef` alias remains.
-With npm, use `npx @zeer-dev/chef@0.2.0 init` and the matching npm project scripts.
-Scripts should supply all three setup flags and `--json`; redirected sessions
+`pnpm add -g @zeer-dev/chef@0.3.0`, then `zeer init`. The `zeer-chef` alias remains.
+With npm, use `npx @zeer-dev/chef@0.3.0 init` and the matching npm project scripts.
+Scripts should select `--template blank|public|shielded` and supply `--dir`,
+`--project`, `--start-height` and `--json`. Existing fully supplied scripts that
+omit `--template` retain the public default. Redirected sessions
 never prompt. Use `zeer <command> --help` for details and `zeer --version` to check
 the installed version. Cancelled questions or height lookups create no project.
+
+The shielded starter requires an explicit numeric wallet birthday and rejects
+`latest`: choose a height at or before the notes you need. In its generated
+directory, run `pnpm install --ignore-scripts` and `pnpm run scanner:install`.
+The installer verifies a pinned Linux/WSL2 x64 glibc binary before keyless
+execution. Keep your testnet UFVK in an owner-only file outside the project;
+inspect its fingerprint with the installed scanner and configure the file path,
+executable path and fingerprint in `.env`. Then run `pnpm run codegen`,
+`pnpm run typecheck` and `pnpm run migrate`. Run `follow` and `serve` in separate
+terminals, `query` to read memos and `consume --mode continuous --follow` with
+the project, birthday and private SQLite path to follow receipts. The generated
+README gives complete commands. Init never reads a key or starts a service.
 
 Set `PREP_URL` and database settings in the generated `.env`, then migrate before
 running sync and serve. Follow the [complete quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/)
@@ -86,10 +109,11 @@ for the validated native TypeScript config path. Use erasable TS syntax.
 For a standalone testnet project, use **[Run your own Chef project](https://github.com/EndPx/zeer/blob/main/docs/CHEF_QUICKSTART.md)**.
 After obtaining the local package artifacts, the installed CLI can scaffold a new
 directory with `zeer-chef init --dir ./my-indexer --project my_indexer --start-height 1000`.
-It creates config, schema, handlers, env files, optional local PostgreSQL and npm
+It creates config, schema, handlers, env files, optional local PostgreSQL and project
 commands for the full GraphQL workflow. It never overwrites existing directories,
-installs dependencies or starts services automatically. A real Prep URL with matching
-testnet coverage must be supplied; no public hosted endpoint is assumed.
+installs dependencies or starts services automatically. A Prep URL with matching
+testnet coverage is required at runtime; init records the selected source and
+defaults to the public testnet preview.
 
 ```sh
 node packages/chef/dist/cli.js codegen --config examples/chef-public/chef.config.ts

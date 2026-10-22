@@ -1,6 +1,6 @@
 # Run your own Chef project
 
-Create a Zcash indexer with a schema, TypeScript handlers and a GraphQL API. This quickstart starts near Prep's available testnet head and follows new blocks.
+Create a Zcash application with a schema, TypeScript handlers and a GraphQL API. Chef offers three starting points: a blank project, a public chain indexer and a shielded payment inbox. This walkthrough uses the public starter to follow new testnet blocks.
 
 ## Prerequisites
 
@@ -13,18 +13,28 @@ Create a Zcash indexer with a schema, TypeScript handlers and a GraphQL API. Thi
 For a one-time setup without installing the CLI globally:
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.2.0 dlx zeer init
+pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init
 ```
 
-The explicit executable name selects `zeer` from the package's two compatible aliases. With npm, use `npx @zeer-dev/chef@0.2.0 init`.
+The explicit executable name selects `zeer` from the package's two compatible aliases. With npm, use `npx @zeer-dev/chef@0.3.0 init`.
 
 Accept the defaults or enter your own values:
 
 ```text
+Template: 1 Blank project, 2 Public chain indexer, 3 Shielded payment inbox (public):
 Project name (my_indexer):
 Project folder (my-indexer):
+Prep endpoint (https://zeer.endpx.cloud/api/prep):
 Start block: latest indexed or a height (latest):
 ```
+
+Choose `2` or `public` for this walkthrough. The choices contain:
+
+| Starter | What you get |
+| --- | --- |
+| **Blank project** | Config, an empty entity schema and handler module, environment files, PostgreSQL recipe and project scripts. Define your own model and handlers before indexing. |
+| **Public chain indexer** | A `BlockSummary` model with height, hash, time and transaction count; block and transaction-metadata handlers; a GraphQL query to inspect results. No wallet or viewing key is required. |
+| **Shielded payment inbox** | A `ReadableNote` model, receipt handler, memo queries, pinned scanner installer and restartable SQLite consumer. It requires your own protected local testnet viewing key and an explicit numeric wallet birthday. Follow [Local viewing-key setup](/docs/chef/shielded/local/). |
 
 `latest` reads the chosen Prep service once and writes its available indexed height as a number in `chef.config.ts`. The CLI prints the captured height. It does not select the node's possibly higher source tip or change the configured start on restart. Choose `0` to include genesis history. If Prep cannot provide a ready full-data testnet height, setup explains the failure without creating project files.
 
@@ -91,4 +101,10 @@ For a new historical project, choose `0` during setup. To index only blocks 0 an
 
 Changing an existing project's start height changes its identity. Create a fresh project namespace and replay rather than editing the retained checkpoint. Read [restart and reorg handling](/docs/chef/recovery/) for compatible continuation.
 
-For a globally installed CLI, use `pnpm add -g @zeer-dev/chef@0.2.0` once, then `zeer init`. See the [CLI reference](/docs/chef/cli-commands/) for every supported command, [Performance](/docs/chef/benchmarking/) for measurement, or [Local viewing-key setup](/docs/chef/shielded/local/) for private receipts.
+## Start with your own model
+
+Choose `1` or `blank` to begin without sample entities. Install dependencies and run `pnpm run typecheck`; the empty project can typecheck before code generation. Add entities to `schema.graphql`, each with `id: ID!`, then run `pnpm run codegen`. Implement your application handlers in `handlers.ts` before migrating and indexing. The CLI explains what is missing if the schema or indexer is empty.
+
+Blank and public projects default to `latest`. A shielded inbox asks for a numeric birthday with no default: starting after a payment's block would miss that note. Init never reads a key, installs dependencies or starts a service.
+
+For a globally installed CLI, use `pnpm add -g @zeer-dev/chef@0.3.0` once, then `zeer init`. For unattended setup, provide `--template public --dir my-indexer --project my_indexer --start-height latest --json`. See the [CLI reference](/docs/chef/cli-commands/) for every supported command and [Performance](/docs/chef/benchmarking/) for measurement.
