@@ -1,6 +1,6 @@
 {
   "name": "@zeer-dev/cli",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Start a Zeer Chef project with blank, public-chain or local shielded-inbox templates",
   "type": "module",
   "bin": {
@@ -15,7 +15,7 @@
     "node": ">=24.14.0"
   },
   "dependencies": {
-    "@zeer-dev/chef": "0.6.0"
+    "@zeer-dev/chef": "0.6.1"
   },
   "publishConfig": {
     "access": "public",

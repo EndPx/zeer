@@ -1,5 +1,9 @@
 # Zeer Chef (developer preview)
 
+0.6.1 is a documentation patch: it removes an outdated statement excluding entity
+relationships. Runtime code and the API are unchanged from 0.6.0; this patch does
+not require a database migration or replay for an otherwise unchanged project.
+
 Chef reads complete public Zcash data from Prep, invokes trusted TypeScript
 handlers, commits application entities to developer-owned PostgreSQL, and serves
 an authenticated read-only GraphQL API. The default profile reads public data. An explicit local
