@@ -1,5 +1,24 @@
 # Release package verification
 
+The one-time CLI entry point is `@zeer-dev/cli@0.3.0`:
+
+```sh
+pnpx @zeer-dev/cli init
+```
+
+It contains one executable and pins `@zeer-dev/chef@0.3.0`. The SDK keeps both
+legacy executable aliases. The launcher imports Chef's actual CLI entry point
+in the same process, preserving terminal cancellation and sanitized errors.
+Run `npm run test:cli` before publishing a matching launcher/SDK pair. Verify
+the four-file launcher pack manifest and a separate registry install; the
+two-package verifier below continues to cover the SDK and Prep client.
+
+An unscoped `zeer` publication was rejected by npm's similar-name policy. Do not
+document `pnpx zeer init` as available. `pnpx @zeer-dev/cli@latest init` selects
+the latest launcher tag subject to pnpm's cache and resolution settings; generated
+projects keep exact SDK dependencies. See the [CLI reference](https://zeer.endpx.cloud/docs/chef/cli-commands/)
+for refresh behavior and the [launcher verification](PNPX_LAUNCHER_VERIFICATION_20261022.json).
+
 The current published npm versions are `@zeer-dev/prep-client@0.1.0` and
 `@zeer-dev/chef@0.3.0`. Chef 0.3.0 adds blank, public-data and shielded-inbox
 templates to guided init. Blank contains no sample model or handler. Shielded

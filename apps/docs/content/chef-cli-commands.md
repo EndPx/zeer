@@ -4,16 +4,19 @@ The `@zeer-dev/chef` package installs `zeer` and its compatible alias `zeer-chef
 
 ## Install and inspect
 
-Requires Node.js 24.14+ on Linux x86_64 or WSL2. With a configured pnpm global bin directory, install once:
+Requires Node.js 24.14+ on Linux x86_64 or WSL2. Run without a global installation:
 
 ```sh
-pnpm add -g @zeer-dev/chef@0.3.0
-zeer --version
-zeer --help
-zeer init
+pnpx @zeer-dev/cli init
+pnpx @zeer-dev/cli --version
+pnpx @zeer-dev/cli --help
 ```
 
-Without a global install, use `pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init`. The executable name is explicit because the package has two aliases. npm users can use `npm install -g @zeer-dev/chef@0.3.0` or the one-time `npx @zeer-dev/chef@0.3.0 init`.
+`pnpm dlx @zeer-dev/cli init` is equivalent. npm users can run `npx @zeer-dev/cli@latest init`. The `zeer` launcher uses the matching published Chef CLI, including the same wizard and error handling. The SDK remains `@zeer-dev/chef`; generated projects declare their own exact dependency.
+
+`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.3.0 init` for reproducible scripts. Launcher and Chef versions are published together.
+
+An existing global `zeer` / `zeer-chef` command remains usable. The commands below show that executable form; prefix them with `pnpx` when using the launcher, for example `pnpx @zeer-dev/cli status --config chef.config.ts`.
 
 For any command, `zeer <command> --help` prints its options without loading project configuration or contacting services. `zeer --version` prints the installed package version.
 

@@ -4,12 +4,14 @@
   "workspaces": [
     "packages/prep-client",
     "packages/chef",
+    "packages/cli",
     "apps/web",
     "apps/docs"
   ],
   "scripts": {
     "build:chef": "npm run build -w @zeer-dev/chef",
     "test:chef": "npm test -w @zeer-dev/chef",
+    "test:cli": "npm test -w @zeer-dev/cli",
     "dev:web": "npm run dev -w @zeer/web",
     "build:web": "npm run build -w @zeer/web",
     "dev:docs": "npm run dev -w @zeer/docs",

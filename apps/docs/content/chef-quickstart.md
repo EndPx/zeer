@@ -13,10 +13,10 @@ Create a Zcash application with a schema, TypeScript handlers and a GraphQL API.
 For a one-time setup without installing the CLI globally:
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init
+pnpx @zeer-dev/cli init
 ```
 
-The explicit executable name selects `zeer` from the package's two compatible aliases. With npm, use `npx @zeer-dev/chef@0.3.0 init`.
+`pnpx` runs the `@zeer-dev/cli` package without a global installation. `pnpm dlx @zeer-dev/cli init` is equivalent; npm users can run `npx @zeer-dev/cli@latest init`. To explicitly select the latest release tag, use `pnpx @zeer-dev/cli@latest init`. pnpm manages its download cache; existing generated projects keep their pinned SDK version.
 
 Accept the defaults or enter your own values:
 
@@ -107,4 +107,4 @@ Choose `1` or `blank` to begin without sample entities. Install dependencies and
 
 Blank and public projects default to `latest`. A shielded inbox asks for a numeric birthday with no default: starting after a payment's block would miss that note. Init never reads a key, installs dependencies or starts a service.
 
-For a globally installed CLI, use `pnpm add -g @zeer-dev/chef@0.3.0` once, then `zeer init`. For unattended setup, provide `--template public --dir my-indexer --project my_indexer --start-height latest --json`. See the [CLI reference](/docs/chef/cli-commands/) for every supported command and [Performance](/docs/chef/benchmarking/) for measurement.
+For unattended setup, use `pnpx @zeer-dev/cli@0.3.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json`. An exact launcher version makes automation repeatable. See the [CLI reference](/docs/chef/cli-commands/) for cache refresh and other commands, and [Performance](/docs/chef/benchmarking/) for measurement.

@@ -1,0 +1,1066 @@
+{
+  "format": "zeer-pnpx-launcher-verification-v1",
+  "status": "PASS",
+  "recorded_date_local": "2026-10-22",
+  "timezone": "Asia/Jakarta",
+  "baseline_commit": "5526333",
+  "package": "@zeer-dev/cli",
+  "version": "0.3.0",
+  "chef_dependency": "0.3.0",
+  "unscoped_package": {
+    "name": "zeer",
+    "published": false,
+    "error": "E403 name too similar to bser,user"
+  },
+  "registry": {
+    "status": "PASS",
+    "name": "@zeer-dev/cli",
+    "version": "0.3.0",
+    "latest": "0.3.0",
+    "chef_dependency": "0.3.0",
+    "sha256": "20ff140c79335c4b8aa362db07ae9b1476b9bba9c9137ef21179403b446cec0f",
+    "integrity": "sha512-wrDx0hFmq2iXhWBXnSydu+AzNQs7s6C7Gs4WJ4GsVTrx+zQ9C8CBkRqsLcV2hIsagRwwkkZSrygAszlhSoMwUw==",
+    "anonymous_registry_download": true,
+    "registry_bytes_equal_accepted_candidate": true,
+    "recorded_at_utc": "2026-10-22T05:35:15.028339+00:00"
+  },
+  "candidate_windows": {
+    "status": "PASS",
+    "source": "candidate-tarball",
+    "workspace_link": false,
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-1.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-2.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-3.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-4.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-5.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-6.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-7.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-8.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-9.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-10.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-11.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-12.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-13.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-14.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-15.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-16.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-17.log",
+        "killed": false
+      }
+    ],
+    "templates": [
+      {
+        "template": "blank",
+        "generated_sdk": "0.3.0",
+        "empty_typecheck": true,
+        "empty_codegen_actionable": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "public",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "shielded",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      }
+    ],
+    "installed_alias": true
+  },
+  "candidate_linux": {
+    "status": "PASS",
+    "source": "candidate-tarball",
+    "workspace_link": false,
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-1.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-2.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-3.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-4.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-5.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-6.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-7.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-8.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-9.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-10.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-11.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-12.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-13.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-14.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-15.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-16.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-17.log",
+        "killed": false
+      }
+    ],
+    "templates": [
+      {
+        "template": "blank",
+        "generated_sdk": "0.3.0",
+        "empty_typecheck": true,
+        "empty_codegen_actionable": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "public",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "shielded",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      }
+    ],
+    "installed_alias": true
+  },
+  "candidate_terminal_linux": {
+    "status": "PASS",
+    "actual_terminal": true,
+    "wizard_choices_visible": true,
+    "sigint_exit_code": 130,
+    "cancelled_directory_created": false,
+    "launcher_uses_same_process": true
+  },
+  "registry_windows": {
+    "status": "PASS",
+    "source": "npm-registry",
+    "workspace_link": false,
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-1.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-2.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-3.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-4.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-5.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-6.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-7.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-8.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-9.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-10.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-11.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-12.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-13.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-14.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-15.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-16.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-17.log",
+        "killed": false
+      }
+    ],
+    "templates": [
+      {
+        "template": "blank",
+        "generated_sdk": "0.3.0",
+        "empty_typecheck": true,
+        "empty_codegen_actionable": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "public",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "shielded",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      }
+    ],
+    "installed_alias": true
+  },
+  "registry_linux": {
+    "status": "PASS",
+    "source": "npm-registry",
+    "workspace_link": false,
+    "commands": [
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-0.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-1.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-2.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-3.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-4.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-5.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-6.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-7.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-8.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-9.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-10.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-11.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-12.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-13.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-14.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-15.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 0,
+        "log": "command-16.log",
+        "killed": false
+      },
+      {
+        "program": "pnpm",
+        "exit_code": 1,
+        "log": "command-17.log",
+        "killed": false
+      }
+    ],
+    "templates": [
+      {
+        "template": "blank",
+        "generated_sdk": "0.3.0",
+        "empty_typecheck": true,
+        "empty_codegen_actionable": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "public",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      },
+      {
+        "template": "shielded",
+        "generated_sdk": "0.3.0",
+        "codegen": true,
+        "typecheck": true,
+        "no_overwrite": true
+      }
+    ],
+    "installed_alias": true
+  },
+  "registry_terminal_linux": {
+    "status": "PASS",
+    "actual_terminal": true,
+    "wizard_choices_visible": true,
+    "sigint_exit_code": 130,
+    "cancelled_directory_created": false,
+    "launcher_uses_same_process": true
+  },
+  "actual_pnpx_windows": {
+    "status": "PASS",
+    "platform": "Windows",
+    "pnpm_version": "10.21.0",
+    "bare_init": "blank",
+    "latest_init": "public",
+    "global_installation_required": false
+  },
+  "actual_pnpx_linux": {
+    "status": "PASS",
+    "platform": "Linux x64",
+    "pnpm_version": "9.15.9",
+    "commands": [
+      {
+        "args": [
+          "@zeer-dev/cli",
+          "--version"
+        ],
+        "exit_code": 0
+      },
+      {
+        "args": [
+          "@zeer-dev/cli",
+          "init",
+          "--template",
+          "public",
+          "--dir",
+          "plain-public",
+          "--project",
+          "plain_public",
+          "--start-height",
+          "42",
+          "--json"
+        ],
+        "exit_code": 0
+      },
+      {
+        "args": [
+          "@zeer-dev/cli@latest",
+          "init",
+          "--template",
+          "blank",
+          "--dir",
+          "latest-blank",
+          "--project",
+          "latest_blank",
+          "--start-height",
+          "42",
+          "--json"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "legacy_cache_refresh_flag": "not supported as pnpx prefix; main commands retained"
+  },
+  "actual_cache_refresh_windows": {
+    "status": "PASS",
+    "platform": "Windows",
+    "pnpm_version": "10.21.0",
+    "command": "pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest --version",
+    "version": "0.3.0",
+    "network_retries_observed": true,
+    "latency_benchmark": false
+  },
+  "unit_tests": {
+    "passed": 3,
+    "skipped": 0
+  },
+  "review": "PASS after scoped package wording correction",
+  "cleanup_linux": {
+    "status": "PASS",
+    "unused_test_environment_files_removed": [
+      "work/blank/.env",
+      "work/shielded/.env",
+      "work/public/.env",
+      "scoped-work/blank/.env",
+      "scoped-work/shielded/.env",
+      "scoped-work/public/.env",
+      "registry-work-2/blank/.env",
+      "registry-work-2/plain-public/.env",
+      "registry-work-2/latest-blank/.env",
+      "registry-work-2/shielded/.env",
+      "registry-work-2/public/.env"
+    ],
+    "database_created": false,
+    "wallet_key_loaded": false,
+    "job_inactive": true,
+    "guard": {
+      "checked_at_utc": "2026-10-22T05:50:14.414020+00:00",
+      "limits": {
+        "node_budget_gib": 35,
+        "node_stop_gib": 34,
+        "aggregate_budget_gib": 60,
+        "aggregate_stop_gib": 59,
+        "minimum_host_free_gib": 25,
+        "minimum_available_memory_gib": 3
+      },
+      "node_bytes": 13861855232,
+      "zeer_bytes": 62858380898,
+      "free_bytes": 34761908224,
+      "available_memory_bytes": 9436282880,
+      "services": {
+        "commitpass-api": "active",
+        "nabungfi-api": "active",
+        "nabungfi-keeper": "active",
+        "rocket-arena": "active",
+        "nginx": "active"
+      },
+      "containers": {
+        "skripsi-kat-b-rust-1": true,
+        "stockpilot-app-1": true,
+        "stockpilot-redis-1": true,
+        "hermes-agent-e0qr-hermes-agent-1": true,
+        "sos-pg": true
+      },
+      "other_zeer_running": [],
+      "halted_latch": false,
+      "pipeline_units": {
+        "zeer-testnet-prep-optimized-native.service": "active",
+        "zeer-testnet-chef-memo-http.service": "active",
+        "zeer-testnet-prep-shielded.service": "inactive",
+        "zeer-testnet-chef-demo-http.service": "active",
+        "zeer-testnet-chef-demo-sync.service": "inactive",
+        "zeer-testnet-chef-demo-install.service": "inactive",
+        "zeer-testnet-prep-public.service": "active",
+        "zeer-testnet-prep-http.service": "active",
+        "zeer-testnet-prep-follow.service": "active",
+        "zeer-testnet-chef-http.service": "active",
+        "zeer-testnet-chef-follow.service": "active",
+        "zeer-testnet-repack.service": "inactive",
+        "zeer-testnet-web.service": "active",
+        "zeer-testnet-web-build.service": "inactive"
+      },
+      "pipeline_limit_violations": [],
+      "envelope_invalid": false,
+      "combined_cpu_limit": 3,
+      "combined_memory_mib": 8192,
+      "zebra_running": true,
+      "zebra_oom_killed": false,
+      "reasons": [],
+      "status": "PASS"
+    }
+  },
+  "cleanup_windows": {
+    "wallet_keys_untouched": true,
+    "status": "PASS",
+    "unused_test_env_files_removed": [
+      "pnpx-20261022-2/blank/.env",
+      "pnpx-20261022-2/public/.env",
+      "pnpx-20261022-2/shielded/.env",
+      "pnpx-scoped-20261022/blank/.env",
+      "pnpx-scoped-20261022/public/.env",
+      "pnpx-scoped-20261022/shielded/.env",
+      "pnpx-scoped-registry-20261022-3/blank/.env",
+      "pnpx-scoped-registry-20261022-3/public/.env",
+      "pnpx-scoped-registry-20261022-3/shielded/.env",
+      "pnpx-actual-20261022/blank/.env",
+      "pnpx-actual-20261022/public/.env"
+    ]
+  },
+  "docs": {
+    "activation": {
+      "status": "PASS",
+      "previous": "/opt/zeer-docs/releases/20261022-onboarding-v1",
+      "release": "/opt/zeer-docs/releases/20261022-pnpx-v1",
+      "pages": 44,
+      "application_services_restarted": false
+    },
+    "served_html": {
+      "status": "PASS",
+      "pages": [
+        {
+          "path": "/docs/chef/quickstart/",
+          "bytes": 30688,
+          "sha256": "6ee7d1f968378729cc662055874b8888cccb749ecc7cc1c6f1baacd2b941c9f5",
+          "byte_equality": true
+        },
+        {
+          "path": "/docs/chef/cli-commands/",
+          "bytes": 38621,
+          "sha256": "c1fe4eb315379fe194a8782f99d144e1172d8dd43b0975f54e77d224efb033cc",
+          "byte_equality": true
+        },
+        {
+          "path": "/docs/chef/shielded/local/",
+          "bytes": 34126,
+          "sha256": "a5d320186834aa955dc55d6af111bf703b823d51eb58ac67e970ab1f5e560632",
+          "byte_equality": true
+        }
+      ]
+    },
+    "browser": {
+      "origin": "https://zeer.endpx.cloud",
+      "pages": [
+        {
+          "pathname": "/docs/",
+          "title": "Build with Zeer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/architecture/",
+          "title": "From source to API",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/overview/",
+          "title": "Zeer Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart/",
+          "title": "Your first Prep query",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/getting-started/",
+          "title": "Getting started with Prep",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/clients/",
+          "title": "Prep clients",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/benchmarks/",
+          "title": "Prep retrieval benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/curl/",
+          "title": "cURL examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tokens/",
+          "title": "API access & tokens",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/networks/",
+          "title": "Supported networks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/troubleshooting/",
+          "title": "Troubleshooting",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/query/",
+          "title": "Query & response",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/fields/",
+          "title": "Filters & field selection",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/continuation/",
+          "title": "Continuation & historical scans",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/address-outputs/",
+          "title": "Find payments to a transparent address",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/tutorials/inspect-transaction/",
+          "title": "Inspect a Zcash transaction",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/shielded/",
+          "title": "Public shielded activity",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/transactions/",
+          "title": "Transaction lookup & mempool",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/examples/",
+          "title": "Prep examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/prep/public-api/",
+          "title": "Coverage, access & preview limits",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/overview/",
+          "title": "Zeer Chef",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart/",
+          "title": "Run your own Chef project",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/quickstart-ai/",
+          "title": "Quickstart with AI",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarks/",
+          "title": "Chef indexing benchmarks",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/configuration/",
+          "title": "Configuration file",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/schema/",
+          "title": "Entity schema",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/handlers/",
+          "title": "Transaction handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/block-handlers/",
+          "title": "Block handlers",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/environment-variables/",
+          "title": "Environment variables",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/cli-commands/",
+          "title": "Chef CLI commands",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/database-performance/",
+          "title": "Database performance",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/latency-at-head/",
+          "title": "Latency at the chain head",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/benchmarking/",
+          "title": "Benchmark your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/graphql/",
+          "title": "Querying with GraphQL",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/overview/",
+          "title": "Shielded receipts & privacy",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/local/",
+          "title": "Local viewing-key setup",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/shielded/memos/",
+          "title": "Reading receipts & memos",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/examples/",
+          "title": "Chef examples",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/testing/",
+          "title": "Testing your indexer",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/recovery/",
+          "title": "Checkpoints, restart & reorgs",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/evolution/",
+          "title": "Schema & handler evolution",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/indexes/",
+          "title": "Equality query indexes",
+          "status": 200
+        },
+        {
+          "pathname": "/docs/chef/self-hosting/",
+          "title": "Self-hosting & troubleshooting",
+          "status": 200
+        }
+      ],
+      "viewports": [
+        {
+          "width": 375,
+          "viewport": 375,
+          "document": 375,
+          "axeViolations": 0
+        },
+        {
+          "width": 768,
+          "viewport": 768,
+          "document": 768,
+          "axeViolations": 0
+        },
+        {
+          "width": 1440,
+          "viewport": 1440,
+          "document": 1440,
+          "axeViolations": 0
+        }
+      ],
+      "interactions": [
+        "Chef and Prep onboarding sidebar order and AI guide navigation",
+        "Chef Guides and Prep Tutorials: order, collapse/expand and chapter navigation",
+        "Overview GIFs, reduced-motion stills, mobile accessibility and desktop header alignment",
+        "Product-specific benchmark navigation and downloads; quickstart, guide, tutorial and benchmark reflow/accessibility",
+        "Ctrl+K search and memo result navigation",
+        "Empty search, Escape dismissal and focus return",
+        "Code clipboard copy",
+        "Mobile drawer product navigation",
+        "Long reference reflow with reduced motion",
+        "Existing website Get started link enters the new docs"
+      ]
+    }
+  },
+  "setup_failures": [
+    "Unscoped zeer publication rejected by npm similar-name policy",
+    "Direct pnpx @zeer-dev/chef rejected multiple binaries; compatibility aliases preserved",
+    "Initial Windows candidate dependency-fetch timeout did not install modules; timeout status handling fixed in private acceptance helper",
+    "Python test helper named tty.py shadowed standard library; renamed before actualTTY PASS",
+    "Initial postpublication metadata requests returned404; later default registry installs passed",
+    "pnpm9 rejects cache refresh as pnpx prefix; main variants pass and docs qualify advanced form forpnpm10+"
+  ],
+  "limitations": [
+    "No unconditional latest lookup guarantee; pnpm caches and policies apply",
+    "No new database, decryption or funded-transaction test; the unchangedChef0.3.0SDK retains separate integration evidence",
+    "Launcher andgeneratedSDKdependencies are exact; existing projects are never automatically upgraded"
+  ],
+  "source_sha256": {
+    "packages/cli/cli.mjs": "a9b7a84938cc16e0b561c6a2308ba2e4d062a327510c1562cc46aac791b25179",
+    "packages/cli/package.json": "0fcf6dd5c2fd3679f78980e20e66f0957c44347e5b4ec6e8e94029d1ae60ed41",
+    "packages/cli/test/cli.test.mjs": "c1c4a1d8eb5b64747e138244244152b593a2a509ae229e66a6b5af58a55a1e0b"
+  }
+}

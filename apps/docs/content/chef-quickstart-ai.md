@@ -8,8 +8,8 @@ Create a standalone Zeer Chef 0.3.0 testnet project in a fresh directory.
 Read https://zeer.endpx.cloud/docs/chef/quickstart/ and
 https://zeer.endpx.cloud/docs/chef/configuration/ before writing code.
 
-1. Use the public chain indexer template for this exercise. Follow the
-   Quickstart's installation method and run Chef init with --template public,
+1. Use the public chain indexer template for this exercise. Run
+   pnpx @zeer-dev/cli@0.3.0 init with --template public,
    explicit --dir, --project and --start-height latest flags with --json,
    using a fresh directory and a new project name. Record the numeric startHeight
    returned by init; do not replace it with a later source tip.

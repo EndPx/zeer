@@ -25,18 +25,20 @@ explicitly labeled mainnet fixtures and is not a live testnet service.
 
 ## 1. Create a standalone project
 
-Run the published CLI through npx:
+Run the published launcher without a global installation:
 
 ```sh
-npx @zeer-dev/chef@0.2.0 init
+pnpx @zeer-dev/cli init
 ```
 
-Answer the project name, folder and start block prompts; Enter accepts each
-default (`my_indexer`, `my-indexer`, `latest`). Latest captures the selected
+Choose Public chain indexer for this walkthrough, then answer the project name,
+folder, Prep endpoint and start block prompts. Enter accepts each public-starter
+default (`my_indexer`, `my-indexer`, public Prep, `latest`). Latest captures the selected
 Prep archive height once; explicit `0` includes genesis history. The chosen
-source URL is recorded in `.env`. You can also install the package globally
-once with `npm install -g @zeer-dev/chef@0.2.0`, then use `zeer init`.
-For scripts, pass `--dir DIR --project NAME --start-height HEIGHT --json`.
+source URL is recorded in `.env`. npm users can run `npx @zeer-dev/cli@latest init`.
+`pnpx @zeer-dev/cli@latest init` explicitly selects the latest launcher tag,
+subject to pnpm's dlx cache. For reproducible scripts, use
+`pnpx @zeer-dev/cli@0.3.0 init --template public --dir DIR --project NAME --start-height HEIGHT --json`.
 The `zeer-chef` command remains an alias. Only terminal sessions ask questions.
 
 The directory must not already exist. Its parent must exist and be writable.

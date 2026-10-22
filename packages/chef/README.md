@@ -16,7 +16,7 @@ Initialize a standalone project with:
 Requires Node 24.14+ on Linux x86_64 or WSL2, pnpm (or npm) and PostgreSQL.
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init
+pnpx @zeer-dev/cli init
 cd my-indexer
 pnpm install
 pnpm run codegen
@@ -40,9 +40,12 @@ not silently choose a different range. `--prep-url` overrides `PREP_URL`; otherw
 the public testnet Prep is selected and written to the new `.env`. Existing private
 tokens are not sent to that default source or copied into generated files.
 
-For a short command after one global installation, use
-`pnpm add -g @zeer-dev/chef@0.3.0`, then `zeer init`. The `zeer-chef` alias remains.
-With npm, use `npx @zeer-dev/chef@0.3.0 init` and the matching npm project scripts.
+`pnpx @zeer-dev/cli init` needs no global installation. `pnpm dlx @zeer-dev/cli init` is equivalent;
+with npm, use `npx @zeer-dev/cli@latest init`. `pnpx @zeer-dev/cli@latest init` explicitly selects
+the latest launcher tag, subject to pnpm's dlx cache. To refresh its resolution,
+use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init`. The launcher pins the
+matching Chef release; existing projects keep their own SDK version and lockfile.
+Global `zeer` and `zeer-chef` commands remain compatible.
 Scripts should select `--template blank|public|shielded` and supply `--dir`,
 `--project`, `--start-height` and `--json`. Existing fully supplied scripts that
 omit `--template` retain the public default. Redirected sessions

@@ -7,7 +7,7 @@ Requirements: **Linux/WSL2 x64 with glibc**, Node **24.14+**, pnpm and PostgreSQ
 ## 1. Create the inbox
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init
+pnpx @zeer-dev/cli init
 ```
 
 Choose `3` / `shielded`, then a project name such as `payment_inbox` and folder `payment-inbox`. Select your Prep endpoint and enter an explicit numeric wallet birthday: a block at or before the first note you need to read. There is no `latest` default for this starter, because it could skip earlier payments.
@@ -15,7 +15,7 @@ Choose `3` / `shielded`, then a project name such as `payment_inbox` and folder 
 For unattended setup, replace the example height with your wallet's birthday:
 
 ```sh
-pnpm --package=@zeer-dev/chef@0.3.0 dlx zeer init --template shielded \
+pnpx @zeer-dev/cli init --template shielded \
   --dir payment-inbox --project payment_inbox --start-height 4523000 --json
 cd payment-inbox
 pnpm install --ignore-scripts

@@ -1,0 +1,17 @@
+{
+  "name": "@zeer-dev/cli",
+  "version": "0.3.0",
+  "description": "Start a Zeer Chef project with blank, public-chain or local shielded-inbox templates",
+  "type": "module",
+  "bin": {"zeer": "./cli.mjs"},
+  "files": ["cli.mjs", "README.md", "LICENSE"],
+  "engines": {"node": ">=24.14.0"},
+  "dependencies": {"@zeer-dev/chef": "0.3.0"},
+  "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
+  "repository": {"type": "git", "url": "git+https://github.com/EndPx/zeer.git", "directory": "packages/cli"},
+  "homepage": "https://zeer.endpx.cloud/docs/chef/quickstart/",
+  "bugs": {"url": "https://github.com/EndPx/zeer/issues"},
+  "keywords": ["zcash", "zeer", "indexer", "cli"],
+  "license": "MIT",
+  "scripts": {"test": "node --test test/*.test.mjs"}
+}
