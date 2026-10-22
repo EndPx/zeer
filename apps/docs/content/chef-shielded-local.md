@@ -60,7 +60,7 @@ Use your PostgreSQL database, or start the generated loopback database with Dock
 pnpm run db:up
 ```
 
-Port `39472` must be free. If you change it, update both `compose.yaml` and `DATABASE_URL`. Then:
+Port `39472` must be free. To change it, set `CHEF_POSTGRES_PORT` in `.env` and update the port in host `DATABASE_URL` to match. Then:
 
 ```sh
 pnpm run doctor

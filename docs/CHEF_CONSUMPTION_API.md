@@ -2,6 +2,8 @@
 
 The user-facing contract and examples live in [Querying with GraphQL](../apps/docs/content/chef-graphql.md). This implementation note records the migration and consistency boundaries.
 
+This contract was introduced in 0.2.0 and remains in Chef 0.6.0. The [0.6.0 relationship and transaction breakdown extension](TRANSACTION_BREAKDOWN.md) adds bounded nested reads and lists without replacing these range, cursor or freshness rules. Historical verification counts below retain their original version.
+
 - Equality `where` arguments are preserved. New `range` arguments avoid changing their scalar input types. Initial ordered/range scope is required `Int! @index` and primary ID. A bounded page returns at most 100 entities, fetched with a 101-row lookahead and SQL keysets rather than offsets.
 - Ordering is an indexed Int and same-direction ID tie-breaker, or ID alone. Numeric JSONB values use the existing `(data -> field, id)` partial B-tree. BigInt remains an exact decimal string, never a lexical numeric range.
 - HMAC-SHA256 cursors bind the normalized entity/filter/range/order to project generation, revision and checkpoint. Page size and response projection may change. The API token signs cursors; rotation requires restarting pagination. Invalid continuations return HTTP 409 `CURSOR_INVALIDATED` with current metadata and no partial response. Raw-ID continuations from 0.1.x must restart.

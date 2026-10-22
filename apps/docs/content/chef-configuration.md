@@ -2,7 +2,7 @@
 
 Define the project in `chef.config.ts`. Source and database connections come from `PREP_URL`, optional `PREP_API_TOKEN`, and `DATABASE_URL`.
 
-The generated starter already has a working block-summary configuration. This example shows a different project that stores only transactions with Orchard activity; use its [matching entity schema](https://github.com/EndPx/zeer/blob/main/examples/chef-filtered/schema.graphql).
+The public starter includes a block-summary configuration; blank and shielded starters use different models. This example stores only transactions with Orchard activity; use its [matching entity schema](https://github.com/EndPx/zeer/blob/main/examples/chef-filtered/schema.graphql).
 
 ```ts
 import { defineConfig } from "@zeer-dev/chef";
@@ -45,7 +45,8 @@ export default defineConfig<{
 
 `schema` is resolved relative to the config file. Without explicit sync settings,
 Chef uses 16 blocks per source page and one block per commit; the generated starter
-sets 1,000 and 32 respectively. Fixed source pages allow 1–1,000 blocks, adaptive
+sets 1,000 and 32 respectively for the public template. Blank and shielded templates
+use 16 and 1. Fixed source pages allow 1–1,000 blocks, adaptive
 pages allow up to 1,000,000, and commit groups allow 1–100 blocks. `reorgWindow`
 defaults to 100 and allows 1–1,000 retained blocks.
 

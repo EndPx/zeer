@@ -16,7 +16,7 @@ A low query response time does not prove a short delay across those stages. Bloc
 
 ## Start near the available head
 
-Guided `zeer init` defaults to `latest`: it captures Prep's available indexed height once and writes that number into `chef.config.ts`. This avoids replaying all historical blocks for a new application. It does not backfill older activity. Choose `0` or another explicit height when your application needs history.
+Public and blank guided `zeer init` setups default to `latest`: they capture Prep's available indexed height once and write that number into `chef.config.ts`. This avoids replaying all historical blocks for a new application. It does not backfill older activity. Choose `0` or another explicit height when your application needs history. A shielded inbox requires an explicit numeric wallet birthday at or before the notes it must read; it does not default to `latest`.
 
 After installation, database configuration and migration, run separate terminals:
 

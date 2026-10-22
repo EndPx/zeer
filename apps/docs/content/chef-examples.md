@@ -4,6 +4,7 @@
 | --- | --- | --- |
 | Block summaries | Metadata → BlockSummary → GraphQL | [Quickstart](/docs/chef/quickstart/) |
 | Filtered Orchard transactions | Public predicate → transaction entities | [Source](https://github.com/EndPx/zeer/tree/main/examples/chef-filtered) |
+| Transaction breakdown | Related input/output entities, previous-output resolution and nested GraphQL in Chef 0.6.0 | [Source and setup](https://github.com/EndPx/zeer/tree/main/examples/transaction-breakdown) |
 | Shielded inbox | Local scanner → private receipts and memos | [Local setup](/docs/chef/shielded/local/) |
 | Standalone receipt consumer | Bounded or continuous block-scoped queries → private SQLite; restart and reorg reconciliation | [Source and setup](https://github.com/EndPx/zeer/tree/main/examples/receipt-consumer) |
 | Historical fixture replay | Reproducible offline public-data example | [Source](https://github.com/EndPx/zeer/tree/main/examples/quickstart) |

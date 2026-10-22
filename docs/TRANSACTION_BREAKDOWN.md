@@ -2,6 +2,8 @@
 
 Chef and launcher 0.6.0 are published on npm. Installing the release does not migrate hosted projects or automatically add a transaction schema to them. See the [runnable schema and handlers](../examples/transaction-breakdown/README.md).
 
+The [23 October release acceptance](CHEF_060_ACCEPTANCE.md) records the complete Linux suite and independent registry-installed testnet verification. The Windows pre-release checks at the end of this document retain their earlier date and skipped-platform counts.
+
 ## Previous-output resolution
 
 `readTransparentOutputs(transaction)` validates public `decoded.vout`, converts decimal value strings to exact zatoshis and returns output identities, script components and addresses present in those scripts. JavaScript floating-point amounts, negative values, fractional zatoshis and inconsistent indices fail. Outputs are keyed by `transparentOutputId(txid, outputIndex)`.

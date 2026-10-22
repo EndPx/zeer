@@ -1,6 +1,6 @@
 # Run your own Chef project
 
-Create a Zcash application with a schema, TypeScript handlers and a GraphQL API. Chef offers three starting points: a blank project, a public chain indexer and a shielded payment inbox. This walkthrough uses the public starter to follow new testnet blocks.
+Create a Zcash application with a schema, TypeScript handlers and a GraphQL API. This guide targets Chef 0.6.0 and its three starting points: a blank project, a public chain indexer and a shielded payment inbox. This walkthrough uses the public starter to follow new testnet blocks.
 
 ## Prerequisites
 

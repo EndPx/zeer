@@ -3,7 +3,7 @@
 Chef supports a bounded, explicit field-index declaration for application equality
 queries. This adds database indexes through `migrate`; it does not change the
 GraphQL query language, ordering, read snapshots, authorization or source handling.
-No field indexes are enabled by default.
+Unannotated fields create no extra indexes. The current public starter explicitly indexes `BlockSummary.height`.
 
 Choose fields used by a concrete application workflow and inspect their current
 SQL plans first. A transaction browser commonly filters by mined block height;
@@ -37,6 +37,7 @@ describe the same scalar values; the annotation is database metadata.
 ## Declaration contract
 
 - A field accepts at most one `@index`, without arguments or additional directives.
+- Chef 0.6.0 also accepts `@index` on a single stored entity reference, using its target ID. The inverse reference behind `@derivedFrom` must carry this index. Stored lists and derived lists cannot be indexed, and reference indexes count toward the same project limit.
 - Indexed scalars are `Int`, `Boolean`, `BigInt`, and `ID` on fields other than
   primary `id`. Required and nullable fields are supported.
 - Primary `id` is excluded because the existing `(entity,id)` primary key already

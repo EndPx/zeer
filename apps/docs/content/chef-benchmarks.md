@@ -2,6 +2,8 @@
 
 Chef's benchmark measures the application-indexing pipeline: reading from Prep, running TypeScript handlers, committing entities to PostgreSQL and making committed data readable through GraphQL.
 
+These are historical studies with their original versions, dates and workloads. They are not Chef 0.6.0 performance measurements. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) covers the registry install, all three starters and real testnet transaction breakdown; it does not remeasure the latency tables below.
+
 For private payment observations, start with the [six uninterrupted live receipts](#shielded-receipts-six-uninterrupted-live-samples). For a longer application-consumption check, see the [continuous consumer study](#continuous-consumer-one-observed-hour). Public block-summary and earlier polling studies are recorded separately below.
 
 Recorded **20 October 2026** on real **Zcash Testnet** data. All durations are in **seconds (s)**.

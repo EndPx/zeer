@@ -1,5 +1,7 @@
 # Chef public-data first slice
 
+Historical first-slice contract, accepted in October 2026. For the current 0.6.0 API, use the [developer docs](https://zeer.endpx.cloud/docs/chef/overview/), [consumption contract](CHEF_CONSUMPTION_API.md) and [transaction breakdown contract](TRANSACTION_BREAKDOWN.md). Later releases added local shielded receipts, numeric range pagination and entity relationships; the deferred items below describe the original slice.
+
 Accepted 14 October 2026: hold Prep at its current MVP, begin Chef with **public
 data only**, then benchmark. Viewing-key scanning is deferred. This contract
 supersedes the scanner-first sequencing of the earlier Chef proposal for this

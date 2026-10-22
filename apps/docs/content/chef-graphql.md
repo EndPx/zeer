@@ -23,12 +23,14 @@ This example uses the quickstart's `height: Int! @index` field. For your own sch
 | Argument | Behavior |
 | --- | --- |
 | `first` | 1–100 items; defaults to 25 |
-| `where` | Existing scalar equality filters, such as `{height: 4523000}` |
+| `where` | Scalar or single-reference equality filters, such as `{height: 4523000}` or a target entity ID |
 | `range` | One required, indexed `Int` field, with inclusive `gte`, `lte`, or both |
 | `orderBy` | One required, indexed `Int` followed by `id`, or `id` alone |
 | `after` | The returned opaque `nextCursor`, passed unchanged |
 
-The default order is `id ASC`. An ordered Int automatically adds `id` as a tie-breaker if omitted. Both keys must use the same direction. A range and ordered Int must name the same field; ID-only ordering is also allowed. Nullable fields, numeric BigInt ordering, text search and arbitrary multi-field sorting are outside this profile. BigInt equality and exact decimal-string responses remain supported.
+The default order is `id ASC`. An ordered Int automatically adds `id` as a tie-breaker if omitted. Both keys must use the same direction. A range and ordered Int must name the same field; ID-only ordering is also allowed. Ordering nullable fields, numeric BigInt ranges or ordering, text search and arbitrary multi-field sorting are outside this profile. Nullable-field equality, BigInt equality and exact decimal-string responses remain supported. List and derived fields cannot be equality filters.
+
+Requests allow one query operation, at most five root fields, 100 selected fields and five levels of field depth. The body limit is 64 KiB and the response limit is 2 MiB. Nested relationships also share the [500-unit reference-read budget](/docs/chef/schema/#lists-and-relationships).
 
 ## Read the next page
 

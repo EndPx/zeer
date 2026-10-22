@@ -267,8 +267,8 @@ GraphQL supports scalar equality, bounded ranges on required indexed Int fields,
 deterministic Int/ID ordering, signed revision-bound cursors and `_meta` checkpoint data.
 Authenticated `GET /status` reads cached source freshness without RPC and remains
 available during entity reconciliation. See [the consumption API contract](../../docs/CHEF_CONSUMPTION_API.md)
-for cursor recovery and the required additive migration from 0.1.x. It has no mutations, relations, subscriptions,
-introspection, fragments or executable directives. A bearer token is required.
+for cursor recovery and the required additive migration from 0.1.x. Chef 0.6.0 also supports bounded entity relationships and lists, as described below. Mutations, subscriptions,
+introspection, fragments and executable directives remain unsupported. A bearer token is required.
 See the example for request, response and concurrency bounds. No public
 production endpoint or Neon compatibility result is claimed.
 

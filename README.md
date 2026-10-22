@@ -21,6 +21,13 @@ Read the [developer documentation](https://zeer.endpx.cloud/docs/) for Prep and
 Chef quickstarts, API contracts and the local Shielded & Memos workflow. The
 [Docusaurus workspace](apps/docs/README.md) documents how to build and verify it.
 
+The current Chef and launcher release is **0.6.0**; Prep client remains **0.1.0**.
+Chef supports bounded entity relationships and lists, including a runnable
+[transparent transaction breakdown](examples/transaction-breakdown/README.md).
+Use the [release acceptance record](docs/CHEF_060_ACCEPTANCE.md) for its actual
+testnet and registry-install checks. Package publication does not upgrade hosted
+Playground schemas automatically.
+
 ## Status
 
 **A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the public Chef indexes block summaries from block 0 and follows the latest Prep blocks. An opt-in local watch-only receipt preview is available separately. Chef and the Prep client are available on npm.**

@@ -12,6 +12,8 @@ npm run test:chef
 
 Database/native integration cases require explicit environment configuration. Skipped cases are not execution evidence.
 
+For the published 0.6.0 release, the [acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) reports 187 Linux SDK tests with no skips, three launcher tests and a separate registry-installed testnet project. Those are recorded release checks, not tests automatically executed by `init` or evidence that every developer's environment is ready.
+
 ## Application checks
 
 1. Pin a small source range and target hash.

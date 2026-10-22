@@ -21,6 +21,7 @@ query ReadShieldedMemos {
 | Field | Meaning |
 | --- | --- |
 | `txid`, `pool`, `outputIndex` | Transaction and note location |
+| `blockHeight`, `blockHash` | Containing block context stored by the generated receipt handler |
 | `valueZat` | Exact received note value as a decimal string |
 | `receiver` | Authorized receiver component |
 | `memoHex` | Original 512-byte memo |

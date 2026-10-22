@@ -29,7 +29,7 @@ query {
 
 Replace the example height with a block your project has committed. An index helps locate matching rows; it does not create missing history.
 
-Chef supports argument-free `@index` on `Int`, `Boolean`, `BigInt` and non-primary `ID` fields, with at most eight field indexes per project. Primary `id` already has an index. Chef 0.2.0 also supports bounded ranges and Int/ID ordering on required indexed Int fields. String indexes, composite declarations and other custom sort orders remain outside this profile. See [Equality query indexes](/docs/chef/indexes/) for the complete contract.
+Chef supports argument-free `@index` on `Int`, `Boolean`, `BigInt`, non-primary `ID` and single entity-reference fields, with at most eight field indexes per project. A reference is indexed by its target ID; the inverse field used by `@derivedFrom` must be indexed. Primary `id` already has an index. Bounded ranges and Int/ID ordering have been supported since 0.2.0. String/list indexes, composite declarations and other custom sort orders remain outside this profile. See [Equality query indexes](/docs/chef/indexes/) for the complete contract.
 
 Declared indexes are created by explicit `migrate`, before indexing. Adding or removing an annotation changes project identity: use [a new namespace and replay](/docs/chef/evolution/) before switching readers. Chef does not defer index creation until backfill finishes or create indexes on the first query.
 
@@ -67,7 +67,9 @@ GraphQL reads use a committed snapshot and its checkpoint. Run `serve` separatel
 | Entity reads dominate handler time | Read only the entities needed and reuse values within the handler |
 | Reads became faster but writes slowed | Check whether each declared field index serves a real query |
 
-The generated starter uses 32-block commit groups; the supported range is 1–100. A larger group can reduce commit overhead but publishes checkpoints less often, holds a longer transaction and repeats more uncommitted work after a failure. Changes must preserve exact entity output and supported reorg recovery. Choose using measurements rather than a universal batch-size rule.
+The public starter uses 32-block commit groups; blank and shielded starters use one block. The supported range is 1–100. A larger group can reduce commit overhead but publishes checkpoints less often, holds a longer transaction and repeats more uncommitted work after a failure. Changes must preserve exact entity output and supported reorg recovery. Choose using measurements rather than a universal batch-size rule.
+
+Nested relationships share the root snapshot and a 500-unit read budget. Inverse lists reserve `first + 1` units before reading, even when fewer rows match. If a relation is too large, use the child entity's paginated root query rather than increasing nesting. See [schema limits](/docs/chef/schema/#lists-and-relationships).
 
 Keep external payments and other irreversible side effects outside handlers: replay and rollback apply to database projections. Preserve PostgreSQL durability settings when comparing durable indexing performance.
 

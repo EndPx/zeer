@@ -6,12 +6,12 @@ Chef reads connections and credentials from the process environment. The generat
 
 | Variable | Used by | Purpose |
 | --- | --- | --- |
-| `PREP_URL` | `init`, `migrate`, `sync`, `status`, `serve` | Prep base URL for this project's source identity |
+| `PREP_URL` | `init`, `doctor`, `dev`, `migrate`, `sync`, `status`, `serve` | Prep base URL for this project's source identity |
 | `PREP_API_TOKEN` | Prep requests | Optional bearer token for a private Prep deployment |
-| `DATABASE_URL` | `migrate`, `sync`, `status`, `serve` | PostgreSQL connection string |
-| `CHEF_API_TOKEN` | `serve`, starter query client | Private bearer token; `serve` requires at least 16 bytes |
+| `DATABASE_URL` | `doctor`, `dev`, `migrate`, `sync`, `status`, `serve` | PostgreSQL connection string |
+| `CHEF_API_TOKEN` | `doctor`, `dev`, `serve`, starter query client | Private bearer token; `serve` requires 16–4,096 bytes without line breaks |
 | `POSTGRES_PASSWORD` | Starter Docker Compose | Password for the optional local PostgreSQL container |
-| `CHEF_URL` | Starter `query.mjs` | GraphQL URL; defaults to `http://127.0.0.1:39370/graphql` |
+| `CHEF_URL` | Starter query and consumer scripts | API origin; generated `.env` uses `http://127.0.0.1:39370`; query clients select `/graphql` |
 
 For the public testnet Prep preview, set these lines in the generated `.env`:
 
@@ -43,9 +43,11 @@ The [shielded inbox example](/docs/chef/shielded/local/) also uses:
 | --- | --- |
 | `ZEER_SCANNER_EXECUTABLE` | Absolute local scanner executable path; required for shielded `sync` |
 | `ZEER_VIEWING_KEY_FILE` | Absolute protected UFVK file path; required for shielded `sync` |
+| `ZEER_ACCOUNT_ID` | Local account identifier read by the generated shielded config; defaults to `inbox` |
 | `ZEER_KEY_FINGERPRINT` | Fingerprint read by the inbox config and bound to the account identity |
-| `ZEER_BIRTHDAY_HEIGHT` | First relevant block height, read by the inbox config |
+| `ZEER_PROJECT`, `ZEER_BIRTHDAY_HEIGHT` | Reference copies of init choices in generated `.env`; the generated config stores the actual project and start height as literals |
+| `CHEF_LOCAL_URL` | Optional absolute loopback HTTP `/graphql` override for the shielded query client |
 
-The last two are example configuration variables, rather than implicit CLI settings. A receipt reader can serve an existing projection without loading the scanner key. Keep viewing keys in the operator's environment; the public Prep API does not accept them.
+`ZEER_ACCOUNT_ID` and `ZEER_KEY_FINGERPRINT` are read by the generated application config, not implicit CLI settings. Editing the generated `ZEER_PROJECT` or `ZEER_BIRTHDAY_HEIGHT` alone does not change its configured project or start. A custom config can choose to read them. The shielded config requires a valid fingerprint even for codegen, which loads `.env` but does not load the key. Its query client permits loopback HTTP only. An API reader can serve an existing projection without loading the scanner key. Keep viewing keys in the operator's environment; the public Prep API does not accept them.
 
 Keep `.env` and UFVK files out of version control. Load server credentials only where the indexer or authenticated reader runs, and use [local viewing-key setup](/docs/chef/shielded/local/) for file permissions.

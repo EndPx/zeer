@@ -178,7 +178,7 @@ The generated scripts load `.env` and work with pnpm or npm. With npm, put forwa
 
 ## Background runtime and backups
 
-The 0.5.0 starter adds these package scripts to generated projects. They wrap the project's Docker Compose recipe; they are separate from the `zeer` subcommands above. Keep the pnpm lockfile and configure the project before using them.
+Chef 0.6.0 starters include these scripts, introduced in 0.5.0. They wrap the project's Docker Compose recipe; they are separate from the `zeer` subcommands above. Keep the pnpm lockfile and configure the project before using them.
 
 | Script | Action |
 | --- | --- |
@@ -217,7 +217,7 @@ Chef currently has no managed deployment, database reset or Prometheus `metrics`
 
 The server also exposes authenticated `GET /status` for [cached freshness metadata](/docs/chef/graphql/#check-freshness-without-calling-rpc). This differs from the CLI `status` command, which actively checks Prep. Upgrades from 0.1.x require stopping the follower and API, running the additive migration with the same config, then restarting both.
 
-Chef 0.4.0 adds dev and doctor without changing the stored project fingerprint or database format. Existing 0.3.0 projects keep their package version until you explicitly upgrade it. Add `dev` and `doctor` scripts matching the generated launch command, or invoke the upgraded local CLI with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js dev`. Keep your config, schema and namespace identity unchanged for compatible continuation.
+Dev and doctor were introduced in 0.4.0 and remain available in 0.6.0. Existing projects keep their dependency and scaffold files until explicitly upgraded. Add missing scripts matching the generated launch command, or invoke the upgraded local CLI with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js dev`. Keep config, schema and namespace identity unchanged for compatible continuation. Adding the new relation/list model requires a fresh namespace and replay; see [project evolution](/docs/chef/evolution/).
 
 If Doctor reports a **readable checkpoint ahead of Prep**, `dev` stops with
 `DEV_RECONCILIATION_REQUIRED` before starting the API. Run `pnpm run follow`
