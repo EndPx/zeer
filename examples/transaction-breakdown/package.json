@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Nested transaction input/output indexing with previous-output resolution",
   "dependencies": {
-    "@zeer-dev/chef": "0.6.0"
+    "@zeer-dev/chef": "0.6.1"
   },
   "scripts": {
     "codegen": "zeer codegen",

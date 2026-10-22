@@ -21,7 +21,7 @@ Read the [developer documentation](https://zeer.endpx.cloud/docs/) for Prep and
 Chef quickstarts, API contracts and the local Shielded & Memos workflow. The
 [Docusaurus workspace](apps/docs/README.md) documents how to build and verify it.
 
-The current Chef and launcher release is **0.6.0**; Prep client remains **0.1.0**.
+The current Chef and launcher release is **0.6.1**; Prep client remains **0.1.0**.
 Chef supports bounded entity relationships and lists, including a runnable
 [transparent transaction breakdown](examples/transaction-breakdown/README.md).
 Use the [release acceptance record](docs/CHEF_060_ACCEPTANCE.md) for its actual

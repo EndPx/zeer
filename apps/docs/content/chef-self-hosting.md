@@ -2,7 +2,7 @@
 
 Run your Chef project in the background with separate follower and API containers. The follower processes blocks and writes entities; the API reads committed data from the same PostgreSQL project. Prep remains an external data service.
 
-New projects generated with **Chef 0.6.0** include the runtime files below. Keep the same configuration, schema, handlers and dependency versions for the follower and API. Upgrading an existing project's SDK does not add these scaffold files automatically.
+New projects generated with **Chef 0.6.1** include the runtime files below. Keep the same configuration, schema, handlers and dependency versions for the follower and API. Upgrading an existing project's SDK does not add these scaffold files automatically.
 
 ## Recorded walkthrough
 

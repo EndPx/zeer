@@ -1,0 +1,76 @@
+{
+  "version": "0.6.1",
+  "verifiedOn": "2026-10-23",
+  "patch": "documentation only",
+  "runtimeAndTemplatesByteIdenticalTo060": true,
+  "candidateFiles": {
+    "chef": {
+      "changedFiles": [
+        "package/README.md",
+        "package/package.json"
+      ],
+      "unchangedFiles": 62,
+      "sha256": "9734b491172ab2245b6a48cdbb637e49656ac8ab2e0694e0d8dedb0652dbe197",
+      "sha512": "fc83eda1c756850b54608a319dbb1734f060be9cea464cf9318d6c6219fee07d1b1fe2b27580f40b7cb512daa6a2977fe32e9dee022484a26dba6a4b6289f9b7",
+      "bytes": 96011,
+      "runtimeByteIdenticalTo060": true
+    },
+    "cli": {
+      "changedFiles": [
+        "package/package.json"
+      ],
+      "unchangedFiles": 3,
+      "sha256": "c65d05ec4f4d797e0db913c9baf1eae6d87d7c3183bccee12e1e90215c2de6a5",
+      "sha512": "917e09ec5a68cce15fd108c2c6e701ff5897459bb40f2c35874fd68b233b379095c03250f9d2081f52b1a7ec2eaf7987fc9acd4968d65c9efe5d14671a947946",
+      "bytes": 2637,
+      "runtimeByteIdenticalTo060": true
+    },
+    "status": "PASS"
+  },
+  "registryInstall": {
+    "status": "PASS",
+    "version": "0.6.1",
+    "installedCorrectedReadme": true,
+    "starters": [
+      {
+        "template": "blank",
+        "sdk": "0.6.1",
+        "registryInstall": true,
+        "codegen": "expected empty-schema rejection",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      },
+      {
+        "template": "public",
+        "sdk": "0.6.1",
+        "registryInstall": true,
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      },
+      {
+        "template": "shielded",
+        "sdk": "0.6.1",
+        "registryInstall": true,
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      }
+    ],
+    "actualPnpmDlxVersion": "0.6.1"
+  },
+  "latest": {
+    "@zeer-dev/chef": "0.6.1",
+    "@zeer-dev/cli": "0.6.1"
+  },
+  "publicDocs": {
+    "release": "20261023-chef061-docs-v1",
+    "pagesVerified": 44,
+    "allMatchBuiltHtml": true
+  },
+  "hostedNamespaceMigration": false,
+  "newLiveTransactions": false
+}

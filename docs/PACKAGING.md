@@ -1,6 +1,24 @@
 # Release package verification
 
-## Current release: Chef and launcher 0.6.0
+## Current release: Chef and launcher 0.6.1
+
+`@zeer-dev/chef@0.6.1` and `@zeer-dev/cli@0.6.1` were published and verified
+on 23 October 2026. Both latest tags select 0.6.1; anonymous downloads match
+the audited candidates. The launcher pins Chef 0.6.1; Prep client remains 0.1.0.
+
+```sh
+pnpx @zeer-dev/cli@0.6.1 init
+```
+
+The package README now describes entity relationships consistently. Every packed
+runtime and template file is byte-identical to 0.6.0; only package metadata and
+the Chef README changed. An otherwise unchanged existing project needs no new
+migration or replay for this patch. The [0.6.1 acceptance](CHEF_061_ACCEPTANCE.md)
+records candidate and registry checks; the [0.6.0 evidence](CHEF_060_ACCEPTANCE.md)
+retains the original functional/native/PostgreSQL verification. No new live
+benchmark or hosted namespace migration is claimed.
+
+## Previous release: Chef and launcher 0.6.0
 
 `@zeer-dev/chef@0.6.0` and `@zeer-dev/cli@0.6.0` were published and
 verified on 23 October 2026. Both `latest` tags select 0.6.0. Anonymous registry

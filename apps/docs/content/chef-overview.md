@@ -2,7 +2,7 @@
 
 **Zeer Chef** turns Zcash data into application entities with TypeScript handlers, PostgreSQL storage and a GraphQL API.
 
-These guides target **Chef and CLI 0.6.0**. The Prep client has its own version, **0.1.0**. Your project's schema and installed SDK determine its API; the hosted Playground retains its separately deployed demo schema.
+These guides target **Chef and CLI 0.6.1**. The Prep client has its own version, **0.1.0**. Your project's schema and installed SDK determine its API; the hosted Playground retains its separately deployed demo schema.
 
 <picture class="overview-demo">
   <source media="(prefers-reduced-motion: reduce)" srcset="/docs/demos/chef-flow.png" />

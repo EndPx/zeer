@@ -14,7 +14,7 @@ pnpx @zeer-dev/cli --help
 
 `pnpm dlx @zeer-dev/cli init` is equivalent. npm users can run `npx @zeer-dev/cli@latest init`. The `zeer` launcher uses the matching published Chef CLI, including the same wizard and error handling. The SDK remains `@zeer-dev/chef`; generated projects declare their own exact dependency.
 
-`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.6.0 init` for reproducible scripts. Launcher and Chef versions are published together.
+`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.6.1 init` for reproducible scripts. Launcher and Chef versions are published together.
 
 An existing global `zeer` / `zeer-chef` command remains usable. The commands below show that executable form; prefix them with `pnpx` when using the launcher, for example `pnpx @zeer-dev/cli status --config chef.config.ts`.
 
@@ -178,7 +178,7 @@ The generated scripts load `.env` and work with pnpm or npm. With npm, put forwa
 
 ## Background runtime and backups
 
-Chef 0.6.0 starters include these scripts, introduced in 0.5.0. They wrap the project's Docker Compose recipe; they are separate from the `zeer` subcommands above. Keep the pnpm lockfile and configure the project before using them.
+Chef 0.6.1 starters include these scripts, introduced in 0.5.0. They wrap the project's Docker Compose recipe; they are separate from the `zeer` subcommands above. Keep the pnpm lockfile and configure the project before using them.
 
 | Script | Action |
 | --- | --- |
@@ -217,7 +217,7 @@ Chef currently has no managed deployment, database reset or Prometheus `metrics`
 
 The server also exposes authenticated `GET /status` for [cached freshness metadata](/docs/chef/graphql/#check-freshness-without-calling-rpc). This differs from the CLI `status` command, which actively checks Prep. Upgrades from 0.1.x require stopping the follower and API, running the additive migration with the same config, then restarting both.
 
-Dev and doctor were introduced in 0.4.0 and remain available in 0.6.0. Existing projects keep their dependency and scaffold files until explicitly upgraded. Add missing scripts matching the generated launch command, or invoke the upgraded local CLI with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js dev`. Keep config, schema and namespace identity unchanged for compatible continuation. Adding the new relation/list model requires a fresh namespace and replay; see [project evolution](/docs/chef/evolution/).
+Dev and doctor were introduced in 0.4.0 and remain available in 0.6.1. Existing projects keep their dependency and scaffold files until explicitly upgraded. Add missing scripts matching the generated launch command, or invoke the upgraded local CLI with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js dev`. Keep config, schema and namespace identity unchanged for compatible continuation. Adding the new relation/list model requires a fresh namespace and replay; see [project evolution](/docs/chef/evolution/).
 
 If Doctor reports a **readable checkpoint ahead of Prep**, `dev` stops with
 `DEV_RECONCILIATION_REQUIRED` before starting the API. Run `pnpm run follow`

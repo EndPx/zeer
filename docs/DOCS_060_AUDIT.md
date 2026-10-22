@@ -68,3 +68,8 @@ README is corrected by this audit, as is the public documentation. Updating the
 README bundled in npm requires a new package version; this audit does not
 overwrite 0.6.0 or claim to have published a patch. Its release manifest and
 integrity hashes continue to identify the original published artifact.
+
+Follow-up: the separate [0.6.1 documentation patch](CHEF_061_ACCEPTANCE.md) now
+distributes the corrected README through npm. Both packages and their exact
+launcher dependency were registry-verified. The original 0.6.0 artifact remains
+unchanged, and this audit's historical verification scope remains 0.6.0.

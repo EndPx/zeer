@@ -105,7 +105,7 @@ With npm, use `npm install --ignore-scripts` and `npm run SCRIPT -- ...` when fo
 
 ## Alternative installation
 
-The [scanner release](https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1) also includes a standalone `shielded-inbox.tar.gz` tested with Chef 0.2.0. It has its own README and `chef.config.mjs`; follow its commands rather than mixing them with the generated 0.6.0 project's scripts.
+The [scanner release](https://github.com/EndPx/zeer/releases/tag/scanner-v0.1.0-testnet.1) also includes a standalone `shielded-inbox.tar.gz` tested with Chef 0.2.0. It has its own README and `chef.config.mjs`; follow its commands rather than mixing them with the generated 0.6.1 project's scripts.
 
 Other platforms retain the source-build path. From a checkout with the pinned Rust 1.99.0 toolchain:
 
