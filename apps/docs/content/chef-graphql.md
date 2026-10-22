@@ -1,6 +1,8 @@
 # Querying with GraphQL
 
-Chef serves authenticated, read-only queries for your project's entity schema. **Chef 0.2.0 introduced** bounded range queries, revision-bound cursors and cached source metadata; Chef 0.6.0 retains this API and adds [entity relationships and lists](/docs/chef/schema/). Existing 0.1.x projects need the additive migration below before using it. These features apply to your own project running 0.2.0 or newer; publishing the SDK does not automatically upgrade hosted Playground projects.
+Chef serves authenticated, read-only queries for your project's entity schema. **Chef 0.2.0 introduced** bounded range queries, revision-bound cursors and cached source metadata. Chef 0.6.0 retains those features and adds [entity relationships and lists](/docs/chef/schema/). Existing 0.1.x projects need the additive migration below before using the range and cursor API.
+
+Relationships and lists require **Chef 0.6.0 or newer**. Nested entity reads share the root query's PostgreSQL snapshot and have a request budget. Inverse lists are bounded; overflow returns `RELATION_LIMIT_EXCEEDED` with `QUERY_CHILD_LIST`, so the consumer can read the child entity through its paginated root query. Publishing the SDK does not automatically upgrade hosted Playground projects or their schemas.
 
 ```graphql
 query {
@@ -81,4 +83,4 @@ Stop its follower and API processes, keep the existing config and schema, instal
 
 Do not change schema/handler identity merely to run this migration. Adding `@index` to a previously unindexed field changes model identity and requires a [new project namespace](/docs/chef/evolution/). A process using the new store refuses an unmigrated project. Custom stores must provide snapshot-consistent `ReadView.consumption` and implement ordered keysets before serving list queries; an absent context fails closed.
 
-**Notes:** Send the project's bearer token with every request. Mutations, relations, subscriptions, introspection, fragments and executable directives are outside this API profile. Settlement decisions and external side effects stay in the consuming application; a durable change feed is not included.
+**Notes:** Send the project's bearer token with every request. Mutations, subscriptions, introspection, fragments and executable directives are outside this API profile. Entity relationships follow the [schema and relation limits](/docs/chef/schema/). Settlement decisions and external side effects stay in the consuming application; a durable change feed is not included.
