@@ -21,7 +21,7 @@ use tokio::{
 };
 use tokio_stream::{
     wrappers::{ReceiverStream, TcpListenerStream},
-    Stream,
+    Stream, StreamExt,
 };
 use tonic::{Request, Response, Status};
 
@@ -276,7 +276,17 @@ where
                 .max_decoding_message_size(16 * 1024)
                 .max_encoding_message_size(MAX_GRPC_BYTES),
         )
-        .serve_with_incoming_shutdown(TcpListenerStream::new(listener), stop);
+        // Builder socket options do not apply to a custom incoming stream.
+        // Configure each accepted socket before handing it to tonic.
+        .serve_with_incoming_shutdown(
+            TcpListenerStream::new(listener).map(|accepted| {
+                accepted.and_then(|socket| {
+                    socket.set_nodelay(true)?;
+                    Ok(socket)
+                })
+            }),
+            stop,
+        );
     tokio::pin!(server);
     tokio::pin!(shutdown);
     tokio::select! {

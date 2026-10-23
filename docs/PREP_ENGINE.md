@@ -159,6 +159,11 @@ node examples/prep-client/query.mjs
 
 The internal CLI also retains `import`, `inspect`, and `serve` for compact
 snapshots. Existing public compact APIs and full-node APIs are distinct sources.
+The compact gRPC listener explicitly enables `TCP_NODELAY` on each accepted
+socket: Tonic's builder socket settings do not apply to its custom incoming
+stream. Admission remains capped at four active streams with no waiting queue;
+excess requests receive `RESOURCE_EXHAUSTED`. This transport setting does not
+change the full-data HTTP API, snapshot limits, or integrity checks.
 
 ## Evidence and remaining limits
 
