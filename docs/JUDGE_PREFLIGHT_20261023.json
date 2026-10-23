@@ -1,0 +1,170 @@
+{
+  "status": "PASS",
+  "date": "2026-10-23",
+  "timezone": "Asia/Jakarta",
+  "browser": "Fresh real Chrome context; no existing user profile or storage state",
+  "initialCookies": 0,
+  "finalCookieNames": [],
+  "visitorAuthorizationRequests": 0,
+  "visitorCookieRequests": 0,
+  "steps": [
+    {
+      "name": "Landing page opens anonymously",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/"
+    },
+    {
+      "name": "Home \u00e2\u2020\u2019 docs \u00e2\u2020\u2019 Chef quickstart in two link clicks",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/docs/chef/quickstart/"
+    },
+    {
+      "name": "Prep quickstart is discoverable from the product navigation",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/docs/prep/quickstart/"
+    },
+    {
+      "name": "Home \u00e2\u2020\u2019 Open App \u00e2\u2020\u2019 Prep Playground",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/prep"
+    },
+    {
+      "name": "Prep: verified header example and bounded first page",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/prep"
+    },
+    {
+      "name": "Prep: modern Orchard activity example",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/prep"
+    },
+    {
+      "name": "Chef: default browse and next-page examples",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/chef"
+    },
+    {
+      "name": "Chef: Genesis block",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/chef"
+    },
+    {
+      "name": "Chef: Filter by block height",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/chef"
+    },
+    {
+      "name": "Chef: Compare two heights",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/chef"
+    },
+    {
+      "name": "Chef: Indexer checkpoint",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/chef"
+    },
+    {
+      "name": "Chef: Latest indexed block",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/chef"
+    },
+    {
+      "name": "Chef: published shielded memo, without a visitor viewing key",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/app/chef"
+    },
+    {
+      "name": "Console Quickstart link returns to the documented onboarding choice",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/docs/"
+    },
+    {
+      "name": "Mobile visitor can open navigation and reach a quickstart",
+      "status": "PASS",
+      "url": "https://zeer.endpx.cloud/docs/chef/quickstart/"
+    }
+  ],
+  "queries": [
+    {
+      "kind": "prep",
+      "example": "headers",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "prep",
+      "example": "Orchard",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "browse",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "next page",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "Genesis block",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "Filter by block height",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "Compare two heights",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "Indexer checkpoint",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "Latest indexed block",
+      "httpStatuses": [
+        200
+      ]
+    },
+    {
+      "kind": "chef",
+      "example": "published memo",
+      "httpStatuses": [
+        200
+      ]
+    }
+  ],
+  "crossLayerGenesis": {
+    "height": 0,
+    "hash": "05a60a92d99d85997cce3b87616c089f6124d7342af37106edc76126334a2c38",
+    "heightHashTimestampMatch": true
+  },
+  "pageErrors": [],
+  "limitations": [
+    "One bounded point-in-time visitor journey, not an availability SLA or load test.",
+    "Hosted demo schema is separate from the npm SDK feature set.",
+    "Published memo belongs to the selected demo wallet; no visitor viewing key was used."
+  ]
+}

@@ -1,5 +1,10 @@
 # Public testnet demo walkthrough
 
+Visitor check: on 23 October 2026, a fresh Chrome session with no cookies or
+developer token completed the public Prep/Chef examples and quickstart navigation.
+See the [judge preflight record](JUDGE_PREFLIGHT_20261023.md) for the checked path
+and its scope.
+
 Open [the console](https://zeer.endpx.cloud/app). Prep reports its observed archive
 coverage against the source. Chef indexes public BlockSummary entities from
 **block 0 through the latest available Prep block**, using namespace
@@ -94,6 +99,20 @@ show public metadata, exact zatoshis and encrypted shielded data. The mempool
 view observes the configured testnet node and refreshes while visible. A pending
 row can be mined or disappear between observations; no pending fixture is forced.
 See [field and privacy boundaries](PUBLIC_SHIELDED.md).
+
+## Read the published shielded memo
+
+In Chef Playground, select **Read shielded memos** under **Try an example**, then
+press **Run query**. The selected public demo receipt returns **Hello from Zeer
+Chef**, **100,000 zatoshi**, pool `ironwood`, block `4523289` and `origin: unknown`.
+The query uses transaction
+`b9444bea5e092925ddfa52dbfbd8d1075c62b8b234260df3d9b9179f0a8d2d6e`.
+
+No account, visitor viewing key or wallet connection is required. Zeer's local
+scanner previously decrypted this selected note and Chef indexed its projection;
+the public query reads that deliberately disclosed receipt. It does not decrypt
+arbitrary wallets or accept viewing keys. Use **Inspect transaction** to view its
+public chain context in Prep.
 
 ## Read shielded memos on your own machine
 
