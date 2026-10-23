@@ -159,11 +159,41 @@ node examples/prep-client/query.mjs
 
 The internal CLI also retains `import`, `inspect`, and `serve` for compact
 snapshots. Existing public compact APIs and full-node APIs are distinct sources.
-The compact gRPC listener explicitly enables `TCP_NODELAY` on each accepted
+The legacy `serve --dataset` gRPC listener explicitly enables `TCP_NODELAY` on each accepted
 socket: Tonic's builder socket settings do not apply to its custom incoming
 stream. Admission remains capped at four active streams with no waiting queue;
 excess requests receive `RESOURCE_EXHAUSTED`. This transport setting does not
 change the full-data HTTP API, snapshot limits, or integrity checks.
+
+### Immutable compact archive retrieval
+
+`compact-archive-append` registers checked compact segments in height order.
+`serve-compact --archive PATH` serves that frozen archive using the lightwallet
+protocol's `GetBlock`, `GetBlockRange`, `GetLatestBlock`, and `GetLightdInfo`
+methods. The default projection is shielded-only; original transaction indices
+and encrypted note fields are retained. `import --shielded-only` can apply the
+same projection when capturing a segment.
+
+This is a separate retrieval profile with a 100,000-block range limit, eight
+active readers, 128 queued readers, and a 30-second queue timeout. It accepts at
+most 128 connections, each with one concurrent HTTP/2 stream. Its bounded
+internal batches still produce one compact block per wire message. Cancellation
+releases read leases; interruption cannot turn a partial range into a successful
+end of stream.
+
+The reported tip is the archive tip. This profile does not follow a live node
+or implement the rest of the wallet protocol, including tree state, transparent
+address history, mempool, hash-only lookups, or explicit pool selection. Keep it
+on loopback or a trusted private network. See the
+[compact serving methodology](../benchmarks/prep/compact-serving/README.md) for
+the fixed historical workload and comparison boundaries.
+
+On Unix, full-archive refresh reuses a previously verified catalog while the
+opened file's device, inode, length, modification time, and change time match.
+Atomic replacement or an in-place change causes full catalog verification.
+Other platforms retain full parsing. Directory/file checks, changed-catalog
+validation, epoch checks, and writer validation still apply; a cache hit is not
+permission to skip canonicality checks.
 
 ## Evidence and remaining limits
 
@@ -182,6 +212,8 @@ Execution records and benchmark comparisons are local-only under
 `benchmarks/results/`. See the [harness](../benchmarks/README.md) for reproduction
 and the committed public fixtures for deterministic regression inputs.
 
-Large-scale public operation, millions-of-block latency, complete network
-upgrade interoperability and modern full shielded-payload production workloads
-remain unproven. No universal HyperSync parity or speedup is claimed.
+Large-scale public operation, live full-data performance across millions of
+blocks, complete network-upgrade interoperability, and modern full
+shielded-payload production workloads remain unproven. A frozen compact
+retrieval measurement does not establish those properties. No universal
+HyperSync parity or speedup is claimed.

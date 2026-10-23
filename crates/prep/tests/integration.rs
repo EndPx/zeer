@@ -421,6 +421,7 @@ async fn import_fixture(fault: Fault) -> (TempDir, anyhow::Result<prep_store::Ma
         expected_end_hash: hash(4),
         allow_insecure: false,
         deadline_seconds: if matches!(fault, Fault::Stall) { 1 } else { 10 },
+        shielded_only: false,
     })
     .await;
     stop.send(()).unwrap();

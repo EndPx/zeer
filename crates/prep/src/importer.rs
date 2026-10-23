@@ -27,6 +27,19 @@ pub struct ImportOptions {
     pub expected_end_hash: String,
     pub allow_insecure: bool,
     pub deadline_seconds: u64,
+    /// Normalize to the lightwallet protocol's default shielded-only view.
+    pub shielded_only: bool,
+}
+
+pub fn shielded_projection(block: &mut CompactBlock) {
+    block.vtx.retain_mut(|tx| {
+        tx.vin.clear();
+        tx.vout.clear();
+        !tx.spends.is_empty()
+            || !tx.outputs.is_empty()
+            || !tx.actions.is_empty()
+            || !tx.ironwood_actions.is_empty()
+    });
 }
 
 fn hash_display(hash: &[u8]) -> Result<String> {
@@ -255,11 +268,14 @@ pub async fn import(options: ImportOptions) -> Result<Manifest> {
             .await
             .map_err(|_| anyhow!("upstream_stream_deadline_exceeded"))?
             .map_err(|_| anyhow!("upstream_stream_failed"))?;
-        let Some(block) = block else { break };
+        let Some(mut block) = block else { break };
         ensure!(
             next <= options.end && block.height == next,
             "range_height_gap_or_extra_block"
         );
+        if options.shielded_only {
+            shielded_projection(&mut block);
+        }
         let length = block.encoded_len();
         ensure!(length <= MAX_BLOCK_BYTES, "compact_block_too_large");
         payload_bytes = payload_bytes
@@ -303,6 +319,7 @@ pub async fn import(options: ImportOptions) -> Result<Manifest> {
     );
     remaining(deadline)?;
     let provenance = serde_json::json!({
+        "projection": if options.shielded_only { "shielded-only" } else { "source-payload" },
         "schema_version": 1,
         "source": url.as_str(),
         "network": options.network,

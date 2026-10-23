@@ -43,3 +43,8 @@ One warmup and five local reads provide a timing observation including client
 decoding and cursor checks. Reference equality is checked after each timer.
 Public-source fetch timing and local serving timing have different network and
 preparation boundaries and must never be presented as a speedup ratio.
+
+For the separate multi-segment lightwallet retrieval profile and the pinned
+Zaino/Ztreamer workload schedule, see
+[compact serving](compact-serving/README.md). Its wallet-download scenario only
+downloads compact blocks; it does not measure wallet scanning or Chef.

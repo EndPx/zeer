@@ -74,6 +74,26 @@ enum Command {
         #[arg(long)]
         archive: PathBuf,
     },
+    /// Append checked compact segments to a compact archive, in height order.
+    CompactArchiveAppend {
+        #[arg(long)]
+        archive: PathBuf,
+        #[arg(long, value_parser = ["mainnet", "testnet", "regtest"])]
+        network: String,
+        #[arg(long)]
+        from: u64,
+        #[arg(long = "segment", required = true)]
+        segments: Vec<String>,
+    },
+    /// Serve an immutable compact archive through the lightwallet block-retrieval subset.
+    ServeCompact {
+        #[arg(long)]
+        archive: PathBuf,
+        #[arg(long, default_value = "127.0.0.1:39479")]
+        listen: SocketAddr,
+        #[arg(long)]
+        allow_network: bool,
+    },
     /// Offline lossless compression into a new archive, with complete payload comparison.
     ArchiveRepack {
         #[arg(long)]
@@ -114,6 +134,9 @@ enum Command {
         allow_insecure: bool,
         #[arg(long, default_value_t = 120)]
         deadline_seconds: u64,
+        /// Store the protocol's shielded-only projection, preserving original tx indices.
+        #[arg(long)]
+        shielded_only: bool,
     },
     /// Fully verify an existing snapshot and print its manifest.
     Inspect {
@@ -135,6 +158,38 @@ enum Command {
 #[tokio::main]
 async fn main() -> Result<()> {
     match Cli::parse().command {
+        Command::CompactArchiveAppend {
+            archive,
+            network,
+            from,
+            segments,
+        } => {
+            let summary = tokio::task::spawn_blocking(move || {
+                let mut writer = prep_store::ArchiveWriter::create_or_open(&archive, &network, from)?;
+                for segment in segments {
+                    if !writer.catalog().segments.iter().any(|entry| entry.directory == segment) {
+                        writer.append_segment(&segment)?;
+                    }
+                }
+                Ok::<_, prep_store::Error>(serde_json::json!({"network":network,"from":from,"head":writer.head(),"segments":writer.catalog().segments.len(),"catalog_sha256":writer.catalog().catalog_sha256}))
+            }).await??;
+            println!("{}", summary);
+        }
+        Command::ServeCompact {
+            archive,
+            listen,
+            allow_network,
+        } => {
+            validate_listen(listen, allow_network)?;
+            let archive =
+                tokio::task::spawn_blocking(move || prep_store::Archive::open(archive)).await??;
+            let listener = tokio::net::TcpListener::bind(listen).await?;
+            eprintln!("Prep immutable compact retrieval at {}; no authentication, no live-chain or full-wallet API guarantee", listener.local_addr()?);
+            prep::compact_rpc::serve(archive, listener, async {
+                let _ = tokio::signal::ctrl_c().await;
+            })
+            .await?;
+        }
         Command::ArchiveRepack {
             archive,
             out,
@@ -251,6 +306,7 @@ async fn main() -> Result<()> {
             expected_end_hash,
             allow_insecure,
             deadline_seconds,
+            shielded_only,
         } => {
             let manifest = import(ImportOptions {
                 source,
@@ -261,6 +317,7 @@ async fn main() -> Result<()> {
                 expected_end_hash,
                 allow_insecure,
                 deadline_seconds,
+                shielded_only,
             })
             .await?;
             println!("{}", serde_json::to_string_pretty(&manifest)?);

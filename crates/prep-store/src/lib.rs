@@ -1739,7 +1739,7 @@ mod tests {
         assert!(std::mem::size_of::<PackedIndex>() <= 144);
         let mut corrupt = fs::read(path.join(SEGMENT_NAME)).unwrap();
         *corrupt.last_mut().unwrap() ^= 1;
-        fs::write(path.join(SEGMENT_NAME), corrupt).unwrap();
+        modify(&path.join(SEGMENT_NAME), &corrupt);
         assert!(packed.read_block(1).is_err());
         assert!(Store::open(&path).is_err());
     }
@@ -1775,11 +1775,10 @@ mod tests {
         manifest.schema_version = 2;
         manifest.dataset_id = dataset_id(&manifest).unwrap();
         manifest.blocks[0].uncompressed_length = Some(u32::MAX);
-        fs::write(
-            path.join(MANIFEST_NAME),
-            serde_json::to_vec(&manifest).unwrap(),
-        )
-        .unwrap();
+        modify(
+            &path.join(MANIFEST_NAME),
+            &serde_json::to_vec(&manifest).unwrap(),
+        );
         assert!(Store::open(&path).is_err());
     }
 

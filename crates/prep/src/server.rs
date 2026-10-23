@@ -32,15 +32,15 @@ pub const MAX_RANGE_BLOCKS: u64 = 10_000;
 pub const SHUTDOWN_GRACE_SECONDS: u64 = 2;
 const BATCH_CHANNEL_SIZE: usize = 2;
 
-struct BoundedStream {
-    receiver: ReceiverStream<Result<BlockBatch, Status>>,
+pub(crate) struct BoundedStream<T> {
+    pub(crate) receiver: ReceiverStream<Result<T, Status>>,
     // Shared with the producer: release only after both disk work and the
     // response stream end, including queued messages a slow client has not read.
-    _permit: Arc<OwnedSemaphorePermit>,
+    pub(crate) _permit: Arc<OwnedSemaphorePermit>,
 }
 
-impl Stream for BoundedStream {
-    type Item = Result<BlockBatch, Status>;
+impl<T: Unpin> Stream for BoundedStream<T> {
+    type Item = Result<T, Status>;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         Pin::new(&mut self.receiver).poll_next(cx)
     }
@@ -99,9 +99,9 @@ impl PrepService {
     }
 }
 
-fn blocking_send(
-    sender: &mpsc::Sender<Result<BlockBatch, Status>>,
-    item: Result<BlockBatch, Status>,
+pub(crate) fn blocking_send<T: Send>(
+    sender: &mpsc::Sender<Result<T, Status>>,
+    item: Result<T, Status>,
     shutdown: &mut watch::Receiver<bool>,
     runtime: &tokio::runtime::Handle,
 ) -> bool {

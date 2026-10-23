@@ -151,12 +151,40 @@ fn validate_catalog(catalog: &Catalog) -> Result<()> {
     Ok(())
 }
 
-fn read_catalog(root: &Path) -> Result<Catalog> {
+// Atomic publication replaces the inode. In-place writes also change ctime,
+// even if a caller restores mtime. Other platforms retain full parsing.
+fn catalog_identity(metadata: &fs::Metadata) -> Option<[u64; 7]> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        Some([
+            metadata.dev(),
+            metadata.ino(),
+            metadata.len(),
+            metadata.mtime() as u64,
+            metadata.mtime_nsec() as u64,
+            metadata.ctime() as u64,
+            metadata.ctime_nsec() as u64,
+        ])
+    }
+    #[cfg(not(unix))]
+    {
+        let _ = metadata;
+        None
+    }
+}
+
+fn open_catalog(root: &Path) -> Result<File> {
     check_directory(root)?;
-    let mut file = regular_file(&root.join(CATALOG_NAME))?;
+    let file = regular_file(&root.join(CATALOG_NAME))?;
     if file.metadata()?.len() > MAX_CATALOG_BYTES {
         return Err(Error::Limit("catalog bytes"));
     }
+    Ok(file)
+}
+
+fn parse_catalog(mut file: File) -> Result<(Catalog, Option<[u64; 7]>)> {
+    let before = catalog_identity(&file.metadata()?);
     let mut bytes = Vec::new();
     (&mut file)
         .take(MAX_CATALOG_BYTES + 1)
@@ -166,7 +194,15 @@ fn read_catalog(root: &Path) -> Result<Catalog> {
     }
     let catalog: Catalog = serde_json::from_slice(&bytes)?;
     validate_catalog(&catalog)?;
-    Ok(catalog)
+    let after = catalog_identity(&file.metadata()?);
+    if before != after {
+        return Err(Error::Invalid("catalog changed while reading"));
+    }
+    Ok((catalog, after))
+}
+
+fn read_catalog(root: &Path) -> Result<Catalog> {
+    parse_catalog(open_catalog(root)?).map(|(catalog, _)| catalog)
 }
 
 #[cfg(all(test, unix))]
@@ -231,6 +267,7 @@ pub struct Archive {
     root: PathBuf,
     catalog: Arc<Catalog>,
     stores: Arc<Vec<Store>>,
+    catalog_identity: Option<[u64; 7]>,
 }
 
 impl Archive {
@@ -239,10 +276,20 @@ impl Archive {
     }
 
     fn load(root: &Path, previous: Option<&Self>) -> Result<Self> {
-        let catalog = profile_phase!("catalog", read_catalog(root))?;
+        let file = open_catalog(root)?;
+        let identity = catalog_identity(&file.metadata()?);
+        if let Some(previous) = previous {
+            if identity.is_some() && identity == previous.catalog_identity {
+                return Ok(previous.clone());
+            }
+        }
+        let (catalog, identity) = profile_phase!("catalog", parse_catalog(file))?;
         if let Some(previous) = previous {
             if catalog == *previous.catalog {
-                return Ok(previous.clone());
+                return Ok(Self {
+                    catalog_identity: identity,
+                    ..previous.clone()
+                });
             }
             if catalog.network != previous.catalog.network
                 || catalog.payload_kind != previous.catalog.payload_kind
@@ -325,6 +372,7 @@ impl Archive {
             root: root.to_path_buf(),
             catalog: Arc::new(catalog),
             stores: Arc::new(stores),
+            catalog_identity: identity,
         })
     }
 
@@ -679,6 +727,7 @@ impl ArchiveWriter {
                 root: root.to_path_buf(),
                 catalog: Arc::new(catalog),
                 stores: Arc::new(Vec::new()),
+                catalog_identity: None,
             }
         };
         Ok(Self {
@@ -781,6 +830,7 @@ impl ArchiveWriter {
             root: self.archive.root.clone(),
             catalog: Arc::new(catalog),
             stores: Arc::new(stores),
+            catalog_identity: None,
         };
         Ok(())
     }
@@ -1144,6 +1194,77 @@ mod tests {
                 ))
             ));
         }
+    }
+
+    #[test]
+    fn cached_catalog_detects_in_place_changes_with_restored_mtime() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer = ArchiveWriter::create_or_open(&root, "regtest", 1).unwrap();
+        writer
+            .append_segment(&make_segment(&root, "a", 1, 2, false, false))
+            .unwrap();
+        let pinned = Archive::open(&root).unwrap();
+        let path = root.join(CATALOG_NAME);
+        let old_time = fs::metadata(&path).unwrap().modified().unwrap();
+        let mut changed = pinned.catalog().clone();
+        changed.epoch += 1;
+        changed.revision += 1;
+        changed.catalog_sha256 = catalog_hash(&changed).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(2));
+        fs::write(&path, serde_json::to_vec_pretty(&changed).unwrap()).unwrap();
+        File::options()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_times(fs::FileTimes::new().set_modified(old_time))
+            .unwrap();
+        let fresh = pinned.refresh().unwrap();
+        assert_eq!(fresh.catalog().epoch, 1);
+        assert_eq!(pinned.catalog().epoch, 0);
+        // Corruption with restored mtime must still fail after a cache hit.
+        assert!(Arc::ptr_eq(
+            &fresh.catalog,
+            &fresh.refresh().unwrap().catalog
+        ));
+        let old_time = fs::metadata(&path).unwrap().modified().unwrap();
+        changed.catalog_sha256 = "00".repeat(32);
+        std::thread::sleep(std::time::Duration::from_millis(2));
+        fs::write(&path, serde_json::to_vec_pretty(&changed).unwrap()).unwrap();
+        File::options()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_times(fs::FileTimes::new().set_modified(old_time))
+            .unwrap();
+        assert!(fresh.refresh().is_err());
+    }
+
+    #[test]
+    fn cached_catalog_observes_atomic_rollback_and_rejects_symlinks() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer = ArchiveWriter::create_or_open(&root, "regtest", 1).unwrap();
+        for (name, first, last) in [("a", 1, 2), ("b", 3, 4)] {
+            writer
+                .append_segment(&make_segment(&root, name, first, last, false, false))
+                .unwrap();
+        }
+        let pinned = Archive::open(&root).unwrap();
+        assert!(Arc::ptr_eq(
+            &pinned.catalog,
+            &pinned.refresh().unwrap().catalog
+        ));
+        writer.rollback_to(2).unwrap();
+        let fresh = pinned.refresh().unwrap();
+        assert_eq!(pinned.head(), Some(4));
+        assert_eq!(fresh.head(), Some(2));
+        assert!(fresh.catalog().epoch > pinned.catalog().epoch);
+        let path = root.join(CATALOG_NAME);
+        let backup = root.join("catalog-backup.json");
+        fs::rename(&path, &backup).unwrap();
+        std::os::unix::fs::symlink(&backup, &path).unwrap();
+        assert!(fresh.refresh().is_err());
     }
 
     #[test]
