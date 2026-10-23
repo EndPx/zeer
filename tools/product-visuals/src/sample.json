@@ -1,0 +1,16 @@
+{
+  "block": {
+    "height": 4515166,
+    "time": "1792326475"
+  },
+  "transaction": {
+    "txid": "1dc8ca68f7fa920f4262cebaf70adbf21dcff6a2bf6d59908c3f5ecab9f8f751",
+    "inputValueZat": "247950000",
+    "outputs": [
+      "0",
+      "10000",
+      "247920000"
+    ]
+  },
+  "provenance": "Verified 0.6.0 testnet acceptance. These animations explain processing and do not represent a new execution or benchmark."
+}

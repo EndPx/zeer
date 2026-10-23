@@ -1,0 +1,75 @@
+{
+  "renderer": "Remotion 4.0.537",
+  "frames": 144,
+  "fps": 30,
+  "seconds": 4.8,
+  "gifFps": 12,
+  "loop": "once",
+  "assets": [
+    {
+      "path": "assets/readme/zeer-overview.gif",
+      "bytes": 789544,
+      "sha256": "661583fad54972238ba445cfd6f5b450f38ee17123bf307da6d902a855451c5f",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "assets/readme/zeer-overview.png",
+      "bytes": 626821,
+      "sha256": "c2b8141aebf3bbb8a1ff9f3c756a7f3184667ab3c42d0fe30f5defab9cf45ff0",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "apps/docs/static/demos/prep-flow.gif",
+      "bytes": 504351,
+      "sha256": "f15e7b423c33238dbab99f860128638d711bd0878f96e3362c25d0ff98af8e9e",
+      "width": 1040,
+      "height": 600
+    },
+    {
+      "path": "apps/docs/static/demos/prep-flow.png",
+      "bytes": 473174,
+      "sha256": "350d611ee2b5a674eacf5c1b11c11884ea7d219813f6ef30be8f3c238747d9fe",
+      "width": 1040,
+      "height": 600
+    },
+    {
+      "path": "apps/docs/static/demos/chef-flow.gif",
+      "bytes": 1284995,
+      "sha256": "0cbb44964ffc96865031a6bbe4b50cd7219b8121f3dc7e4c6379414e76f6a4a8",
+      "width": 1040,
+      "height": 600
+    },
+    {
+      "path": "apps/docs/static/demos/chef-flow.png",
+      "bytes": 478966,
+      "sha256": "8f3127c6d2dc21f65958d92266a8e8e677a793818307df2addd0807b31f3bc7e",
+      "width": 1040,
+      "height": 600
+    }
+  ],
+  "scope": "Original explanatory illustrations using verified public sample fields; not fresh execution or benchmark evidence.",
+  "verification": {
+    "typecheck": "PASS",
+    "gifMetadata": "PASS",
+    "playback": "one pass, 4830 ms per animation",
+    "githubMarkdownSanitizer": "three picture/reduced-motion sources preserved",
+    "readmePreview": [
+      "1440 light",
+      "1440 dark",
+      "390 mobile"
+    ],
+    "reducedMotion": "all three PNG posters selected",
+    "docsBrowserPages": 44,
+    "docsAxeViolations": 0
+  },
+  "demoVideo": {
+    "release": "https://github.com/EndPx/zeer/releases/tag/showcase-20261023",
+    "url": "https://github.com/EndPx/zeer/releases/download/showcase-20261023/zeer-demo-115s.mp4",
+    "bytes": 16870701,
+    "sha256": "045da208d32665b1b1b77e5ba4d11c0d132402ee8d96423777f32912529b2e29",
+    "timelineSeconds": 115,
+    "anonymousDownloadVerified": true
+  }
+}

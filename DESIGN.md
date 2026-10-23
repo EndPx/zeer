@@ -639,3 +639,15 @@ as a wrapping two-column button group and Chef panes stack vertically.
 Remaining delivery work: public hosting and ingress controls, published package
 distribution, wider testnet archive coverage, and a recorded walkthrough. Synthetic
 performance scores must be measured and reported separately from engine benchmarks.
+
+## Repository presentation — 23 October
+
+The public README leads with the product, working demo links and a single original
+Remotion overview. Use the existing graphite/lime/cream identity and original SVG
+mark. Product sections reuse the updated 1040×600 Prep and Chef illustrations;
+source, tokens and exact motion live in tools/product-visuals/DESIGN.md. Each GIF
+plays once for less than five seconds and settles on a static story. Matching PNG
+posters serve reduced-motion readers. The Chef scene uses the documented custom
+Transaction model, not a fabricated hosted Playground schema. Keep benchmark
+versions and evidence types explicit. Public final artwork belongs in assets/readme
+or apps/docs/static/demos; working narration, sessions and render caches stay local.

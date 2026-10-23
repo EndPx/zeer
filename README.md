@@ -1,181 +1,186 @@
+<div align="center">
+
 # Zeer
 
 **Zcash data. Ready to build.**
 
-Zeer is open-source data infrastructure for Zcash, with two product layers.
+A public-chain data engine and an application-indexing framework for Zcash.
 
-**Zeer Chef** is a Zcash indexing framework that transforms public blockchain
-data into structured, queryable application data with GraphQL APIs. Developers
-define schemas and TypeScript handlers; Chef processes data from Prep and stores
-the resulting entities in PostgreSQL.
+[Demo video · 1:55](https://github.com/EndPx/zeer/releases/tag/showcase-20261023) · [Live playground](https://zeer.endpx.cloud/app) · [Documentation](https://zeer.endpx.cloud/docs/) · [Quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) · [Reviewer walkthrough](docs/HACKATHON_DEMO.md)
 
-**Zeer Prep** is the Rust data engine that powers Chef. It provides access to
-complete public Zcash blocks and transactions through a range/filter API and a
-typed client, with field selection, historical backfill and source following.
+[![Chef 0.6.1](https://img.shields.io/badge/Chef-0.6.1-c6ff42?style=flat-square&labelColor=172119)](https://www.npmjs.com/package/@zeer-dev/chef) [![Prep client 0.1.0](https://img.shields.io/badge/Prep_client-0.1.0-c6ff42?style=flat-square&labelColor=172119)](https://www.npmjs.com/package/@zeer-dev/prep-client) [![Testnet developer preview](https://img.shields.io/badge/Zcash-testnet_preview-a0b09f?style=flat-square&labelColor=172119)](https://zeer.endpx.cloud/app) [![MIT license](https://img.shields.io/badge/license-MIT-a0b09f?style=flat-square&labelColor=172119)](LICENSE)
 
-Use Chef to build application data models and GraphQL APIs, or use Prep directly
-for custom data pipelines, analytics and specialized applications. Prep supplies
-the ingredients; Chef applies the developer's recipe.
+<picture>
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/zeer-overview.png">
+  <img src="assets/readme/zeer-overview.gif" alt="Zcash blocks pass through Prep selection, Chef's TypeScript model and PostgreSQL, then become a GraphQL API for an application." width="1200">
+</picture>
 
-Read the [developer documentation](https://zeer.endpx.cloud/docs/) for Prep and
-Chef quickstarts, API contracts and the local Shielded & Memos workflow. The
-[Docusaurus workspace](apps/docs/README.md) documents how to build and verify it.
+<sub>Original Remotion illustration. Plays once and settles into the complete data path.</sub>
 
-The current Chef and launcher release is **0.6.1**; Prep client remains **0.1.0**.
-Chef supports bounded entity relationships and lists, including a runnable
-[transparent transaction breakdown](examples/transaction-breakdown/README.md).
-Use the [release acceptance record](docs/CHEF_060_ACCEPTANCE.md) for its actual
-testnet and registry-install checks. Package publication does not upgrade hosted
-Playground schemas automatically.
+</div>
+
+## From chain data to application data
+
+A transaction lookup is one part of a Zcash backend. An application also needs selected history, records that fit its domain, and a way to keep those records coherent when the chain changes.
+
+Zeer connects those steps through two layers:
+
+| Layer | What it does | Use it when |
+| --- | --- | --- |
+| **Chef** | Runs your TypeScript handlers, stores entities in PostgreSQL, and serves authenticated GraphQL with checkpoints and bounded recovery | Your application needs a persistent model and API |
+| **Prep** | Serves public blocks and transactions through a Rust range/filter engine, with field selection and snapshot-aware continuation | You need chain data for a script, analysis pipeline or indexer |
+
+Use Prep directly, or let Chef consume it. Your model, database and application policy remain yours.
+
+## Try the working product
+
+The public testnet playground requires **no account, wallet connection or API token**.
+
+1. **[Query Prep](https://zeer.endpx.cloud/app/prep?example=headers&from=4515166&to=4515167).** Press **Run query** to inspect one real testnet block and its selected fields.
+2. **[Query Chef](https://zeer.endpx.cloud/app/chef).** Try **Genesis block**, **Compare two heights**, or **Latest indexed block**, then run the GraphQL query.
+3. **Read a shielded memo.** In the same Chef playground, select **Read shielded memos** and run it. The deliberately published demo receipt contains **Hello from Zeer Chef** and **100,000 zatoshi**.
+
+The memo example reads a selected projection from Zeer's own testnet wallet. The public service accepts no viewing key. Your own receipts use the [local scanner workflow](https://zeer.endpx.cloud/docs/chef/shielded/local/).
+
+A [fresh-browser reviewer check](docs/JUDGE_PREFLIGHT_20261023.md) completed these paths without cookies or developer credentials. Hosted demo projects have their own schemas; installing the SDK does not automatically upgrade them.
+
+## Build your first indexer
+
+Use **Node.js 24.14+**, **pnpm**, and **Linux x86_64 or WSL2**. You also need PostgreSQL, or Docker Engine with Compose v2 for the included local database.
+
+```sh
+pnpx @zeer-dev/cli@0.6.1 init
+```
+
+Choose **Public chain indexer**. Accept the default project folder, or use your own. Init creates files and local development credentials; it starts no services.
+
+```sh
+cd my-indexer
+pnpm install
+pnpm run db:up            # Skip if you configured an existing PostgreSQL database.
+pnpm run dev --migrate    # Explicitly initialize a compatible project namespace.
+```
+
+In another terminal:
+
+```sh
+pnpm run query
+```
+
+The public starter captures Prep's available indexed height once, follows new blocks and exposes `BlockSummary` entities. Use a **blank** starter for your own schema, or a **shielded** starter with an explicit wallet birthday for a local inbox. Your project pins its SDK version.
+
+[Complete quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) · [Quickstart with AI](https://zeer.endpx.cloud/docs/chef/quickstart-ai/) · [CLI reference](https://zeer.endpx.cloud/docs/chef/cli-commands/)
+
+## Prep — select the data your application needs
+
+Choose a block range, public transaction predicates and response fields. The typed client follows bounded pages through the captured snapshot, including pages with no matching transactions.
+
+<picture>
+  <source media="(prefers-reduced-motion: reduce)" srcset="apps/docs/static/demos/prep-flow.png">
+  <img src="apps/docs/static/demos/prep-flow.gif" alt="Prep projects the requested height and time fields from a verified Zcash testnet block into a focused response." width="1040">
+</picture>
+
+- Public transaction-ID lookup and transparent-output address matching.
+- Separate Sapling, Orchard and Ironwood component filters.
+- Exact decoded values, selected metadata, or raw transaction bytes.
+- Explicit coverage, readiness, continuation and source-change outcomes.
+
+[Prep quickstart](https://zeer.endpx.cloud/docs/prep/quickstart/) · [Query contract](https://zeer.endpx.cloud/docs/prep/query/) · [Recorded retrieval benchmarks](https://zeer.endpx.cloud/docs/prep/benchmarks/)
+
+## Chef — define the model your application can query
+
+Write a GraphQL entity schema and deterministic TypeScript handlers. Chef commits their changes, undo history and checkpoint together in PostgreSQL, then exposes the committed projection through GraphQL.
+
+<picture>
+  <source media="(prefers-reduced-motion: reduce)" srcset="apps/docs/static/demos/chef-flow.png">
+  <img src="apps/docs/static/demos/chef-flow.gif" alt="Chef stores a developer-defined transaction model in PostgreSQL. A GraphQL query then returns a resolved input and related output values from a verified testnet example." width="1040">
+</picture>
+
+- Scalar fields, bounded lists, forward references and `@derivedFrom` relationships.
+- Exact zatoshi values and transparent previous-output resolution.
+- Bounded filters, deterministic ordering and revision-bound cursors.
+- Snapshot-consistent reads, freshness metadata and explicit recovery errors.
+- `dev`, read-only `doctor`, container recipes and namespace backup/restore helpers.
+
+The illustration uses the [transaction breakdown example](examples/transaction-breakdown), a developer-defined model. The default public starter produces block summaries. Animations explain the engine; they are not live execution recordings or speed measurements.
+
+[Entity schemas](https://zeer.endpx.cloud/docs/chef/schema/) · [GraphQL](https://zeer.endpx.cloud/docs/chef/graphql/) · [Recovery](https://zeer.endpx.cloud/docs/chef/recovery/) · [Self-hosting](https://zeer.endpx.cloud/docs/chef/self-hosting/)
+
+## Authorized shielded receipts, in your environment
+
+For an application that needs note values, receivers and memos, add Chef's local watch-only scanner. It uses an operator-owned **Unified Full Viewing Key** and supports Sapling, Orchard and Ironwood in the experimental testnet profile.
+
+```text
+Public transaction bytes from Prep
+  → local scanner + protected UFVK
+  → Chef receipt handler
+  → operator PostgreSQL
+  → authenticated application GraphQL
+```
+
+The UFVK stays with the operator and grants no spending authority. A receipt records an authorized note observation; it is not a spendable balance, sender identity or payment approval. Applications validate their own order, amount, receiver, confirmations and source canonicality before taking action.
+
+[Local setup](https://zeer.endpx.cloud/docs/chef/shielded/local/) · [Receipt contract](docs/SHIELDED_RECEIPTS.md) · [Read memos](https://zeer.endpx.cloud/docs/chef/shielded/memos/)
+
+## What you can build
+
+| Application | Zeer's role |
+| --- | --- |
+| **Analytics dashboard** | Turn public blocks and transaction components into application aggregates |
+| **Specialized explorer** | Model transactions, transparent inputs/outputs and their relationships |
+| **Private payment inbox** | Index authorized note values and memos in the operator's environment |
+| **Monitoring backend** | Supply a polling consumer with queryable observations and recovery context |
+
+Invoices, campaigns, notification delivery, wallet state and settlement rules belong to the application. Chef's API is read-only; subscriptions, webhooks and a durable change feed are not included.
+
+## Evidence you can inspect
+
+| Evidence | What it establishes |
+| --- | --- |
+| **[0.6.1 release verification](docs/CHEF_061_ACCEPTANCE.md)** | Registry integrity, corrected README, exact launcher dependency and three registry-installed starters |
+| **[0.6.0 functional acceptance](docs/CHEF_060_ACCEPTANCE.md)** | 187 Linux SDK tests without skips, native/PostgreSQL checks, and real testnet breakdown with restart; 0.6.1 runtime files are byte-identical |
+| **[Six live shielded receipts](https://zeer.endpx.cloud/docs/chef/benchmarks/#shielded-receipts-six-uninterrupted-live-samples)** | Six future mined Ironwood notes in one observer, with values/memos, source rechecks and consumer recovery; recorded with Chef 0.2.0 |
+| **[Anonymous reviewer journey](docs/JUDGE_PREFLIGHT_20261023.md)** | Fifteen browser steps and ten real queries, all HTTP 200 on the first attempt |
+| **[Documentation audit](docs/DOCS_060_AUDIT.md)** | All 44 published pages reviewed against the implemented API and examples |
+
+Performance results retain their original version, workload and timing boundaries. Compare [Prep retrieval](https://zeer.endpx.cloud/docs/prep/benchmarks/) separately from [Chef indexing and receipt processing](https://zeer.endpx.cloud/docs/chef/benchmarks/).
 
 ## Status
 
-**A public testnet developer preview is available at [zeer.endpx.cloud](https://zeer.endpx.cloud). It uses real blockchain data. Prep reports its stored coverage from genesis and current source freshness; the public Chef indexes block summaries from block 0 and follows the latest Prep blocks. An opt-in local watch-only receipt preview is available separately. Chef and the Prep client are available on npm.**
+Zeer is a Zcash testnet developer preview. Public services are shared and bounded. Shielded scanning remains experimental; Zeer does not validate consensus or promise production availability. Recovery is bounded by retained history. The application remains responsible for financial execution.
 
-Inspect current coverage in the [console](https://zeer.endpx.cloud/app) or
-through the [limited public Prep API](docs/PUBLIC_API.md). The preview is bounded
-and can be unavailable during source recovery or maintenance. It is not a
-production availability commitment.
-
-Start with the [public demo walkthrough](docs/HACKATHON_DEMO.md), then run the
-[bounded Chef example](examples/chef-hackathon/README.md) or the
-[developer quickstart](docs/CHEF_QUICKSTART.md). The public Chef uses the genesis-following `hosted_genesis_testnet_v2` namespace.
-Its coverage and progress come from the committed checkpoint. The separate local
-bounded example covers **4,510,000–4,519,999 inclusive** for reproducible tests.
-
-Public [Sapling, Orchard and Ironwood queries](docs/PUBLIC_SHIELDED.md) expose
-component counts, pool filters and coinbase classification. The
-[transaction inspector](https://zeer.endpx.cloud/app/prep?view=transaction) adds read-only
-node observations for mined transactions and the current mempool. Pending
-observations remain separate from archive coverage and Chef checkpoints.
-
-Prep supports bounded transaction-ID lookup, snapshot pinning, capability
-discovery, immutable transaction indexes and direct metadata projection. Optional
-[disk metadata sidecars](docs/PREP_DISK_INDEX.md) reduce retained row memory while
-preserving source verification. Prep and Chef use bounded request queues with
-explicit overload responses. See
-the [query contract](docs/PREP_QUERY.md) and
-[pinned CipherScan architecture review](docs/SL_CIPHERSCAN_RESEARCH.md).
-Chef uses bounded write coalescing while preserving atomic block/checkpoint commits.
-Developers can opt into bounded scalar equality indexes with field `@index`
-declarations during explicit migration. Existing schemas retain their behavior;
-see the [query-index contract](docs/CHEF_QUERY_INDEXES.md) and
-[schema/handler evolution procedure](docs/SCHEMA_EVOLUTION.md) before changing a
-running project's model.
-
-Benchmark outputs, comparison tables and reports are retained locally under
-`benchmarks/results/` and excluded from Git. The public repository keeps the
-[harness and reproduction instructions](benchmarks/README.md), source pins and
-input fixtures. No performance ranking is published here.
-
-Whole-chain execution and production readiness remain unproven. Neither Prep
-nor the current public Chef slice decrypts private notes or validates consensus.
-
-For operator-authorized notes, the separate [watch-only receipt profile](docs/SHIELDED_RECEIPTS.md)
-uses a local native scanner and a generic Chef `receipt` handler. Try the
-[shielded inbox](examples/shielded-inbox/README.md) with an operator-owned UFVK.
-Private keys and note data are not accepted by the hosted public Prep service.
-
-Full archives now support genesis, opt-in lossless compressed records and
-binary in-memory header indexes. An offline conversion can resume from a
-verified segment prefix while preserving the original archive. See
-[archive storage and recovery](docs/PREP_STORAGE.md).
-
-This is the core Zeer monorepo. See [accepted product responsibilities and planning order](.omc/plans/zeer-v0.1.md#0-accepted-product-names-and-planning-order).
-
-## Chef public developer experience
-
-Start with [Run your own Chef project](docs/CHEF_QUICKSTART.md): create a standalone
-testnet project with `pnpx @zeer-dev/cli init`, connect your Prep endpoint and
-PostgreSQL, then check it with `pnpm run doctor`. `pnpm run dev --migrate`
-explicitly permits compatible namespace initialization, generates types,
-typechecks and starts GraphQL with a follower. Subsequent runs use
-`pnpm run dev`; the separate migrate, sync and serve commands remain available.
-The SDK and Prep client are available on npm:
-[`@zeer-dev/chef`](https://www.npmjs.com/package/@zeer-dev/chef) and
-[`@zeer-dev/prep-client`](https://www.npmjs.com/package/@zeer-dev/prep-client).
-
-- An npm package with CLI, TypeScript handlers and generated types.
-- Self-hosted operation with developer-owned PostgreSQL.
-- Historical processing followed by live block tracking.
-- Public chain facts from Prep; optional local testnet receipt scanning; webhooks remain deferred.
-- Typed entity operations and authenticated read-only GraphQL.
-- Explicit checkpoint, replay and reorg behavior.
-
-Zeer does not require spending keys. Viewing keys and decoded private data remain sensitive and belong in the operator's protected environment. Shielded receipt discovery does not reveal every sender or private transaction in the network.
-
-## Implemented Prep layout
+## Explore the source
 
 ```text
-crates/prep/              Rust full-node source, follower, HTTP queries, compact API
-crates/prep-store/        Immutable segments, atomic archive catalog, header index
-crates/prep-proto/        Pinned upstream protocol and experimental Prep API
-packages/prep-client/     Typed native-fetch client, published on npm
-packages/chef/            Public TS handlers, PostgreSQL runtime, GraphQL and CLI
-examples/prep-client/     Runnable client example
-examples/chef-public/     Runnable public-data application schema and handlers
-benchmarks/prep/          Independent reference capture and round-trip verifier
+apps/web/                Public website and Prep/Chef playgrounds
+apps/docs/               Developer documentation
+crates/prep/             Rust data engine and source follower
+crates/prep-store/       Archive segments, catalog and indexes
+crates/zeer-scanner/      Local watch-only note scanner
+packages/chef/           TypeScript framework, PostgreSQL runtime and GraphQL
+packages/cli/            Published one-command launcher
+packages/prep-client/    Typed native-fetch client
+examples/                Public indexers, transaction breakdown and private inbox
+benchmarks/              Reproduction harnesses and source references
+tools/product-visuals/   Reproducible Remotion illustrations
+docs/                    Contracts, operational guides and scoped evidence
 ```
-
-## Earlier Chef layout proposal
-
-The following is the earlier full framework proposal. The active public-only
-slice is consolidated in `packages/chef`; these additional modules remain planned:
-
-```text
-crates/zeer-scanner/        Rust Zcash integration and scanning
-packages/runtime/          TypeScript processing and persistence
-packages/sdk/              Developer API and types
-packages/cli/              CLI and process lifecycle
-packages/graphql/          Read-only query API
-examples/                  Standalone public-data and invoice examples
-benchmarks/                Reproducible comparison and correctness harness
-docs/                      Public plans, research and specifications
-assets/brand/              Zeer identity assets
-```
-
-Internal modules do not imply separate npm publications. The initial target is one public package, with native distribution details handled internally.
-
-## Planning and research
-
-- [Start here: project plan](plan.md)
-- [Prep engine contract and commands](docs/PREP_ENGINE.md)
-- [28 October delivery scope](docs/PREP_DELIVERY.md)
-- [Query and SDK contract](docs/PREP_QUERY.md)
-- [Chef public-data contract](docs/CHEF_PUBLIC_MVP.md)
-- [Chef example and commands](examples/chef-public/README.md)
-- [Recovery and operator guide](docs/OPERATIONS.md)
-- [Opt-in query indexes](docs/CHEF_QUERY_INDEXES.md)
-- [Schema and handler evolution design](docs/SCHEMA_EVOLUTION.md)
-- [Local package installation and verification](docs/PACKAGING.md)
-- [Demo script and architecture](docs/DEMO.md)
-- [Implementation plan and acceptance gates](.omc/plans/zeer-v0.1.md)
-- [Benchmark methodology](docs/BENCHMARK_SPEC.md)
-- [Envio / HyperIndex architecture research](docs/ENVIO_HYPERINDEX_RESEARCH.md)
-- [Selected logo concept](assets/brand/zeer-logo-concept-v2.png)
-
-The benchmark plan distinguishes external indexer comparisons, source-provider comparisons, and a direct-library scanner baseline. Claims will be tied to reproducible datasets, exact versions, correctness checks and actual measurements.
 
 ## Development
 
-Start with the [public-data quickstart](examples/quickstart/README.md) for an
-isolated complete-block fixture → Prep → Chef → PostgreSQL → GraphQL walkthrough.
-It includes direct Prep reads and a restart/resume check; it is historical
-fixture replay, not a live mainnet service.
-
-On Linux/WSL, use the pinned Rust 1.99.0 toolchain and committed lockfile:
+For framework development:
 
 ```sh
-cargo test --workspace --locked
-cargo build --release -p prep --locked
-target/release/prep --help
-node --test packages/prep-client/test/*.test.js
+npm ci
+npm run build:chef
+npm run test:chef
+npm run test:cli
 ```
 
-Use `sync`, `archive-inspect` and `serve-http` for full data, with `--follow` for source tracking. See [the engine commands](docs/PREP_ENGINE.md#commands). `import`, `inspect` and `serve` retain the earlier compact snapshot workflow. HTTP defaults to loopback; non-loopback access requires explicit opt-in and a deployment token. This is not an audited public-service deployment. Chef commands are available through the local package; see [the public example](examples/chef-public/README.md).
+Database and native-scanner cases require their documented environment; a skipped test is not integration evidence. Native development uses the pinned **Rust 1.99.0** toolchain and `Cargo.lock`. See [testing](https://zeer.endpx.cloud/docs/chef/testing/), [Prep engine commands](docs/PREP_ENGINE.md), and the [benchmark harnesses](benchmarks/README.md).
 
-The tested target is Linux x86_64; Windows development uses WSL2. Snapshot writes require Unix filesystem durability operations. Dependency versions are recorded in `Cargo.lock`.
+The visual source and regeneration instructions are in [tools/product-visuals](tools/product-visuals). The final [1:55 demo video](https://github.com/EndPx/zeer/releases/tag/showcase-20261023) is distributed as a separate release asset. Working video/audio exports and private operational files remain local.
 
 ## License
 
-[MIT](LICENSE) for Zeer's original project materials and future original source. Referenced projects retain their own licenses. Downloaded upstream research code is local-only and is not part of this repository's implementation.
+[MIT](LICENSE) for Zeer's original materials. Dependencies and referenced projects retain their own licenses.

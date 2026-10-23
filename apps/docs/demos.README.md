@@ -1,15 +1,23 @@
-# Overview illustrations
+# Product overview illustrations
 
-`static/demos/chef-flow.gif` and `prep-flow.gif` are original diagrams rendered
-from `scripts/render-overviews.py`. They use Zeer's colors and the installed
-Manrope / IBM Plex Mono fonts. No screenshots or third-party illustrations are used.
+The current `static/demos/prep-flow.gif` and `chef-flow.gif` are original Remotion
+compositions from [tools/product-visuals](../../tools/product-visuals). They use
+Zeer's existing SVG mark, Manrope and IBM Plex Mono. No website screenshots or
+third-party illustrations are used.
 
-Prep shows block records, selection and JSON. Chef shows Prep, TypeScript
-handlers, PostgreSQL entities and GraphQL. These are explanatory illustrations,
-not execution results or throughput measurements. Each GIF plays once for 4.8
-seconds, ending on the complete diagram. Matching PNG frames
-are selected through native picture sources for `prefers-reduced-motion`.
+Prep shows one explicit testnet block range and selected fields becoming a
+projected response. Chef shows Prep → TypeScript handlers → PostgreSQL, then a
+GraphQL query over the developer-defined transaction example. Numeric fields
+come from the recorded public testnet acceptance; animation timing is illustrative,
+not execution evidence or a speed measurement.
 
-To regenerate, install the normal workspace dependencies and use Python with
-Pillow, fonttools and Brotli, then run `python apps/docs/scripts/render-overviews.py`.
-Build requires only the committed GIF/PNG assets, not Python or a capture service.
+Each animation plays once for approximately 4.8 seconds and stops on the complete
+result. The matching PNG poster is selected for `prefers-reduced-motion`. Both
+product canvases remain 1040 × 600 and retain the existing overview picture markup.
+The historical deployment recording is separate and retains its original provenance.
+
+To regenerate the current product diagrams, follow the Remotion tool's README.
+`npm run render -- --stills` generates just the static posters. The older
+`scripts/render-overviews.py` is retained as the previous illustration source;
+it is not the canonical renderer for the current assets. Building the docs uses
+the committed final GIF/PNG files and requires neither Remotion nor FFmpeg.
