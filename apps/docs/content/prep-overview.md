@@ -33,6 +33,8 @@ Prep handles range queries, public filters and field selection at the data layer
 
 ## Performance Benchmarks
 
+In a separate **23 October 2026** compact retrieval study, Prep downloaded **4,102,798 testnet compact blocks in a median of 32.28 s** from a warm prepared archive. Across 48 measurements, all 2,592,262 requests succeeded, including workloads with 128 clients. This measures historical compact serving; preparation, wallet scanning and decryption are outside the timer. See [compact results and comparison limits](/docs/prep/benchmarks/#compact-block-retrieval).
+
 Recorded **21 October 2026** on Zcash Testnet blocks **4,522,544–4,522,799 inclusive**: 256 blocks and 531 transactions, with real transparent, Sapling, Orchard and Ironwood activity. Times are medians of **three runs per candidate**, in **seconds (s)**, after verified warmups.
 
 | Task | Returned rows | Prep | Zebra RPC |

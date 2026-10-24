@@ -1,0 +1,1374 @@
+{
+  "recorded": "2026-10-23",
+  "status": "PASS",
+  "scope": "Prepared immutable compact archive; historical retrieval only",
+  "reference": "https://github.com/pearl-max468/zcash-indexer-bench/tree/b01dab9df6256185e9c96fac96286b9d41f1c7ce",
+  "environment": {
+    "host": "WSL2 Ubuntu 24.04 / AMD Ryzen 5 6600H",
+    "serverCpus": "0-1",
+    "serverCpuQuota": 2,
+    "memoryCeilingGiB": 2,
+    "clientCpus": "2-3",
+    "cache": "Warm prepared archive, full untimed verification, declared warmups; no OS cache dropping",
+    "binarySha256": "eda8f66d98b081321710bd6412192c4eb88ead1a406208016d74fb458d388f7f",
+    "ghzSha256": "0055032ca8511551909013166b831a3bbf06219093a63b7bbbf3822147afab4f",
+    "requestHeightsSha256": "e4e562fdd8a7295b9b2d5cda51406a9c9b80e813e1a84cdf9aa84526b1d65e4a"
+  },
+  "verification": {
+    "status": "PASS",
+    "measurements": 48,
+    "measuredRequests": 2592262,
+    "nonOK": 0,
+    "finiteCountsVerified": true,
+    "allRawSha256Verified": true
+  },
+  "correctness": {
+    "status": "PASS",
+    "seededHeights": 2000,
+    "publishedCases": [
+      {
+        "method": "GetBlock",
+        "case": "height=280000",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=280001",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=350494",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=583999",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=584000",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=584001",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=723451",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=843371",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=874772",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=896900",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=903799",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=903800",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=903801",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=984098",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1001845",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1028499",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1028500",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1028501",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1092515",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1430953",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1509923",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1570287",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1589366",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1617199",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1650676",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1668200",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1686066",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1769442",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1842419",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1842420",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=1842421",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2108826",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2200289",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2208164",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2223078",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2389415",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2901405",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2906382",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2975999",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2976000",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2976001",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=2990864",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3001713",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3135279",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3256693",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3317406",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3472373",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3536499",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3536500",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3536501",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3582373",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3738392",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3803062",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3845282",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=3885879",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4051999",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4052000",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4052001",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4069643",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4114325",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4133999",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4134000",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4134001",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4205892",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4225517",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4329097",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlock",
+        "case": "height=4382797",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlockRange",
+        "case": "350494-350593",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlockRange",
+        "case": "1001845-1001944",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlockRange",
+        "case": "1617199-1617298",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlockRange",
+        "case": "2200289-2200388",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlockRange",
+        "case": "2990864-2990963",
+        "status": "PASS"
+      },
+      {
+        "method": "GetBlockRange",
+        "case": "3582373-3582472",
+        "status": "PASS"
+      },
+      {
+        "method": "payload comparison",
+        "case": "4282797-4382797 100k",
+        "status": "PASS",
+        "note": "Reference compatibility case is 100001 blocks; compared by one unary + one 100000-block RPC, not a claim of single-call 100001 support."
+      }
+    ],
+    "fullDownloadBlocks": 4102798,
+    "fullDownloadDigest": "263861fc67294b8bcd5fe28c112f4d02b7978e8c643b03e22839981fe443c988",
+    "supportedMethods": [
+      "GetBlock",
+      "GetBlockRange",
+      "GetLightdInfo",
+      "GetLatestBlock"
+    ],
+    "excluded": "Remaining wallet RPCs, reverse and explicit-pool requests, hash-only lookup, and pre-Sapling blocks are not supported by this immutable profile."
+  },
+  "measurements": [
+    {
+      "repeat": 1,
+      "scenario": "GetLightdInfo",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 0.654562043,
+      "p50Seconds": 0.0002816,
+      "p95Seconds": 0.000700195,
+      "p99Seconds": 0.002171485,
+      "serverCpuSeconds": 0.20210099999999898,
+      "clientCpuSeconds": 1.0171400000000002,
+      "sampledPeakCgroupBytes": 1143152640,
+      "sampledPeakAnonBytes": 664064000,
+      "sampledPeakFileBytes": 476692480,
+      "rawSha256": "d73a38262dafa734ee539a8bab908090bb906bdbf59d993827b05d3f14075b0d"
+    },
+    {
+      "repeat": 1,
+      "scenario": "GetLatestBlock",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 1.24789718,
+      "p50Seconds": 0.000374255,
+      "p95Seconds": 0.002312343,
+      "p99Seconds": 0.015296383,
+      "serverCpuSeconds": 0.47468299999999886,
+      "clientCpuSeconds": 1.229463,
+      "sampledPeakCgroupBytes": 1143402496,
+      "sampledPeakAnonBytes": 664100864,
+      "sampledPeakFileBytes": 476692480,
+      "rawSha256": "6b08a6f82758c162794051632e7e9aae39afc7e954210d1c32d456683a906b76"
+    },
+    {
+      "repeat": 1,
+      "scenario": "GetBlock",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 1.873601136,
+      "p50Seconds": 0.000725452,
+      "p95Seconds": 0.004836635,
+      "p99Seconds": 0.016872906,
+      "serverCpuSeconds": 1.2038320000000056,
+      "clientCpuSeconds": 1.1792840000000004,
+      "sampledPeakCgroupBytes": 1143402496,
+      "sampledPeakAnonBytes": 664125440,
+      "sampledPeakFileBytes": 476692480,
+      "rawSha256": "555e5be6ef15d07b88b4b9f504af09d0510114286b573f06f9b350debac8df3f"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range-100",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 5.186241107,
+      "p50Seconds": 0.003090847,
+      "p95Seconds": 0.011602559,
+      "p99Seconds": 0.02297776,
+      "serverCpuSeconds": 3.388871999999999,
+      "clientCpuSeconds": 3.600580999999999,
+      "sampledPeakCgroupBytes": 1143631872,
+      "sampledPeakAnonBytes": 664342528,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 19281.787702663398,
+      "rawSha256": "fd2063bdb56db07efbf69b0758d162804947ebbac8c9f39b189d781748359d60"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range-1000",
+      "count": 300,
+      "ok": 300,
+      "statusCodes": {
+        "OK": 300
+      },
+      "totalSeconds": 4.157612632,
+      "p50Seconds": 0.011537017,
+      "p95Seconds": 0.025474378,
+      "p99Seconds": 0.035277747,
+      "serverCpuSeconds": 3.6659719999999965,
+      "clientCpuSeconds": 4.878992,
+      "sampledPeakCgroupBytes": 1144168448,
+      "sampledPeakAnonBytes": 664670208,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 72156.79442836558,
+      "rawSha256": "e06a3999546d1e35d7c1ba0b57789dfca758397a2a99248892b4e1fd10435c28"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range-10000",
+      "count": 100,
+      "ok": 100,
+      "statusCodes": {
+        "OK": 100
+      },
+      "totalSeconds": 9.689658552,
+      "p50Seconds": 0.072225138,
+      "p95Seconds": 0.192374627,
+      "p99Seconds": 0.495450199,
+      "serverCpuSeconds": 9.89347,
+      "clientCpuSeconds": 12.222855,
+      "sampledPeakCgroupBytes": 1146028032,
+      "sampledPeakAnonBytes": 666566656,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 103202.8109797114,
+      "rawSha256": "3d1f5067e63698c5cfec33ad0c5023feb4269358819d54193991bee1959da935"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range-100000",
+      "count": 10,
+      "ok": 10,
+      "statusCodes": {
+        "OK": 10
+      },
+      "totalSeconds": 8.721113302,
+      "p50Seconds": 0.673413269,
+      "p95Seconds": 1.071967728,
+      "p99Seconds": 1.071967728,
+      "serverCpuSeconds": 10.247433000000001,
+      "clientCpuSeconds": 11.401727,
+      "sampledPeakCgroupBytes": 1146109952,
+      "sampledPeakAnonBytes": 666566656,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 114664.25963880913,
+      "rawSha256": "ef324cd9bde14112d4c826b03930720d4a5353d5a85e89b31feff59ec2cc7e11"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range1000-c1",
+      "count": 2884,
+      "ok": 2884,
+      "statusCodes": {
+        "OK": 2884
+      },
+      "totalSeconds": 30.007728086,
+      "p50Seconds": 0.008188694,
+      "p95Seconds": 0.019335798,
+      "p99Seconds": 0.03229796,
+      "serverCpuSeconds": 29.910104000000004,
+      "clientCpuSeconds": 33.294974,
+      "sampledPeakCgroupBytes": 1146286080,
+      "sampledPeakAnonBytes": 666828800,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 96108.57548877617,
+      "rawSha256": "82d939538cc79c7fec817cb49968abb5abe741149a72f21ef927c20245ffbf52"
+    },
+    {
+      "repeat": 1,
+      "scenario": "block-c1",
+      "count": 55473,
+      "ok": 55473,
+      "statusCodes": {
+        "OK": 55473
+      },
+      "totalSeconds": 30.000383298,
+      "p50Seconds": 0.000376923,
+      "p95Seconds": 0.000588089,
+      "p99Seconds": 0.000866289,
+      "serverCpuSeconds": 16.547265999999993,
+      "clientCpuSeconds": 23.864879000000006,
+      "sampledPeakCgroupBytes": 1146490880,
+      "sampledPeakAnonBytes": 666828800,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 1849.076375090786,
+      "rawSha256": "03a2caba756ac97792809249d391aeb24d6865cb5da68764d1d32c4ad0135a0e"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range1000-c8",
+      "count": 6927,
+      "ok": 6927,
+      "statusCodes": {
+        "OK": 6927
+      },
+      "totalSeconds": 30.016979438,
+      "p50Seconds": 0.030370982,
+      "p95Seconds": 0.054835337,
+      "p99Seconds": 0.095669194,
+      "serverCpuSeconds": 51.80376799999999,
+      "clientCpuSeconds": 58.229451,
+      "sampledPeakCgroupBytes": 1200902144,
+      "sampledPeakAnonBytes": 721010688,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 230769.38884899137,
+      "rawSha256": "6cd621807b4de2b6f8f3e9416bf3ff52f9f57d5aed33cdce2025ba4a717dedff"
+    },
+    {
+      "repeat": 1,
+      "scenario": "block-c8",
+      "count": 247251,
+      "ok": 247251,
+      "statusCodes": {
+        "OK": 247251
+      },
+      "totalSeconds": 29.996760735,
+      "p50Seconds": 0.000596096,
+      "p95Seconds": 0.00163397,
+      "p99Seconds": 0.003055558,
+      "serverCpuSeconds": 39.360454000000004,
+      "clientCpuSeconds": 55.623762000000006,
+      "sampledPeakCgroupBytes": 1201553408,
+      "sampledPeakAnonBytes": 721354752,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 8242.589997776306,
+      "rawSha256": "4770b881eff73d2fa8a23bc28169ccdf821176534fc645372947b6a409d8681f"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range1000-c32",
+      "count": 7679,
+      "ok": 7679,
+      "statusCodes": {
+        "OK": 7679
+      },
+      "totalSeconds": 30.094128178,
+      "p50Seconds": 0.104052158,
+      "p95Seconds": 0.178639931,
+      "p99Seconds": 0.25462498,
+      "serverCpuSeconds": 54.56657200000001,
+      "clientCpuSeconds": 60.10516099999999,
+      "sampledPeakCgroupBytes": 1232699392,
+      "sampledPeakAnonBytes": 751431680,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 255166.05613495238,
+      "rawSha256": "066c8e56603c07fcc099dabd88f72fe36616e478bc1d06f1d0eb9d83d4637789"
+    },
+    {
+      "repeat": 1,
+      "scenario": "block-c32",
+      "count": 262272,
+      "ok": 262272,
+      "statusCodes": {
+        "OK": 262272
+      },
+      "totalSeconds": 30.002902729,
+      "p50Seconds": 0.00225542,
+      "p95Seconds": 0.006429388,
+      "p99Seconds": 0.012334794,
+      "serverCpuSeconds": 38.63163900000001,
+      "clientCpuSeconds": 59.78748399999999,
+      "sampledPeakCgroupBytes": 1233895424,
+      "sampledPeakAnonBytes": 752857088,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 8741.554187905123,
+      "rawSha256": "9340815e642c33b4a58c42456bdd2ec9c23429d48b965dec840bd28b8aac6c45"
+    },
+    {
+      "repeat": 1,
+      "scenario": "range1000-c128",
+      "count": 5997,
+      "ok": 5997,
+      "statusCodes": {
+        "OK": 5997
+      },
+      "totalSeconds": 30.327067139,
+      "p50Seconds": 0.503618971,
+      "p95Seconds": 1.185000185,
+      "p99Seconds": 1.339316535,
+      "serverCpuSeconds": 57.14116899999999,
+      "clientCpuSeconds": 60.57361100000003,
+      "sampledPeakCgroupBytes": 1280724992,
+      "sampledPeakAnonBytes": 798892032,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 197744.1462609478,
+      "rawSha256": "f467dc985883b8b1bb6822c2f2f8e4c8d804206299cfa38b722e89ffaad7c4ea"
+    },
+    {
+      "repeat": 1,
+      "scenario": "block-c128",
+      "count": 287043,
+      "ok": 287043,
+      "statusCodes": {
+        "OK": 287043
+      },
+      "totalSeconds": 29.940257707,
+      "p50Seconds": 0.009007861,
+      "p95Seconds": 0.02121692,
+      "p99Seconds": 0.029183596,
+      "serverCpuSeconds": 39.153313000000026,
+      "clientCpuSeconds": 60.26986999999997,
+      "sampledPeakCgroupBytes": 1281900544,
+      "sampledPeakAnonBytes": 799801344,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 9587.192027839148,
+      "rawSha256": "944d471b7f61b0ab4e667611620b44fee580633232e0f06c573fda41ddd0405e"
+    },
+    {
+      "repeat": 1,
+      "scenario": "full-wallet-download",
+      "count": 411,
+      "ok": 411,
+      "statusCodes": {
+        "OK": 411
+      },
+      "totalSeconds": 31.883315918,
+      "p50Seconds": 0.063567804,
+      "p95Seconds": 0.117907623,
+      "p99Seconds": 0.26172792,
+      "serverCpuSeconds": 36.29426599999999,
+      "clientCpuSeconds": 40.83205800000002,
+      "sampledPeakCgroupBytes": 1334919168,
+      "sampledPeakAnonBytes": 853983232,
+      "sampledPeakFileBytes": 476692480,
+      "blocksPerSecond": 128681.6594155983,
+      "rawSha256": "45aa5502a5dbd7bcf0dbd2c670a0cfa3043314c9be75ceb8e0b3df3b6020bce2"
+    },
+    {
+      "repeat": 2,
+      "scenario": "GetLightdInfo",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 0.399491472,
+      "p50Seconds": 0.0002256,
+      "p95Seconds": 0.000417552,
+      "p99Seconds": 0.000558127,
+      "serverCpuSeconds": 0.14146399999999915,
+      "clientCpuSeconds": 0.4976679999999547,
+      "sampledPeakCgroupBytes": 666361856,
+      "sampledPeakAnonBytes": 664047616,
+      "sampledPeakFileBytes": 4096,
+      "rawSha256": "72b13024939bd1f5a1abd485befbc3d48d344f0a799cf43140b2b31de17edf0a"
+    },
+    {
+      "repeat": 2,
+      "scenario": "GetLatestBlock",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 0.383968444,
+      "p50Seconds": 0.000215346,
+      "p95Seconds": 0.000407094,
+      "p99Seconds": 0.000560876,
+      "serverCpuSeconds": 0.1407740000000004,
+      "clientCpuSeconds": 0.48802700000001664,
+      "sampledPeakCgroupBytes": 666566656,
+      "sampledPeakAnonBytes": 664068096,
+      "sampledPeakFileBytes": 4096,
+      "rawSha256": "c062b27b01fde1f40eae793e4b58ee5c2a4223ec86ba2aab01da40349f1c01f6"
+    },
+    {
+      "repeat": 2,
+      "scenario": "GetBlock",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 0.676262818,
+      "p50Seconds": 0.000381466,
+      "p95Seconds": 0.000639427,
+      "p99Seconds": 0.00149174,
+      "serverCpuSeconds": 0.38910299999999864,
+      "clientCpuSeconds": 0.6080129999999784,
+      "sampledPeakCgroupBytes": 666783744,
+      "sampledPeakAnonBytes": 664113152,
+      "sampledPeakFileBytes": 4096,
+      "rawSha256": "2c5b3ea647dde178e484f70099d509d7b512b10b1f95ed73d525405e5d033f11"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range-100",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 1.78653778,
+      "p50Seconds": 0.001389685,
+      "p95Seconds": 0.002574392,
+      "p99Seconds": 0.004148697,
+      "serverCpuSeconds": 1.0721589999999992,
+      "clientCpuSeconds": 1.767652000000048,
+      "sampledPeakCgroupBytes": 667033600,
+      "sampledPeakAnonBytes": 664305664,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 55974.18712298376,
+      "rawSha256": "5163dd96ca8d47b51e1d1cd4387c87f3d609ebe637c3787fc5aae8cd73c2270e"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range-1000",
+      "count": 300,
+      "ok": 300,
+      "statusCodes": {
+        "OK": 300
+      },
+      "totalSeconds": 2.345620633,
+      "p50Seconds": 0.006922412,
+      "p95Seconds": 0.011884082,
+      "p99Seconds": 0.014111247,
+      "serverCpuSeconds": 2.4259520000000023,
+      "clientCpuSeconds": 2.9737839999999665,
+      "sampledPeakCgroupBytes": 667127808,
+      "sampledPeakAnonBytes": 664535040,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 127897.91997024952,
+      "rawSha256": "abea057c0f8d6ec4f63f6bc0d47849c91e2e1a466fea5a935367ae0e585c63ab"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range-10000",
+      "count": 100,
+      "ok": 100,
+      "statusCodes": {
+        "OK": 100
+      },
+      "totalSeconds": 7.68754875,
+      "p50Seconds": 0.063957195,
+      "p95Seconds": 0.150535647,
+      "p99Seconds": 0.211703302,
+      "serverCpuSeconds": 8.134982,
+      "clientCpuSeconds": 9.94484300000002,
+      "sampledPeakCgroupBytes": 669593600,
+      "sampledPeakAnonBytes": 666689536,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 130080.47591242917,
+      "rawSha256": "ee553b5f92c63c5b48245d9ee40bbeb5a74d23d8cdaab32746ac639487908f75"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range-100000",
+      "count": 10,
+      "ok": 10,
+      "statusCodes": {
+        "OK": 10
+      },
+      "totalSeconds": 7.278319319,
+      "p50Seconds": 0.555233656,
+      "p95Seconds": 0.80544737,
+      "p99Seconds": 0.80544737,
+      "serverCpuSeconds": 8.667836999999999,
+      "clientCpuSeconds": 9.48282600000001,
+      "sampledPeakCgroupBytes": 669556736,
+      "sampledPeakAnonBytes": 666689536,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 137394.3566050348,
+      "rawSha256": "aaf76681cd6cc9febb1b758443f1c2eca41f4a8d854385cc25543eb108d95907"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range1000-c1",
+      "count": 3659,
+      "ok": 3659,
+      "statusCodes": {
+        "OK": 3659
+      },
+      "totalSeconds": 30.002323631,
+      "p50Seconds": 0.006983329,
+      "p95Seconds": 0.012580429,
+      "p99Seconds": 0.020400265,
+      "serverCpuSeconds": 31.134158,
+      "clientCpuSeconds": 34.068722000000015,
+      "sampledPeakCgroupBytes": 669880320,
+      "sampledPeakAnonBytes": 666988544,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 121957.22054738874,
+      "rawSha256": "5c43c6d98c97b23dd2212acdb96055c981101105df6aa05af4c8bab13da7e207"
+    },
+    {
+      "repeat": 2,
+      "scenario": "block-c1",
+      "count": 54749,
+      "ok": 54749,
+      "statusCodes": {
+        "OK": 54749
+      },
+      "totalSeconds": 30.00006127,
+      "p50Seconds": 0.000384634,
+      "p95Seconds": 0.000599525,
+      "p99Seconds": 0.000900438,
+      "serverCpuSeconds": 16.557247000000004,
+      "clientCpuSeconds": 23.793022999999977,
+      "sampledPeakCgroupBytes": 669933568,
+      "sampledPeakAnonBytes": 666992640,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 1824.9629394840233,
+      "rawSha256": "0d917d9d1219bf1bc1786f74bc2f78b382ebca041016c011c83bbc005c18537a"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range1000-c8",
+      "count": 7582,
+      "ok": 7582,
+      "statusCodes": {
+        "OK": 7582
+      },
+      "totalSeconds": 30.028832628,
+      "p50Seconds": 0.028752643,
+      "p95Seconds": 0.047437683,
+      "p99Seconds": 0.067974269,
+      "serverCpuSeconds": 52.125882000000004,
+      "clientCpuSeconds": 58.24617900000007,
+      "sampledPeakCgroupBytes": 728358912,
+      "sampledPeakAnonBytes": 725356544,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 252490.667683507,
+      "rawSha256": "05d81c727ff5749f5a77559e5420bd55bd65deecc3173569a15f20becce14c5a"
+    },
+    {
+      "repeat": 2,
+      "scenario": "block-c8",
+      "count": 256061,
+      "ok": 256061,
+      "statusCodes": {
+        "OK": 256061
+      },
+      "totalSeconds": 29.997061062,
+      "p50Seconds": 0.000586473,
+      "p95Seconds": 0.001578356,
+      "p99Seconds": 0.00268612,
+      "serverCpuSeconds": 39.41001,
+      "clientCpuSeconds": 55.70223999999996,
+      "sampledPeakCgroupBytes": 729436160,
+      "sampledPeakAnonBytes": 725905408,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 8536.202912370496,
+      "rawSha256": "9d3043ad98037ec8dde9b71acac110a2d1ac0624af9cde5c309c912ae1a5e5eb"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range1000-c32",
+      "count": 5274,
+      "ok": 5274,
+      "statusCodes": {
+        "OK": 5274
+      },
+      "totalSeconds": 30.139021495,
+      "p50Seconds": 0.13964379,
+      "p95Seconds": 0.354868056,
+      "p99Seconds": 0.493198562,
+      "serverCpuSeconds": 55.517526000000004,
+      "clientCpuSeconds": 58.565750000000065,
+      "sampledPeakCgroupBytes": 764284928,
+      "sampledPeakAnonBytes": 760111104,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 174989.09182817847,
+      "rawSha256": "6252c08fd8ed7094e1c3864e17a4a6065526955d8fad42bd3e2fb2650621147f"
+    },
+    {
+      "repeat": 2,
+      "scenario": "block-c32",
+      "count": 261977,
+      "ok": 261977,
+      "statusCodes": {
+        "OK": 261977
+      },
+      "totalSeconds": 29.991747764,
+      "p50Seconds": 0.002270793,
+      "p95Seconds": 0.006363813,
+      "p99Seconds": 0.012326589,
+      "serverCpuSeconds": 38.957694000000004,
+      "clientCpuSeconds": 58.348811999999995,
+      "sampledPeakCgroupBytes": 765542400,
+      "sampledPeakAnonBytes": 761171968,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 8734.96943430749,
+      "rawSha256": "a8a7c32ac55633496a36a4440dc250aa442f4fae2fc65aafa35979003c6f1232"
+    },
+    {
+      "repeat": 2,
+      "scenario": "range1000-c128",
+      "count": 7132,
+      "ok": 7132,
+      "statusCodes": {
+        "OK": 7132
+      },
+      "totalSeconds": 31.010995764,
+      "p50Seconds": 0.481510124,
+      "p95Seconds": 0.813780028,
+      "p99Seconds": 1.293137587,
+      "serverCpuSeconds": 55.79808299999996,
+      "clientCpuSeconds": 60.5728619999999,
+      "sampledPeakCgroupBytes": 837951488,
+      "sampledPeakAnonBytes": 833581056,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 229982.94070516064,
+      "rawSha256": "eef7704eb2f930a5aeefc8ca677802a24b126074aaf1ac01a685c6a0d8e359e2"
+    },
+    {
+      "repeat": 2,
+      "scenario": "block-c128",
+      "count": 244547,
+      "ok": 244547,
+      "statusCodes": {
+        "OK": 244547
+      },
+      "totalSeconds": 29.926980586,
+      "p50Seconds": 0.010169757,
+      "p95Seconds": 0.027301716,
+      "p99Seconds": 0.042147562,
+      "serverCpuSeconds": 38.63737500000002,
+      "clientCpuSeconds": 59.379763999999966,
+      "sampledPeakCgroupBytes": 839569408,
+      "sampledPeakAnonBytes": 834203648,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 8171.455830542437,
+      "rawSha256": "6c585e3c66057bb08c877db0ef350743ed304667f64707e597e128a98b7a73a3"
+    },
+    {
+      "repeat": 2,
+      "scenario": "full-wallet-download",
+      "count": 411,
+      "ok": 411,
+      "statusCodes": {
+        "OK": 411
+      },
+      "totalSeconds": 34.092433329,
+      "p50Seconds": 0.068313146,
+      "p95Seconds": 0.149371341,
+      "p99Seconds": 0.21796365,
+      "serverCpuSeconds": 36.95029900000003,
+      "clientCpuSeconds": 43.14681800000004,
+      "sampledPeakCgroupBytes": 891731968,
+      "sampledPeakAnonBytes": 887255040,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 120343.3606632602,
+      "rawSha256": "c1b77f1f49671676a7329a0458ebfc23cecefa37de602ffcde87322d572ca4bc"
+    },
+    {
+      "repeat": 3,
+      "scenario": "GetLightdInfo",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 0.437876606,
+      "p50Seconds": 0.000240174,
+      "p95Seconds": 0.000434366,
+      "p99Seconds": 0.000602896,
+      "serverCpuSeconds": 0.14786000000000143,
+      "clientCpuSeconds": 0.5363890000000424,
+      "sampledPeakCgroupBytes": 666411008,
+      "sampledPeakAnonBytes": 664051712,
+      "sampledPeakFileBytes": 4096,
+      "rawSha256": "5e1c3709f6e2339819b0e3f605c57216b63fe997e3f828f311aa8a189ce6f382"
+    },
+    {
+      "repeat": 3,
+      "scenario": "GetLatestBlock",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 0.692041261,
+      "p50Seconds": 0.000294748,
+      "p95Seconds": 0.001041693,
+      "p99Seconds": 0.003848892,
+      "serverCpuSeconds": 0.2306209999999993,
+      "clientCpuSeconds": 0.73367599999996,
+      "sampledPeakCgroupBytes": 666873856,
+      "sampledPeakAnonBytes": 664096768,
+      "sampledPeakFileBytes": 4096,
+      "rawSha256": "e5110457834ca07eb2b9e506bd62d0785eebdd6fc69bd6ba61c6f116e9c9b91b"
+    },
+    {
+      "repeat": 3,
+      "scenario": "GetBlock",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 0.656424662,
+      "p50Seconds": 0.00041987,
+      "p95Seconds": 0.000719397,
+      "p99Seconds": 0.001121316,
+      "serverCpuSeconds": 0.323287999999998,
+      "clientCpuSeconds": 0.6350410000000153,
+      "sampledPeakCgroupBytes": 666857472,
+      "sampledPeakAnonBytes": 664117248,
+      "sampledPeakFileBytes": 4096,
+      "rawSha256": "67971486afd04a37c6528d6b0f44cd943ff1eeb599d3e27ee018011cae496d77"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range-100",
+      "count": 1000,
+      "ok": 1000,
+      "statusCodes": {
+        "OK": 1000
+      },
+      "totalSeconds": 2.588241371,
+      "p50Seconds": 0.001768231,
+      "p95Seconds": 0.00454647,
+      "p99Seconds": 0.009675298,
+      "serverCpuSeconds": 1.4054470000000023,
+      "clientCpuSeconds": 2.5562019999999706,
+      "sampledPeakCgroupBytes": 667074560,
+      "sampledPeakAnonBytes": 664313856,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 38636.2729227853,
+      "rawSha256": "e1be9be7eafd2a56aab0964d13253a567237b0d1cda754fb45794011223ac388"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range-1000",
+      "count": 300,
+      "ok": 300,
+      "statusCodes": {
+        "OK": 300
+      },
+      "totalSeconds": 3.212119897,
+      "p50Seconds": 0.008610239,
+      "p95Seconds": 0.021119022,
+      "p99Seconds": 0.028204173,
+      "serverCpuSeconds": 2.992591999999995,
+      "clientCpuSeconds": 3.9492370000000534,
+      "sampledPeakCgroupBytes": 667258880,
+      "sampledPeakAnonBytes": 664567808,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 93396.26465381595,
+      "rawSha256": "267efd392e029655c6407e2ffad8adf85a71da2e6f3c852a1664b367bb9b6b70"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range-10000",
+      "count": 100,
+      "ok": 100,
+      "statusCodes": {
+        "OK": 100
+      },
+      "totalSeconds": 10.130319651,
+      "p50Seconds": 0.076060647,
+      "p95Seconds": 0.178468849,
+      "p99Seconds": 0.478155837,
+      "serverCpuSeconds": 10.178559,
+      "clientCpuSeconds": 12.772289999999984,
+      "sampledPeakCgroupBytes": 669294592,
+      "sampledPeakAnonBytes": 666640384,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 98713.56822400825,
+      "rawSha256": "888ab50281837b4fd82561eff7a8ee30b86112380698ac197484bac6ed3a7024"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range-100000",
+      "count": 10,
+      "ok": 10,
+      "statusCodes": {
+        "OK": 10
+      },
+      "totalSeconds": 9.068822533,
+      "p50Seconds": 0.706954054,
+      "p95Seconds": 1.334153964,
+      "p99Seconds": 1.334153964,
+      "serverCpuSeconds": 10.870782000000005,
+      "clientCpuSeconds": 11.594620999999961,
+      "sampledPeakCgroupBytes": 669392896,
+      "sampledPeakAnonBytes": 666640384,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 110267.89821513866,
+      "rawSha256": "5ae5157b74e9051157e24fe5dc987cb0e47c04014980e86927e2b029c1b734dc"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range1000-c1",
+      "count": 2540,
+      "ok": 2540,
+      "statusCodes": {
+        "OK": 2540
+      },
+      "totalSeconds": 30.002377344,
+      "p50Seconds": 0.00860951,
+      "p95Seconds": 0.023707732,
+      "p99Seconds": 0.052221366,
+      "serverCpuSeconds": 28.101043000000004,
+      "clientCpuSeconds": 31.533898000000008,
+      "sampledPeakCgroupBytes": 669691904,
+      "sampledPeakAnonBytes": 666914816,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 84659.95780524239,
+      "rawSha256": "b3d827dc82d1eac0a9bda8a534a9df58a945d2930a623bdf5963dd6bdf962b15"
+    },
+    {
+      "repeat": 3,
+      "scenario": "block-c1",
+      "count": 54609,
+      "ok": 54609,
+      "statusCodes": {
+        "OK": 54609
+      },
+      "totalSeconds": 29.999356447,
+      "p50Seconds": 0.000391433,
+      "p95Seconds": 0.00057607,
+      "p99Seconds": 0.000850189,
+      "serverCpuSeconds": 16.419512999999995,
+      "clientCpuSeconds": 23.825231000000045,
+      "sampledPeakCgroupBytes": 669802496,
+      "sampledPeakAnonBytes": 666914816,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 1820.3390494885439,
+      "rawSha256": "32c729d58661ab335799ea629c7cdab5ee4d231b345683263c6bd840c48b5f8b"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range1000-c8",
+      "count": 6138,
+      "ok": 6138,
+      "statusCodes": {
+        "OK": 6138
+      },
+      "totalSeconds": 30.030598661,
+      "p50Seconds": 0.033324808,
+      "p95Seconds": 0.068616633,
+      "p99Seconds": 0.115304358,
+      "serverCpuSeconds": 51.828907,
+      "clientCpuSeconds": 57.74020599999997,
+      "sampledPeakCgroupBytes": 728428544,
+      "sampledPeakAnonBytes": 725143552,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 204391.52976231772,
+      "rawSha256": "b72632f33eda500ab6aed9551d0650c1d62f47305d3099de6ef6078d4178e911"
+    },
+    {
+      "repeat": 3,
+      "scenario": "block-c8",
+      "count": 265553,
+      "ok": 265553,
+      "statusCodes": {
+        "OK": 265553
+      },
+      "totalSeconds": 29.998492231,
+      "p50Seconds": 0.000577031,
+      "p95Seconds": 0.00150548,
+      "p99Seconds": 0.002462635,
+      "serverCpuSeconds": 39.917507,
+      "clientCpuSeconds": 55.80323799999985,
+      "sampledPeakCgroupBytes": 728940544,
+      "sampledPeakAnonBytes": 725528576,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 8852.211569672872,
+      "rawSha256": "a24745ccdf073552f8c35a7887a611fe9cebf0705e98c6fa8351f7e8580d51bf"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range1000-c32",
+      "count": 7323,
+      "ok": 7323,
+      "statusCodes": {
+        "OK": 7323
+      },
+      "totalSeconds": 30.272507376,
+      "p50Seconds": 0.1087989,
+      "p95Seconds": 0.193094153,
+      "p99Seconds": 0.275416351,
+      "serverCpuSeconds": 54.956602000000004,
+      "clientCpuSeconds": 60.34469699999991,
+      "sampledPeakCgroupBytes": 778285056,
+      "sampledPeakAnonBytes": 774443008,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 241902.6580469401,
+      "rawSha256": "e8808d16ec83df85c42c0c2654dbc85b6bae5ec33fa8b37b5651d60b26fb6e82"
+    },
+    {
+      "repeat": 3,
+      "scenario": "block-c32",
+      "count": 267706,
+      "ok": 267706,
+      "statusCodes": {
+        "OK": 267706
+      },
+      "totalSeconds": 29.975936376,
+      "p50Seconds": 0.002372286,
+      "p95Seconds": 0.006112463,
+      "p99Seconds": 0.009645418,
+      "serverCpuSeconds": 39.063715,
+      "clientCpuSeconds": 59.31886300000008,
+      "sampledPeakCgroupBytes": 780095488,
+      "sampledPeakAnonBytes": 775823360,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 8930.696831019988,
+      "rawSha256": "ad830f2d6d0e9218ccb6b220a98ecd3780a7587006a8ebe7069abd5262c6ddbf"
+    },
+    {
+      "repeat": 3,
+      "scenario": "range1000-c128",
+      "count": 7090,
+      "ok": 7090,
+      "statusCodes": {
+        "OK": 7090
+      },
+      "totalSeconds": 30.948883024,
+      "p50Seconds": 0.499132056,
+      "p95Seconds": 0.747060961,
+      "p99Seconds": 1.093732978,
+      "serverCpuSeconds": 55.989085999999986,
+      "clientCpuSeconds": 61.4483000000001,
+      "sampledPeakCgroupBytes": 879898624,
+      "sampledPeakAnonBytes": 875614208,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 229087.4276303252,
+      "rawSha256": "09c9d8c14eee27e713041624ecb02ec4653f44ef0b928be6ae18bd8f8edb89e9"
+    },
+    {
+      "repeat": 3,
+      "scenario": "block-c128",
+      "count": 250333,
+      "ok": 250333,
+      "statusCodes": {
+        "OK": 250333
+      },
+      "totalSeconds": 29.949783522,
+      "p50Seconds": 0.010115921,
+      "p95Seconds": 0.025233799,
+      "p99Seconds": 0.035772755,
+      "serverCpuSeconds": 38.44862499999999,
+      "clientCpuSeconds": 60.742798999999934,
+      "sampledPeakCgroupBytes": 881831936,
+      "sampledPeakAnonBytes": 876179456,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 8358.42435442362,
+      "rawSha256": "551842349e3fa268cb7c36aa3bd62a50e36abf94d171b6c2642db44072ac4e9d"
+    },
+    {
+      "repeat": 3,
+      "scenario": "full-wallet-download",
+      "count": 411,
+      "ok": 411,
+      "statusCodes": {
+        "OK": 411
+      },
+      "totalSeconds": 32.282220139,
+      "p50Seconds": 0.064962656,
+      "p95Seconds": 0.123982152,
+      "p99Seconds": 0.182737062,
+      "serverCpuSeconds": 35.83497,
+      "clientCpuSeconds": 41.58062500000014,
+      "sampledPeakCgroupBytes": 937537536,
+      "sampledPeakAnonBytes": 933105664,
+      "sampledPeakFileBytes": 4096,
+      "blocksPerSecond": 127091.56874385565,
+      "rawSha256": "379bb79f742e901e70c19a7617be2ecaaae45b5912c59fa7f3beeab9de6a6638"
+    }
+  ],
+  "publishedDownloadSeconds": {
+    "zaino_0_10_1": 368.818951913,
+    "ztreamer_v0_1_0": 21.703181981
+  },
+  "limitations": [
+    "WSL2/Ryzen hardware differs from published GitHub runners",
+    "Only compact streaming subset, not full wallet protocol compatibility",
+    "Snapshot acquired remotely and materialized before timing; no equivalent local-node index-build timing",
+    "No Zaino or Ztreamer process run"
+  ]
+}

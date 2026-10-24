@@ -1,0 +1,12 @@
+{
+  "name": "zeer-address-analytics-example",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@zeer-dev/chef": "0.6.1" },
+  "devDependencies": { "typescript": "7.0.2", "@types/node": "24.19.2" },
+  "scripts": {
+    "codegen": "zeer codegen", "typecheck": "tsc --noEmit",
+    "migrate": "zeer migrate", "sync": "zeer sync", "serve": "zeer serve",
+    "test": "node --test test.mjs", "test:postgres": "node --test postgres.test.mjs"
+  }
+}

@@ -1,0 +1,40 @@
+type AddressSummary {
+  id: ID!
+  receivedZat: BigInt!
+  spentZat: BigInt!
+  incomingTransactions: Int!
+  outgoingTransactions: Int!
+  firstHeight: Int!
+  lastHeight: Int! @index
+}
+
+type AddressActivity {
+  id: ID!
+  address: AddressSummary! @index
+  txid: ID! @index
+  blockHeight: Int! @index
+  blockHash: String!
+  receivedZat: BigInt!
+  spentZat: BigInt!
+  receiving: Boolean!
+  spending: Boolean!
+}
+
+type ObservedOutput {
+  id: ID!
+  txid: String!
+  outputIndex: Int!
+  valueZat: BigInt!
+  addresses: [String!]!
+  scriptHex: String
+  spentBy: String
+}
+
+type Coverage {
+  id: ID!
+  startHeight: Int!
+  lastHeight: Int!
+  processedBlocks: Int!
+  unresolvedInputs: Int!
+  unattributedOutputs: Int!
+}

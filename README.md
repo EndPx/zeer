@@ -141,9 +141,12 @@ Invoices, campaigns, notification delivery, wallet state and settlement rules be
 | **[0.6.0 functional acceptance](docs/CHEF_060_ACCEPTANCE.md)** | 187 Linux SDK tests without skips, native/PostgreSQL checks, and real testnet breakdown with restart; 0.6.1 runtime files are byte-identical |
 | **[Six live shielded receipts](https://zeer.endpx.cloud/docs/chef/benchmarks/#shielded-receipts-six-uninterrupted-live-samples)** | Six future mined Ironwood notes in one observer, with values/memos, source rechecks and consumer recovery; recorded with Chef 0.2.0 |
 | **[Anonymous reviewer journey](docs/JUDGE_PREFLIGHT_20261023.md)** | Fifteen browser steps and ten real queries, all HTTP 200 on the first attempt |
+| **[24 October developer acceptance](docs/DEVELOPER_ACCEPTANCE_20261024.md)** | Fresh registry onboarding, PostgreSQL restart, address analytics rollback, 45 verified public docs pages, and another anonymous reviewer journey |
 | **[Documentation audit](docs/DOCS_060_AUDIT.md)** | All 44 published pages reviewed against the implemented API and examples |
 
 Performance results retain their original version, workload and timing boundaries. Compare [Prep retrieval](https://zeer.endpx.cloud/docs/prep/benchmarks/) separately from [Chef indexing and receipt processing](https://zeer.endpx.cloud/docs/chef/benchmarks/).
+
+**Compact retrieval:** Prep downloaded **4,102,798 testnet compact blocks in a median of 32.28 seconds** across three runs. All **2,592,262 measured requests** across 48 measurements completed successfully, including workloads with 128 clients. This measures a warm prepared archive; acquisition, wallet scanning and decryption are outside the timer. [Results, published comparisons and hardware differences](https://zeer.endpx.cloud/docs/prep/benchmarks/#compact-block-retrieval) · [Reproduce](benchmarks/prep/compact-serving/README.md).
 
 ## Status
 

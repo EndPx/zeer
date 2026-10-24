@@ -1,0 +1,11 @@
+query AddressHistory($address: ID!) {
+  AddressSummaryById(id: $address) {
+    id receivedZat spentZat incomingTransactions outgoingTransactions firstHeight lastHeight
+  }
+  AddressActivityList(where: { address: $address }, orderBy: [{ blockHeight: ASC }, { id: ASC }], first: 25) {
+    items { id txid blockHeight blockHash receivedZat spentZat receiving spending }
+    nextCursor
+  }
+  CoverageById(id: "chain") { startHeight lastHeight processedBlocks unresolvedInputs unattributedOutputs }
+  _meta { height }
+}

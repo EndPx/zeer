@@ -2,9 +2,47 @@
 
 Prep retrieves selected public chain data from a prepared archive. This benchmark compares that retrieval path with native Zebra RPC over the **same block range, fields and expected results**. It does not measure Chef indexing or shielded decryption.
 
-Recorded **21 October 2026 (UTC)** on **Zcash Testnet**. All durations are in **seconds (s)**. Full-history startup is reported separately below.
+All durations are in **seconds (s)**. The compact retrieval study below uses the published Zaino/Ztreamer workload. The HTTP comparison with Zebra and full-history startup measure different operations and retain their original dates and environments.
+
+## Compact-block retrieval
+
+Recorded **23 October 2026** on Zcash testnet. Prep downloaded **4,102,798 compact blocks** in a median of **32.28 seconds**. The three runs took **31.88, 34.09 and 32.28 seconds**.
+
+| Prepared compact-block download | Median total time |
+| --- | ---: |
+| Prep, measured locally | **32.28 s** |
+| Zaino 0.10.1, published reference | 368.82 s |
+| Ztreamer v0.1.0, published reference | 21.70 s |
+
+The range is **280,000–4,382,797 inclusive**, retrieved in 411 consecutive requests of at most 10,000 blocks. The wire protocol, shielded-only projection, deterministic height/range schedule and ghz version match the compact retrieval subset of the [pinned reference study](https://github.com/pearl-max468/zcash-indexer-bench/tree/b01dab9df6256185e9c96fac96286b9d41f1c7ce). Reference total times are calculated from its fixed block count and published median throughput. Zaino and Ztreamer were not run again for this experiment.
+
+### Concurrent retrieval
+
+With **128 clients** each requesting 1,000-block ranges:
+
+| Metric | Prep | Published Zaino | Published Ztreamer |
+| --- | ---: | ---: | ---: |
+| Blocks per second | 229,087 | 110,093 | 229,527 |
+| Median request latency | 0.499132 s | 0.908112 s | 0.458177 s |
+| p95 request latency | 0.813780 s | 1.829424 s | 0.732681 s |
+
+Prep completed **16 scenarios over three repeats**, with **2,592,262 measured requests, all OK**. Scenarios cover metadata, single blocks, ranges of 100–100,000 blocks, 1/8/32/128 clients, and the complete download. Before timing, all 4,102,798 streamed blocks matched ordered heights and per-chunk/global payload digests; 2,000 seeded unary payload hashes and the supported published compatibility cases also passed.
+
+### Environment and scope
+
+Prep ran on **WSL2 Ubuntu 24.04, AMD Ryzen 5 6600H**. The server used CPUs 0–1, a two-CPU quota, a 2 GiB memory ceiling and no swap; the client used CPUs 2–3. The reference used Ubuntu 24.04 GitHub runners with 4 vCPUs, 16 GB host RAM and several CPU models. These results compare the same retrieval workload across different environments; they do not isolate an implementation speedup.
+
+Prep served a **prepared immutable archive**, while the reference services have a broader wallet API and a local backing node. Archive acquisition, startup validation, live ingestion, wallet scanning, decryption and confirmations are outside these timings. Caches were warm and were not cleared. Client CPU approached its two-core allocation under high concurrency, limiting the interpretation of maximum server throughput.
+
+The measured `serve-compact` profile supports height-based block retrieval and snapshot metadata. Its tip is the archive tip. Tree state, address history, mempool and the remaining wallet RPCs are outside this profile. This study does not measure the public hosted HTTP endpoint or Chef.
+
+[Download the recorded compact summary](pathname:///docs/benchmarks/2026-10-23-prep-compact.json), including all 48 measurements, payload checks and binary hashes. Full per-request logs remain retained locally. The [reproduction guide](https://github.com/EndPx/zeer/tree/main/benchmarks/prep/compact-serving) describes acquisition, verification, resource limits and the complete schedule.
+
+Run `node apps/docs/scripts/verify-compact-benchmarks.mjs` from the repository to check the recorded summary counts and aggregates.
 
 ## Workload and results
+
+The following matched HTTP retrieval study was recorded **21 October 2026 (UTC)**.
 
 Range: **4,522,544–4,522,799 inclusive** — 256 blocks and 531 transactions. It contains 163 non-coinbase transactions with transparent components, **2 Sapling**, **2 Orchard** and **181 Ironwood** transactions. Component counts can overlap. The range and lookup selections were frozen before timing; the reference includes their selection rules and block hashes.
 
