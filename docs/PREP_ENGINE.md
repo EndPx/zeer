@@ -1,6 +1,6 @@
 # Zeer Prep engine
 
-Updated 2026-10-19. The user requires complete blocks and transactions for the
+Updated 2026-10-24. The user requires complete blocks and transactions for the
 28 October delivery. [Delivery contract](PREP_DELIVERY.md) owns the active scope;
 [query contract](PREP_QUERY.md) owns the HTTP and SDK semantics. Chef's public-data
 pipeline is implemented; optional private scanning is a separate
@@ -89,9 +89,12 @@ choosing a network by difficulty or activation schedule.
 
 ## Query and client
 
-`GET /height`, `/health`, `/ready`, and `POST /query` serve the full archive.
+`GET /height`, `/health`, `/ready`, `/capabilities`, `POST /query` and
+`POST /transactions` describe or query the full archive. Optional `GET /mempool`
+and `POST /transaction` use the configured live node observation path.
 Queries support a bounded scanned-block limit, field selection, transaction IDs,
-versions, public Sapling/Orchard activity flags, and transparent output addresses.
+versions, public Sapling/Orchard/Ironwood activity flags, pool unions, coinbase
+classification, and transparent output addresses.
 They do not resolve transparent input ownership or search shielded recipients.
 
 A cursor binds network, archive start, query, epoch and the captured terminal
@@ -112,10 +115,13 @@ HTTP 413 when it cannot fit in an empty page. The stored envelope and node JSON
 are still decoded first; this does not establish a peak-memory cap equal to the
 serialized response limit.
 
-The published `@zeer-dev/prep-client` exposes `getHeight()`, `get()`, and finite
-`stream()` with cancellation, deadlines, bounds and explicit reorg errors. It
-uses native fetch rather than a Rust native addon. HTTP/binary, Arrow, Parquet,
-SSE, automatic client rollback and npm publication are not implemented.
+The published `@zeer-dev/prep-client@0.1.0` exposes `getHeight()`,
+`getCapabilities()`, `get()`, finite `stream()`, bounded `getTransactions()`,
+and optional live `getMempool()` / `getTransaction()` observations. Reads support
+cancellation, deadlines, bounds and explicit source errors. The client uses
+native fetch rather than a Rust native addon. Full-data binary, Arrow, Parquet,
+SSE and automatic client rollback are not implemented. The separate compact
+gRPC retrieval profile is described below.
 
 ## Limits and deployment
 
@@ -124,10 +130,13 @@ SSE, automatic client rollback and npm publication are not implemented.
   compact payload <=4 MiB. Oversized data is rejected rather than omitted.
 - Segment <=256 MiB; follower buffers at most 64 MiB plus framing of encoded records with metadata
   reserve; configurable disk allowance counts old/incomplete files too.
-- At most 10,000 referenced segments; configured segment range 1..1000 blocks;
+- At most 30,000 referenced segments; configured segment range 1..1000 blocks;
   archive may begin at height 0, including genesis. No entire-mainnet archive was deployed.
-- Query <=1000 scanned blocks and 32 MiB serialized response; 2 active queries.
-  These are serialization/concurrency bounds, not a 32 MiB peak-memory claim.
+- Fixed query pages scan at most 1,000 blocks, with a native serialized response
+  ceiling of 32 MiB. Adaptive scans permit up to 1,000,000 blocks, a 500 ms soft
+  work slice, a 512 KiB target and a 4 MiB hard response cap. The HTTP reader
+  admits two active requests. These are response/concurrency bounds, not
+  peak-memory guarantees. The [hosted ingress](PUBLIC_API.md) is stricter.
 - Source HTTPS verifies certificates. Source Basic credentials come only from
   PREP_SOURCE_USER/PREP_SOURCE_PASSWORD. Plaintext non-loopback sources require
   explicit opt-in and private/local addresses.
@@ -208,8 +217,10 @@ separates real archives from synthetic capacity fixtures and independently check
 stored-data projections across budgets. Build serving binaries without the
 diagnostic feature; instrumented times are not uninstrumented service latency.
 
-Execution records and benchmark comparisons are local-only under
-`benchmarks/results/`. See the [harness](../benchmarks/README.md) for reproduction
+Raw execution records remain local under `benchmarks/results/`. Curated
+measurements, provenance and comparison limits are public in the
+[Prep benchmark chapter](https://zeer.endpx.cloud/docs/prep/benchmarks/) and its
+downloadable artifacts. See the [harness](../benchmarks/README.md) for reproduction
 and the committed public fixtures for deterministic regression inputs.
 
 Large-scale public operation, live full-data performance across millions of

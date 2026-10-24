@@ -25,7 +25,7 @@ pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init
 Keep an exact version for reproducible automation:
 
 ```sh
-pnpx @zeer-dev/cli@0.5.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json
+pnpx @zeer-dev/cli@0.6.1 init --template public --dir my-indexer --project my_indexer --start-height latest --json
 ```
 
 Generated projects pin their SDK version and retain their own lockfile. Running

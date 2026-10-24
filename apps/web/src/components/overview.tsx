@@ -55,7 +55,7 @@ export function Overview() {
             name: "Chef",
             icon: Braces,
             text: "Query your application entities.",
-            body: "Explore the GraphQL API built from your schema, handlers, and PostgreSQL database.",
+            body: "Explore the public demo's GraphQL entities. Run Chef locally with your own schema, handlers and PostgreSQL database.",
             href: "/app/chef",
             label: "TypeScript · PostgreSQL · GraphQL",
           },
@@ -82,8 +82,8 @@ export function Overview() {
         </Link>
       </div>
       <p className="privacy-note">
-        <ShieldCheck size={15} /> Public data only. Viewing keys and private
-        memo scanning are outside this preview.
+        <ShieldCheck size={15} /> Public chain data and one selected Zeer demo
+        receipt. Scan your own memos locally; this preview accepts no viewing keys.
       </p>
     </>
   );

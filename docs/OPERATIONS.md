@@ -46,8 +46,9 @@ repeatable-read snapshot; this is not a claim of instantaneous canonical finalit
 
 ## Interrupted application writes
 
-Chef commits one block's entity writes, undo records, block identity and checkpoint
-in one PostgreSQL transaction. After an interrupted invocation, an earlier block
+Chef commits entity writes, undo records, block identities and checkpoint in one
+PostgreSQL transaction per block by default, or per configured bounded batch.
+After an interrupted invocation, an earlier block
 may already be committed even when the invocation never returned its final count.
 Restart from the persisted checkpoint. Keep handlers deterministic and confine
 effects to entity operations; HTTP calls, payments and files do not participate
@@ -121,10 +122,13 @@ Serialize guard-policy changes against in-flight guard checks: an already-runnin
 Python guard keeps its loaded policy even after the source file changes. Restore
 normal service limits before completing the cutover, then verify the guard again.
 
-## Fixed Chef hackathon namespace
+## Historical fixed Chef hackathon namespace
 
-The hosted Chef demo uses `hackathon_testnet_20261020`, with the inclusive target
-4,510,000–4,519,999. See [the manifest and handlers](../examples/chef-hackathon/README.md).
+The original hosted Chef demo used `hackathon_testnet_20261020`, with the inclusive
+target 4,510,000–4,519,999. The public block-summary demo now follows from genesis
+in a separate namespace; read `/api/status` and GraphQL for current observed
+coverage. The fixed example remains available for bounded reproduction. See
+[the manifest and handlers](../examples/chef-hackathon/README.md).
 Its API serves committed entities during a finite sync, then remains available
 after the writer reaches the target. It does not follow the chain tip. Keep the
 previous genesis namespace and its configuration intact for rollback.
@@ -133,8 +137,9 @@ Set the web adapter's `ZEER_CHEF_URL` and server-side token to the matching demo
 reader. Set `ZEER_CHEF_DEMO` to a single-line JSON object from that example's
 `demo.json` (project, fromBlock and toBlock). The network field is not used by the
 UI descriptor; all hosted adapters still enforce testnet. The descriptor declares
-the intended range; only GraphQL's observed checkpoint supplies progress. Remove
-the descriptor when connecting an ordinary full-history/following Chef project.
+the intended range; only GraphQL's observed checkpoint supplies progress. A
+following descriptor uses `fromBlock: 0, toBlock: null`; use the actual namespace
+and mode, or omit the descriptor when no demo descriptor applies.
 Never switch a URL without switching or removing its descriptor too.
 
 Before changing the public web endpoint, migrate the new namespace, start its
@@ -149,7 +154,8 @@ Restart the identical writer/config to the same end. Check every final entity's
 hash, timestamp and transaction count against an independent Prep projection,
 and check that the committed prefix is unchanged. A repeat sync to the completed
 target must leave both checkpoint and entity digest unchanged. Save operational
-proofs locally; never publish deployment credentials or benchmark result files.
+proofs locally; never publish deployment credentials or unreviewed raw logs.
+Curated benchmark summaries may be published with their scope and provenance.
 
 ## Optional read-only testnet node observations
 

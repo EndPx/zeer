@@ -142,7 +142,8 @@ Invoices, campaigns, notification delivery, wallet state and settlement rules be
 | **[Six live shielded receipts](https://zeer.endpx.cloud/docs/chef/benchmarks/#shielded-receipts-six-uninterrupted-live-samples)** | Six future mined Ironwood notes in one observer, with values/memos, source rechecks and consumer recovery; recorded with Chef 0.2.0 |
 | **[Anonymous reviewer journey](docs/JUDGE_PREFLIGHT_20261023.md)** | Fifteen browser steps and ten real queries, all HTTP 200 on the first attempt |
 | **[24 October developer acceptance](docs/DEVELOPER_ACCEPTANCE_20261024.md)** | Fresh registry onboarding, PostgreSQL restart, address analytics rollback, 45 verified public docs pages, and another anonymous reviewer journey |
-| **[Documentation audit](docs/DOCS_060_AUDIT.md)** | All 44 published pages reviewed against the implemented API and examples |
+| **[23 October documentation audit](docs/DOCS_060_AUDIT.md)** | All 44 pages published at that milestone reviewed against the implemented API and examples |
+| **[24 October consistency audit](docs/CLAIMS_CONSISTENCY_AUDIT_20261024.md)** | Website, 45 docs pages, package versions and repository contracts checked together; stale claims corrected and executable examples verified |
 
 Performance results retain their original version, workload and timing boundaries. Compare [Prep retrieval](https://zeer.endpx.cloud/docs/prep/benchmarks/) separately from [Chef indexing and receipt processing](https://zeer.endpx.cloud/docs/chef/benchmarks/).
 

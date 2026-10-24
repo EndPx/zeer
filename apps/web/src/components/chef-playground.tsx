@@ -89,8 +89,8 @@ export function ChefPlayground({ enabled, demo, memoDemo }: { enabled: boolean; 
     <>
       <div className="console-title">
         <span className="eyebrow">Zeer Chef</span>
-        <h1>Your schema. Your playground.</h1>
-        <p>Choose an example and run it against real indexed testnet data. Edit the query to explore your own application API.</p>
+        <h1>From entities to answers.</h1>
+        <p>Choose an example and query real indexed testnet data. The hosted playground uses Zeer's demo schema; run Chef locally for your own application API.</p>
       </div>
       {demo && <div className="notice demo-coverage">
         <Info size={16} aria-hidden="true" />

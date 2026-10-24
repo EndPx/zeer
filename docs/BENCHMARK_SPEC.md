@@ -1,7 +1,13 @@
 # Zeer benchmark specification v0.1
 
 Date: 2026-10-12 (Asia/Jakarta).
-Status: **benchmark methodology; execution records and results are local-only**. See the [harness](../benchmarks/README.md). Retrieval, ingestion and scanning workloads must not be combined into one ranking.
+Status: **historical v0.1 methodology and planning baseline**. Capability/status
+statements below describe the original October 12–13 scope, not the current
+release. Later delivery publishes reviewed [Prep](https://zeer.endpx.cloud/docs/prep/benchmarks/)
+and [Chef](https://zeer.endpx.cloud/docs/chef/benchmarks/) evidence under the
+[current results policy](../benchmarks/README.md). Raw/private execution records
+stay local. Retrieval, ingestion and scanning workloads must not be combined
+into one ranking.
 Product and event semantics: [Zeer implementation plan](../.omc/plans/zeer-v0.1.md).
 
 ## 1. Questions the benchmark must answer

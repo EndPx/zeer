@@ -36,11 +36,13 @@ bounded source ranges. A full-mainnet node/archive is not considered deployed
 merely because the software can iterate ranges. Disk limits, source coverage,
 source trust, indexed height and freshness must be explicit.
 
-No spending, wallet key management, Chef/GraphQL, cloud billing, new brand
-products, public deployment or npm publication is included. Full production
-readiness and "millions of blocks instantly" remain unproven claims. Existing
-shared-VPS services remain untouched; retain the 3 CPU / 8 GiB / 40 GiB total
-experimental envelope unless the user explicitly changes it.
+Spending, wallet key management, application Chef/GraphQL, cloud billing and new
+brand products remain outside Prep. The original 13 October scope excluded
+public deployment and npm publication; later authorization delivered the
+[public testnet API](PUBLIC_API.md) and [published client](PACKAGING.md).
+Full production readiness and "millions of blocks instantly" remain unproven
+claims. Preserve unrelated shared-VPS services. The authorized aggregate envelope
+is now 3 CPU / 8 GiB / 60 GiB, superseding the initial 40 GiB allowance.
 
 ## Architecture and verification order
 

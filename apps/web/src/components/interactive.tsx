@@ -172,7 +172,7 @@ const productData = {
     features: [
       [
         "Choose your block range",
-        "Page through history, then follow new data.",
+        "Page through a captured range of available history.",
       ],
       [
         "Select just the fields you need",

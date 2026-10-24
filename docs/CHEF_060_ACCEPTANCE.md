@@ -1,6 +1,6 @@
 # Chef 0.6.0 acceptance
 
-Chef and launcher 0.6.0 were published and verified on 23 October 2026. Both `latest` tags select 0.6.0, the launcher pins Chef 0.6.0, and anonymous registry tarball downloads match the audited candidates byte for byte.
+Chef and launcher 0.6.0 were published and verified on 23 October 2026. At that verification, both `latest` tags selected 0.6.0, that version's launcher pinned Chef 0.6.0, and anonymous registry tarball downloads matched the audited candidates byte for byte. The later [0.6.1 patch](CHEF_061_ACCEPTANCE.md) supersedes those latest tags without changing the runtime.
 
 ## Real testnet breakdown
 

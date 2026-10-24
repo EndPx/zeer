@@ -21,7 +21,8 @@ benchmark or hosted namespace migration is claimed.
 ## Previous release: Chef and launcher 0.6.0
 
 `@zeer-dev/chef@0.6.0` and `@zeer-dev/cli@0.6.0` were published and
-verified on 23 October 2026. Both `latest` tags select 0.6.0. Anonymous registry
+verified on 23 October 2026. Both `latest` tags selected 0.6.0 at that verification,
+before 0.6.1 superseded them. Anonymous registry
 downloads matched the audited tarballs; the launcher pins Chef 0.6.0.
 Prep client remains 0.1.0.
 
@@ -47,7 +48,8 @@ the hosted Playground keeps its separately deployed schema.
 
 `@zeer-dev/chef@0.5.0` and `@zeer-dev/cli@0.5.0` were published on
 22 October 2026. Both anonymous registry downloads matched the audited release
-tarballs, both `latest` tags select 0.5.0, and the launcher pins Chef 0.5.0.
+tarballs, both `latest` tags selected 0.5.0 at that verification, and that
+version's launcher pins Chef 0.5.0.
 Prep client remains 0.1.0. The database format and core indexing/query API are
 unchanged from 0.4.0.
 

@@ -1,6 +1,24 @@
 # Zeer planning entry point
 
-Updated: 2026-10-22 (Asia/Jakarta).
+Updated: 2026-10-24 (Asia/Jakarta).
+
+## Current verified release
+
+Chef and launcher **0.6.1** and Prep client **0.1.0** are published. The
+[release record](docs/PACKAGING.md), [developer acceptance](docs/DEVELOPER_ACCEPTANCE_20261024.md)
+and [application study](docs/PREP_APPLICATION_STUDY_20261024.md) describe current
+delivery and its limits. The public testnet Prep archive follows from genesis;
+the Chef block-summary demo follows in its own namespace, while a separate demo
+projection exposes one deliberately published memo receipt. Query `/api/status`
+and Prep `/height` for current observed coverage rather than a historical height
+in this plan. Public Prep accepts no viewing keys.
+
+Curated benchmark summaries and reports are public; raw logs, private operational
+records and key material stay local. Buffered range reads remain opt-in after
+the recorded experiments. The authorized aggregate resource envelope is
+**3 CPU / 8 GiB / 60 GiB**. Organizer form/deadline verification and submission
+are separate from technical readiness. Dated milestones below preserve their
+original scope and evidence, including sections originally titled "current".
 
 ## Completed feature delivery: generated-project deployment and recovery
 
@@ -68,7 +86,7 @@ three generated standalone starters recovered from source interruption and
 restart; public testnet blocks 4,528,205–4,528,206 matched Prep. This is bounded
 onboarding evidence, not a throughput or funded-payment benchmark.
 
-**Status: Prep supports public historical queries and live node observations. Chef implements public handlers and an opt-in local testnet receipt preview with a native watch-only scanner. Whole-chain Chef execution and production readiness remain unproven. The hosted demo remains public-data only. All benchmark results and detailed proof reports remain local-only; source, methodology and fixtures remain public.**
+**Scope: Prep supports public historical queries and live node observations. Chef implements public handlers and an opt-in local testnet receipt preview with a native watch-only scanner. Production readiness remains unproven. The hosted demo serves public block summaries and one selected published receipt; private scanning stays local. Curated benchmark results and scoped reports are public, with raw/private evidence retained locally.**
 
 ## Current slice: generic shielded receipts, 20 October
 
@@ -101,9 +119,10 @@ No private key import, memo decryption, transaction broadcast or private receipt
 indexing belongs to this slice. The supplied ZecBlock decrypt tool is a research
 reference for a later phase.
 
-The current hosted frontend is on the VPS at https://zeer.endpx.cloud. Prep stores
-testnet history from genesis; the Chef demo deliberately covers only blocks
-4,510,000–4,519,999 in its own namespace. Older deployment and roadmap notes below
+The hosted frontend is on the VPS at https://zeer.endpx.cloud. Prep stores
+testnet history from genesis. The original Chef demo covered only blocks
+4,510,000–4,519,999; the later public block-summary namespace follows from genesis.
+Read current coverage from the service. Older deployment and roadmap notes below
 are historical decisions, not a statement that public hosting is still pending.
 Live observations do not extend archive coverage or advance Chef checkpoints.
 
@@ -116,7 +135,8 @@ promises that unfinished gates will pass. Implementation was subsequently
 authorized on 14 October. M1–M6 technical delivery is complete on the tested
 candidate `8023c329bbb0cc5b26f101e01b383bb0b9180cea`. Detailed execution evidence
 remains local. Authenticated organizer cutoff/form verification remains a
-separate submission gate; package publication and public deployment were not run.
+separate submission gate. Package publication and public deployment had not been
+run for that original candidate; subsequent releases are recorded above.
 
 ### Current priority after the technical candidate
 

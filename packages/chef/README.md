@@ -96,8 +96,9 @@ sync: {
 },
 ```
 
-Supported predicates are Prep's `txids`, `versions`, `has_sapling`, `has_orchard`
-and `transparent_output_addresses`; predicates combine with AND and entries
+Supported predicates are Prep's `txids`, `versions`, `has_sapling`, `has_orchard`,
+`has_ironwood`, `shielded_pools`, `is_coinbase` and
+`transparent_output_addresses`; predicates combine with AND and entries
 within an array with OR. Empty arrays match nothing. Filters do not expose
 encrypted shielded data. All headers remain present and contiguous: a page with
 zero matching transactions still advances the checkpoint after validation.
@@ -109,7 +110,8 @@ and commits bounded batches; it does not replace chain checks with a sparse jump
 Do not enable this against older servers, which reject the unknown scan mode.
 
 Existing configs retain defaults of 16 blocks per page and one block per commit.
-New scaffolded projects use metadata handlers and explicit 1,000/32 settings.
+The public starter uses metadata handlers and explicit 1,000/32 settings.
+Blank and shielded starters explicitly use 16/1; their handler models differ.
 Page/commit sizes are independent; response byte limits may shorten a page.
 Changing entry configuration changes project identity. Use a new namespace when
 adopting a different filter or handler rather than attaching it to old entities.
@@ -310,7 +312,8 @@ indexes on that entity's native JSONB field value plus ID. Unannotated schemas
 create no extra field indexes and retain their existing model fingerprints.
 
 Annotations support `Int`, `Boolean`, `BigInt`, and non-primary `ID` fields,
-including nullable fields, with at most eight indexes per project. The primary
+including nullable fields, and single entity references indexed by target ID,
+with at most eight indexes per project. The primary
 `id` already has an index. `String` is excluded because its larger value bound
 can exceed PostgreSQL B-tree tuple limits. Equality types, null handling, exact
 BigInt strings, pagination, authorization and snapshot/read gates stay unchanged.

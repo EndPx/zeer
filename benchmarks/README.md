@@ -5,19 +5,16 @@ fixtures for Prep retrieval, Chef application indexing and native serving compar
 
 ## Local results policy
 
-All generated benchmark results stay local. Store raw runs, logs, comparison
-tables, reports and execution manifests under `benchmarks/results/`, which is
-ignored by Git. Do not force-add that directory or copy measured results into
-public READMEs, plans or candidate manifests. Publication requires a new explicit
-request from the project owner. This storage policy does not change where an
-authorized experiment runs; remote working copies remain operational state.
-
-Publication exception, approved 21 October 2026: the documentation publishes a
-sanitized snapshot of the 20 October testnet Prep and Chef runs at
-`apps/docs/static/benchmarks/2026-10-20-testnet.json`. It includes all samples for
-the displayed workloads and original evidence hashes. Raw logs, credentials and
-unrelated comparison results remain local. This is a historical measurement,
-not a current hosted-service benchmark.
+Raw runs, logs and private execution manifests stay under `benchmarks/results/`,
+which is ignored by Git. Do not force-add that directory. The owner subsequently
+authorized publication of reviewed benchmark evidence: curated summaries live
+under `apps/docs/static/benchmarks/`, with scope, versions, samples and provenance
+in the [Prep](https://zeer.endpx.cloud/docs/prep/benchmarks/) and
+[Chef](https://zeer.endpx.cloud/docs/chef/benchmarks/) chapters. Their recorded
+dates do not imply current hosted-service performance. Keep credentials,
+key-bearing material and unreviewed raw logs private. Publishing additional
+unrelated experiment results still requires authorization. Remote working copies
+remain operational state.
 
 A fresh checkout has no result directory; create it when starting an experiment.
 Keep failures and successful runs together locally. Commit source, configuration,

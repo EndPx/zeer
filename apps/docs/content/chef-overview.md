@@ -35,7 +35,7 @@ Recorded **20 October 2026** over blocks **0–9,999 inclusive**. Chef started w
 
 Each profile has one recorded run. The timer includes CLI startup, Prep reads, handler execution, PostgreSQL commits and polling through completion. Both runs reached checkpoint 9,999 with identical entity results.
 
-These are historical measurements, not a new Chef 0.6.0 benchmark. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) separately verifies package installation, transaction breakdown and restart behavior.
+These are historical block-summary measurements. The later [Chef 0.6.1 address-analytics study](/docs/chef/benchmarks/#address-analytics-with-chef-061) separately measures a 512-block application replay with concurrent GraphQL reads. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) verifies the runtime's package installation, transaction breakdown and restart behavior; 0.6.1 retains that runtime.
 
 See the [Chef benchmark methodology and recorded samples](/docs/chef/benchmarks/) for timing boundaries, resource limits and evidence.
 

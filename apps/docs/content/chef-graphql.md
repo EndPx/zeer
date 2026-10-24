@@ -81,7 +81,7 @@ Status remains readable while entity reads are reconciling or blocked. It uses c
 
 ## Upgrade an existing project
 
-Stop its follower and API processes, keep the existing config and schema, install Chef 0.6.0, then run the project's `migrate` command before restarting both processes. The migration from 0.1.x adds metadata and a revision trigger to the existing marked namespace; it preserves entities, checkpoints and undo history. It does not replay the chain. Chef 0.6.0 preserves existing scalar-only model identities. New schema declarations require a fresh namespace and replay. Back up the database before an operational upgrade.
+Stop its follower and API processes, keep the existing config and schema, install Chef 0.6.1, then run the project's `migrate` command before restarting both processes. The migration from 0.1.x adds metadata and a revision trigger to the existing marked namespace; it preserves entities, checkpoints and undo history. It does not replay the chain. Chef 0.6.1 retains 0.6.0's scalar-only model identities and runtime. An otherwise unchanged project already on 0.6.0 needs no new migration for the 0.6.1 documentation patch. New schema declarations require a fresh namespace and replay. Back up the database before an operational upgrade.
 
 Do not change schema/handler identity merely to run this migration. Adding `@index` to a previously unindexed field changes model identity and requires a [new project namespace](/docs/chef/evolution/). A process using the new store refuses an unmigrated project. Custom stores must provide snapshot-consistent `ReadView.consumption` and implement ordered keysets before serving list queries; an absent context fails closed.
 

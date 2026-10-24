@@ -1,5 +1,11 @@
 # Zeer public-data demo
 
+This is the historical local fixture walkthrough, not the final hackathon video
+or current hosted reviewer journey. Use the [reviewer walkthrough](HACKATHON_DEMO.md)
+for the public product and the [1:55 release video](https://github.com/EndPx/zeer/releases/tag/showcase-20261023)
+for the submission demo. The three-minute sequence below retains its original
+offline source and setup boundaries.
+
 Audience: developers evaluating complete public Zcash data retrieval and
 application indexing. Target length: approximately three minutes after dependency
 setup. Installation time is not part of this narrative and is not a benchmark.
