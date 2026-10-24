@@ -12,6 +12,8 @@ use prep_proto::zcash::{
 };
 use prep_store::{Archive, COMPACT_KIND};
 use prost::Message;
+#[cfg(feature = "compact-transport-profile")]
+use std::sync::atomic::AtomicU64;
 use std::{
     future::Future,
     io,
@@ -41,6 +43,7 @@ pub const MAX_RANGE_BLOCKS: u64 = 100_000;
 pub const MAX_CONNECTIONS: usize = 128;
 pub const MAX_ACTIVE_READS: usize = 8;
 pub const MAX_QUEUED_READS: usize = 128;
+pub const MAX_BATCH_BLOCKS: usize = 64;
 const QUEUE_WAIT: Duration = Duration::from_secs(30);
 type BlockStream = Pin<Box<dyn Stream<Item = Result<CompactBlock, Status>> + Send>>;
 
@@ -248,7 +251,7 @@ impl CompactTxStreamer for CompactService {
             let result = (|| {
                 // Amortize the blocking/async handoff while retaining one
                 // CompactBlock per wire message. Both count and bytes are bounded.
-                let mut batch = Vec::with_capacity(64);
+                let mut batch = Vec::with_capacity(MAX_BATCH_BLOCKS);
                 let mut bytes = 0usize;
                 for lo in (start.height..=end.height).step_by(10000) {
                     let hi = (lo + 9999).min(end.height);
@@ -262,9 +265,11 @@ impl CompactTxStreamer for CompactService {
                         let record =
                             record.map_err(|_| Status::data_loss("snapshot_read_failed"))?;
                         if !batch.is_empty()
-                            && (batch.len() == 64 || bytes + record.payload.len() > MAX_BLOCK_BYTES)
+                            && (batch.len() == MAX_BATCH_BLOCKS
+                                || bytes + record.payload.len() > MAX_BLOCK_BYTES)
                         {
-                            let outgoing = std::mem::replace(&mut batch, Vec::with_capacity(64));
+                            let outgoing =
+                                std::mem::replace(&mut batch, Vec::with_capacity(MAX_BATCH_BLOCKS));
                             if !blocking_send(&sender, Ok(outgoing), &mut shutdown, &runtime) {
                                 return Ok(());
                             }
@@ -305,6 +310,48 @@ impl CompactTxStreamer for CompactService {
 struct LimitedSocket {
     socket: TcpStream,
     _permit: OwnedSemaphorePermit,
+    #[cfg(feature = "compact-transport-profile")]
+    stats: Arc<TransportStats>,
+}
+
+#[cfg(feature = "compact-transport-profile")]
+#[derive(Default)]
+struct TransportStats {
+    calls: AtomicU64,
+    bytes: AtomicU64,
+    pending: AtomicU64,
+    buckets: [AtomicU64; 5],
+}
+#[cfg(feature = "compact-transport-profile")]
+impl TransportStats {
+    fn record(&self, result: &Poll<io::Result<usize>>) {
+        match result {
+            Poll::Ready(Ok(n)) if *n > 0 => {
+                self.calls.fetch_add(1, Ordering::Relaxed);
+                self.bytes.fetch_add(*n as u64, Ordering::Relaxed);
+                let bucket = [4096, 16384, 65536, 262144]
+                    .iter()
+                    .position(|limit| n <= limit)
+                    .unwrap_or(4);
+                self.buckets[bucket].fetch_add(1, Ordering::Relaxed);
+            }
+            Poll::Pending => {
+                self.pending.fetch_add(1, Ordering::Relaxed);
+            }
+            _ => {}
+        }
+    }
+    fn report(&self) {
+        eprintln!(
+            "{}",
+            serde_json::json!({"format":"compact-transport-profile-v1",
+            "successfulWrites":self.calls.load(Ordering::Relaxed),"bytes":self.bytes.load(Ordering::Relaxed),
+            "pendingPolls":self.pending.load(Ordering::Relaxed),
+            "writeSizeBuckets":["<=4096","4097..16384","16385..65536","65537..262144",">262144"],
+            "counts":self.buckets.iter().map(|n|n.load(Ordering::Relaxed)).collect::<Vec<_>>(),
+            "scope":"diagnostic AsyncWrite completions, not TCP packets or RPC latency"})
+        );
+    }
 }
 impl Connected for LimitedSocket {
     type ConnectInfo = TcpConnectInfo;
@@ -327,7 +374,10 @@ impl AsyncWrite for LimitedSocket {
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<io::Result<usize>> {
-        Pin::new(&mut self.socket).poll_write(cx, buf)
+        let result = Pin::new(&mut self.socket).poll_write(cx, buf);
+        #[cfg(feature = "compact-transport-profile")]
+        self.stats.record(&result);
+        result
     }
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.socket).poll_flush(cx)
@@ -340,7 +390,10 @@ impl AsyncWrite for LimitedSocket {
         cx: &mut Context<'_>,
         bufs: &[io::IoSlice<'_>],
     ) -> Poll<io::Result<usize>> {
-        Pin::new(&mut self.socket).poll_write_vectored(cx, bufs)
+        let result = Pin::new(&mut self.socket).poll_write_vectored(cx, bufs);
+        #[cfg(feature = "compact-transport-profile")]
+        self.stats.record(&result);
+        result
     }
     fn is_write_vectored(&self) -> bool {
         self.socket.is_write_vectored()
@@ -355,6 +408,10 @@ where
     let service = CompactService::new(archive, receiver.clone())?;
     let mut server_stop = receiver;
     let connections = Arc::new(Semaphore::new(MAX_CONNECTIONS));
+    #[cfg(feature = "compact-transport-profile")]
+    let stats = Arc::new(TransportStats::default());
+    #[cfg(feature = "compact-transport-profile")]
+    let socket_stats = stats.clone();
     let incoming = TcpListenerStream::new(listener).filter_map(move |accepted| match accepted {
         Err(error) => Some(Err(error)),
         Ok(socket) => match connections.clone().try_acquire_owned() {
@@ -362,6 +419,8 @@ where
             Ok(permit) => Some(socket.set_nodelay(true).map(|()| LimitedSocket {
                 socket,
                 _permit: permit,
+                #[cfg(feature = "compact-transport-profile")]
+                stats: socket_stats.clone(),
             })),
         },
     });
@@ -387,5 +446,7 @@ where
             }
         }
     }
+    #[cfg(feature = "compact-transport-profile")]
+    stats.report();
     Ok(())
 }

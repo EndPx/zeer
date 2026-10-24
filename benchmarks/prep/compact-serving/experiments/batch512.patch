@@ -1,0 +1,9 @@
+--- a/crates/prep/src/compact_rpc.rs
++++ b/crates/prep/src/compact_rpc.rs
+@@ -44,5 +44,5 @@
+ pub const MAX_ACTIVE_READS: usize = 8;
+ pub const MAX_QUEUED_READS: usize = 128;
+-pub const MAX_BATCH_BLOCKS: usize = 64;
++pub const MAX_BATCH_BLOCKS: usize = 512;
+ const QUEUE_WAIT: Duration = Duration::from_secs(30);
+ type BlockStream = Pin<Box<dyn Stream<Item = Result<CompactBlock, Status>> + Send>>;

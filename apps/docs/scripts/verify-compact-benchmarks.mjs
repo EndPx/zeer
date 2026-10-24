@@ -39,3 +39,23 @@ assert.equal(experiment.acceptance.status,'REJECTED');
 assert.equal(gates.downloadMedianAtLeast10PercentLower,false);
 assert.equal(experiment.correctness.candidate.fullDownloadDigest,experiment.correctness.baseline.fullDownloadDigest);
 console.log('Buffered experiment: 57 measurements, 4,606,704 OK requests; predeclared promotion gate remains REJECTED.');
+
+const diagnostic=JSON.parse(await readFile(new URL('../static/benchmarks/2026-10-24-prep-consumer.json',import.meta.url),'utf8'));
+assert.equal(diagnostic.defaultChanged,false);
+assert.equal(diagnostic.screeningSamples.length,6);
+assert.equal(diagnostic.consumerSamples.length,12);
+const pilotMedian=(variant,key)=>median(diagnostic.screeningSamples.filter(r=>r.variant===variant).map(r=>r[key]));
+assert.equal(pilotMedian('baseline','totalSeconds'),30.9338001);
+assert.equal(pilotMedian('candidate','totalSeconds'),29.963266271);
+assert.equal(diagnostic.batchScreening.status,'REJECTED');
+assert.equal(diagnostic.batchScreening.everyPairImproves,false);
+assert.ok(pilotMedian('candidate','totalSeconds')>pilotMedian('baseline','totalSeconds')*.9);
+for(const group of diagnostic.consumerGroups){
+ const samples=diagnostic.consumerSamples.filter(r=>r.variant===group.engine&&r.consumer===group.consumer);
+ assert.equal(samples.length,3);
+ assert.equal(median(samples.map(r=>r.totalSeconds)),group.medianSeconds);
+ assert.equal(median(samples.map(r=>r.clientCpuSeconds)),group.medianClientCpuSeconds);
+ for(const r of samples)assert.match(r.rawSha256,/^[0-9a-f]{64}$/);
+}
+assert.equal(diagnostic.consumerGroups.find(g=>g.engine==='buffered'&&g.consumer==='typed').medianSeconds,13.993732029);
+console.log('Transport/client diagnostic: rejected 6-sample batch screening and 12 consumer samples verified; no default change.');

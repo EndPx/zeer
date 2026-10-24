@@ -170,6 +170,46 @@ admitted manifest. Fresh requests continue to check files and integrity.
 
 ## Scope and resource limits
 
+### Transport and consumer diagnostics
+
+The optional `compact-transport-profile` feature records successful AsyncWrite
+completion sizes, bytes and pending polls at shutdown. It is compiled out of
+ordinary builds. These counters measure runtime write completions, not packets.
+Build with `cargo build --release -p prep --features compact-transport-profile`.
+
+For client CPU/allocation profiles, `profile-client.py --out NEW_DIRECTORY`
+prepares pinned ghz v0.121.0 source with diagnostic hooks. Use Python 3.12+ and
+build its `cmd/ghz` with **Go 1.23.0**, matching the official binary inspected
+for this study. Set `ZEER_CLIENT_CPU_PROFILE` and `ZEER_CLIENT_ALLOC_PROFILE` to
+new local output files, then run the same ghz full-download call. Inspect them
+with `go tool pprof -top` and `go tool pprof -top -sample_index=alloc_space`.
+Allocation space is cumulative churn, not peak RAM. The instrumented client is
+for diagnosis; retain unmodified ghz for the reference timing comparison.
+
+A typed consumer diagnostic is also available:
+
+```sh
+cargo build --release -p prep --example compact_download_probe
+taskset -c 2,3 target/release/examples/compact_download_probe \
+  http://127.0.0.1:39479 280000 4382797 \
+  263861fc67294b8bcd5fe28c112f4d02b7978e8c643b03e22839981fe443c988
+```
+
+That digest belongs only to the frozen reference capture. The probe validates
+every height, parent link and full normalized payload digest, including
+re-encoding and hashing inside its timer. Connection and snapshot metadata are
+outside the timer. It uses two Tokio workers and one stream at a time. This is
+different work from ghz's dynamic decoding, so its timing must not replace the
+ghz baseline or be used to rank Prep against a competitor measured with ghz.
+
+The rejected batch512 screening experiment can be reproduced in a separate
+checkout with `git apply benchmarks/prep/compact-serving/experiments/batch512.patch`.
+It only changes the internal batch count; the 4 MiB cap and one block per wire
+message remain. The checked-in default stays at 64 blocks. Do not combine it
+with buffered reads when reproducing the single-change batch experiment.
+
+### Supported surface
+
 `serve-compact` supports height-based `GetBlock`, forward `GetBlockRange`,
 `GetLatestBlock`, and snapshot metadata via `GetLightdInfo`. It limits each range
 to 100,000 blocks, active readers to eight, queued readers to 128, queue wait to

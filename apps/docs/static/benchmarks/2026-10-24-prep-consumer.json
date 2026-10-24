@@ -1,0 +1,276 @@
+{
+  "date": "2026-10-24",
+  "scope": "Consumer diagnostic uses different client algorithms and validation work; not interchangeable with reference benchmark",
+  "defaultChanged": false,
+  "profiling": {
+    "sourceCommit": "b7ca8f5fad40d3da97092a8886e4a4f636712069",
+    "compiler": "Go 1.23.0",
+    "cpuUnmarshalCumulativePercent": 64.35,
+    "cpuRecvMsgCumulativePercent": 74.11,
+    "allocationSpaceMiBApprox": 5074.13,
+    "cpuTop": "File: ghz-profile\nType: cpu\nTime: 2026-10-24 19:10:27 +07\nDuration: 23.96s, Total samples = 29.62s (123.60%)\nShowing nodes accounting for 1.25s, 4.22% of 29.62s total\nDropped 399 nodes (cum <= 0.15s)\nShowing top 18 nodes out of 203\n      flat  flat%   sum%        cum   cum%\n         0     0%     0%     23.33s 78.76%  github.com/bojand/ghz/runner.(*Requester).runWorkers.func2.1\n         0     0%     0%     23.33s 78.76%  github.com/bojand/ghz/runner.(*Worker).makeRequest\n         0     0%     0%     23.33s 78.76%  github.com/bojand/ghz/runner.(*Worker).runWorker\n     0.13s  0.44%  0.44%     23.25s 78.49%  github.com/bojand/ghz/runner.(*Worker).makeServerStreamingRequest\n     0.03s   0.1%  0.54%     23.11s 78.02%  github.com/jhump/protoreflect/dynamic/grpcdynamic.(*ServerStream).RecvMsg\n     0.05s  0.17%  0.71%     22.13s 74.71%  google.golang.org/grpc.(*clientStream).RecvMsg\n     0.02s 0.068%  0.78%     22.04s 74.41%  google.golang.org/grpc.(*clientStream).withRetry\n     0.04s  0.14%  0.91%     21.99s 74.24%  google.golang.org/grpc.(*clientStream).RecvMsg.func1\n     0.27s  0.91%  1.82%     21.95s 74.11%  google.golang.org/grpc.(*csAttempt).recvMsg\n     0.17s  0.57%  2.40%     20.95s 70.73%  google.golang.org/grpc.recv\n     0.05s  0.17%  2.57%     19.06s 64.35%  google.golang.org/grpc/encoding/proto.codec.Unmarshal\n     0.06s   0.2%  2.77%        19s 64.15%  github.com/golang/protobuf/proto.Unmarshal\n     0.15s  0.51%  3.27%     18.99s 64.11%  github.com/golang/protobuf/proto.UnmarshalMerge\n     0.06s   0.2%  3.48%     18.30s 61.78%  google.golang.org/protobuf/proto.UnmarshalOptions.UnmarshalState\n     0.08s  0.27%  3.75%     18.27s 61.68%  google.golang.org/protobuf/proto.UnmarshalOptions.unmarshal\n     0.09s   0.3%  4.05%     18.22s 61.51%  google.golang.org/protobuf/internal/impl.legacyUnmarshal\n     0.04s  0.14%  4.19%     18.11s 61.14%  github.com/jhump/protoreflect/dynamic.(*Message).Unmarshal\n     0.01s 0.034%  4.22%     18.07s 61.01%  github.com/jhump/protoreflect/dynamic.(*Message).UnmarshalMerge (inline)\n",
+    "allocationTop": "File: ghz-profile\nType: alloc_space\nTime: 2026-10-24 19:10:51 +07\nShowing nodes accounting for 5016.62MB, 98.87% of 5074.13MB total\nDropped 118 nodes (cum <= 25.37MB)\nShowing top 18 nodes out of 47\n      flat  flat%   sum%        cum   cum%\n 2179.31MB 42.95% 42.95%  2179.31MB 42.95%  github.com/jhump/protoreflect/dynamic.(*Message).internalSetField\n  541.71MB 10.68% 53.63%   543.21MB 10.71%  google.golang.org/grpc.(*parser).recvMsg\n  445.52MB  8.78% 62.41%   445.52MB  8.78%  github.com/jhump/protoreflect/dynamic.NewMessageWithMessageFactory (inline)\n  398.54MB  7.85% 70.26%  4736.67MB 93.35%  google.golang.org/grpc.(*csAttempt).recvMsg\n  397.51MB  7.83% 78.09%   397.51MB  7.83%  github.com/jhump/protoreflect/internal/codec.(*Buffer).DecodeRawBytes\n  325.01MB  6.41% 84.50%   325.01MB  6.41%  github.com/jhump/protoreflect/dynamic.validElementFieldValueForRv\n  295.01MB  5.81% 90.31%  2273.22MB 44.80%  github.com/jhump/protoreflect/codec.DecodeLengthDelimitedField\n     151MB  2.98% 93.29%      151MB  2.98%  google.golang.org/protobuf/internal/impl.(*MessageInfo).MessageOf\n     109MB  2.15% 95.44%      109MB  2.15%  github.com/jhump/protoreflect/codec.DecodeScalarField\n  102.94MB  2.03% 97.47%   102.94MB  2.03%  bytes.growSlice\n   70.57MB  1.39% 98.86%    70.57MB  1.39%  github.com/jhump/protoreflect/dynamic.(*Message).addRepeatedField\n    0.50MB 0.0099% 98.87%   107.95MB  2.13%  google.golang.org/grpc/internal/transport.(*http2Client).handleData\n         0     0% 98.87%   102.94MB  2.03%  bytes.(*Buffer).Write\n         0     0% 98.87%   102.94MB  2.03%  bytes.(*Buffer).grow\n         0     0% 98.87%  4958.61MB 97.72%  github.com/bojand/ghz/runner.(*Requester).runWorkers.func2.1\n         0     0% 98.87%  4958.61MB 97.72%  github.com/bojand/ghz/runner.(*Worker).makeRequest\n         0     0% 98.87%  4916.18MB 96.89%  github.com/bojand/ghz/runner.(*Worker).makeServerStreamingRequest\n         0     0% 98.87%  4958.61MB 97.72%  github.com/bojand/ghz/runner.(*Worker).runWorker\n",
+    "note": "Cumulative CPU categories overlap; allocation space is not peak memory; patched client is diagnostic only"
+  },
+  "environment": {
+    "host": "WSL2 Ubuntu 24.04 / AMD Ryzen 5 6600H",
+    "serverCpus": "0-1",
+    "serverCpuQuota": 2,
+    "serverMemoryGiB": 2,
+    "clientAffinity": "2-3",
+    "clientWorkers": 2,
+    "cache": "Warm, no cache drops"
+  },
+  "batchScreening": {
+    "status": "REJECTED",
+    "medianBaselineSeconds": 30.9338001,
+    "medianCandidateSeconds": 29.963266271,
+    "timeReductionPercent": 3.1374542599439654,
+    "medianImprovesAtLeast10Percent": false,
+    "everyPairImproves": false,
+    "baselineMedianServerCpuSeconds": 35.845081,
+    "candidateMedianServerCpuSeconds": 26.848691000000002,
+    "baselineMedianWriteSyscalls": 215066,
+    "candidateMedianWriteSyscalls": 60105,
+    "measuredRequests": 2466
+  },
+  "consumerGroups": [
+    {
+      "engine": "direct",
+      "consumer": "ghz",
+      "medianSeconds": 29.678617971,
+      "runsSeconds": [
+        29.678617971,
+        29.168798545,
+        32.914647579
+      ],
+      "medianServerCpuSeconds": 33.163701,
+      "medianClientCpuSeconds": 38.028973,
+      "peakClientRssKiB": 33300
+    },
+    {
+      "engine": "direct",
+      "consumer": "typed",
+      "medianSeconds": 23.715859959,
+      "runsSeconds": [
+        24.247762622,
+        23.715859959,
+        23.420756064
+      ],
+      "medianServerCpuSeconds": 30.163554999999995,
+      "medianClientCpuSeconds": 6.229305999999994,
+      "peakClientRssKiB": 8108
+    },
+    {
+      "engine": "buffered",
+      "consumer": "ghz",
+      "medianSeconds": 29.790342403,
+      "runsSeconds": [
+        29.790342403,
+        29.933982677,
+        29.218968465
+      ],
+      "medianServerCpuSeconds": 23.243174999999994,
+      "medianClientCpuSeconds": 37.52728499999998,
+      "peakClientRssKiB": 32912
+    },
+    {
+      "engine": "buffered",
+      "consumer": "typed",
+      "medianSeconds": 13.993732029,
+      "runsSeconds": [
+        13.868699255,
+        14.002729549,
+        13.993732029
+      ],
+      "medianServerCpuSeconds": 20.479921000000004,
+      "medianClientCpuSeconds": 6.164829000000012,
+      "peakClientRssKiB": 8072
+    }
+  ],
+  "screeningSamples": [
+    {
+      "variant": "baseline",
+      "repeat": 1,
+      "totalSeconds": 30.9338001,
+      "serverCpuSeconds": 35.845081,
+      "clientCpuSeconds": 39.551509,
+      "ioBefore": "rchar: 3918783271\nwchar: 12870854\nsyscr: 8261787\nsyscw: 902\nread_bytes: 1970921472\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "ioAfter": "rchar: 4464423078\nwchar: 564923340\nsyscr: 16467383\nsyscw: 215968\nread_bytes: 2086703104\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "rawSha256": "22959cdaecde09ef8087a0eff1051b63987a9e1ac8a60b54b8daa5f609faf05b"
+    },
+    {
+      "variant": "candidate",
+      "repeat": 1,
+      "totalSeconds": 33.134296245,
+      "serverCpuSeconds": 29.380262000000002,
+      "clientCpuSeconds": 37.884803,
+      "ioBefore": "rchar: 3918783403\nwchar: 12865939\nsyscr: 8261787\nsyscw: 319\nread_bytes: 476704768\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "ioAfter": "rchar: 4464423210\nwchar: 563295233\nsyscr: 16467383\nsyscw: 60194\nread_bytes: 476704768\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "rawSha256": "f199d133072791b559587809057eaed05142b9eb989e75b807fdb7dcbcfa1537"
+    },
+    {
+      "variant": "candidate",
+      "repeat": 2,
+      "totalSeconds": 29.963266271,
+      "serverCpuSeconds": 26.53268299999999,
+      "clientCpuSeconds": 34.14668800000001,
+      "ioBefore": "rchar: 3918783638\nwchar: 12865829\nsyscr: 8261787\nsyscw: 310\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "ioAfter": "rchar: 4464423445\nwchar: 563297448\nsyscr: 16467383\nsyscw: 60506\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "rawSha256": "8824687a997770800bbe5a442f364b503498da76cbb951201be08976d80e4606"
+    },
+    {
+      "variant": "baseline",
+      "repeat": 2,
+      "totalSeconds": 29.838872804,
+      "serverCpuSeconds": 32.983157,
+      "clientCpuSeconds": 38.44555799999999,
+      "ioBefore": "rchar: 3918783506\nwchar: 12871190\nsyscr: 8261787\nsyscw: 944\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "ioAfter": "rchar: 4464423313\nwchar: 564967533\nsyscr: 16467383\nsyscw: 220641\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "rawSha256": "ce7d47aece6ff0b35fa38320fd5e52599e08b4981b9f5201833bf2212916bb81"
+    },
+    {
+      "variant": "baseline",
+      "repeat": 3,
+      "totalSeconds": 35.328385635,
+      "serverCpuSeconds": 38.27592,
+      "clientCpuSeconds": 44.903731000000036,
+      "ioBefore": "rchar: 3918783506\nwchar: 12871153\nsyscr: 8261787\nsyscw: 945\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "ioAfter": "rchar: 4464423313\nwchar: 564897447\nsyscr: 16467383\nsyscw: 214112\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "rawSha256": "86f3d3749941d9297992e84b81188218f63e66ab3c9e36d08980888063dbbe29"
+    },
+    {
+      "variant": "candidate",
+      "repeat": 3,
+      "totalSeconds": 29.858498857,
+      "serverCpuSeconds": 26.848691000000002,
+      "clientCpuSeconds": 34.038518000000025,
+      "ioBefore": "rchar: 3918783638\nwchar: 12865862\nsyscr: 8261787\nsyscw: 312\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "ioAfter": "rchar: 4464423445\nwchar: 563295535\nsyscr: 16467383\nsyscw: 60417\nread_bytes: 0\nwrite_bytes: 4096\ncancelled_write_bytes: 0\n",
+      "rawSha256": "b76bc50112b89b422633da5ddf6151284c16c095d689767c2683a0f3b92e65c3"
+    }
+  ],
+  "consumerSamples": [
+    {
+      "variant": "direct",
+      "consumer": "ghz",
+      "repeat": 1,
+      "totalSeconds": 29.678617971,
+      "serverCpuSeconds": 33.163701,
+      "clientCpuSeconds": 38.028973,
+      "clientMaxRssKiB": 33300,
+      "rawSha256": "038ab92d94c188c3bd26ab54e69aae55f2276033c832956eab68104bc4f21c87"
+    },
+    {
+      "variant": "direct",
+      "consumer": "typed",
+      "repeat": 1,
+      "totalSeconds": 24.247762622,
+      "serverCpuSeconds": 30.957956999999993,
+      "clientCpuSeconds": 6.418745000000001,
+      "clientMaxRssKiB": 8040,
+      "rawSha256": "5956cb8aed311f01d3248e232aa2a60e7633d0b6591583eaeb69388075b5c194"
+    },
+    {
+      "variant": "buffered",
+      "consumer": "ghz",
+      "repeat": 1,
+      "totalSeconds": 29.790342403,
+      "serverCpuSeconds": 23.805238999999993,
+      "clientCpuSeconds": 37.721956,
+      "clientMaxRssKiB": 32912,
+      "rawSha256": "0a959ed3044938879f3891508a0da2024187f9e8067a83cbe96515518eb4c1f4"
+    },
+    {
+      "variant": "buffered",
+      "consumer": "typed",
+      "repeat": 1,
+      "totalSeconds": 13.868699255,
+      "serverCpuSeconds": 20.443466,
+      "clientCpuSeconds": 6.112336999999998,
+      "clientMaxRssKiB": 7760,
+      "rawSha256": "34f3eb32b0acc87b66683159961bfbcb0b82ad63ee131f7c5e700d2d704b7cc5"
+    },
+    {
+      "variant": "buffered",
+      "consumer": "typed",
+      "repeat": 2,
+      "totalSeconds": 14.002729549,
+      "serverCpuSeconds": 20.714891,
+      "clientCpuSeconds": 6.303752999999999,
+      "clientMaxRssKiB": 8072,
+      "rawSha256": "725af7600681fbd3f7473fe2f9067b967708c27e8b7bb31ced3b80dc9dfbad54"
+    },
+    {
+      "variant": "buffered",
+      "consumer": "ghz",
+      "repeat": 2,
+      "totalSeconds": 29.933982677,
+      "serverCpuSeconds": 23.243174999999994,
+      "clientCpuSeconds": 37.52728499999998,
+      "clientMaxRssKiB": 32040,
+      "rawSha256": "bdb84fc866e6a39c78c458beccd5e2d3e66104819db2af40b02ba79cab6d4244"
+    },
+    {
+      "variant": "direct",
+      "consumer": "typed",
+      "repeat": 2,
+      "totalSeconds": 23.715859959,
+      "serverCpuSeconds": 30.163554999999995,
+      "clientCpuSeconds": 6.1836489999999955,
+      "clientMaxRssKiB": 7992,
+      "rawSha256": "903ba5075cca2dfbac14291fb9dbe161c6c09e30882ffb8bf88d0ef26b44ab88"
+    },
+    {
+      "variant": "direct",
+      "consumer": "ghz",
+      "repeat": 2,
+      "totalSeconds": 29.168798545,
+      "serverCpuSeconds": 32.415869,
+      "clientCpuSeconds": 37.60289700000002,
+      "clientMaxRssKiB": 33012,
+      "rawSha256": "8a1a0739cc563727a270f36627237b259b2f57969897eed888094b9138960711"
+    },
+    {
+      "variant": "direct",
+      "consumer": "ghz",
+      "repeat": 3,
+      "totalSeconds": 32.914647579,
+      "serverCpuSeconds": 35.752779,
+      "clientCpuSeconds": 42.104984000000016,
+      "clientMaxRssKiB": 32616,
+      "rawSha256": "ecc814eb9b7a56ebd4310889cfd643a079bc40814eb9ac1887a5e55e0e42075d"
+    },
+    {
+      "variant": "direct",
+      "consumer": "typed",
+      "repeat": 3,
+      "totalSeconds": 23.420756064,
+      "serverCpuSeconds": 29.802692000000008,
+      "clientCpuSeconds": 6.229305999999994,
+      "clientMaxRssKiB": 8108,
+      "rawSha256": "80235b3c7811d01c8df57fa0173af485bf42988c9310184f1fa996f2e2463779"
+    },
+    {
+      "variant": "buffered",
+      "consumer": "ghz",
+      "repeat": 3,
+      "totalSeconds": 29.218968465,
+      "serverCpuSeconds": 23.092846,
+      "clientCpuSeconds": 36.832789000000034,
+      "clientMaxRssKiB": 32620,
+      "rawSha256": "b7d8dc3c916f4df26571e7592ca4e4b037ef2a228482b2065d3aecceab11e6e2"
+    },
+    {
+      "variant": "buffered",
+      "consumer": "typed",
+      "repeat": 3,
+      "totalSeconds": 13.993732029,
+      "serverCpuSeconds": 20.479921000000004,
+      "clientCpuSeconds": 6.164829000000012,
+      "clientMaxRssKiB": 8044,
+      "rawSha256": "ee43f7ffdd7a33fb86f6a5561c1ca6e4b500814313016799137275f996eed683"
+    }
+  ],
+  "rawReportsVerified": true
+}

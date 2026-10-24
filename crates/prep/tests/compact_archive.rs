@@ -225,14 +225,15 @@ async fn wait_until(mut predicate: impl FnMut() -> bool) {
 
 #[tokio::test]
 async fn queue_is_bounded_and_cancellation_and_shutdown_release_leases() {
-    let (_dir, archive) = fixture(500, 4096);
+    let blocks = (compact_rpc::MAX_BATCH_BLOCKS * 3) as u64;
+    let (_dir, archive) = fixture(blocks, 4096);
     let (stop, stopped) = watch::channel(false);
     let service = Arc::new(CompactService::new(archive, stopped).unwrap());
     let mut held = vec![];
     for _ in 0..MAX_ACTIVE_READS {
         held.push(
             service
-                .get_block_range(range(1, 500))
+                .get_block_range(range(1, blocks))
                 .await
                 .unwrap()
                 .into_inner(),
@@ -243,7 +244,7 @@ async fn queue_is_bounded_and_cancellation_and_shutdown_release_leases() {
     for _ in 0..MAX_QUEUED_READS {
         let s = service.clone();
         waiting.push(tokio::spawn(async move {
-            s.get_block_range(range(1, 500)).await
+            s.get_block_range(range(1, blocks)).await
         }));
     }
     wait_until(|| service.queued_reads() == MAX_QUEUED_READS).await;
@@ -256,7 +257,7 @@ async fn queue_is_bounded_and_cancellation_and_shutdown_release_leases() {
     }
     wait_until(|| service.queued_reads() == 0).await;
     let s = service.clone();
-    let waiting = tokio::spawn(async move { s.get_block_range(range(1, 500)).await });
+    let waiting = tokio::spawn(async move { s.get_block_range(range(1, blocks)).await });
     wait_until(|| service.queued_reads() == 1).await;
     stop.send(true).unwrap();
     assert!(matches!(waiting.await.unwrap(),Err(e) if e.code()==Code::Unavailable));

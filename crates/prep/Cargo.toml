@@ -9,6 +9,7 @@ publish = false
 [features]
 admission-profile = ["prep-store/admission-profile"]
 buffered-range-reads = ["prep-store/buffered-range-reads"]
+compact-transport-profile = []
 
 [[example]]
 name = "admission_queries"

@@ -58,6 +58,27 @@ The experimental `buffered-range-reads` Cargo feature uses a 64 KiB range buffer
 
 [Download the experimental summary and gate results](pathname:///docs/benchmarks/2026-10-24-prep-buffered.json). The [reproduction guide](https://github.com/EndPx/zeer/tree/main/benchmarks/prep/compact-serving/#compare-a-read-path-optimization) covers the paired controller and diagnostic build. Per-request logs remain retained locally.
 
+### Transport and consumer diagnostics
+
+A follow-up examined the cost of the benchmark consumer. A diagnostic build of pinned ghz v0.121.0 used the same Go 1.23.0 compiler as the official binary, adding CPU/allocation profiling only. About **64% of sampled CPU** was under protobuf unmarshalling. Its allocation profile estimated roughly **5 GiB cumulative allocation churn**, while the normal consumer runs below peaked near **33 MiB RSS**. Cumulative allocations are not live memory usage. One instrumented four-CPU sensitivity run did not improve time; it is not part of the comparison table.
+
+The selected transport experiment increased internal batches from 64 to 512 blocks while retaining the 4 MiB byte cap and one block per gRPC message. In three paired screening runs, median time changed from **30.933800 s to 29.963266 s**: **3.14% lower**, with two pairs slower. It failed the predeclared screening gate, so no full concurrency acceptance matrix followed. The default batch remains **64**. Fewer write syscalls and lower server CPU did not produce a consistent latency improvement.
+
+A separate consumer diagnostic used the same frozen range, server caps and client CPU affinity, with three runs per combination:
+
+| Prepared engine | Consumer | Median total time | Median client CPU time |
+| --- | --- | ---: | ---: |
+| Direct reads, batch64 | Official ghz | 29.678618 s | 38.028973 s |
+| Direct reads, batch64 | Typed Rust probe | 23.715860 s | 6.229306 s |
+| Opt-in buffered reads, batch64 | Official ghz | 29.790342 s | 37.527285 s |
+| Opt-in buffered reads, batch64 | Typed Rust probe | 13.993732 s | 6.164829 s |
+
+**These are different client algorithms and validation workloads.** The typed probe checks height ordering and within-range parent links, re-encodes the pinned protobuf and verifies the complete payload digest inside its timer. All six typed downloads matched **4,102,798 blocks, 411 requests, 529,228,615 payload bytes** and the expected digest. Every official-ghz request was OK. Both engines used 2 CPU / 2 GiB; clients used affinity to two separate CPUs. Client memory was observed, not capped in this diagnostic. Caches were warm and engine/client order alternated.
+
+The typed timings are **not replacements for the reference ghz benchmark** and cannot rank Prep against Zaino or Ztreamer measured with ghz. They show that consumer processing can limit this end-to-end workload and obscure some engine-side savings. Buffered reads remain opt-in; no hosted engine cutover followed this study.
+
+[Download profiling, screening and consumer summaries](pathname:///docs/benchmarks/2026-10-24-prep-consumer.json). The [reproduction notes](https://github.com/EndPx/zeer/tree/main/benchmarks/prep/compact-serving/#transport-and-consumer-diagnostics) include the typed probe, profiling hooks and rejected batch patch. Raw profiles and per-request logs remain retained locally.
+
 ## Workload and results
 
 The following matched HTTP retrieval study was recorded **21 October 2026 (UTC)**.
