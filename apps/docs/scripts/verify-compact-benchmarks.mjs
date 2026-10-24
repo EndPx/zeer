@@ -59,3 +59,42 @@ for(const group of diagnostic.consumerGroups){
 }
 assert.equal(diagnostic.consumerGroups.find(g=>g.engine==='buffered'&&g.consumer==='typed').medianSeconds,13.993732029);
 console.log('Transport/client diagnostic: rejected 6-sample batch screening and 12 consumer samples verified; no default change.');
+
+const application=JSON.parse(await readFile(new URL('../static/benchmarks/2026-10-24-prep-application.json',import.meta.url),'utf8'));
+assert.equal(application.defaultChanged,false);
+assert.equal(application.environment.sdk,'0.6.1');
+assert.equal(application.measurements.length,6);
+assert.equal(new Set(application.measurements.map(r=>`${r.variant}:${r.repeat}`)).size,6);
+const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-12,`${a} != ${b}`);
+const middle=values=>{const v=[...values].sort((a,b)=>a-b);return (v[Math.floor((v.length-1)/2)]+v[Math.floor(v.length/2)])/2;};
+for(const group of application.groups){
+ const samples=application.measurements.filter(r=>r.variant===group.variant);
+ assert.equal(samples.length,3);
+ for(const key of ['wallSeconds','cliSeconds','fetchSeconds','handlerIncludingEntityIoSeconds','transactionOverheadSeconds','readerCpuSeconds'])close(middle(samples.map(r=>r[key])),group[key]);
+ const queries=application.querySamples.filter(r=>r.variant===group.variant).flatMap(r=>r.samples);
+ assert.equal(queries.length,group.graphqlSamples);
+ assert.ok(queries.every(r=>r.ok&&r.seconds>=0));
+ const sorted=queries.map(r=>r.seconds).sort((a,b)=>a-b);
+ close(middle(sorted),group.pooledGraphqlMedianSeconds);
+ close(sorted[Math.ceil(sorted.length*.95)-1],group.pooledGraphqlP95Seconds);
+}
+assert.equal(application.querySamples.flatMap(r=>r.samples).length,160);
+for(const row of application.measurements){
+ assert.equal(row.blocks,512);assert.equal(row.transactions,621);assert.equal(row.prepRequests,98);
+ assert.equal(row.graphqlErrors,0);assert.equal(row.restartIdentical,true);
+ assert.equal(row.entityDigest,application.correctness.expectedDigest);
+}
+assert.equal(application.correctness.status,'PASS');
+assert.equal(application.correctness.newBlocks,314);
+assert.equal(application.correctness.final.height-application.correctness.initial.height,314);
+assert.equal(Object.values(application.correctness.entityCounts).reduce((a,b)=>a+b),1076);
+assert.deepEqual(application.correctness.coverage,{id:'chain',startHeight:4525000,lastHeight:4525511,processedBlocks:512,unresolvedInputs:12,unattributedOutputs:2});
+assert.equal(application.correctness.resolvedOutputs,13);
+assert.equal(application.correctness.pagination.checks.length,6);
+for(const p of application.correctness.pagination.checks){assert.equal(p.pages,14);assert.equal(p.items,514);assert.equal(p.orderedAndComplete,true);assert.equal(p.nestedSummariesMatch,true);assert.equal(p.serverRestarted,true);}
+assert.equal(application.measurements.filter(r=>r.variant==='buffered'&&r.cliSeconds>application.measurements.find(d=>d.variant==='direct'&&d.repeat===r.repeat).cliSeconds).length,2);
+assert.equal(application.environment.memoryLimitIsCgroup,false);
+assert.deepEqual(application.durability,{fsync:'on',synchronous_commit:'on',full_page_writes:'on'});
+assert.equal(application.monitor.ingestionPublicationOverlappedTimedSync,true);
+for(const a of application.artifacts)assert.match(a.sha256,/^[0-9a-f]{64}$/);
+console.log('Chef application study: 6 matching runs, 160 successful concurrent queries, 84 complete pagination reads, 314 ingested blocks; no default promotion.');

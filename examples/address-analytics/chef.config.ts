@@ -8,7 +8,7 @@ export default defineConfig<ChefEntities>({
   indexer: {
     async block({ block, context }) {
       const old = await context.entities.get("Coverage", "chain");
-      await context.entities.set("Coverage", { id: "chain", startHeight: 0,
+      await context.entities.set("Coverage", { id: "chain", startHeight: old?.startHeight ?? block.height,
         lastHeight: block.height, processedBlocks: (old?.processedBlocks ?? 0) + 1,
         unresolvedInputs: old?.unresolvedInputs ?? 0, unattributedOutputs: old?.unattributedOutputs ?? 0 });
     },

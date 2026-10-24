@@ -2,11 +2,28 @@
 
 Chef's benchmark measures the application-indexing pipeline: reading from Prep, running TypeScript handlers, committing entities to PostgreSQL and making committed data readable through GraphQL.
 
-These are historical studies with their original versions, dates and workloads. They are not Chef 0.6.0 performance measurements. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) covers the registry install, all three starters and real testnet transaction breakdown; it does not remeasure the latency tables below.
+Studies retain their original versions, dates and workloads. The application study below uses Chef 0.6.1; the older backfill and receipt tables retain their historical versions. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) covers the registry install, all three starters and real testnet transaction breakdown; it does not remeasure those older latency tables.
+
+## Address analytics with Chef 0.6.1
+
+On **24 October 2026**, an independently installed registry package indexed **512 testnet blocks, 4,525,000–4,525,511 inclusive**, containing **621 transactions**. Three fresh namespaces per reader used the same address analytics handler, PostgreSQL 18, 16-block pages and eight-block commit batches. Direct and experimental buffered Prep readers alternated order.
+
+| Application metric | Direct Prep reads | Opt-in buffered reads |
+| --- | ---: | ---: |
+| Median indexing CLI elapsed time | 2.460766 s | 2.496932 s |
+| Concurrent GraphQL reads | 79, all successful | 81, all successful |
+| Pooled GraphQL median | 0.007510 s | 0.009076 s |
+| Pooled GraphQL p95 | 0.031536 s | 0.022927 s |
+
+All six runs matched **1,076 entity rows** against independent arithmetic over the same normalized input. Restart preserved state, and each restarted GraphQL server returned all **514 activities in 14 ordered pages**, including matching related summaries. Coverage recorded 12 unresolved inputs and two outputs without a single attributable address; partial-range totals are not wallet balances.
+
+A real local Prep follower published **314 additional blocks** during the study; publication overlapped one timed indexing interval. This was concurrent **catch-up**, not a chain-head latency or shielded scanning measurement. WSL2 on Ryzen 5 6600H used two CPU affinity slots for Prep and two shared by Chef/PostgreSQL, without cgroup quotas. Caches were warm. Admission, setup and final validation were outside the indexing timer; the CLI timer includes source reads, handler work and commits.
+
+Buffered reads did **not** consistently improve application time: two of three paired runs were slower. They remain opt-in. This small exploratory study neither promotes a default nor replaces the compact-block retrieval comparison. [Download every timing and query sample](pathname:///docs/benchmarks/2026-10-24-prep-application.json), or read the [methodology and reproduction steps](https://github.com/EndPx/zeer/blob/main/docs/PREP_APPLICATION_STUDY_20261024.md).
 
 For private payment observations, start with the [six uninterrupted live receipts](#shielded-receipts-six-uninterrupted-live-samples). For a longer application-consumption check, see the [continuous consumer study](#continuous-consumer-one-observed-hour). Public block-summary and earlier polling studies are recorded separately below.
 
-Recorded **20 October 2026** on real **Zcash Testnet** data. All durations are in **seconds (s)**.
+The following block-summary study was recorded **20 October 2026** on real **Zcash Testnet** data. All durations are in **seconds (s)**.
 
 ## Workload and results
 

@@ -26,6 +26,8 @@ For the database recovery test, set `CHEF_TEST_DATABASE_URL` to a disposable loc
 
 Run `query.graphql` with an indexed transparent address as `$address`. For a full backfill, continue with `pnpm run sync --follow`. The start is deliberately fixed at 0: filtering out funding transactions would make later inputs unresolved. Historical backfill can take time; it is not part of code generation or the fixture test.
 
+For a bounded modern-data experiment, change `startHeight` and use a **new project namespace** before migrating. `Coverage.startHeight` records the first block actually indexed. Inputs funded before that height can remain unresolved; the resulting totals cover the observed range and are not a complete address balance. The [512-block application study](../../docs/PREP_APPLICATION_STUDY_20261024.md) exercises this mode with PostgreSQL, concurrent GraphQL reads and restart.
+
 ## Read the result
 
 - `AddressSummary`: exact `receivedZat`/`spentZat`, incoming/outgoing transaction counts, first/last observed block heights. Several outputs or inputs involving one address in one transaction count once. A zero-value output still counts as activity.

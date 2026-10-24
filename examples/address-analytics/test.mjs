@@ -5,6 +5,19 @@ import {once} from 'node:events';
 import {createChefServer, parseModel, encodeEntity} from '@zeer-dev/chef';
 import config from './chef.config.ts';
 
+test('coverage preserves the actual first indexed height for a partial-history project', async () => {
+  let coverage = null;
+  const context = { entities: {
+    async get() { return structuredClone(coverage); },
+    async set(_name, value) { coverage = structuredClone(value); },
+  } };
+  await config.indexer.block({ block: { height: 4525000 }, context });
+  await config.indexer.block({ block: { height: 4525001 }, context });
+  assert.equal(coverage.startHeight, 4525000);
+  assert.equal(coverage.lastHeight, 4525001);
+  assert.equal(coverage.processedBlocks, 2);
+});
+
 test('address totals count transactions once, preserve exact amounts, and expose incomplete attribution', async t => {
   const tables = new Map();
   const entities = {

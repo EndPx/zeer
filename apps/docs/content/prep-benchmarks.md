@@ -79,6 +79,8 @@ The typed timings are **not replacements for the reference ghz benchmark** and c
 
 [Download profiling, screening and consumer summaries](pathname:///docs/benchmarks/2026-10-24-prep-consumer.json). The [reproduction notes](https://github.com/EndPx/zeer/tree/main/benchmarks/prep/compact-serving/#transport-and-consumer-diagnostics) include the typed probe, profiling hooks and rejected batch patch. Raw profiles and per-request logs remain retained locally.
 
+The next [Chef 0.6.1 application study](/docs/chef/benchmarks/#address-analytics-with-chef-061) tested PostgreSQL writes, concurrent GraphQL reads, pagination and restart against both reader modes while real Prep ingestion progressed. It found identical application results, but no consistent indexing-time improvement. Those application timings are kept in the Chef chapter; buffered reads remain opt-in.
+
 ## Workload and results
 
 The following matched HTTP retrieval study was recorded **21 October 2026 (UTC)**.
