@@ -4,6 +4,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 for name in ('root','output','binary','ghz','generated'):
  parser.add_argument('--'+name,type=pathlib.Path,required=True)
 parser.add_argument('--user',required=True)
+parser.add_argument('--baseline',type=pathlib.Path,help='Optional baseline binary: alternate three focused baseline runs with the complete candidate matrix')
 parser.add_argument('--controller-cpu',type=int,default=5)
 args=parser.parse_args()
 assert os.geteuid()==0,'Run the controller as root; the server and client use --user.'
@@ -22,7 +23,7 @@ assert len(expected['chunks'])==411 and len(expected['samples'])==2000
 assert hashlib.sha256((root/'reference/data-heights.json').read_bytes()).hexdigest()=='e4e562fdd8a7295b9b2d5cda51406a9c9b80e813e1a84cdf9aa84526b1d65e4a'
 assert hashlib.sha256(proto.read_bytes()).hexdigest()=='6fbfa974081fb02366a3118a25764af289bdbb86688978f5ff2bae661dfa346a'
 assert hashlib.sha256((proto.parent/'compact_formats.proto').read_bytes()).hexdigest()=='d8d0c8aaa5ceec7d5dcc188ef25b04011df2ec0254901620fce982fc13aeb32d'
-assert '0.121.0' in subprocess.check_output([str(ghz),'--version'],text=True)
+assert '0.121.0' in subprocess.check_output([str(ghz),'--version'],text=True,stderr=subprocess.STDOUT)
 with socket.socket() as probe:probe.bind(('127.0.0.1',39479))
 def command(args,**kw):return subprocess.run(args,check=True,**kw)
 def cg_read(path):
@@ -107,43 +108,53 @@ for c in [1,8,32,128]:
  plan.append(dict(name=f'block-c{c}',method='GetBlock',duration=30,c=c,file=True,blocks=1))
 plan.append(dict(name='full-wallet-download',method='GetBlockRange',n=len(expected['chunks']),skip=0,c=1,data=sync_data,totalBlocks=expected['blocks'],timeout='600s'))
 environment={'referenceCommit':'b01dab9df6256185e9c96fac96286b9d41f1c7ce','binarySha256':hashlib.sha256(binary.read_bytes()).hexdigest(),'ghzSha256':hashlib.sha256(ghz.read_bytes()).hexdigest(),'requestHeightsSha256':hashlib.sha256((root/'reference/data-heights.json').read_bytes()).hexdigest(),'hardware':subprocess.check_output(['lscpu'],text=True),'platform':subprocess.check_output(['uname','-a'],text=True),'plan':plan,'cache':'Warm prepared archive, full untimed verification, declared warmups; no OS cache dropping','limitations':['WSL2/Ryzen hardware differs from published GitHub runners','Only compact streaming subset, not full wallet protocol compatibility','Snapshot acquired remotely and materialized before timing; no equivalent local-node index-build timing','No Zaino or Ztreamer process run']}
-(out/'environment.json').write_text(json.dumps(environment,indent=2));verify();summaries=[]
+paired=args.baseline is not None
+variants={'baseline':args.baseline.resolve(),'candidate':binary} if paired else {'candidate':binary}
+focus=['full-wallet-download','range1000-c128','block-c128']
+if paired:environment.update(variants={k:hashlib.sha256(v.read_bytes()).hexdigest() for k,v in variants.items()},baselineFocus=focus)
+(out/'environment.json').write_text(json.dumps(environment,indent=2))
+for variant,binary in variants.items():
+ verify()
+ if paired:(out/f'correctness-{variant}.json').write_bytes((out/'correctness.json').read_bytes())
+summaries=[]
 for repeat in range(1,4):
- unit,path=start(repeat)
- try:
-  for scenario in plan:
-   name=f"r{repeat}-{scenario['name']}";dest=out/(name+'.json');os.chown(out,account.pw_uid,account.pw_gid)
-   args=['runuser','-u',service_user,'--','taskset','-c','2,3',str(ghz),'--insecure','--proto',str(proto),'--import-paths',str(root/'reference'),'--call','cash.z.wallet.sdk.rpc.CompactTxStreamer.'+scenario['method'],'--concurrency',str(scenario['c']),'--connections',str(scenario['c']),'--timeout',scenario.get('timeout','120s'),'--max-recv-message-size','256MB','--format','json','--output',str(dest)]
-   if scenario.get('duration'):args+=['--duration',str(scenario['duration'])+'s','--duration-stop','wait']
-   else:args+=['--total',str(scenario['n'])]
-   if scenario.get('skip'):args+=['--skipFirst',str(scenario['skip'])]
-   args+=['--data-file',str(root/'reference/data-heights.json')] if scenario.get('file') else ['--data',scenario['data']]
-   args+=[endpoint];before=cg_read(path);peaks=dict(before);done=threading.Event()
-   def monitor():
-    while not done.wait(.5):
-     try:
-      now=cg_read(path)
-      for k in ['memoryBytes','anonBytes','fileBytes']:peaks[k]=max(peaks[k],now[k])
-     except FileNotFoundError:return
-   watcher=threading.Thread(target=monitor);watcher.start();cpu=resource.getrusage(resource.RUSAGE_CHILDREN)
-   try:result=subprocess.run(args,capture_output=True,text=True,timeout=1200,env={**os.environ,'GOMAXPROCS':'2'})
-   finally:done.set();watcher.join()
-   after=cg_read(path);usage=resource.getrusage(resource.RUSAGE_CHILDREN)
-   (out/(name+'.stderr')).write_text(result.stderr);assert result.returncode==0,'GHZ_FAILED_'+name
-   raw=json.loads(dest.read_text());codes=raw.get('statusCodeDistribution',{});ok=codes.get('OK',0);seconds=raw['total']/1e9;dist={d['percentage']:d['latency']/1e9 for d in raw['latencyDistribution']}
-   row={'repeat':repeat,'scenario':scenario['name'],'count':raw['count'],'ok':ok,'statusCodes':codes,'totalSeconds':seconds,'p50Seconds':dist.get(50),'p95Seconds':dist.get(95),'p99Seconds':dist.get(99),'serverCpuSeconds':after['cpuSeconds']-before['cpuSeconds'],'clientCpuSeconds':usage.ru_utime+usage.ru_stime-cpu.ru_utime-cpu.ru_stime,'sampledPeakCgroupBytes':peaks['memoryBytes'],'sampledPeakAnonBytes':peaks['anonBytes'],'sampledPeakFileBytes':peaks['fileBytes']}
-   if scenario.get('blocks'):row['blocksPerSecond']=ok*scenario['blocks']/seconds
-   if scenario.get('totalBlocks') and ok==scenario['n']:row['blocksPerSecond']=scenario['totalBlocks']/seconds
-   digest_file=hashlib.sha256();compressed=dest.with_suffix('.json.gz')
-   with dest.open('rb') as src,gzip.open(compressed,'wb',compresslevel=1) as target:
-    while chunk:=src.read(1024*1024):digest_file.update(chunk);target.write(chunk)
-   verify_file=hashlib.sha256()
-   with gzip.open(compressed,'rb') as src:
-    while chunk:=src.read(1024*1024):verify_file.update(chunk)
-   assert verify_file.digest()==digest_file.digest();row['rawSha256']=digest_file.hexdigest()
-   assert dest.parent==out and compressed.is_file();dest.unlink()
-   summaries.append(row);(out/'summary.json').write_text(json.dumps(summaries,indent=2));print(json.dumps(row),flush=True)
-   assert ok==raw['count'] and ok>0,'NON_SUCCESSFUL_REQUESTS_'+name
-   if not scenario.get('duration'):assert raw['count']==scenario['n']-scenario.get('skip',0),'MEASURED_COUNT_MISMATCH_'+name
- finally:stop(unit)
-(out/'complete.json').write_text(json.dumps({'status':'PASS','runs':3,'scenarios':len(plan),'measurements':len(summaries)},indent=2));print('BENCHMARK COMPLETE',flush=True)
+ for variant in (list(variants) if repeat%2 else list(reversed(variants))):
+  binary=variants[variant];unit,path=start(repeat*10+(variant=='candidate') if paired else repeat)
+  try:
+   for scenario in plan:
+    if variant=='baseline' and scenario['name'] not in focus:continue
+    name=(variant+'-' if paired else '')+f"r{repeat}-{scenario['name']}";dest=out/(name+'.json');os.chown(out,account.pw_uid,account.pw_gid)
+    args=['runuser','-u',service_user,'--','taskset','-c','2,3',str(ghz),'--insecure','--proto',str(proto),'--import-paths',str(root/'reference'),'--call','cash.z.wallet.sdk.rpc.CompactTxStreamer.'+scenario['method'],'--concurrency',str(scenario['c']),'--connections',str(scenario['c']),'--timeout',scenario.get('timeout','120s'),'--max-recv-message-size','256MB','--format','json','--output',str(dest)]
+    if scenario.get('duration'):args+=['--duration',str(scenario['duration'])+'s','--duration-stop','wait']
+    else:args+=['--total',str(scenario['n'])]
+    if scenario.get('skip'):args+=['--skipFirst',str(scenario['skip'])]
+    args+=['--data-file',str(root/'reference/data-heights.json')] if scenario.get('file') else ['--data',scenario['data']]
+    args+=[endpoint];before=cg_read(path);peaks=dict(before);done=threading.Event()
+    def monitor():
+     while not done.wait(.5):
+      try:
+       now=cg_read(path)
+       for k in ['memoryBytes','anonBytes','fileBytes']:peaks[k]=max(peaks[k],now[k])
+      except FileNotFoundError:return
+    watcher=threading.Thread(target=monitor);watcher.start();cpu=resource.getrusage(resource.RUSAGE_CHILDREN)
+    try:result=subprocess.run(args,capture_output=True,text=True,timeout=1200,env={**os.environ,'GOMAXPROCS':'2'})
+    finally:done.set();watcher.join()
+    after=cg_read(path);usage=resource.getrusage(resource.RUSAGE_CHILDREN)
+    (out/(name+'.stderr')).write_text(result.stderr);assert result.returncode==0,'GHZ_FAILED_'+name
+    raw=json.loads(dest.read_text());codes=raw.get('statusCodeDistribution',{});ok=codes.get('OK',0);seconds=raw['total']/1e9;dist={d['percentage']:d['latency']/1e9 for d in raw['latencyDistribution']}
+    row={'repeat':repeat,'scenario':scenario['name'],'count':raw['count'],'ok':ok,'statusCodes':codes,'totalSeconds':seconds,'p50Seconds':dist.get(50),'p95Seconds':dist.get(95),'p99Seconds':dist.get(99),'serverCpuSeconds':after['cpuSeconds']-before['cpuSeconds'],'clientCpuSeconds':usage.ru_utime+usage.ru_stime-cpu.ru_utime-cpu.ru_stime,'sampledPeakCgroupBytes':peaks['memoryBytes'],'sampledPeakAnonBytes':peaks['anonBytes'],'sampledPeakFileBytes':peaks['fileBytes']}
+    if scenario.get('blocks'):row['blocksPerSecond']=ok*scenario['blocks']/seconds
+    if scenario.get('totalBlocks') and ok==scenario['n']:row['blocksPerSecond']=scenario['totalBlocks']/seconds
+    digest_file=hashlib.sha256();compressed=dest.with_suffix('.json.gz')
+    with dest.open('rb') as src,gzip.open(compressed,'wb',compresslevel=1) as target:
+     while chunk:=src.read(1024*1024):digest_file.update(chunk);target.write(chunk)
+    verify_file=hashlib.sha256()
+    with gzip.open(compressed,'rb') as src:
+     while chunk:=src.read(1024*1024):verify_file.update(chunk)
+    assert verify_file.digest()==digest_file.digest();row['rawSha256']=digest_file.hexdigest()
+    assert dest.parent==out and compressed.is_file();dest.unlink()
+    row.update(variant=variant) if paired else None;summaries.append(row);(out/'summary.json').write_text(json.dumps(summaries,indent=2));print(json.dumps(row),flush=True)
+    assert ok==raw['count'] and ok>0,'NON_SUCCESSFUL_REQUESTS_'+name
+    if not scenario.get('duration'):assert raw['count']==scenario['n']-scenario.get('skip',0),'MEASURED_COUNT_MISMATCH_'+name
+  finally:stop(unit)
+(out/'complete.json').write_text(json.dumps({'status':'PASS','runs':3,'scenarios':len(plan),'pairedBaseline':paired,'measurements':len(summaries)},indent=2));print('BENCHMARK COMPLETE',flush=True)

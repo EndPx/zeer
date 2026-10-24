@@ -12,6 +12,8 @@ use prost::Message;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::fs::{self, File, OpenOptions};
+#[cfg(feature = "buffered-range-reads")]
+use std::io::BufReader;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -779,6 +781,7 @@ impl Store {
                 index,
                 limits.max_block_bytes,
                 &manifest.payload_kind,
+                false,
             )?;
             if let Some(index) = disk_index.as_mut() {
                 let full = profile_phase!(
@@ -902,13 +905,20 @@ impl Store {
         if file.metadata()?.len() != self.manifest.segment_bytes {
             return Err(Error::Invalid("segment length changed after open"));
         }
+        // Experimental sequential reads retain a small request-local buffer.
+        // Manifest validation proves contiguous offsets; singletons do not prefetch.
         Ok(RangeReader {
+            #[cfg(feature = "buffered-range-reads")]
+            file: BufReader::with_capacity(if start == end { 0 } else { 64 * 1024 }, file),
+            #[cfg(not(feature = "buffered-range-reads"))]
             file,
             manifest: self.manifest.clone(),
             packed: self.packed.clone(),
             next,
             end_index,
             max_block_bytes: self.limits.max_block_bytes,
+            #[cfg(feature = "buffered-range-reads")]
+            positioned: false,
             done: false,
         })
     }
@@ -1036,15 +1046,18 @@ fn validate_manifest_structure(manifest: &Manifest, limits: StoreLimits) -> Resu
     Ok(())
 }
 
-fn read_record(
-    file: &mut File,
+fn read_record<R: Read + Seek>(
+    file: &mut R,
     entry: &BlockIndex,
     max_bytes: u64,
     kind: &str,
+    positioned: bool,
 ) -> Result<BlockRecord> {
     #[cfg(feature = "admission-profile")]
     let io_phase = profiling::Phase::new("record_io");
-    file.seek(SeekFrom::Start(entry.offset))?;
+    if !positioned {
+        file.seek(SeekFrom::Start(entry.offset))?;
+    }
     let mut prefix = [0_u8; 4];
     file.read_exact(&mut prefix)?;
     let length = u32::from_le_bytes(prefix);
@@ -1094,12 +1107,17 @@ fn read_record(
 /// One request owns one independently opened file descriptor; concurrent range
 /// readers never share a seek offset. At most one payload is returned per next().
 pub struct RangeReader {
+    #[cfg(feature = "buffered-range-reads")]
+    file: BufReader<File>,
+    #[cfg(not(feature = "buffered-range-reads"))]
     file: File,
     manifest: Arc<Manifest>,
     packed: Option<Arc<Vec<PackedIndex>>>,
     next: usize,
     end_index: usize,
     max_block_bytes: u64,
+    #[cfg(feature = "buffered-range-reads")]
+    positioned: bool,
     done: bool,
 }
 
@@ -1121,8 +1139,22 @@ impl Iterator for RangeReader {
                 &entry,
                 self.max_block_bytes,
                 &self.manifest.payload_kind,
+                {
+                    #[cfg(feature = "buffered-range-reads")]
+                    {
+                        self.positioned
+                    }
+                    #[cfg(not(feature = "buffered-range-reads"))]
+                    {
+                        false
+                    }
+                },
             )
         });
+        #[cfg(feature = "buffered-range-reads")]
+        {
+            self.positioned = true;
+        }
         self.next += 1;
         if record.is_err() {
             self.done = true;
@@ -1221,6 +1253,47 @@ mod tests {
         assert_eq!(left.next().unwrap().unwrap(), record(2));
         assert_eq!(right.next().unwrap().unwrap(), record(3));
         assert_eq!(left.next().unwrap().unwrap(), record(3));
+    }
+
+    #[test]
+    #[cfg(feature = "buffered-range-reads")]
+    fn buffered_ranges_cross_refills_and_reject_corrupt_prefixes_and_payloads() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("buffered");
+        let mut writer = test_writer(&path, 1, 4096);
+        for height in 1..=4096 {
+            writer.push(record(height)).unwrap();
+        }
+        let manifest = writer.finish().unwrap();
+        let store = Store::open(&path).unwrap();
+        for (first, last) in [(1, 4096), (713, 3201), (2048, 2048)] {
+            let rows = store
+                .read_range(first, last)
+                .unwrap()
+                .collect::<Result<Vec<_>>>()
+                .unwrap();
+            assert_eq!(rows, (first..=last).map(record).collect::<Vec<_>>());
+        }
+        let original = fs::read(path.join(SEGMENT_NAME)).unwrap();
+        let entry = &manifest.blocks[3000];
+        let mut corrupt = original.clone();
+        corrupt[entry.offset as usize..entry.offset as usize + 4]
+            .copy_from_slice(&0u32.to_le_bytes());
+        modify(&path.join(SEGMENT_NAME), &corrupt);
+        let mut reader = store.read_range(1, 4096).unwrap();
+        for _ in 0..3000 {
+            assert!(reader.next().unwrap().is_ok());
+        }
+        assert!(reader.next().unwrap().is_err());
+        assert!(reader.next().is_none());
+        let mut corrupt = original;
+        corrupt[entry.offset as usize + 4] ^= 1;
+        modify(&path.join(SEGMENT_NAME), &corrupt);
+        assert!(store
+            .read_range(2990, 3020)
+            .unwrap()
+            .collect::<Result<Vec<_>>>()
+            .is_err());
     }
 
     #[test]

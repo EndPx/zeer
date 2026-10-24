@@ -7,6 +7,8 @@ description = "Bounded immutable compact-block snapshots for Zeer Prep"
 
 [features]
 admission-profile = []
+# Experimental: lower checked-read CPU, but not promoted by the latency gate.
+buffered-range-reads = []
 
 [[example]]
 name = "admission_phases"

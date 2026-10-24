@@ -13,7 +13,7 @@ pub struct PhaseTime {
     pub ns: u128,
     pub calls: u64,
 }
-#[derive(Serialize)]
+#[derive(Default, Serialize)]
 pub struct AdmissionProfile {
     pub archive_budget_bytes: usize,
     pub segment_budget_bytes: usize,
@@ -24,6 +24,29 @@ pub struct AdmissionProfile {
     pub admission_ns: u128,
     pub phases: BTreeMap<&'static str, PhaseTime>,
     pub segments: Vec<SegmentAdmission>,
+}
+
+/// Diagnostic-only timers for checked reads after admission. Budget overrides
+/// are not used by read operations; ordinary builds contain no timers.
+pub fn measure_reads<T>(
+    operation: impl FnOnce() -> Result<T>,
+) -> Result<(T, BTreeMap<&'static str, PhaseTime>)> {
+    ACTIVE.with(|slot| {
+        assert!(slot.borrow().is_none(), "nested read profiling");
+        *slot.borrow_mut() = Some(AdmissionProfile::default());
+    });
+    struct Reset;
+    impl Drop for Reset {
+        fn drop(&mut self) {
+            ACTIVE.with(|s| {
+                s.borrow_mut().take();
+            });
+        }
+    }
+    let _reset = Reset;
+    let result = operation()?;
+    let profile = ACTIVE.with(|slot| slot.borrow_mut().take().unwrap());
+    Ok((result, profile.phases))
 }
 #[derive(Serialize)]
 pub struct SegmentAdmission {

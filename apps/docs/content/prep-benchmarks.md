@@ -40,6 +40,24 @@ The measured `serve-compact` profile supports height-based block retrieval and s
 
 Run `node apps/docs/scripts/verify-compact-benchmarks.mjs` from the repository to check the recorded summary counts and aggregates.
 
+### Buffered-read experiment — 24 October
+
+An opt-in range-read candidate was tested against a fresh run of the previous binary on the same machine. The candidate completed the full 16-scenario matrix three times; the baseline repeated the complete download and two 128-client scenarios. Variant order alternated by repeat. All **4,606,704 requests across 57 measurements** were OK, and both binaries passed full payload verification before timing.
+
+| Complete download metric | Fresh baseline | Experimental candidate |
+| --- | ---: | ---: |
+| Median total time | 22.920197 s | 21.186483 s |
+| Median server CPU time | 26.106398 s | 16.754105 s |
+| Maximum sampled anonymous memory, across measured scenarios | 835.04 MiB | 927.81 MiB |
+
+Median download time improved **7.56%**; median server CPU time fell **35.82%**. The baseline itself was faster than its 23 October result, which is why the historical 32.28-second value is not used to attribute the candidate's improvement.
+
+The candidate **was not promoted to default**: it missed the predeclared minimum 10% download-time improvement. The other gates passed: each paired download improved; 128-client throughput, p95 and anonymous memory stayed within their declared tolerances; all requests succeeded. Range128 median p95 was slightly higher, **0.571452 s versus 0.556283 s**, within the 5% allowance. These results do not establish a cross-hardware ranking against Ztreamer.
+
+The experimental `buffered-range-reads` Cargo feature uses a 64 KiB range buffer and one initial seek. Every returned record retains its length, checksum and identity checks; singleton requests do not prefetch. Default builds retain direct reads. This study did not replace the hosted Prep engine or change Chef.
+
+[Download the experimental summary and gate results](pathname:///docs/benchmarks/2026-10-24-prep-buffered.json). The [reproduction guide](https://github.com/EndPx/zeer/tree/main/benchmarks/prep/compact-serving/#compare-a-read-path-optimization) covers the paired controller and diagnostic build. Per-request logs remain retained locally.
+
 ## Workload and results
 
 The following matched HTTP retrieval study was recorded **21 October 2026 (UTC)**.

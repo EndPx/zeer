@@ -131,6 +131,43 @@ accounting can differ between repeats because pages were charged to an earlier
 unit; report anonymous memory separately and do not interpret cgroup totals as
 an independent cold-cache test.
 
+## Compare a read-path optimization
+
+Pass `--baseline /path/to/previous-prep` alongside `--binary /path/to/candidate`
+to run both versions sequentially on the same machine. Each binary first passes
+the complete payload verification. The candidate receives all 16 scenarios in
+each of three repeats. The baseline receives the full download, 1,000-block
+ranges with 128 clients, and single blocks with 128 clients. The per-repeat
+order alternates. Reports retain separate binary hashes and variant labels;
+this mode produces 57 measurements. Keep both binaries built without diagnostic
+features and record acceptance thresholds before measuring.
+
+To inspect checked read costs independently of network timing:
+
+```sh
+cargo build --release -p prep --features admission-profile --example compact_read_profile
+target/release/examples/compact_read_profile "$ARCHIVE" 280000 4382797
+```
+
+Admission is outside the diagnostic timer. Store phases count every checksum
+and integrity decode. Top-level durations use seconds; nested native phase
+counters use nanoseconds. Instrumentation adds overhead; these synchronous
+diagnostics are not gRPC latency or a replacement for the serving schedule.
+
+The optional **experimental** `buffered-range-reads` Cargo feature enables a
+request-local 64 KiB buffer and one initial seek for sequential ranges. Build
+with `cargo build --release -p prep --features buffered-range-reads` to evaluate
+it. It is disabled by default: the 24 October experiment improved full-download
+median time by 7.56%, below its predeclared 10% promotion gate. Default builds
+retain direct reads and per-record seeks. Enable both `admission-profile` and
+`buffered-range-reads` when profiling the experimental path.
+
+Singleton reads use no read-ahead. Manifest validation establishes contiguous
+offsets; prefix lengths, payload hashes and decoded identity checks still run
+for every returned record. A range can retain prefetched snapshot bytes while
+an external process changes a file; every returned byte must still match the
+admitted manifest. Fresh requests continue to check files and integrity.
+
 ## Scope and resource limits
 
 `serve-compact` supports height-based `GetBlock`, forward `GetBlockRange`,

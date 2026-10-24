@@ -8,9 +8,14 @@ publish = false
 
 [features]
 admission-profile = ["prep-store/admission-profile"]
+buffered-range-reads = ["prep-store/buffered-range-reads"]
 
 [[example]]
 name = "admission_queries"
+required-features = ["admission-profile"]
+
+[[example]]
+name = "compact_read_profile"
 required-features = ["admission-profile"]
 
 [dependencies]
