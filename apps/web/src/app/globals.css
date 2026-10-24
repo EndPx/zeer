@@ -2504,8 +2504,21 @@ svg {
 .demo-coverage strong { color: var(--text); }
 .demo-coverage p { margin: 8px 0 0; }
 .demo-coverage code, .coverage-note code { overflow-wrap: anywhere; }
-.chef-examples .format-tabs { margin:16px 0; }
-.chef-examples .format-tabs button { min-height:44px; font-size:12px; padding:10px 12px; }
+.chef-query-layout { align-items:start; }
+.chef-examples { min-width:0; }
+.chef-examples h2 { font-size:16px; margin-bottom:8px; }
+.chef-examples .example-buttons { margin:16px 0; }
+.chef-examples .example-buttons button { min-height:44px; }
+.chef-examples .example-buttons button svg { flex-shrink:0; }
+.chef-examples .field-hint { overflow-wrap:anywhere; }
+.chef-examples .schema-panel { margin-top:24px; padding:18px 0 0; border:0; border-top:1px solid var(--line); }
+.chef-examples .schema-panel details > div { display:block; padding:9px 0; overflow-wrap:anywhere; }
+.chef-examples .schema-hint { margin-top:16px; }
+.chef-query-layout .graphql-columns { grid-template-columns:repeat(2,minmax(0,1fr)); }
+@media(max-width:1200px){
+  .chef-query-layout .graphql-columns { grid-template-columns:1fr; }
+  .chef-query-layout .editor-pane { border-right:0; border-bottom:1px solid var(--line); }
+}
 .chef-height-field { display:block; margin-top:16px; font-size:12px; color:var(--muted); }
 .chef-height-field input { display:block; margin-top:8px; padding:12px; max-width:100%; width:240px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; }
 .chef-private-example summary { display:flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; font-size:14px; }

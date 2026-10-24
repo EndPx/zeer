@@ -1,5 +1,20 @@
 # Zeer website design system
 
+## Chef query layout — 24 October
+
+Reuse Prep's `query-explorer` sidebar/main grid: a 210px example rail, 22px gap
+and a shrinkable main column. Try an example, its selected guidance, optional
+height/memo context and the existing schema disclosure belong in the left rail.
+The schema disclosure starts collapsed so it does not push the mobile editor
+below a long field inventory; its fields remain available through native disclosure.
+The right column holds the GraphQL toolbar, query/response panes, continuation
+and credential note. Do not add a product or alter query/scanner behavior.
+Above 1200px, editor and response share two equal columns; at 1200px and below
+they stack. At 800px and below, examples move above the main column using Prep's
+existing two-column wrapping buttons. The document owns vertical scrolling;
+code retains its bounded overflow and the editor its existing resizing. Reuse
+existing colors, type, focus states and 44px minimum actions without new motion.
+
 ## Documentation site — 20 October
 
 The approved documentation uses Docusaurus at `/docs/`, with product navigation

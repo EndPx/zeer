@@ -109,10 +109,11 @@ export function ChefPlayground({ enabled, demo, memoDemo }: { enabled: boolean; 
           </span>
         </div>
       )}
-      <section className="network-status chef-examples" aria-label="Chef query examples">
-        <h2>Try an example</h2>
+      <div className="query-explorer chef-query-layout">
+      <aside className="chef-examples" aria-labelledby="chef-examples-title">
+        <h2 id="chef-examples-title">Try an example</h2>
         <p className="field-hint">Select a query to fill the editor, then press Run query.</p>
-        <div className="format-tabs" aria-label="Query examples">{chefExamples.filter(item => item.id !== "memos" || memoDemo).map(item => <button key={item.id} aria-pressed={example === item.id} disabled={item.id === "latest" && metrics.checkpoint === null} onClick={() => chooseExample(item.id)}>{item.name}{item.id === "latest" && metrics.checkpoint === null ? " · reading checkpoint…" : ""}</button>)}</div>
+        <div className="example-buttons" aria-label="Query examples">{chefExamples.filter(item => item.id !== "memos" || memoDemo).map(item => <button key={item.id} aria-pressed={example === item.id} disabled={item.id === "latest" && metrics.checkpoint === null} onClick={() => chooseExample(item.id)}><span>{item.name}{item.id === "latest" && metrics.checkpoint === null ? " · reading checkpoint…" : ""}</span><ArrowRight size={14} aria-hidden="true" /></button>)}</div>
         <p className="field-hint">{selected.description}</p>
         {example === "height" && <label className="chef-height-field" htmlFor="chef-block-height">Block height<input id="chef-block-height" type="number" min={0} max={2147483647} step={1} inputMode="numeric" value={blockHeight} aria-invalid={chefBlockHeight(blockHeight) === null} onChange={event => {
           setBlockHeight(event.target.value);
@@ -125,7 +126,21 @@ export function ChefPlayground({ enabled, demo, memoDemo }: { enabled: boolean; 
           <p>Chef read this note with Zeer's demo viewing key in a local scanner. Only the selected demo receipt is published here. Your viewing key stays in your environment.</p>
           <a className="text-link" href="https://github.com/EndPx/zeer/tree/main/examples/shielded-inbox">Read your own memos with Chef <ArrowRight size={14} /></a>
         </div>}
-      </section>
+        <div className="schema-panel">
+          <span className="small-label">Example schema</span>
+          <details>
+            <summary><ChevronDown size={13} />{example === "memos" ? "ReadableNote" : "BlockSummary"}</summary>
+            {(example === "memos" ? ["id: ID!", "txid: String!", "pool: String!", "outputIndex: Int!", "blockHeight: Int!", "valueZat: BigInt!", "receiver: String!", "memoKind: String!", "memoText: String", "scope: String!", "origin: String!", "coinbase: Boolean!"] : [
+              "id: ID!", "height: Int!", "hash: String!", "time: BigInt!", "transactionCount: Int!",
+            ]).map(field => <div key={field}>{field}</div>)}
+          </details>
+          <div className="schema-hint">
+            {example === "memos" ? "From the shielded-inbox schema. _meta describes this demo projection's checkpoint." : "From the starter schema."}
+            <br />Runtime introspection is not enabled.
+          </div>
+        </div>
+      </aside>
+      <div className="query-main">
       <div className="graphql-workspace">
         <div className="panel-toolbar">
           <strong>
@@ -153,29 +168,6 @@ export function ChefPlayground({ enabled, demo, memoDemo }: { enabled: boolean; 
           </div>
         </div>
         <div className="graphql-columns">
-          <aside className="schema-panel">
-            <span className="small-label">Example schema</span>
-            <details open>
-              <summary>
-                <ChevronDown size={13} />
-                {example === "memos" ? "ReadableNote" : "BlockSummary"}
-              </summary>
-              {(example === "memos" ? ["id: ID!", "txid: String!", "pool: String!", "outputIndex: Int!", "blockHeight: Int!", "valueZat: BigInt!", "receiver: String!", "memoKind: String!", "memoText: String", "scope: String!", "origin: String!", "coinbase: Boolean!"] : [
-                "id: ID!",
-                "height: Int!",
-                "hash: String!",
-                "time: BigInt!",
-                "transactionCount: Int!",
-              ]).map((f) => (
-                <div key={f}>{f}</div>
-              ))}
-            </details>
-            <div className="schema-hint">
-              {example === "memos" ? "From the shielded-inbox schema. _meta describes this demo projection's checkpoint." : "From the starter schema."}
-              <br />
-              Runtime introspection is not enabled.
-            </div>
-          </aside>
           <div className="editor-pane">
             <div className="pane-label">
               Query <span>Ctrl / ⌘ + Enter</span>
@@ -259,6 +251,8 @@ export function ChefPlayground({ enabled, demo, memoDemo }: { enabled: boolean; 
       <p className="privacy-note">
         <ShieldCheck size={15} /> Your API credentials stay on the server.
       </p>
+      </div>
+      </div>
     </>
   );
 }
