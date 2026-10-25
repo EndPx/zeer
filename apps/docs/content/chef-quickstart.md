@@ -1,6 +1,6 @@
 # Run your own Chef project
 
-Create a Zcash application with a schema, TypeScript handlers and a GraphQL API. This guide targets Chef 0.6.1 and its three starting points: a blank project, a public chain indexer and a shielded payment inbox. This walkthrough uses the public starter to follow new testnet blocks.
+Create a Zcash application with a schema, TypeScript handlers and a GraphQL API. This guide targets Chef 0.7.0 and its three starting points: a blank project, a public chain indexer and a shielded payment inbox. This walkthrough uses the public starter to follow new testnet blocks.
 
 ## Prerequisites
 
@@ -104,4 +104,4 @@ Choose `1` or `blank` to begin without sample entities. Install dependencies and
 
 Blank and public projects default to `latest`. A shielded inbox asks for a numeric birthday with no default: starting after a payment's block would miss that note. Init never reads a key, installs dependencies or starts a service.
 
-For unattended setup, use `pnpx @zeer-dev/cli@0.6.1 init --template public --dir my-indexer --project my_indexer --start-height latest --json`. An exact launcher version makes automation repeatable. With npm, forward dev options as `npm run dev -- --migrate`. See the [CLI reference](/docs/chef/cli-commands/) for cache refresh and other commands, and [Performance](/docs/chef/benchmarking/) for measurement.
+For unattended setup, use `pnpx @zeer-dev/cli@0.7.0 init --template public --dir my-indexer --project my_indexer --start-height latest --json`. An exact launcher version makes automation repeatable. With npm, forward dev options as `npm run dev -- --migrate`. See the [CLI reference](/docs/chef/cli-commands/) for cache refresh and other commands, and [Performance](/docs/chef/benchmarking/) for measurement.

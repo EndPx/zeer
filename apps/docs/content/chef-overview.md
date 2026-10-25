@@ -2,7 +2,7 @@
 
 **Zeer Chef** turns Zcash data into application entities with TypeScript handlers, PostgreSQL storage and a GraphQL API.
 
-These guides target **Chef and CLI 0.6.1**. The Prep client has its own version, **0.1.0**. Your project's schema and installed SDK determine its API; the hosted Playground retains its separately deployed demo schema.
+These guides target **Chef and CLI 0.7.0**. The Prep client has its own version, **0.1.0**. Your project's schema and installed SDK determine its API; the hosted Playground retains its separately deployed demo schema.
 
 <picture class="overview-demo">
   <source media="(prefers-reduced-motion: reduce)" srcset="/docs/demos/chef-flow.png" />
@@ -35,7 +35,7 @@ Recorded **20 October 2026** over blocks **0–9,999 inclusive**. Chef started w
 
 Each profile has one recorded run. The timer includes CLI startup, Prep reads, handler execution, PostgreSQL commits and polling through completion. Both runs reached checkpoint 9,999 with identical entity results.
 
-These are historical block-summary measurements. The later [Chef 0.6.1 address-analytics study](/docs/chef/benchmarks/#address-analytics-with-chef-061) separately measures a 512-block application replay with concurrent GraphQL reads. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) verifies the runtime's package installation, transaction breakdown and restart behavior; 0.6.1 retains that runtime.
+These are historical block-summary measurements. The later [Chef 0.6.1 address-analytics study](/docs/chef/benchmarks/#address-analytics-with-chef-061) separately measures a 512-block application replay with concurrent GraphQL reads. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) verifies the runtime's package installation, transaction breakdown and restart behavior; 0.6.1 retains that runtime. [Chef 0.7.0 operational acceptance](https://github.com/EndPx/zeer/blob/main/docs/CHEF_070_ACCEPTANCE.md) separately verifies the heartbeat, diagnosis and source-interruption workflow.
 
 See the [Chef benchmark methodology and recorded samples](/docs/chef/benchmarks/) for timing boundaries, resource limits and evidence.
 

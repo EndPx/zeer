@@ -49,7 +49,7 @@ A zero Chef–Prep gap means caught up with the observed Prep data. It does not 
 
 ## Observe work before a page finishes
 
-The **0.7.0 source-build candidate is not yet published**; current published installation commands use 0.6.1. Candidate sync/follow emits a best-effort cached heartbeat every five seconds while source reads, local scanning, handlers or commits are still running. It adds no Prep or PostgreSQL requests and does not change follow's polling interval.
+Chef **0.7.0** sync/follow emits a best-effort cached heartbeat every five seconds while source reads, local scanning, handlers or commits are still running. It adds no Prep or PostgreSQL requests and does not change follow's polling interval.
 
 Read `progress.phase`, its `phaseSince`, the inclusive pending `processingRange` and `committedHeight` together. `lastProgressAt` changes when a local stage completes; it can advance after a source read or handler without a durable commit. `heartbeatAt` only identifies the diagnostic emission time. A long scanner stage can therefore show repeated heartbeats with the same committed height and last-progress time. A blocked event loop or backpressured output can delay or suppress heartbeats; their absence is not a complete process-health test.
 

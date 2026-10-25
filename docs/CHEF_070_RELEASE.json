@@ -1,0 +1,263 @@
+{
+  "version": "0.7.0",
+  "verifiedOn": "2026-10-25",
+  "status": "COMPLETE",
+  "sourceCommit": "95adb373625d0a25d6369f4b6e2613e2e553cdff",
+  "packages": {
+    "chef": {
+      "sha256": "9df9e5a11a167f3a2d4287c9db31f11b9e871beea73c51265c05a05848ce467c",
+      "integrity": "sha512-XruO9czmVsAJ+31Db676f6oVoXZQjqC6zrO5HU9akLLfSWoXjpnA327n8RQZKFWAjKDnchuZdneiSlVhjCK/mw==",
+      "bytes": 103882,
+      "changedFromTestedCandidate": [
+        "package/dist/build-identity.json",
+        "package/README.md"
+      ],
+      "unchangedFiles": 67,
+      "artifact": {
+        "schemaVersion": 1,
+        "packageName": "@zeer-dev/chef",
+        "packageVersion": "0.7.0",
+        "buildCommit": "95adb373625d0a25d6369f4b6e2613e2e553cdff",
+        "sourceState": "modified"
+      }
+    },
+    "cli": {
+      "sha256": "3896a7d85614e12086b41ba02d11e22e1d3a64c0385583539c1dd0991d9d2858",
+      "integrity": "sha512-VEUIOgCGJss10vcFuaQhNLJXn6J3sSsy/EYmWkAhVvCMBCm0ouCv+Pdt15X//QTdP2N0+RbBAd7armf1tIjwfA==",
+      "bytes": 2627,
+      "changedFromTestedCandidate": [
+        "package/README.md"
+      ],
+      "unchangedFiles": 3
+    }
+  },
+  "registryIntegrity": "PASS",
+  "candidateInstall": {
+    "status": "PASS",
+    "sdk": "0.7.0",
+    "install": "isolated candidate tarball",
+    "workspaceLink": false,
+    "starters": [
+      {
+        "template": "blank",
+        "codegen": "expected rejection for empty schema",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      },
+      {
+        "template": "public",
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      },
+      {
+        "template": "shielded",
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      }
+    ]
+  },
+  "registryInstall": {
+    "status": "PASS",
+    "version": "0.7.0",
+    "installedCorrectedReadme": true,
+    "starters": [
+      {
+        "template": "blank",
+        "sdk": "0.7.0",
+        "registryInstall": true,
+        "codegen": "expected empty-schema rejection",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      },
+      {
+        "template": "public",
+        "sdk": "0.7.0",
+        "registryInstall": true,
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      },
+      {
+        "template": "shielded",
+        "sdk": "0.7.0",
+        "registryInstall": true,
+        "codegen": "PASS",
+        "typecheck": "PASS",
+        "noOverwrite": "PASS",
+        "keyLoaded": false
+      }
+    ],
+    "actualPnpmDlxVersion": "0.7.0"
+  },
+  "runtime": {
+    "registry-recovery-070": {
+      "passed": true,
+      "sdk": "0.7.0",
+      "entityCount": 1601,
+      "cliProcesses": 8,
+      "checks": {
+        "initial_projection": true,
+        "unready_gate_and_cached_heartbeat": true,
+        "transport_wait_preserves_projection": true,
+        "backlog_above_1024": true,
+        "restart_checkpoint_revision_entities_exact": true,
+        "bounded_sqlite_consumer_reopens_without_duplicates": true,
+        "owned_namespace_removed": true
+      },
+      "entityDigest": "1408c19e5a232d6174646429f177e488ba947bc0b0d38893e923f76a1c7f69fd",
+      "consumerDigest": "1408c19e5a232d6174646429f177e488ba947bc0b0d38893e923f76a1c7f69fd",
+      "liveNetwork": false
+    },
+    "registry-upgrade-070": {
+      "passed": true,
+      "sdk": "0.7.0",
+      "entityCount": 1601,
+      "cliProcesses": 9,
+      "checks": {
+        "initial_projection": true,
+        "upgrade_061_to_070_without_migration": true,
+        "unready_gate_and_cached_heartbeat": true,
+        "transport_wait_preserves_projection": true,
+        "backlog_above_1024": true,
+        "restart_checkpoint_revision_entities_exact": true,
+        "bounded_sqlite_consumer_reopens_without_duplicates": true,
+        "owned_namespace_removed": true
+      },
+      "entityDigest": "1408c19e5a232d6174646429f177e488ba947bc0b0d38893e923f76a1c7f69fd",
+      "consumerDigest": "1408c19e5a232d6174646429f177e488ba947bc0b0d38893e923f76a1c7f69fd",
+      "liveNetwork": false
+    }
+  },
+  "latest": {
+    "@zeer-dev/chef": "0.7.0",
+    "@zeer-dev/cli": "0.7.0"
+  },
+  "fullCandidateTests": {
+    "chef": {
+      "platform": "Linux",
+      "passed": 204,
+      "failed": 0,
+      "skipped": 0,
+      "postgresql": true,
+      "nativeScanner": true
+    },
+    "prep": {
+      "passed": 93,
+      "failed": 0,
+      "skipped": 0
+    },
+    "launcher": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "prepClientVersion": "0.1.0",
+  "hostedNamespacesMigrated": false,
+  "prepBinaryDeployed": false,
+  "newLiveTransactions": false,
+  "publicDocs": {
+    "status": "PASS",
+    "release": "20261025-chef070-docs-v2",
+    "pagesVerified": 45,
+    "allMatchBuiltHtml": true,
+    "browserInteractions": 10,
+    "viewports": [
+      {
+        "width": 375,
+        "viewport": 375,
+        "document": 375,
+        "axeViolations": 0
+      },
+      {
+        "width": 768,
+        "viewport": 768,
+        "document": 768,
+        "axeViolations": 0
+      },
+      {
+        "width": 1440,
+        "viewport": 1440,
+        "document": 1440,
+        "axeViolations": 0
+      }
+    ]
+  },
+  "limitations": [
+    "Historical shielded catch-up samples keep their candidate identity and are not future-live measurements.",
+    "Published CONSUMER.md retains a candidate-era repository acceptance appendix; maintained recovery docs describe the released API.",
+    "Artifact sourceState modified conservatively reflects untracked demo media; this is not a clean-tree attestation."
+  ],
+  "websiteBuild": {
+    "status": "PASS",
+    "scope": "Local Next.js production build and typecheck; hosted docs activated separately",
+    "websiteApplicationRedeployed": false
+  },
+  "hostedPreviewRecovery": {
+    "earlierValidationAttempt": {
+      "example": "Genesis block",
+      "status": 429,
+      "cause": "unclassified; observed during recovery validation"
+    },
+    "status": "PASS",
+    "anonymousBrowser": true,
+    "cookiesRequired": false,
+    "checks": [
+      {
+        "example": "Genesis block",
+        "status": 200,
+        "checkpoint": 4539806
+      },
+      {
+        "example": "Compare two heights",
+        "status": 200,
+        "checkpoint": 4539806
+      },
+      {
+        "example": "Latest indexed block",
+        "status": 200,
+        "checkpoint": 4539806
+      },
+      {
+        "example": "Read shielded memos",
+        "status": 200,
+        "checkpoint": 4523291
+      }
+    ],
+    "prepAvailable": true,
+    "chefAvailable": true,
+    "observedChefHeight": 4539807,
+    "observedPrepHeight": 4539807,
+    "sourceLagBlocks": 0,
+    "at": "2026-10-25T09:36:13.432Z",
+    "memoReaderActive": true,
+    "publishedReceiptVerified": true,
+    "memoPort": 39377,
+    "originalPortOwnerPreserved": true,
+    "onlyMemoWebTargetChanged": true,
+    "memoDatabaseHostCorrected": true,
+    "viewingKeyLoaded": false,
+    "sdkUpgraded": false,
+    "schemaChanged": false,
+    "webServiceRestarted": true,
+    "sourceServicesRestarted": false,
+    "guard": {
+      "status": "PASS",
+      "cpuLimit": 3,
+      "memoryMiB": 8192,
+      "diskGiB": 60
+    },
+    "runtimeUpgraded": false,
+    "legacyPrepProxyRepointed": true,
+    "sourceUrlPreserved": true,
+    "existingPrepReaderRestarted": false,
+    "existingPrepFollowerRestarted": false
+  }
+}

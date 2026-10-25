@@ -22,7 +22,7 @@ Run this from your generated project directory. It loads the project's `.env` an
 
 ## Recover from a source interruption
 
-Use a disposable project for this exercise. It uses the existing CLI recovery path available in published Chef 0.6.1; the additional heartbeat and diagnostic fields described below belong to the **0.7.0 source-build candidate**, which is not yet published.
+Use a disposable project for this exercise. The recovery path is available in Chef 0.6.1; use **Chef 0.7.0** for the additional heartbeat and diagnostic fields described below.
 
 1. Prepare the project, migrate its intended namespace, then record `pnpm run status --json`. Keep the checkpoint height/hash and a small query result with stable entity IDs. Run only one writer for this project.
 2. In one terminal, run `pnpm run follow --json`. In another, run `pnpm run serve`. The API and follower must use the same config, source URL and database.
@@ -34,9 +34,9 @@ Use a disposable project for this exercise. It uses the existing CLI recovery pa
 
 If a command exited, correct its reported cause before restarting the same command. Authentication, incompatible network/source identity and rebuild-required errors are not reasons to retry indefinitely. The exercise checks projection recovery; it does not prove exactly-once notifications or payments.
 
-## Read long-running work in the 0.7.0 candidate
+## Read long-running work in Chef 0.7.0
 
-Candidate sync/follow emits a best-effort `state: "heartbeat"` every five seconds from cached process state. It makes no additional Prep or database request. `progress.processingRange` is an inclusive pending range; `progress.committedHeight` is the last checkpoint observed or commit/rollback acknowledged by this process. A supported rollback can decrease it.
+Chef 0.7.0 sync/follow emits a best-effort `state: "heartbeat"` every five seconds from cached process state. It makes no additional Prep or database request. `progress.processingRange` is an inclusive pending range; `progress.committedHeight` is the last checkpoint observed or commit/rollback acknowledged by this process. A supported rollback can decrease it.
 
 | Field | Meaning |
 | --- | --- |
@@ -50,7 +50,7 @@ The phases are `checking_checkpoint`, `fetching`, `scanning`, `handlers`, `commi
 
 ## Choose the next action
 
-The 0.7.0 candidate adds `action.category` and `action.retryPolicy` to fixed error guidance. Status and doctor expose a `diagnostic` with build-produced artifact identity, coverage, checkpoint and timestamped source information. Missing build provenance is `unknown`; a source folder's current Git revision is not substituted for the running artifact.
+Chef 0.7.0 adds `action.category` and `action.retryPolicy` to fixed error guidance. Status and doctor expose a `diagnostic` with build-produced artifact identity, coverage, checkpoint and timestamped source information. Missing build provenance is `unknown`; a source folder's current Git revision is not substituted for the running artifact.
 
 | Observation or code | Operator action |
 | --- | --- |

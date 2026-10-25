@@ -2,11 +2,11 @@
 
 Chef's benchmark measures the application-indexing pipeline: reading from Prep, running TypeScript handlers, committing entities to PostgreSQL and making committed data readable through GraphQL.
 
-Studies retain their original versions, dates and workloads. The catch-up study below compares published Chef 0.6.1 with an unpublished 0.7.0 candidate; the application study uses 0.6.1. Older backfill and receipt tables retain their historical versions. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) covers the registry install, all three starters and real testnet transaction breakdown; it does not remeasure those older latency tables.
+Studies retain their original versions, dates and workloads. The catch-up study below compares published Chef 0.6.1 with the pre-release 0.7.0 candidate; the application study uses 0.6.1. Older backfill and receipt tables retain their historical versions. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) covers the registry install, all three starters and real testnet transaction breakdown; it does not remeasure those older latency tables.
 
 ## Shielded historical catch-up — 25 October 2026
 
-This study replays **24 real testnet blocks, 4,526,284–4,526,307 inclusive**, selecting six previously mined transactions from Zeer's own Ironwood wallet. It compares published **0.6.1** with an **unpublished 0.7.0 candidate**. Each SDK/profile has three fresh project namespaces; the same six selected external notes are reused in every run. These are correlated historical observations, not 72 independent payments or future-live samples.
+This study replays **24 real testnet blocks, 4,526,284–4,526,307 inclusive**, selecting six previously mined transactions from Zeer's own Ironwood wallet. It compares published **0.6.1** with the **pre-release 0.7.0 candidate**. Each SDK/profile has three fresh project namespaces; the same six selected external notes are reused in every run. These are correlated historical observations, not 72 independent payments or future-live samples.
 
 | SDK | Page / commit blocks | Runs | Median indexing time | Prep response → consumer median | Prep response → consumer p95 |
 | --- | ---: | ---: | ---: | ---: | ---: |

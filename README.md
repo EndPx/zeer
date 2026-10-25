@@ -8,7 +8,7 @@ A public-chain data engine and an application-indexing framework for Zcash.
 
 [Demo video · 1:55](https://github.com/EndPx/zeer/releases/tag/showcase-20261023) · [Live playground](https://zeer.endpx.cloud/app) · [Documentation](https://zeer.endpx.cloud/docs/) · [Quickstart](https://zeer.endpx.cloud/docs/chef/quickstart/) · [Reviewer walkthrough](docs/HACKATHON_DEMO.md)
 
-[![Chef 0.6.1](https://img.shields.io/badge/Chef-0.6.1-c6ff42?style=flat-square&labelColor=172119)](https://www.npmjs.com/package/@zeer-dev/chef) [![Prep client 0.1.0](https://img.shields.io/badge/Prep_client-0.1.0-c6ff42?style=flat-square&labelColor=172119)](https://www.npmjs.com/package/@zeer-dev/prep-client) [![Testnet developer preview](https://img.shields.io/badge/Zcash-testnet_preview-a0b09f?style=flat-square&labelColor=172119)](https://zeer.endpx.cloud/app) [![MIT license](https://img.shields.io/badge/license-MIT-a0b09f?style=flat-square&labelColor=172119)](LICENSE)
+[![Chef 0.7.0](https://img.shields.io/badge/Chef-0.7.0-c6ff42?style=flat-square&labelColor=172119)](https://www.npmjs.com/package/@zeer-dev/chef) [![Prep client 0.1.0](https://img.shields.io/badge/Prep_client-0.1.0-c6ff42?style=flat-square&labelColor=172119)](https://www.npmjs.com/package/@zeer-dev/prep-client) [![Testnet developer preview](https://img.shields.io/badge/Zcash-testnet_preview-a0b09f?style=flat-square&labelColor=172119)](https://zeer.endpx.cloud/app) [![MIT license](https://img.shields.io/badge/license-MIT-a0b09f?style=flat-square&labelColor=172119)](LICENSE)
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/zeer-overview.png">
@@ -32,7 +32,7 @@ Zeer connects those steps through two layers:
 
 Use Prep directly, or let Chef consume it. Your model, database and application policy remain yours.
 
-The current source also contains an **unpublished Chef/CLI 0.7.0 candidate** focused on operational visibility and recovery. Published installation commands below remain pinned to 0.6.1. See the [operational verification report](docs/OPERATIONS_20261025.md) for the implementation, interruption/restart proof and separately scoped historical shielded-receipt measurements. This source milestone does not upgrade hosted projects.
+Chef/CLI **0.7.0** adds operational visibility and recovery diagnostics. See the [operational verification report](docs/OPERATIONS_20261025.md) for the implementation, interruption/restart proof and separately scoped historical shielded-receipt measurements. Installing the SDK does not upgrade hosted projects.
 
 ## Try the working product
 
@@ -51,7 +51,7 @@ A [fresh-browser reviewer check](docs/JUDGE_PREFLIGHT_20261023.md) completed the
 Use **Node.js 24.14+**, **pnpm**, and **Linux x86_64 or WSL2**. You also need PostgreSQL, or Docker Engine with Compose v2 for the included local database.
 
 ```sh
-pnpx @zeer-dev/cli@0.6.1 init
+pnpx @zeer-dev/cli@0.7.0 init
 ```
 
 Choose **Public chain indexer**. Accept the default project folder, or use your own. Init creates files and local development credentials; it starts no services.
@@ -139,6 +139,7 @@ Invoices, campaigns, notification delivery, wallet state and settlement rules be
 
 | Evidence | What it establishes |
 | --- | --- |
+| **[0.7.0 release verification](docs/CHEF_070_ACCEPTANCE.md)** | Registry integrity, matching launcher, three starters and source-interruption recovery |
 | **[0.6.1 release verification](docs/CHEF_061_ACCEPTANCE.md)** | Registry integrity, corrected README, exact launcher dependency and three registry-installed starters |
 | **[0.6.0 functional acceptance](docs/CHEF_060_ACCEPTANCE.md)** | 187 Linux SDK tests without skips, native/PostgreSQL checks, and real testnet breakdown with restart; 0.6.1 runtime files are byte-identical |
 | **[Six live shielded receipts](https://zeer.endpx.cloud/docs/chef/benchmarks/#shielded-receipts-six-uninterrupted-live-samples)** | Six future mined Ironwood notes in one observer, with values/memos, source rechecks and consumer recovery; recorded with Chef 0.2.0 |

@@ -14,7 +14,7 @@ pnpx @zeer-dev/cli --help
 
 `pnpm dlx @zeer-dev/cli init` is equivalent. npm users can run `npx @zeer-dev/cli@latest init`. The `zeer` launcher uses the matching published Chef CLI, including the same wizard and error handling. The SDK remains `@zeer-dev/chef`; generated projects declare their own exact dependency.
 
-`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.6.1 init` for reproducible scripts. Launcher and Chef versions are published together.
+`pnpx @zeer-dev/cli@latest init` selects npm's `latest` tag. pnpm may reuse its dlx cache, so this is not an unconditional check for a new release on every invocation. On pnpm 10+, use `pnpx --config.dlx-cache-max-age=0 @zeer-dev/cli@latest init` for a fresh dlx resolution. Older pnpm releases can use the normal command; the cache-refresh flag is version-dependent. Keep an exact version such as `pnpx @zeer-dev/cli@0.7.0 init` for reproducible scripts. Launcher and Chef versions are published together.
 
 An existing global `zeer` / `zeer-chef` command remains usable. The commands below show that executable form; prefix them with `pnpx` when using the launcher, for example `pnpx @zeer-dev/cli status --config chef.config.ts`.
 
@@ -146,13 +146,13 @@ Without a target, finite sync captures the available Prep tip and exits after re
 
 `pageSize`, `batchSize`, source filters and adaptive scans live in `chef.config.ts`, not CLI flags. Compatible restarts resume the durable checkpoint. Ctrl+C stops with committed progress retained; invocation counters can exclude a committed partial-page prefix. See [Benchmarking](/docs/chef/benchmarking/) for interpreting counters.
 
-### Candidate progress diagnostics
+### Progress diagnostics
 
-The **0.7.0 source-build candidate is not yet published**. Published installation commands above still target 0.6.1. Candidate sync/follow adds a cached heartbeat every five seconds, independent of the unchanged five-second follow polling default. There is no heartbeat flag or environment variable.
+Chef **0.7.0** sync/follow adds a cached heartbeat every five seconds, independent of the unchanged five-second follow polling default. There is no heartbeat flag or environment variable.
 
 JSON heartbeat records have `state: "heartbeat"` and `progress` with `phase`, `phaseSince`, `lastProgressAt`, `heartbeatAt`, `committedHeight`, inclusive `processingRange`, `prepReady`, `prepArchiveHeight`, `prepIndexedHeight`, `sourceObservedHeight` and `sourceObservedAt`. Human output describes committed and pending heights separately. The heartbeat makes no source or database read; its completed-page counters do not include work still running in the current page.
 
-`lastProgressAt` records a completed local stage and does not imply a committed block. `heartbeatAt` alone means only that a diagnostic was emitted. The timestamps are ISO UTC except the source observation, which retains Prep's Unix seconds. Heartbeats are best effort, may be delayed by event-loop work and are skipped on stdout backpressure. They stop when sync completes, fails or is cancelled. See [the phase and recovery contract](/docs/chef/recovery/#read-long-running-work-in-the-070-candidate).
+`lastProgressAt` records a completed local stage and does not imply a committed block. `heartbeatAt` alone means only that a diagnostic was emitted. The timestamps are ISO UTC except the source observation, which retains Prep's Unix seconds. Heartbeats are best effort, may be delayed by event-loop work and are skipped on stdout backpressure. They stop when sync completes, fails or is cancelled. See [the phase and recovery contract](/docs/chef/recovery/#read-long-running-work-in-chef-070).
 
 ## status
 
@@ -188,7 +188,7 @@ The generated scripts load `.env` and work with pnpm or npm. With npm, put forwa
 
 ## Background runtime and backups
 
-Chef 0.6.1 starters include these scripts, introduced in 0.5.0. They wrap the project's Docker Compose recipe; they are separate from the `zeer` subcommands above. Keep the pnpm lockfile and configure the project before using them.
+Chef 0.7.0 starters include these scripts, introduced in 0.5.0. They wrap the project's Docker Compose recipe; they are separate from the `zeer` subcommands above. Keep the pnpm lockfile and configure the project before using them.
 
 | Script | Action |
 | --- | --- |
@@ -227,7 +227,7 @@ Chef currently has no managed deployment, database reset or Prometheus `metrics`
 
 The server also exposes authenticated `GET /status` for [cached freshness metadata](/docs/chef/graphql/#check-freshness-without-calling-rpc). This differs from the CLI `status` command, which actively checks Prep. Upgrades from 0.1.x require stopping the follower and API, running the additive migration with the same config, then restarting both.
 
-Dev and doctor were introduced in 0.4.0 and remain available in 0.6.1. Existing projects keep their dependency and scaffold files until explicitly upgraded. Add missing scripts matching the generated launch command, or invoke the upgraded local CLI with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js dev`. Keep config, schema and namespace identity unchanged for compatible continuation. Adding the new relation/list model requires a fresh namespace and replay; see [project evolution](/docs/chef/evolution/).
+Dev and doctor were introduced in 0.4.0 and remain available in 0.7.0. Existing projects keep their dependency and scaffold files until explicitly upgraded. Add missing scripts matching the generated launch command, or invoke the upgraded local CLI with `node --env-file=.env node_modules/@zeer-dev/chef/dist/cli.js dev`. Keep config, schema and namespace identity unchanged for compatible continuation. Adding the new relation/list model requires a fresh namespace and replay; see [project evolution](/docs/chef/evolution/).
 
 If Doctor reports a **readable checkpoint ahead of Prep**, `dev` stops with
 `DEV_RECONCILIATION_REQUIRED` before starting the API. Run `pnpm run follow`

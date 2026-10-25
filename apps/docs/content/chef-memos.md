@@ -43,7 +43,7 @@ Open the [Chef playground](https://zeer.endpx.cloud/app/chef), select **Read shi
 Install the published Chef package:
 
 ```sh
-npm install @zeer-dev/chef@0.6.1
+npm install @zeer-dev/chef@0.7.0
 ```
 
 The generated shielded starter already includes the package and `read-transaction.mjs`:

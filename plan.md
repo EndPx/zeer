@@ -1,11 +1,11 @@
 # Zeer planning entry point
 
-Updated: 2026-10-24 (Asia/Jakarta).
+Updated: 2026-10-25 (Asia/Jakarta).
 
 ## Current verified release
 
-Chef and launcher **0.6.1** and Prep client **0.1.0** are published. The
-[release record](docs/PACKAGING.md), [developer acceptance](docs/DEVELOPER_ACCEPTANCE_20261024.md)
+Chef and launcher **0.7.0** and Prep client **0.1.0** are published. The
+[release record](docs/PACKAGING.md), [0.7.0 acceptance](docs/CHEF_070_ACCEPTANCE.md), [earlier developer acceptance](docs/DEVELOPER_ACCEPTANCE_20261024.md)
 and [application study](docs/PREP_APPLICATION_STUDY_20261024.md) describe current
 delivery and its limits. The public testnet Prep archive follows from genesis;
 the Chef block-summary demo follows in its own namespace, while a separate demo

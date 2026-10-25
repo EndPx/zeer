@@ -1,6 +1,6 @@
 # Shielded receipt historical catch-up
 
-`receipt-catchup.mjs` compares published Chef 0.6.1 with the unpublished 0.7.0 candidate on an existing owned testnet wallet. It reads six previously mined Ironwood transactions across blocks **4,526,284–4,526,307 inclusive**. This is historical catch-up, not future-live detection, a broadcast test or confirmation latency.
+`receipt-catchup.mjs` compares published Chef 0.6.1 with the pre-release 0.7.0 candidate measured before publication on an existing owned testnet wallet. It reads six previously mined Ironwood transactions across blocks **4,526,284–4,526,307 inclusive**. This is historical catch-up, not future-live detection, a broadcast test or confirmation latency.
 
 The recorded 25 October 2026 timing cohort contains 12 runs: three fresh namespaces for each SDK and each 16/1 or 16/4 page/commit profile. The same six selected external notes are reused in every run; their pooled timings are correlated. Scanning also finds other authorized notes in those transactions: all runs store the same 12-receipt projection. A no-op resume must leave it unchanged. No signing or broadcasts occur, and the local viewing key is never sent to Prep.
 

@@ -1,9 +1,31 @@
 # Release package verification
 
-## Current release: Chef and launcher 0.6.1
+## Current release: Chef and launcher 0.7.0
+
+Chef and launcher **0.7.0** add sync/follow progress heartbeats, build-produced
+artifact identity and fixed operator diagnosis. Their registry verification and
+fresh-install checks are recorded in [0.7.0 acceptance](CHEF_070_ACCEPTANCE.md)
+and the [machine-readable release record](CHEF_070_RELEASE.json).
+
+```sh
+pnpx @zeer-dev/cli@0.7.0 init
+```
+
+The launcher pins Chef 0.7.0; Prep client remains 0.1.0. An otherwise unchanged
+0.6.x project needs no new database migration or replay for this additive
+diagnostics release. Stop its writer/API, back up the namespace, update its SDK
+dependency and lockfile, then restart with the same configuration and identity.
+Changing schema or handlers still follows the project evolution contract.
+
+Source preflight/build-info improvements to the Rust Prep binary have their own
+deployment lifecycle. Publishing the TypeScript SDK does not deploy that binary
+or upgrade the hosted Playground's runtime/schema. Historical benchmarks retain
+the exact package versions and candidate labels used during measurement.
+
+## Previous release: Chef and launcher 0.6.1
 
 `@zeer-dev/chef@0.6.1` and `@zeer-dev/cli@0.6.1` were published and verified
-on 23 October 2026. Both latest tags select 0.6.1; anonymous downloads match
+on 23 October 2026. Both latest tags selected 0.6.1 at that verification; anonymous downloads match
 the audited candidates. The launcher pins Chef 0.6.1; Prep client remains 0.1.0.
 
 ```sh

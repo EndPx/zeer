@@ -3,13 +3,13 @@
 Open a working directory in your coding assistant and paste this prompt. You need Node 24.14+, Linux/WSL2 and PostgreSQL. The assistant should follow the same [Quickstart](/docs/chef/quickstart/) you would use manually.
 
 ```text
-Create a standalone Zeer Chef 0.6.1 testnet project in a fresh directory.
+Create a standalone Zeer Chef 0.7.0 testnet project in a fresh directory.
 
 Read https://zeer.endpx.cloud/docs/chef/quickstart/ and
 https://zeer.endpx.cloud/docs/chef/configuration/ before writing code.
 
 1. Use the public chain indexer template for this exercise. Run
-   pnpx @zeer-dev/cli@0.6.1 init with --template public,
+   pnpx @zeer-dev/cli@0.7.0 init with --template public,
    explicit --dir, --project and --start-height latest flags with --json,
    using a fresh directory and a new project name. Record the numeric startHeight
    returned by init; do not replace it with a later source tip.

@@ -52,8 +52,8 @@ The [shielded inbox example](/docs/chef/shielded/local/) also uses:
 
 Keep `.env` and UFVK files out of version control. Load server credentials only where the indexer or authenticated reader runs, and use [local viewing-key setup](/docs/chef/shielded/local/) for file permissions.
 
-## Candidate operational diagnostics
+## Operational diagnostics
 
-The **0.7.0 source-build candidate is not yet published**. Its five-second sync heartbeat and fixed diagnostic actions require no new environment variables. Keep using the installed 0.6.1 commands until a release is published and verified. `--poll-seconds` controls follow's source polling; it does not configure heartbeat cadence.
+Chef **0.7.0** adds a five-second sync heartbeat and fixed diagnostic actions without new environment variables. `--poll-seconds` controls follow's source polling; it does not configure heartbeat cadence.
 
 Artifact identity is written during the package build. Runtime diagnostics do not accept a commit or package version from `.env` and do not inspect the deployment directory's current Git HEAD. Missing provenance is reported as `unknown`. Diagnostics omit connection strings, bearer tokens, viewing keys and receipt contents; this does not make arbitrary handler logs safe to publish. Keep application logging and saved benchmark artifacts private or redact them before sharing.

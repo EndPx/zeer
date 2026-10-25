@@ -1,6 +1,6 @@
 # Operational visibility and recovery — 25 October 2026
 
-This milestone addresses source startup, long-running work, diagnosis and a repeatable recovery path. **Chef/CLI 0.7.0 is an unpublished source-build candidate.** Published installation examples remain on 0.6.1; no hosted namespace or shared source service was upgraded as part of this work.
+This report records the pre-release source milestone for startup, long-running work, diagnosis and recovery. It was tested as the **Chef/CLI 0.7.0 candidate**, before npm publication. The subsequent [0.7.0 release acceptance](CHEF_070_ACCEPTANCE.md) tracks registry installation and documentation activation separately. No hosted namespace or shared source service was upgraded during this source verification.
 
 ## What changed
 

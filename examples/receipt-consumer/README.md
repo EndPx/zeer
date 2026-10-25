@@ -175,7 +175,7 @@ prefix through undo floor 70, replace the mutable branch with a shorter head at
 The optional phase adds three CLI runs. The default range-mode fixture remains
 the twelve-run check.
 
-## Controlled source interruption with the 0.7.0 candidate
+## Controlled source interruption with Chef 0.7.0
 
 `verify-source-recovery.mjs` exercises actual Chef CLI processes, PostgreSQL,
 authenticated GraphQL and the continuous SQLite consumer against an owned
@@ -192,7 +192,7 @@ and revision. The consumer catches up using 128-block windows and 25-row pages,
 then reopens its SQLite database without duplicates. The existing range-mode
 budget remains unchanged.
 
-Build the candidate first. From the repository root, with an existing disposable
+Build the source package first, or configure an independently installed Chef 0.7.0 package below. From the repository root, with an existing disposable
 PostgreSQL database and Node 24.14+, run:
 
 ```sh
@@ -200,10 +200,10 @@ DATABASE_URL=postgres://YOUR_DISPOSABLE_DATABASE node examples/receipt-consumer/
 ```
 
 The default SDK root is this checkout's `packages/chef`. To test an independently
-installed candidate, set `CHEF_ACCEPTANCE_SDK_ROOT` to its absolute
+installed package, set `CHEF_ACCEPTANCE_SDK_ROOT` to its absolute
 `node_modules/@zeer-dev/chef` directory. The existing example remains pinned to
 published 0.2.0 for its historical consumer workflow; this acceptance requires
-the **unpublished 0.7.0 source-build candidate** for heartbeat and diagnostic
+**Chef 0.7.0 or its tested source candidate** for heartbeat and diagnostic
 checks. It does not install or download an SDK itself.
 
 Proof and private CLI logs are retained under `private/src_<random>/proof.json`.

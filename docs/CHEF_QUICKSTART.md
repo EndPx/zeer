@@ -38,7 +38,7 @@ Prep archive height once; explicit `0` includes genesis history. The chosen
 source URL is recorded in `.env`. npm users can run `npx @zeer-dev/cli@latest init`.
 `pnpx @zeer-dev/cli@latest init` explicitly selects the latest launcher tag,
 subject to pnpm's dlx cache. For reproducible scripts, use
-`pnpx @zeer-dev/cli@0.6.1 init --template public --dir DIR --project NAME --start-height HEIGHT --json`.
+`pnpx @zeer-dev/cli@0.7.0 init --template public --dir DIR --project NAME --start-height HEIGHT --json`.
 The `zeer-chef` command remains an alias. Only terminal sessions ask questions.
 
 The directory must not already exist. Its parent must exist and be writable.
