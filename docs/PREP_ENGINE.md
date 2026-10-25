@@ -1,6 +1,6 @@
 # Zeer Prep engine
 
-Updated 2026-10-24. The user requires complete blocks and transactions for the
+Updated 2026-10-25. The user requires complete blocks and transactions for the
 28 October delivery. [Delivery contract](PREP_DELIVERY.md) owns the active scope;
 [query contract](PREP_QUERY.md) owns the HTTP and SDK semantics. Chef's public-data
 pipeline is implemented; optional private scanning is a separate
@@ -77,15 +77,79 @@ choosing a network by difficulty or activation schedule.
   session and writer lock. `--max-source-retries` defaults to 8 additional
   attempts (maximum 20); delays are 1, 2, 4, 8, 16, then 30 seconds, capped at
   30 seconds. A successful step resets the consecutive-failure budget. Status
-  remains not ready while failures are being retried.
+  remains not ready while failures during an admitted session are being retried.
 - Only HTTP 429/5xx, request timeouts and recognized interrupted/refused network
   I/O acquire the typed retry marker. Authentication, malformed responses,
   integrity/network mismatch, disk errors, deep reorgs and the overall sync-step
-  deadline remain terminal. Historical mode does not retry. Initialization
-  errors and source IP changes are not recovered; private HTTP DNS answers are
+  deadline remain terminal. Historical mode does not retry. Temporary source
+  preflight failures also use the bounded follow retry budget; archive admission
+  errors and source IP changes are not recovered. Private HTTP DNS answers are
   pinned for the process lifetime. Ctrl-C interrupts polling and backoff.
 - Post-publication filesystem errors can have an ambiguous outcome. Inspect
   the existing catalog/snapshot before retrying; never assume it is absent.
+
+### Source preflight and process progress
+
+Run `prep build-info` to inspect the running executable's embedded
+`schemaVersion`, `packageName`, `packageVersion`, `buildCommit`, and `sourceState`.
+The same `artifact` object is included in authenticated `/capabilities` responses.
+No archive, source, token or viewing key is needed for the local command, and it
+does not inspect Git at runtime. The commit/state are captured at build time
+from verified tracked sources after discarding inherited `GIT_*` redirection.
+Source copies without verifiable tracked package/Rust sources report `unknown`;
+modified native build inputs report `modified` (Prep, its local Rust dependencies,
+and workspace Cargo configuration). Unrelated website/media changes are outside
+this dirty-state scope. Paths and build timestamps are omitted.
+This metadata identifies an artifact's declared build source, not an attestation
+of its publisher or deployment correctness; retain the binary checksum too.
+
+`prep sync` checks authenticated `getblockchaininfo` and the requested network
+before opening, validating or creating an archive. The complete preflight,
+including client/DNS initialization, is bounded to the smaller of
+`--deadline-seconds` and 30 seconds. HTTP 401/403 reports
+`rpc_authentication_failed` and is terminal. A timeout reports
+`source_preflight_timeout`; recognized temporary source failures retry only in
+follow mode within `--max-source-retries`.
+
+An unsuccessful preflight creates no archive directory, lock, catalog or status
+file. It does not rewrite a previous status file. Monitor process health and
+status age together: a previous status is not a new observation. Credentials
+are read from the existing environment when constructing the client; Prep does
+not reload a rotated cookie. Refresh the protected environment and restart the
+follower after verifying the replacement credentials.
+
+After preflight, the existing exclusive writer lock and complete integrity
+admission still apply. The source height observed before admission is diagnostic;
+the first sync step re-observes the source before reconciliation or publication.
+
+The CLI retains completed `SyncProgress` JSON on stdout and emits structured
+`prep_operation` JSON diagnostics on stderr. Phases are `checking_source`,
+`opening_and_validating_archive`, `catching_up`, `waiting_source`,
+`waiting_for_blocks`, and `ready`. The source and committed heights in these
+events are the last known observations, not new RPC checks. No credentials,
+endpoint, archive path, viewing key, memo or upstream error body enters them.
+
+Every five seconds an independent diagnostic worker repeats the current phase
+with `heartbeat: true`. This means the process is alive; it does not establish
+that disk validation or indexing has advanced. `last_progress_at_unix` changes
+on completed phase milestones or a new committed catalog revision, not on a
+heartbeat or an unchanged poll. `committed_height` remains unknown until archive
+admission succeeds and thereafter changes only from admitted/committed data.
+An explicit empty catalog after rollback clears the previously observed head,
+including when fetching its replacement later fails.
+
+Diagnostics use a bounded eight-record queue and best-effort `try_send`. If
+stderr is blocked or the queue is full, records can be dropped; a diagnostic sink
+cannot delay archive work or shutdown. A single process-wide sink worker owns
+only diagnostic records and is not joined during sync shutdown. This is a
+progress aid, not an external watchdog or a durable event feed. Completed
+`SyncProgress` stdout retains its existing output/backpressure behavior.
+
+Archive admission remains synchronous and cannot be interrupted midway by the
+async shutdown signal. Its heartbeat remains observable, and shutdown is handled
+after the integrity pass returns; there is no detached admission worker that can
+later acquire a writer lock after the caller has exited. These diagnostics do
+not remove the cost of a cold archive restart or make the archive ready early.
 
 ## Query and client
 

@@ -1,6 +1,9 @@
 import { PrepError } from "@zeer-dev/prep-client";
 import type { Height, PrepClient } from "@zeer-dev/prep-client";
 import type { Checkpoint, ChefStore } from "./types.js";
+import { artifactIdentity, diagnosticAction, operatorDiagnostic, type DiagnosticAction } from "./operator-diagnostics.js";
+import type { ProgressSnapshot } from "./progress.js";
+import { CliError } from "./cli-error.js";
 
 const guidance: Record<string, string> = {
   DOCTOR_NOT_READY: "Resolve the failed doctor checks, then run doctor again. No setup changes were made by the diagnostic.",
@@ -61,12 +64,14 @@ const guidance: Record<string, string> = {
   REQUESTED_RANGE_NOT_COMPLETE: "Inspect status and source coverage, then retry the incomplete range.",
   SOURCE_NETWORK_OR_KIND_MISMATCH: "Use a full-v1 Prep archive on the configured network; restore the expected endpoint before retrying.",
   PREP_UNAUTHORIZED: "Check PREP_API_TOKEN against the Prep service token; never put credentials in a URL.",
+  DATABASE_UNAUTHORIZED: "Check the configured database credentials and access policy. Connection strings and server details are intentionally omitted.",
+  DATABASE_UNAVAILABLE: "Check database availability, then retry under a bounded operator policy. Do not reset the retained namespace.",
   PREP_PROTOCOL_ERROR: "Check Prep/client compatibility and the expected endpoint, then retry.",
   SOURCE_CHANGED_DURING_REPLAY: "Retry reconciliation against a stable Prep archive; inspect status if it persists.",
   CHEF_COMMAND_FAILED: "Check configuration, explicit migration, database access and source readiness. Third-party error details are intentionally omitted.",
 };
 
-export function cliFailure(error: unknown, knownCode?: string): { error: { code: string }; help: string } {
+export function cliFailure(error: unknown, knownCode?: string): { error: { code: string }; help: string; action: DiagnosticAction } {
   const otherCodes = ["UNKNOWN_COMMAND", "INVALID_POLL_SECONDS", "CONFIG_TOO_LARGE", "INVALID_REORG_WINDOW", "INVALID_END_HEIGHT", "INVALID_PORT", "INVALID_ENV_NAME", "INVALID_RUNTIME_OPTIONS", "INVALID_PAGE_SIZE", "INVALID_PREP_RANGE", "INCOMPLETE_PREP_BLOCKS", "INVALID_PREP_BLOCK", "INVALID_PREP_TRANSACTION", "INVALID_PREP_TRANSACTION_ORDER", "MISSING_COINBASE_OR_TRANSACTIONS", "NONCONTIGUOUS_PREP_CHAIN", "INVALID_SOURCE_HEADER"];
   let code = knownCode && (Object.hasOwn(guidance, knownCode) || otherCodes.includes(knownCode)) ? knownCode : undefined;
   if (!code && error instanceof PrepError) {
@@ -77,14 +82,21 @@ export function cliFailure(error: unknown, knownCode?: string): { error: { code:
   if (!code && error instanceof DOMException && error.name === "TimeoutError") code = "SOURCE_UNAVAILABLE";
   if (!code && error && typeof error === "object") {
     const detail = error as { code?: unknown; message?: unknown };
-    if (detail.code === "42P01" || detail.code === "3F000"
+    if (detail.code === "28P01" || detail.code === "28000") code = "DATABASE_UNAUTHORIZED";
+    else if (detail.code === "57P03" || detail.code === "53300") code = "DATABASE_UNAVAILABLE";
+    else if (detail.code === "42P01" || detail.code === "3F000"
       || detail.message === "Chef state migration required; run migrate before restarting this version"
       || detail.message === "Chef consumption migration required; stop writers and run migrate") code = "MIGRATION_REQUIRED";
     else if (detail.message === "Chef project identity mismatch; use a new project namespace") code = "PROJECT_IDENTITY_MISMATCH";
     else if (detail.message === "Chef project already has an active writer" || detail.message === "Stop the project writer before consumption migration") code = "WRITER_ALREADY_ACTIVE";
   }
   code ??= "CHEF_COMMAND_FAILED";
-  return { error: { code }, help: guidance[code] ?? "Check --help and the configuration values before retrying." };
+  // Preserve established error codes, while distinguishing transient transport/429/timeouts for operators.
+  const transient = code === "SOURCE_UNAVAILABLE" && (error instanceof PrepError && (error.code === "TRANSPORT_ERROR" || error.status === 429)
+    || error instanceof DOMException && error.name === "TimeoutError"
+    || error instanceof CliError && error.retryTransient);
+  return { error: { code }, help: guidance[code] ?? "Check --help and the configuration values before retrying.",
+    action: diagnosticAction(transient ? "PREP_TRANSPORT_UNAVAILABLE" : code) };
 }
 
 export function sourceObservation(meta: Height, checkpoint: Checkpoint, network: string, startHeight: number) {
@@ -111,16 +123,20 @@ export function sourceObservation(meta: Height, checkpoint: Checkpoint, network:
 
 /** A diagnostic observation does not change the durable read gate or acquire a writer. */
 export async function readStatus(options: {
-  store: Pick<ChefStore, "checkpoint">; client: Pick<PrepClient, "getHeight">;
-  network: string; startHeight: number; signal?: AbortSignal;
+  store: Pick<ChefStore, "checkpoint" | "consumptionStatus">; client: Pick<PrepClient, "getHeight">;
+  network: string; startHeight: number; project?: string; signal?: AbortSignal;
 }) {
-  const checkpoint = await options.store.checkpoint();
+  const consumption = await options.store.consumptionStatus?.();
+  const checkpoint = consumption?.checkpoint ?? await options.store.checkpoint();
   let source: ReturnType<typeof sourceObservation> | { availability: "unavailable"; errorCode: string };
+  let sourceAction: DiagnosticAction | undefined;
   try {
     source = sourceObservation(await options.client.getHeight({ signal: options.signal, timeoutMs: 5000 }), checkpoint, options.network, options.startHeight);
   } catch (error) {
     options.signal?.throwIfAborted();
-    source = { availability: "unavailable", errorCode: cliFailure(error).error.code };
+    const failure = cliFailure(error);
+    source = { availability: "unavailable", errorCode: failure.error.code };
+    sourceAction = failure.action;
   }
   const state = checkpoint.status === "blocked" ? "blocked"
     : source.availability === "unavailable" ? "source_unavailable"
@@ -129,7 +145,14 @@ export async function readStatus(options: {
     : checkpoint.status === "reconciling" ? "reconciling"
     : source.checkpointAheadOfPrep ? "reconciliation_needed"
     : source.chefPrepLagBlocks === 0 ? "caught_up" : "backfill";
-  return { checkpoint, state, readGate: checkpoint.status, source, invocationMode: "status" };
+  const code = state === "blocked" ? "REBUILD_REQUIRED" : state === "source_mismatch" ? "SOURCE_NETWORK_OR_KIND_MISMATCH"
+    : state === "source_unavailable" ? source.availability === "unavailable" ? source.errorCode : "SOURCE_UNAVAILABLE"
+    : state === "source_not_ready" ? source.availability === "available" && !source.historyAvailable ? "SOURCE_HISTORY_UNAVAILABLE" : "SOURCE_UNAVAILABLE"
+    : state === "reconciling" || state === "reconciliation_needed" ? "RECONCILIATION_REQUIRED" : "OK";
+  const diagnostic = operatorDiagnostic({ ...options, checkpoint, source, code, lastCommitAt: consumption?.lastCommitAt,
+    projectGeneration: consumption?.generation, dataRevision: consumption?.revision });
+  if (state === "source_unavailable" && sourceAction) diagnostic.action = sourceAction;
+  return { checkpoint, state, readGate: checkpoint.status, source, invocationMode: "status", diagnostic };
 }
 
 export function formatOutput(value: Record<string, unknown>, human: boolean): string {
@@ -139,6 +162,19 @@ export function formatOutput(value: Record<string, unknown>, human: boolean): st
     return `Chef error: ${error.code}\n${value.help}\n`;
   }
   const lines = [`Chef ${value.command}: ${value.state ?? value.status ?? "status"}${value.project ? ` (${value.project})` : ""}`];
+  const identity = value.artifact ?? (value.diagnostic as { artifact?: ReturnType<typeof artifactIdentity> } | undefined)?.artifact;
+  if (identity) {
+    const item = identity as ReturnType<typeof artifactIdentity>;
+    lines.push(`Artifact: ${item.packageName}@${item.packageVersion}; build: ${item.buildCommit}; source: ${item.sourceState}`);
+  }
+  if (value.state === "heartbeat" && value.progress) {
+    const progress = value.progress as ProgressSnapshot;
+    lines.push(`Active phase: ${progress.phase}; phase since: ${progress.phaseSince}`);
+    lines.push(`Committed height: ${progress.committedHeight ?? "none"}; pending range (not committed): ${progress.processingRange ? `${progress.processingRange.from}-${progress.processingRange.to}` : "none"}`);
+    lines.push(`Prep ready: ${progress.prepReady ?? "unknown"}; Prep archive height: ${progress.prepArchiveHeight ?? "unknown"}; Prep indexed height: ${progress.prepIndexedHeight ?? "unknown"}; observed source height: ${progress.sourceObservedHeight ?? "unknown"}`);
+    lines.push(`Last progress: ${progress.lastProgressAt ?? "unknown"}; heartbeat: ${progress.heartbeatAt}. A heartbeat does not establish new committed progress.`);
+    return `${lines.join("\n")}\n`;
+  }
   if (value.role) lines.push(`Process: ${value.role}`);
   if (value.command === "doctor" && Array.isArray(value.checks)) {
     for (const check of value.checks as Array<{name:string;status:string;code:string;help:string}>) {
@@ -172,5 +208,7 @@ export function formatOutput(value: Record<string, unknown>, human: boolean): st
   if (value.command === "init" && value.startHeight !== undefined) lines.push(`Start block: ${value.startHeight}${value.startSelection === "latest_indexed" ? " (latest indexed height captured from Prep)" : " (explicit)"}`);
   if (Array.isArray(value.nextSteps)) for (const step of value.nextSteps) lines.push(String(step));
   if (value.host) lines.push(`Listening: ${value.host}:${value.port}`);
+  const diagnostic = value.diagnostic as ReturnType<typeof operatorDiagnostic> | undefined;
+  if (diagnostic) lines.push(`Source observation age: ${diagnostic.sourceObservationAgeSeconds ?? "unknown"} seconds; clock: ${diagnostic.observationClock}; action: ${diagnostic.action.category} (${diagnostic.action.retryPolicy})`);
   return `${lines.join("\n")}\n`;
 }

@@ -146,6 +146,14 @@ Without a target, finite sync captures the available Prep tip and exits after re
 
 `pageSize`, `batchSize`, source filters and adaptive scans live in `chef.config.ts`, not CLI flags. Compatible restarts resume the durable checkpoint. Ctrl+C stops with committed progress retained; invocation counters can exclude a committed partial-page prefix. See [Benchmarking](/docs/chef/benchmarking/) for interpreting counters.
 
+### Candidate progress diagnostics
+
+The **0.7.0 source-build candidate is not yet published**. Published installation commands above still target 0.6.1. Candidate sync/follow adds a cached heartbeat every five seconds, independent of the unchanged five-second follow polling default. There is no heartbeat flag or environment variable.
+
+JSON heartbeat records have `state: "heartbeat"` and `progress` with `phase`, `phaseSince`, `lastProgressAt`, `heartbeatAt`, `committedHeight`, inclusive `processingRange`, `prepReady`, `prepArchiveHeight`, `prepIndexedHeight`, `sourceObservedHeight` and `sourceObservedAt`. Human output describes committed and pending heights separately. The heartbeat makes no source or database read; its completed-page counters do not include work still running in the current page.
+
+`lastProgressAt` records a completed local stage and does not imply a committed block. `heartbeatAt` alone means only that a diagnostic was emitted. The timestamps are ISO UTC except the source observation, which retains Prep's Unix seconds. Heartbeats are best effort, may be delayed by event-loop work and are skipped on stdout backpressure. They stop when sync completes, fails or is cancelled. See [the phase and recovery contract](/docs/chef/recovery/#read-long-running-work-in-the-070-candidate).
+
 ## status
 
 ```sh
@@ -153,6 +161,8 @@ pnpm run status --json
 ```
 
 Read the durable checkpoint before observing Prep with a **5-second** timeout. Status does not acquire a writer lock or change the database. A source outage, incompatible source or unresolved reconciliation produces a nonzero diagnostic. A zero Chef–Prep gap does not prove the source is at the network head; inspect source freshness and the separate Prep gap. See [Latency at the Head](/docs/chef/latency-at-head/).
+
+In the 0.7.0 candidate, status and doctor add `diagnostic.artifact`, source-observation age and an `action` category/retry policy. Artifact version, commit and source state come from build-produced metadata, with unknown values reported explicitly. Status includes generation, revision and last commit time when the store supplies them; these are durable metadata, unlike a sync process's transient phase. Diagnostics classify the next action without changing retry policy or reconciliation. Follow the [source interruption recipe](/docs/chef/recovery/#recover-from-a-source-interruption) for a controlled recovery check.
 
 ## serve
 

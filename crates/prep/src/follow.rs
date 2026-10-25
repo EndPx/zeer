@@ -1,11 +1,17 @@
 //! Process-level sync loop. Keeps one writer session across source polls.
-use std::{future::Future, time::Duration};
+use std::{
+    future::Future,
+    io::Write,
+    sync::{mpsc, Arc, Mutex, OnceLock},
+    thread,
+    time::Duration,
+};
 
 use anyhow::{ensure, Result};
 
 use crate::{
-    follower::{SyncOptions, SyncSession},
-    full_source::is_transient_source_error,
+    follower::{source_error_code, SyncEvent, SyncOptions, SyncSession},
+    full_source::{is_transient_source_error, unix_seconds},
 };
 
 pub struct LoopOptions {
@@ -18,6 +24,111 @@ pub struct LoopOptions {
 struct RetryBudget {
     limit: u32,
     used: u32,
+}
+
+fn diagnostic_sink() -> Option<mpsc::SyncSender<SyncEvent>> {
+    static SINK: OnceLock<Option<mpsc::SyncSender<SyncEvent>>> = OnceLock::new();
+    SINK.get_or_init(|| {
+        let (sender, events) = mpsc::sync_channel::<SyncEvent>(8);
+        // One process-wide writer may block on an undrained stderr pipe. It has
+        // no archive/session resources and is deliberately never joined by sync.
+        let worker = thread::Builder::new()
+            .name("prep-diagnostics".into())
+            .spawn(move || {
+                for event in events {
+                    if let Ok(json) = serde_json::to_string(&event) {
+                        let _ = writeln!(std::io::stderr().lock(), "{json}");
+                    }
+                }
+            });
+        worker.ok().map(|_| sender)
+    })
+    .clone()
+}
+
+/// Independent of Tokio so synchronous archive validation remains observable.
+/// The worker only logs a redacted in-memory snapshot; no RPC or disk access.
+struct Reporter {
+    state: Arc<Mutex<SyncEvent>>,
+    stop: mpsc::Sender<()>,
+    worker: Option<thread::JoinHandle<()>>,
+    sink: Option<mpsc::SyncSender<SyncEvent>>,
+}
+
+impl Reporter {
+    fn new() -> Self {
+        Self::with_interval(Duration::from_secs(5))
+    }
+
+    fn with_interval(interval: Duration) -> Self {
+        Self::with_sink(interval, diagnostic_sink())
+    }
+
+    fn with_sink(interval: Duration, sink: Option<mpsc::SyncSender<SyncEvent>>) -> Self {
+        let state = Arc::new(Mutex::new(SyncEvent::new("checking_source", "started")));
+        let (stop, stopped) = mpsc::channel();
+        let snapshot = state.clone();
+        let heartbeat_sink = sink.clone();
+        let worker = thread::spawn(move || {
+            while matches!(
+                stopped.recv_timeout(interval),
+                Err(mpsc::RecvTimeoutError::Timeout)
+            ) {
+                let Ok(state) = snapshot.lock() else { break };
+                let mut event = state.clone();
+                drop(state);
+                event.heartbeat = true;
+                event.observed_at_unix = unix_seconds();
+                Self::print(&heartbeat_sink, &event);
+            }
+        });
+        Self {
+            state,
+            stop,
+            worker: Some(worker),
+            sink,
+        }
+    }
+
+    fn print(sink: &Option<mpsc::SyncSender<SyncEvent>>, event: &SyncEvent) {
+        if let Some(sink) = sink {
+            // A full/closed diagnostic pipe must not delay indexing or shutdown.
+            let _ = sink.try_send(event.clone());
+        }
+    }
+
+    fn record(&self, mut event: SyncEvent) {
+        self.record_update(&mut event, false);
+    }
+
+    fn record_checkpoint(&self, mut event: SyncEvent) {
+        self.record_update(&mut event, true);
+    }
+
+    fn record_update(&self, event: &mut SyncEvent, authoritative: bool) {
+        if let Ok(mut state) = self.state.lock() {
+            event.source_height = event.source_height.or(state.source_height);
+            if !authoritative {
+                event.committed_height = event.committed_height.or(state.committed_height);
+            }
+            event.last_progress_at_unix = if event.state == "completed" {
+                Some(event.observed_at_unix)
+            } else {
+                state.last_progress_at_unix
+            };
+            *state = event.clone();
+        }
+        Self::print(&self.sink, event);
+    }
+}
+
+impl Drop for Reporter {
+    fn drop(&mut self) {
+        let _ = self.stop.send(());
+        if let Some(worker) = self.worker.take() {
+            let _ = worker.join();
+        }
+    }
 }
 
 impl RetryBudget {
@@ -59,12 +170,6 @@ pub async fn run(
     let follow = options.follow_mode;
     let to = options.to;
     tokio::pin!(shutdown);
-    let mut session = tokio::select! {
-        biased;
-        _ = &mut shutdown => return Ok(()),
-        result = SyncSession::new(options) => result?,
-    };
-    let mut steps = 0_u64;
     let mut retries = RetryBudget {
         limit: if follow {
             controls.max_source_retries
@@ -73,7 +178,40 @@ pub async fn run(
         },
         used: 0,
     };
+    let reporter = Reporter::new();
+    let mut session = loop {
+        let result = tokio::select! {
+            biased;
+            _ = &mut shutdown => return Ok(()),
+            result = SyncSession::new_with_observer(options.clone(), |event| reporter.record(event)) => result,
+        };
+        match result {
+            Ok(session) => {
+                retries.reset();
+                break session;
+            }
+            Err(error) => {
+                let Some(delay) = retries.next_delay(&error) else {
+                    return Err(error);
+                };
+                let mut event = SyncEvent::new("waiting_source", "retrying");
+                event.error_code = Some(source_error_code(&error));
+                event.retry_attempt = Some(retries.used);
+                event.retry_limit = Some(retries.limit);
+                event.retry_delay_seconds = Some(delay.as_secs());
+                reporter.record(event);
+                tokio::select! {
+                    biased;
+                    _ = &mut shutdown => return Ok(()),
+                    _ = tokio::time::sleep(delay) => {},
+                }
+            }
+        }
+    };
+    let mut steps = 0_u64;
+    let mut previous_revision = None;
     loop {
+        reporter.record(SyncEvent::new("catching_up", "started"));
         let result = tokio::select! {
             biased;
             _ = &mut shutdown => break,
@@ -87,15 +225,21 @@ pub async fn run(
             Err(error) => {
                 // step() has already durably published ready=false. The same
                 // session retains its writer lock and committed archive head.
+                let mut event = SyncEvent::new("catching_up", "failed");
+                event.error_code = Some(source_error_code(&error));
+                let observed = session.progress_snapshot();
+                event.committed_height = observed.head;
+                event.source_height = Some(observed.source_height);
+                reporter.record_checkpoint(event);
                 let Some(delay) = retries.next_delay(&error) else {
                     return Err(error);
                 };
-                eprintln!(
-                    "temporary_source_failure retry={}/{} delay_seconds={}",
-                    retries.used,
-                    retries.limit,
-                    delay.as_secs()
-                );
+                let mut event = SyncEvent::new("waiting_source", "retrying");
+                event.error_code = Some(source_error_code(&error));
+                event.retry_attempt = Some(retries.used);
+                event.retry_limit = Some(retries.limit);
+                event.retry_delay_seconds = Some(delay.as_secs());
+                reporter.record(event);
                 tokio::select! {
                     biased;
                     _ = &mut shutdown => break,
@@ -104,6 +248,24 @@ pub async fn run(
                 continue;
             }
         };
+        let mut event = SyncEvent::new(
+            if progress.head.is_none() {
+                "waiting_for_blocks"
+            } else if progress.progress {
+                "catching_up"
+            } else {
+                "ready"
+            },
+            if previous_revision != Some(progress.revision) {
+                "completed"
+            } else {
+                "observed"
+            },
+        );
+        event.source_height = Some(progress.source_height);
+        event.committed_height = progress.head;
+        previous_revision = Some(progress.revision);
+        reporter.record_checkpoint(event);
         println!("{}", serde_json::to_string(&progress)?);
         steps += 1;
         if controls.max_steps.is_some_and(|limit| steps >= limit)
@@ -140,6 +302,60 @@ mod tests {
         Arc,
     };
     use tokio::net::TcpListener;
+
+    #[test]
+    fn heartbeat_keeps_progress_metadata_and_worker_stops_with_reporter() {
+        let reporter = Reporter::with_interval(Duration::from_millis(10));
+        let weak = Arc::downgrade(&reporter.state);
+        let mut event = SyncEvent::new("catching_up", "completed");
+        event.committed_height = Some(12);
+        event.source_height = Some(20);
+        reporter.record(event);
+        let checkpoint_time = reporter.state.lock().unwrap().last_progress_at_unix;
+        assert!(checkpoint_time.is_some());
+        reporter.record(SyncEvent::new("catching_up", "started"));
+        thread::sleep(Duration::from_millis(35));
+        let state = reporter.state.lock().unwrap().clone();
+        assert_eq!(state.last_progress_at_unix, checkpoint_time);
+        assert_eq!(state.committed_height, Some(12));
+        assert_eq!(state.source_height, Some(20));
+        assert!(
+            !state.heartbeat,
+            "heartbeat must never mutate the stored progress snapshot"
+        );
+        let mut rollback = SyncEvent::new("waiting_for_blocks", "completed");
+        rollback.source_height = Some(0);
+        reporter.record_checkpoint(rollback);
+        reporter.record(SyncEvent::new("catching_up", "started"));
+        assert_eq!(reporter.state.lock().unwrap().committed_height, None,
+            "an authoritative empty rollback must clear the previous head, including on later phase changes");
+        drop(reporter);
+        assert!(
+            weak.upgrade().is_none(),
+            "drop must join the diagnostic worker"
+        );
+    }
+
+    #[test]
+    fn full_diagnostic_queue_never_blocks_progress_or_reporter_shutdown() {
+        let (sender, receiver) = mpsc::sync_channel(1);
+        let reporter = Reporter::with_sink(Duration::from_millis(1), Some(sender));
+        reporter.record(SyncEvent::new("catching_up", "started"));
+        let start = std::time::Instant::now();
+        for height in 1..=1000 {
+            let mut event = SyncEvent::new("catching_up", "completed");
+            event.committed_height = Some(height);
+            reporter.record_checkpoint(event);
+        }
+        assert_eq!(reporter.state.lock().unwrap().committed_height, Some(1000));
+        drop(reporter);
+        assert!(start.elapsed() < Duration::from_secs(1));
+        assert!(receiver.try_recv().is_ok());
+        assert!(
+            matches!(receiver.try_recv(), Err(mpsc::TryRecvError::Disconnected)),
+            "only the bounded first record can remain; all later diagnostics are dropped"
+        );
+    }
 
     #[test]
     fn retries_are_bounded_exponential_resettable_and_typed() {
@@ -214,11 +430,10 @@ mod tests {
             .unwrap();
             assert!(result.is_err());
             assert_eq!(requests.load(Ordering::SeqCst), requests_expected);
-            let status: Value = serde_json::from_slice(
-                &std::fs::read(options.archive.join("status.json")).unwrap(),
-            )
-            .unwrap();
-            assert_eq!(status["ready"], false);
+            assert!(
+                !options.archive.exists(),
+                "failed preflight must not initialize an archive"
+            );
             server.abort();
             let _ = server.await;
         }
@@ -263,13 +478,7 @@ mod tests {
         });
         tokio::time::timeout(Duration::from_secs(2), async {
             loop {
-                let status = std::fs::read(options.archive.join("status.json"))
-                    .ok()
-                    .and_then(|bytes| serde_json::from_slice::<Value>(&bytes).ok());
-                if status
-                    .as_ref()
-                    .is_some_and(|status| status["error"] == "sync_failed")
-                {
+                if requests.load(Ordering::SeqCst) == 1 {
                     break;
                 }
                 tokio::time::sleep(Duration::from_millis(5)).await;
@@ -284,6 +493,7 @@ mod tests {
             .unwrap()
             .unwrap();
         assert_eq!(requests.load(Ordering::SeqCst), 1);
+        assert!(!options.archive.exists());
         let _writer = prep_store::ArchiveWriter::create_or_open_with_kind(
             &options.archive,
             "regtest",
@@ -296,7 +506,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn follow_recovers_after_http_outage_without_restarting_or_duplicate_segments() {
+    async fn follow_recovers_after_startup_and_later_http_outages_without_duplicate_segments() {
         #[derive(Clone)]
         struct Source {
             hash: String,
@@ -308,9 +518,11 @@ mod tests {
             let result = match request["method"].as_str().unwrap() {
                 "getblockchaininfo" => {
                     let count = source.polls.fetch_add(1, Ordering::SeqCst) + 1;
-                    // The first segment performs three source-anchor reads.
-                    // Fail the next two attempts, then recover the same source.
-                    if (4..=5).contains(&count) {
+                    // Fail preflight once; the next attempt succeeds without
+                    // initializing the archive prematurely. The first segment
+                    // then performs three source-anchor reads (3..=5).
+                    // Fail two more attempts after that segment is committed.
+                    if count == 1 || (6..=7).contains(&count) {
                         return StatusCode::SERVICE_UNAVAILABLE.into_response();
                     }
                     json!({"chain": "regtest", "blocks": 1, "bestblockhash": source.hash})
@@ -366,7 +578,7 @@ mod tests {
             )
             .await
         });
-        tokio::time::timeout(Duration::from_secs(2), async {
+        tokio::time::timeout(Duration::from_secs(3), async {
             loop {
                 let status = std::fs::read(options.archive.join("status.json"))
                     .ok()
@@ -394,7 +606,7 @@ mod tests {
         assert_eq!(archive.catalog().segments.len(), 1);
         assert_eq!(archive.catalog().segments[0].end_height, 1);
         assert_eq!(archive.catalog().revision, 1);
-        assert_eq!(polls.load(Ordering::SeqCst), 6);
+        assert_eq!(polls.load(Ordering::SeqCst), 8);
         let status: Value =
             serde_json::from_slice(&std::fs::read(options.archive.join("status.json")).unwrap())
                 .unwrap();

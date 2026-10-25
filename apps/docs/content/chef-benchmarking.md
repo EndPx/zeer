@@ -32,6 +32,8 @@ Successful progress records identify their scope as `completed_pages`. The final
 
 The raw JSON field names preserve the CLI's existing format. Present durations in seconds in reports. This is not a full CPU profiler: preparation, private scanner work and uninstrumented overhead are not individually attributed. `transactionOverheadMs` is not a pure PostgreSQL-write timer. A partial or interrupted page can leave a durable prefix beyond the completed-page counters; inspect the checkpoint before interpreting totals.
 
+The **0.7.0 source-build candidate**, not yet published, also emits `state: "heartbeat"` during a long page. Its counters retain `metricsScope: "completed_pages"`; do not sum heartbeat rows or count them as newly completed work. The cached `progress` object identifies the pending inclusive range and last acknowledged/observed committed height. `heartbeatAt` shows that the process produced a diagnostic; `lastProgressAt` records a completed local stage and can change without a new commit. Neither field provides an exact scanner duration. See [recovery and progress semantics](/docs/chef/recovery/#read-long-running-work-in-the-070-candidate).
+
 For example, save this as `report.mjs` and run `node report.mjs`:
 
 ```js
@@ -72,3 +74,11 @@ Compare all expected entities and checkpoint hashes, then restart the compatible
 Run at least three repetitions per candidate, alternate their order and report medians in seconds. Disclose warmups, cache state, resource ceilings, active background work, selected fields, result counts and source preparation costs. Preserve failures and raw samples. Keep one-time startup observations separate from steady head latency.
 
 See [recorded Chef results](/docs/chef/benchmarks/) for durable entity indexing and [Prep results](/docs/prep/benchmarks/) for public-data retrieval. They measure different jobs and must not share a headline performance number.
+
+## Measure shielded receipt processing separately
+
+Keep the viewing key and raw private results in the operator's environment. Use an explicitly authorized testnet account, record its wallet birthday and scanner version privately, and define the expected receipt identities before comparing candidates. Do not infer receipt latency from public block-summary throughput.
+
+Record monotonic observation boundaries for source block availability, the first matching Prep response, local scan completion, PostgreSQL commit acknowledgement and consumer storage. Synchronize clocks for stages on different hosts. Report sample count, median and tail latency in seconds, backlog, errors, active GraphQL query success/latency and CPU/memory limits. Separate catch-up samples from blocks mined after the observer was ready; report mining and confirmation waiting separately from receipt processing.
+
+Compare a fixed range and unchanged model using the existing `sync.pageSize` and `sync.batchSize` controls before adding concurrency. Validate receipt identities, exact values and checkpoint hashes, then run the [interruption and restart exercise](/docs/chef/recovery/#recover-from-a-source-interruption). A larger batch holds an application transaction longer; a failed batch is rescanned and replayed. Phase heartbeats help locate a long stage but are sampled diagnostics, not a substitute for stage instrumentation or new benchmark evidence.

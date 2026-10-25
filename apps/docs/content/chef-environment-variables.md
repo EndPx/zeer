@@ -51,3 +51,9 @@ The [shielded inbox example](/docs/chef/shielded/local/) also uses:
 `ZEER_ACCOUNT_ID` and `ZEER_KEY_FINGERPRINT` are read by the generated application config, not implicit CLI settings. Editing the generated `ZEER_PROJECT` or `ZEER_BIRTHDAY_HEIGHT` alone does not change its configured project or start. A custom config can choose to read them. The shielded config requires a valid fingerprint even for codegen, which loads `.env` but does not load the key. Its query client permits loopback HTTP only. An API reader can serve an existing projection without loading the scanner key. Keep viewing keys in the operator's environment; the public Prep API does not accept them.
 
 Keep `.env` and UFVK files out of version control. Load server credentials only where the indexer or authenticated reader runs, and use [local viewing-key setup](/docs/chef/shielded/local/) for file permissions.
+
+## Candidate operational diagnostics
+
+The **0.7.0 source-build candidate is not yet published**. Its five-second sync heartbeat and fixed diagnostic actions require no new environment variables. Keep using the installed 0.6.1 commands until a release is published and verified. `--poll-seconds` controls follow's source polling; it does not configure heartbeat cadence.
+
+Artifact identity is written during the package build. Runtime diagnostics do not accept a commit or package version from `.env` and do not inspect the deployment directory's current Git HEAD. Missing provenance is reported as `unknown`. Diagnostics omit connection strings, bearer tokens, viewing keys and receipt contents; this does not make arbitrary handler logs safe to publish. Keep application logging and saved benchmark artifacts private or redact them before sharing.

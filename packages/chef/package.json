@@ -1,6 +1,6 @@
 {
   "name": "@zeer-dev/chef",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -40,7 +40,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/prepare-templates.mjs",
+    "build": "tsc -p tsconfig.json && node scripts/write-build-identity.mjs && node scripts/prepare-templates.mjs",
     "prepack": "npm run build",
     "test": "node --test test/*.test.mjs"
   },

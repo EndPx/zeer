@@ -1,0 +1,2442 @@
+{
+  "status": "PASS",
+  "scope": "Historical catch-up of six previously mined owned Ironwood transactions, not future-live detection or mining/confirmation latency.",
+  "versions": {
+    "baseline": "0.6.1",
+    "candidate": "0.7.0-candidate"
+  },
+  "source": {
+    "from": 4526284,
+    "to": 4526307,
+    "before": 4536306,
+    "after": 4536338,
+    "backgroundIngestionProgress": 32
+  },
+  "runs": 12,
+  "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+  "measurements": [
+    {
+      "variant": "baseline",
+      "profile": "default",
+      "repeat": 1,
+      "pageSize": 16,
+      "batchSize": 1,
+      "indexedSeconds": 0.5419270399725065,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.1773869639999996,
+      "handlerSeconds": 0.005489667999999597,
+      "transactionOverheadSeconds": 0.26408075200000064,
+      "requests": 33,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.09227626101346686,
+          "p95Seconds": 0.29354029000387527,
+          "minSeconds": 0.02307698701042682,
+          "maxSeconds": 0.29354029000387527
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.006586884497664869,
+          "p95Seconds": 0.02214103698497638,
+          "minSeconds": 0.005485732021043077,
+          "maxSeconds": 0.02214103698497638
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.01504431149805896,
+          "p95Seconds": 0.037247708009090275,
+          "minSeconds": 0.013566651003202423,
+          "maxSeconds": 0.037247708009090275
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.30448073100706097,
+          "p95Seconds": 0.49720002099638805,
+          "minSeconds": 0.09792717499658465,
+          "maxSeconds": 0.49720002099638805
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.5575247160159051,
+          "p95Seconds": 0.5575247160159051,
+          "minSeconds": 0.2283230200118851,
+          "maxSeconds": 0.5575247160159051
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.02307698701042682,
+          "decryptSeconds": 0.02214103698497638,
+          "decryptToCommitSeconds": 0.037247708009090275,
+          "commitToConsumerSeconds": 0.49720002099638805,
+          "prepToConsumerSeconds": 0.5575247160159051
+        },
+        {
+          "prepToDecryptSeconds": 0.06784284301102161,
+          "decryptSeconds": 0.007373620988801122,
+          "decryptToCommitSeconds": 0.015066052990732715,
+          "commitToConsumerSeconds": 0.4746158200141508,
+          "prepToConsumerSeconds": 0.5575247160159051
+        },
+        {
+          "prepToDecryptSeconds": 0.18395845900522545,
+          "decryptSeconds": 0.005551120004383847,
+          "decryptToCommitSeconds": 0.015022570005385205,
+          "commitToConsumerSeconds": 0.3585436870052945,
+          "prepToConsumerSeconds": 0.5575247160159051
+        },
+        {
+          "prepToDecryptSeconds": 0.29354029000387527,
+          "decryptSeconds": 0.008403301995713264,
+          "decryptToCommitSeconds": 0.013566651003202423,
+          "commitToConsumerSeconds": 0.25041777500882745,
+          "prepToConsumerSeconds": 0.5575247160159051
+        },
+        {
+          "prepToDecryptSeconds": 0.03891789002227597,
+          "decryptSeconds": 0.005485732021043077,
+          "decryptToCommitSeconds": 0.036225100979208946,
+          "commitToConsumerSeconds": 0.15318002901040018,
+          "prepToConsumerSeconds": 0.2283230200118851
+        },
+        {
+          "prepToDecryptSeconds": 0.11670967901591212,
+          "decryptSeconds": 0.005800148006528616,
+          "decryptToCommitSeconds": 0.013686165999388322,
+          "commitToConsumerSeconds": 0.09792717499658465,
+          "prepToConsumerSeconds": 0.2283230200118851
+        }
+      ],
+      "graphql": {
+        "samples": 9,
+        "errors": [],
+        "latency": {
+          "samples": 9,
+          "medianSeconds": 0.0193248369905632,
+          "p95Seconds": 0.051635990996146575,
+          "minSeconds": 0.011078345007263124,
+          "maxSeconds": 0.051635990996146575
+        }
+      },
+      "consumerWaits": {
+        "INDEXER_BEHIND": 1,
+        "REVISION_CHANGED": 3
+      },
+      "phaseCounts": {},
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "candidate",
+      "profile": "default",
+      "repeat": 1,
+      "pageSize": 16,
+      "batchSize": 1,
+      "indexedSeconds": 0.36760591898928396,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.12569203299999893,
+      "handlerSeconds": 0.0027360120000005277,
+      "transactionOverheadSeconds": 0.16124955299999966,
+      "requests": 33,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.06454769297852181,
+          "p95Seconds": 0.18605408299481496,
+          "minSeconds": 0.012296116998186335,
+          "maxSeconds": 0.18605408299481496
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.004503174495766871,
+          "p95Seconds": 0.011434117011958733,
+          "minSeconds": 0.00421456599724479,
+          "maxSeconds": 0.011434117011958733
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.009513197001069784,
+          "p95Seconds": 0.01486285901046358,
+          "minSeconds": 0.008301437017507851,
+          "maxSeconds": 0.01486285901046358
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.21489137399476022,
+          "p95Seconds": 0.34753072800231166,
+          "minSeconds": 0.07079984998563305,
+          "maxSeconds": 0.34753072800231166
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.37410692698904313,
+          "p95Seconds": 0.37410692698904313,
+          "minSeconds": 0.16364547397824936,
+          "maxSeconds": 0.37410692698904313
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.012296116998186335,
+          "decryptSeconds": 0.011434117011958733,
+          "decryptToCommitSeconds": 0.014280081988545135,
+          "commitToConsumerSeconds": 0.34753072800231166,
+          "prepToConsumerSeconds": 0.37410692698904313
+        },
+        {
+          "prepToDecryptSeconds": 0.03147250600159168,
+          "decryptSeconds": 0.004730604006908834,
+          "decryptToCommitSeconds": 0.01486285901046358,
+          "commitToConsumerSeconds": 0.32777156197698787,
+          "prepToConsumerSeconds": 0.37410692698904313
+        },
+        {
+          "prepToDecryptSeconds": 0.11340126499999315,
+          "decryptSeconds": 0.004484170989599079,
+          "decryptToCommitSeconds": 0.010221754986559972,
+          "commitToConsumerSeconds": 0.25048390700249,
+          "prepToConsumerSeconds": 0.37410692698904313
+        },
+        {
+          "prepToDecryptSeconds": 0.18605408299481496,
+          "decryptSeconds": 0.0045221780019346625,
+          "decryptToCommitSeconds": 0.008754003007197753,
+          "commitToConsumerSeconds": 0.17929884098703042,
+          "prepToConsumerSeconds": 0.37410692698904313
+        },
+        {
+          "prepToDecryptSeconds": 0.04455119898193516,
+          "decryptSeconds": 0.004229154990753159,
+          "decryptToCommitSeconds": 0.008804639015579596,
+          "commitToConsumerSeconds": 0.1102896359807346,
+          "prepToConsumerSeconds": 0.16364547397824936
+        },
+        {
+          "prepToDecryptSeconds": 0.08454418697510846,
+          "decryptSeconds": 0.00421456599724479,
+          "decryptToCommitSeconds": 0.008301437017507851,
+          "commitToConsumerSeconds": 0.07079984998563305,
+          "prepToConsumerSeconds": 0.16364547397824936
+        }
+      ],
+      "graphql": {
+        "samples": 8,
+        "errors": [],
+        "latency": {
+          "samples": 8,
+          "medianSeconds": 0.008075848498265259,
+          "p95Seconds": 0.04278205000446178,
+          "minSeconds": 0.005657116009388119,
+          "maxSeconds": 0.04278205000446178
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+        "REVISION_CHANGED": 2
+      },
+      "phaseCounts": {
+        "checking_checkpoint": 6,
+        "fetching": 67,
+        "scanning": 30,
+        "committing": 72,
+        "handlers": 30,
+        "caught_up": 1
+      },
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "baseline",
+      "profile": "batch4",
+      "repeat": 1,
+      "pageSize": 16,
+      "batchSize": 4,
+      "indexedSeconds": 0.16085484399809502,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.04888131300000077,
+      "handlerSeconds": 0.0011108810000009725,
+      "transactionOverheadSeconds": 0.049767425999999435,
+      "requests": 15,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.017236526997294277,
+          "p95Seconds": 0.053853075980441645,
+          "minSeconds": 0.0050419699982739985,
+          "maxSeconds": 0.053853075980441645
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.004589586009387858,
+          "p95Seconds": 0.008906932984245941,
+          "minSeconds": 0.0037430159864015877,
+          "maxSeconds": 0.008906932984245941
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.013975024499814026,
+          "p95Seconds": 0.02355640899622813,
+          "minSeconds": 0.007466337992809713,
+          "maxSeconds": 0.02355640899622813
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.07716011398588307,
+          "p95Seconds": 0.1256677430064883,
+          "minSeconds": 0.027362196997273713,
+          "maxSeconds": 0.1256677430064883
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.11509758897591382,
+          "p95Seconds": 0.17061950601055287,
+          "minSeconds": 0.04080304899252951,
+          "maxSeconds": 0.17061950601055287
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.00928983898484148,
+          "decryptSeconds": 0.008906932984245941,
+          "decryptToCommitSeconds": 0.021182021009735763,
+          "commitToConsumerSeconds": 0.08462572898133658,
+          "prepToConsumerSeconds": 0.11509758897591382
+        },
+        {
+          "prepToDecryptSeconds": 0.013077699986752123,
+          "decryptSeconds": 0.0037430159864015877,
+          "decryptToCommitSeconds": 0.01739416000782512,
+          "commitToConsumerSeconds": 0.08462572898133658,
+          "prepToConsumerSeconds": 0.11509758897591382
+        },
+        {
+          "prepToDecryptSeconds": 0.034847200993681327,
+          "decryptSeconds": 0.004358450009021908,
+          "decryptToCommitSeconds": 0.01055588899180293,
+          "commitToConsumerSeconds": 0.06969449899042957,
+          "prepToConsumerSeconds": 0.11509758897591382
+        },
+        {
+          "prepToDecryptSeconds": 0.053853075980441645,
+          "decryptSeconds": 0.004134244984015822,
+          "decryptToCommitSeconds": 0.007466337992809713,
+          "commitToConsumerSeconds": 0.053778175002662465,
+          "prepToConsumerSeconds": 0.11509758897591382
+        },
+        {
+          "prepToDecryptSeconds": 0.0050419699982739985,
+          "decryptSeconds": 0.004820722009753808,
+          "decryptToCommitSeconds": 0.0083988819969818,
+          "commitToConsumerSeconds": 0.027362196997273713,
+          "prepToConsumerSeconds": 0.04080304899252951
+        },
+        {
+          "prepToDecryptSeconds": 0.02139535400783643,
+          "decryptSeconds": 0.007930516003398225,
+          "decryptToCommitSeconds": 0.02355640899622813,
+          "commitToConsumerSeconds": 0.1256677430064883,
+          "prepToConsumerSeconds": 0.17061950601055287
+        }
+      ],
+      "graphql": {
+        "samples": 6,
+        "errors": [],
+        "latency": {
+          "samples": 6,
+          "medianSeconds": 0.009706226497655734,
+          "p95Seconds": 0.02102129699778743,
+          "minSeconds": 0.003719581989571452,
+          "maxSeconds": 0.02102129699778743
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1
+      },
+      "phaseCounts": {},
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "candidate",
+      "profile": "batch4",
+      "repeat": 1,
+      "pageSize": 16,
+      "batchSize": 4,
+      "indexedSeconds": 0.31806275801500306,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.2128330079999996,
+      "handlerSeconds": 0.0014383219999995161,
+      "transactionOverheadSeconds": 0.04018426700000009,
+      "requests": 15,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.018081815491314046,
+          "p95Seconds": 0.05675541298114695,
+          "minSeconds": 0.004693274007877335,
+          "maxSeconds": 0.05675541298114695
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.004414674491272308,
+          "p95Seconds": 0.01124075602274388,
+          "minSeconds": 0.004013659985503182,
+          "maxSeconds": 0.01124075602274388
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.010403788008261472,
+          "p95Seconds": 0.01727968399063684,
+          "minSeconds": 0.008552159008104354,
+          "maxSeconds": 0.01727968399063684
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.10930672001268249,
+          "p95Seconds": 0.13464375500916503,
+          "minSeconds": 0.05155389700667001,
+          "maxSeconds": 0.13464375500916503
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.16360457800328732,
+          "p95Seconds": 0.16360457800328732,
+          "minSeconds": 0.08215004100929946,
+          "maxSeconds": 0.16360457800328732
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.011681139003485441,
+          "decryptSeconds": 0.01124075602274388,
+          "decryptToCommitSeconds": 0.01727968399063684,
+          "commitToConsumerSeconds": 0.13464375500916503,
+          "prepToConsumerSeconds": 0.16360457800328732
+        },
+        {
+          "prepToDecryptSeconds": 0.01609676898806356,
+          "decryptSeconds": 0.0043538130121305585,
+          "decryptToCommitSeconds": 0.012864054006058723,
+          "commitToConsumerSeconds": 0.13464375500916503,
+          "prepToConsumerSeconds": 0.16360457800328732
+        },
+        {
+          "prepToDecryptSeconds": 0.03300984998350032,
+          "decryptSeconds": 0.004013659985503182,
+          "decryptToCommitSeconds": 0.008552159008104354,
+          "commitToConsumerSeconds": 0.12204256901168264,
+          "prepToConsumerSeconds": 0.16360457800328732
+        },
+        {
+          "prepToDecryptSeconds": 0.05675541298114695,
+          "decryptSeconds": 0.00437523698201403,
+          "decryptToCommitSeconds": 0.010278294008458033,
+          "commitToConsumerSeconds": 0.09657087101368234,
+          "prepToConsumerSeconds": 0.16360457800328732
+        },
+        {
+          "prepToDecryptSeconds": 0.004693274007877335,
+          "decryptSeconds": 0.004454112000530586,
+          "decryptToCommitSeconds": 0.009237845981260762,
+          "commitToConsumerSeconds": 0.06821892102016136,
+          "prepToConsumerSeconds": 0.08215004100929946
+        },
+        {
+          "prepToDecryptSeconds": 0.020066861994564533,
+          "decryptSeconds": 0.00609239999903366,
+          "decryptToCommitSeconds": 0.01052928200806491,
+          "commitToConsumerSeconds": 0.05155389700667001,
+          "prepToConsumerSeconds": 0.08215004100929946
+        }
+      ],
+      "graphql": {
+        "samples": 8,
+        "errors": [],
+        "latency": {
+          "samples": 8,
+          "medianSeconds": 0.0062878210010239854,
+          "p95Seconds": 0.02283079898916185,
+          "minSeconds": 0.004703672981122509,
+          "maxSeconds": 0.02283079898916185
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 2,
+        "INDEXER_BEHIND": 1
+      },
+      "phaseCounts": {
+        "checking_checkpoint": 6,
+        "fetching": 31,
+        "scanning": 12,
+        "committing": 36,
+        "handlers": 30,
+        "caught_up": 1
+      },
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "candidate",
+      "profile": "default",
+      "repeat": 2,
+      "pageSize": 16,
+      "batchSize": 1,
+      "indexedSeconds": 0.28932414698647335,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.09453948399999854,
+      "handlerSeconds": 0.0011678880000013123,
+      "transactionOverheadSeconds": 0.13430324899999688,
+      "requests": 33,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.04603801101620775,
+          "p95Seconds": 0.15038427902618423,
+          "minSeconds": 0.01122883299831301,
+          "maxSeconds": 0.15038427902618423
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.004456666996702552,
+          "p95Seconds": 0.010895452986005694,
+          "minSeconds": 0.004189703002339229,
+          "maxSeconds": 0.010895452986005694
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.00860403900151141,
+          "p95Seconds": 0.015025472996057943,
+          "minSeconds": 0.007638822979060933,
+          "maxSeconds": 0.015025472996057943
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.24587866351066623,
+          "p95Seconds": 0.3475862169871107,
+          "minSeconds": 0.11384612700203434,
+          "maxSeconds": 0.3475862169871107
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.3677129250136204,
+          "p95Seconds": 0.3677129250136204,
+          "minSeconds": 0.19630499300546944,
+          "maxSeconds": 0.3677129250136204
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.01122883299831301,
+          "decryptSeconds": 0.010895452986005694,
+          "decryptToCommitSeconds": 0.008897875028196722,
+          "commitToConsumerSeconds": 0.3475862169871107,
+          "prepToConsumerSeconds": 0.3677129250136204
+        },
+        {
+          "prepToDecryptSeconds": 0.024642629025038332,
+          "decryptSeconds": 0.004477098002098501,
+          "decryptToCommitSeconds": 0.007638822979060933,
+          "commitToConsumerSeconds": 0.33543147300952114,
+          "prepToConsumerSeconds": 0.3677129250136204
+        },
+        {
+          "prepToDecryptSeconds": 0.07575284401536919,
+          "decryptSeconds": 0.004189703002339229,
+          "decryptToCommitSeconds": 0.009221196989528835,
+          "commitToConsumerSeconds": 0.2827388840087224,
+          "prepToConsumerSeconds": 0.3677129250136204
+        },
+        {
+          "prepToDecryptSeconds": 0.15038427902618423,
+          "decryptSeconds": 0.004337796010077,
+          "decryptToCommitSeconds": 0.008310202974826097,
+          "commitToConsumerSeconds": 0.20901844301261008,
+          "prepToConsumerSeconds": 0.3677129250136204
+        },
+        {
+          "prepToDecryptSeconds": 0.02402997700846754,
+          "decryptSeconds": 0.004436235991306603,
+          "decryptToCommitSeconds": 0.007727002986939624,
+          "commitToConsumerSeconds": 0.16454801301006228,
+          "prepToConsumerSeconds": 0.19630499300546944
+        },
+        {
+          "prepToDecryptSeconds": 0.06743339300737716,
+          "decryptSeconds": 0.004942547006066889,
+          "decryptToCommitSeconds": 0.015025472996057943,
+          "commitToConsumerSeconds": 0.11384612700203434,
+          "prepToConsumerSeconds": 0.19630499300546944
+        }
+      ],
+      "graphql": {
+        "samples": 7,
+        "errors": [],
+        "latency": {
+          "samples": 7,
+          "medianSeconds": 0.007755954982712865,
+          "p95Seconds": 0.017337255005259067,
+          "minSeconds": 0.0048063280119095,
+          "maxSeconds": 0.017337255005259067
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+        "REVISION_CHANGED": 2
+      },
+      "phaseCounts": {
+        "checking_checkpoint": 6,
+        "fetching": 67,
+        "scanning": 30,
+        "committing": 72,
+        "handlers": 30,
+        "caught_up": 1
+      },
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "baseline",
+      "profile": "default",
+      "repeat": 2,
+      "pageSize": 16,
+      "batchSize": 1,
+      "indexedSeconds": 0.27192662499146536,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.08689530099999912,
+      "handlerSeconds": 0.0008254309999974794,
+      "transactionOverheadSeconds": 0.12262048500000038,
+      "requests": 33,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.03987041251093615,
+          "p95Seconds": 0.1372007290192414,
+          "minSeconds": 0.009746040013851598,
+          "maxSeconds": 0.1372007290192414
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.004809932506759651,
+          "p95Seconds": 0.009288455010391772,
+          "minSeconds": 0.003833621012745425,
+          "maxSeconds": 0.009288455010391772
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.00786897998477798,
+          "p95Seconds": 0.023198110982775688,
+          "minSeconds": 0.007200706022558734,
+          "maxSeconds": 0.023198110982775688
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.26138352150155697,
+          "p95Seconds": 0.3530909330002032,
+          "minSeconds": 0.13660824700491503,
+          "maxSeconds": 0.3530909330002032
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.37233301100786775,
+          "p95Seconds": 0.37233301100786775,
+          "minSeconds": 0.21471218799706548,
+          "maxSeconds": 0.37233301100786775
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.009746040013851598,
+          "decryptSeconds": 0.009288455010391772,
+          "decryptToCommitSeconds": 0.009496037993812934,
+          "commitToConsumerSeconds": 0.3530909330002032,
+          "prepToConsumerSeconds": 0.37233301100786775
+        },
+        {
+          "prepToDecryptSeconds": 0.024091088998829946,
+          "decryptSeconds": 0.004827049997402355,
+          "decryptToCommitSeconds": 0.007200706022558734,
+          "commitToConsumerSeconds": 0.3410412159864791,
+          "prepToConsumerSeconds": 0.37233301100786775
+        },
+        {
+          "prepToDecryptSeconds": 0.0689602900238242,
+          "decryptSeconds": 0.003833621012745425,
+          "decryptToCommitSeconds": 0.007517786987591535,
+          "commitToConsumerSeconds": 0.295854933996452,
+          "prepToConsumerSeconds": 0.37233301100786775
+        },
+        {
+          "prepToDecryptSeconds": 0.1372007290192414,
+          "decryptSeconds": 0.005499891994986683,
+          "decryptToCommitSeconds": 0.008220172981964424,
+          "commitToConsumerSeconds": 0.22691210900666192,
+          "prepToConsumerSeconds": 0.37233301100786775
+        },
+        {
+          "prepToDecryptSeconds": 0.02483499501249753,
+          "decryptSeconds": 0.004792815016116947,
+          "decryptToCommitSeconds": 0.007309993990929797,
+          "commitToConsumerSeconds": 0.18256719899363816,
+          "prepToConsumerSeconds": 0.21471218799706548
+        },
+        {
+          "prepToDecryptSeconds": 0.05490583000937477,
+          "decryptSeconds": 0.004415126022649929,
+          "decryptToCommitSeconds": 0.023198110982775688,
+          "commitToConsumerSeconds": 0.13660824700491503,
+          "prepToConsumerSeconds": 0.21471218799706548
+        }
+      ],
+      "graphql": {
+        "samples": 9,
+        "errors": [],
+        "latency": {
+          "samples": 9,
+          "medianSeconds": 0.005942096002399921,
+          "p95Seconds": 0.02146819801419042,
+          "minSeconds": 0.00398900598520413,
+          "maxSeconds": 0.02146819801419042
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+        "REVISION_CHANGED": 2
+      },
+      "phaseCounts": {},
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "candidate",
+      "profile": "batch4",
+      "repeat": 2,
+      "pageSize": 16,
+      "batchSize": 4,
+      "indexedSeconds": 0.13299457501852885,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.046879925999998705,
+      "handlerSeconds": 0.0008899839999985488,
+      "transactionOverheadSeconds": 0.02942458700000134,
+      "requests": 15,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.015350963512901217,
+          "p95Seconds": 0.048484027007361874,
+          "minSeconds": 0.004823289025807753,
+          "maxSeconds": 0.048484027007361874
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.0043598629999905825,
+          "p95Seconds": 0.009239442995749414,
+          "minSeconds": 0.004027496004709974,
+          "maxSeconds": 0.009239442995749414
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.007979905494721606,
+          "p95Seconds": 0.01399016598588787,
+          "minSeconds": 0.007013093010755256,
+          "maxSeconds": 0.01399016598588787
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.07053311250638217,
+          "p95Seconds": 0.09269771701656282,
+          "minSeconds": 0.02321878500515595,
+          "maxSeconds": 0.09269771701656282
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.11629646402434446,
+          "p95Seconds": 0.11629646402434446,
+          "minSeconds": 0.04715023102471605,
+          "maxSeconds": 0.11629646402434446
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.00960858102189377,
+          "decryptSeconds": 0.009239442995749414,
+          "decryptToCommitSeconds": 0.01399016598588787,
+          "commitToConsumerSeconds": 0.09269771701656282,
+          "prepToConsumerSeconds": 0.11629646402434446
+        },
+        {
+          "prepToDecryptSeconds": 0.01378357401699759,
+          "decryptSeconds": 0.004115891992114484,
+          "decryptToCommitSeconds": 0.009815172990784049,
+          "commitToConsumerSeconds": 0.09269771701656282,
+          "prepToConsumerSeconds": 0.11629646402434446
+        },
+        {
+          "prepToDecryptSeconds": 0.027650860021822155,
+          "decryptSeconds": 0.004027496004709974,
+          "decryptToCommitSeconds": 0.007990718993823975,
+          "commitToConsumerSeconds": 0.08065488500869833,
+          "prepToConsumerSeconds": 0.11629646402434446
+        },
+        {
+          "prepToDecryptSeconds": 0.048484027007361874,
+          "decryptSeconds": 0.0059151939931325614,
+          "decryptToCommitSeconds": 0.00740109701291658,
+          "commitToConsumerSeconds": 0.060411340004066005,
+          "prepToConsumerSeconds": 0.11629646402434446
+        },
+        {
+          "prepToDecryptSeconds": 0.004823289025807753,
+          "decryptSeconds": 0.004603834007866681,
+          "decryptToCommitSeconds": 0.007969091995619237,
+          "commitToConsumerSeconds": 0.03435785000328906,
+          "prepToConsumerSeconds": 0.04715023102471605
+        },
+        {
+          "prepToDecryptSeconds": 0.016918353008804843,
+          "decryptSeconds": 0.004090183996595442,
+          "decryptToCommitSeconds": 0.007013093010755256,
+          "commitToConsumerSeconds": 0.02321878500515595,
+          "prepToConsumerSeconds": 0.04715023102471605
+        }
+      ],
+      "graphql": {
+        "samples": 4,
+        "errors": [],
+        "latency": {
+          "samples": 4,
+          "medianSeconds": 0.007432390993926674,
+          "p95Seconds": 0.018511918984586373,
+          "minSeconds": 0.0051173369865864515,
+          "maxSeconds": 0.018511918984586373
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1
+      },
+      "phaseCounts": {
+        "checking_checkpoint": 6,
+        "fetching": 31,
+        "scanning": 12,
+        "committing": 36,
+        "handlers": 30,
+        "caught_up": 1
+      },
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "baseline",
+      "profile": "batch4",
+      "repeat": 2,
+      "pageSize": 16,
+      "batchSize": 4,
+      "indexedSeconds": 0.14255421399138868,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.04004340200000206,
+      "handlerSeconds": 0.0006827759999996487,
+      "transactionOverheadSeconds": 0.04003984000000128,
+      "requests": 15,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.015282811989891343,
+          "p95Seconds": 0.049915373005205765,
+          "minSeconds": 0.00569995999103412,
+          "maxSeconds": 0.049915373005205765
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.0045992244995431975,
+          "p95Seconds": 0.009686380013590679,
+          "minSeconds": 0.0038016260077711195,
+          "maxSeconds": 0.009686380013590679
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.01022244650812354,
+          "p95Seconds": 0.015602600993588567,
+          "minSeconds": 0.006912723009008914,
+          "maxSeconds": 0.015602600993588567
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.1853302069939673,
+          "p95Seconds": 0.20956000499427319,
+          "minSeconds": 0.13111787199159153,
+          "maxSeconds": 0.20956000499427319
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.23384911098401062,
+          "p95Seconds": 0.23384911098401062,
+          "minSeconds": 0.16315773598034866,
+          "maxSeconds": 0.23384911098401062
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.010007147007854655,
+          "decryptSeconds": 0.009686380013590679,
+          "decryptToCommitSeconds": 0.01428195898188278,
+          "commitToConsumerSeconds": 0.20956000499427319,
+          "prepToConsumerSeconds": 0.23384911098401062
+        },
+        {
+          "prepToDecryptSeconds": 0.014128360984614119,
+          "decryptSeconds": 0.004054488003021106,
+          "decryptToCommitSeconds": 0.010160745005123317,
+          "commitToConsumerSeconds": 0.20956000499427319,
+          "prepToConsumerSeconds": 0.23384911098401062
+        },
+        {
+          "prepToDecryptSeconds": 0.02843174198642373,
+          "decryptSeconds": 0.004122757993172854,
+          "decryptToCommitSeconds": 0.010284148011123762,
+          "commitToConsumerSeconds": 0.19513322098646313,
+          "prepToConsumerSeconds": 0.23384911098401062
+        },
+        {
+          "prepToDecryptSeconds": 0.049915373005205765,
+          "decryptSeconds": 0.005075691005913541,
+          "decryptToCommitSeconds": 0.008406544977333397,
+          "commitToConsumerSeconds": 0.17552719300147146,
+          "prepToConsumerSeconds": 0.23384911098401062
+        },
+        {
+          "prepToDecryptSeconds": 0.00569995999103412,
+          "decryptSeconds": 0.005546430009417236,
+          "decryptToCommitSeconds": 0.006912723009008914,
+          "commitToConsumerSeconds": 0.15054505298030563,
+          "prepToConsumerSeconds": 0.16315773598034866
+        },
+        {
+          "prepToDecryptSeconds": 0.016437262995168567,
+          "decryptSeconds": 0.0038016260077711195,
+          "decryptToCommitSeconds": 0.015602600993588567,
+          "commitToConsumerSeconds": 0.13111787199159153,
+          "prepToConsumerSeconds": 0.16315773598034866
+        }
+      ],
+      "graphql": {
+        "samples": 6,
+        "errors": [],
+        "latency": {
+          "samples": 6,
+          "medianSeconds": 0.007208882991108112,
+          "p95Seconds": 0.023079188977135345,
+          "minSeconds": 0.005075888009741902,
+          "maxSeconds": 0.023079188977135345
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+        "REVISION_CHANGED": 1
+      },
+      "phaseCounts": {},
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "baseline",
+      "profile": "default",
+      "repeat": 3,
+      "pageSize": 16,
+      "batchSize": 1,
+      "indexedSeconds": 0.4417716269963421,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.24459727999999725,
+      "handlerSeconds": 0.0009074820000005274,
+      "transactionOverheadSeconds": 0.13664848799999618,
+      "requests": 33,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.04819791699992493,
+          "p95Seconds": 0.31199369599926285,
+          "minSeconds": 0.011740795976947993,
+          "maxSeconds": 0.31199369599926285
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.006176772003527731,
+          "p95Seconds": 0.01126345299417153,
+          "minSeconds": 0.0045122840092517436,
+          "maxSeconds": 0.01126345299417153
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.009394124514074065,
+          "p95Seconds": 0.02041279399418272,
+          "minSeconds": 0.007772440992994234,
+          "maxSeconds": 0.02041279399418272
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.0903707154939184,
+          "p95Seconds": 0.11924369700136594,
+          "minSeconds": 0.053961512981913984,
+          "maxSeconds": 0.11924369700136594
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.16244151000864804,
+          "p95Seconds": 0.3737276499741711,
+          "minSeconds": 0.11754112498601899,
+          "maxSeconds": 0.3737276499741711
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.011740795976947993,
+          "decryptSeconds": 0.01126345299417153,
+          "decryptToCommitSeconds": 0.009887365013128147,
+          "commitToConsumerSeconds": 0.09591296399594285,
+          "prepToConsumerSeconds": 0.11754112498601899
+        },
+        {
+          "prepToDecryptSeconds": 0.02619295599288307,
+          "decryptSeconds": 0.004513538005994633,
+          "decryptToCommitSeconds": 0.008792818989604712,
+          "commitToConsumerSeconds": 0.0825553500035312,
+          "prepToConsumerSeconds": 0.11754112498601899
+        },
+        {
+          "prepToDecryptSeconds": 0.2415653329808265,
+          "decryptSeconds": 0.00814478300162591,
+          "decryptToCommitSeconds": 0.02041279399418272,
+          "commitToConsumerSeconds": 0.11174952299916185,
+          "prepToConsumerSeconds": 0.3737276499741711
+        },
+        {
+          "prepToDecryptSeconds": 0.31199369599926285,
+          "decryptSeconds": 0.0045122840092517436,
+          "decryptToCommitSeconds": 0.007772440992994234,
+          "commitToConsumerSeconds": 0.053961512981913984,
+          "prepToConsumerSeconds": 0.3737276499741711
+        },
+        {
+          "prepToDecryptSeconds": 0.027683674998115748,
+          "decryptSeconds": 0.007470860000466928,
+          "decryptToCommitSeconds": 0.015514138009166345,
+          "commitToConsumerSeconds": 0.11924369700136594,
+          "prepToConsumerSeconds": 0.16244151000864804
+        },
+        {
+          "prepToDecryptSeconds": 0.06871215900173411,
+          "decryptSeconds": 0.0048826840065885335,
+          "decryptToCommitSeconds": 0.008900884015019983,
+          "commitToConsumerSeconds": 0.08482846699189395,
+          "prepToConsumerSeconds": 0.16244151000864804
+        }
+      ],
+      "graphql": {
+        "samples": 10,
+        "errors": [],
+        "latency": {
+          "samples": 10,
+          "medianSeconds": 0.00596396200126037,
+          "p95Seconds": 0.020667619013693184,
+          "minSeconds": 0.0038939959777053446,
+          "maxSeconds": 0.020667619013693184
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+        "REVISION_CHANGED": 1
+      },
+      "phaseCounts": {},
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "candidate",
+      "profile": "default",
+      "repeat": 3,
+      "pageSize": 16,
+      "batchSize": 1,
+      "indexedSeconds": 0.27144236597814597,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.09291614699999719,
+      "handlerSeconds": 0.0010858230000012554,
+      "transactionOverheadSeconds": 0.11784642900000109,
+      "requests": 33,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.04112014849670231,
+          "p95Seconds": 0.14274195398320444,
+          "minSeconds": 0.011461877002147958,
+          "maxSeconds": 0.14274195398320444
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.005052050997619517,
+          "p95Seconds": 0.010959627019474283,
+          "minSeconds": 0.00384982000105083,
+          "maxSeconds": 0.010959627019474283
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.008408903988311067,
+          "p95Seconds": 0.016050456993980333,
+          "minSeconds": 0.006735991017194465,
+          "maxSeconds": 0.016050456993980333
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.2464154079934815,
+          "p95Seconds": 0.3414734980033245,
+          "minSeconds": 0.1300877500034403,
+          "maxSeconds": 0.3414734980033245
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.36245029998826794,
+          "p95Seconds": 0.36245029998826794,
+          "minSeconds": 0.20125267098774202,
+          "maxSeconds": 0.36245029998826794
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.011461877002147958,
+          "decryptSeconds": 0.010959627019474283,
+          "decryptToCommitSeconds": 0.009514924982795492,
+          "commitToConsumerSeconds": 0.3414734980033245,
+          "prepToConsumerSeconds": 0.36245029998826794
+        },
+        {
+          "prepToDecryptSeconds": 0.027125833003083244,
+          "decryptSeconds": 0.006105639011366293,
+          "decryptToCommitSeconds": 0.00872501198318787,
+          "commitToConsumerSeconds": 0.32659945500199683,
+          "prepToConsumerSeconds": 0.36245029998826794
+        },
+        {
+          "prepToDecryptSeconds": 0.07449904299573973,
+          "decryptSeconds": 0.004574471997329965,
+          "decryptToCommitSeconds": 0.008092795993434265,
+          "commitToConsumerSeconds": 0.27985846099909395,
+          "prepToConsumerSeconds": 0.36245029998826794
+        },
+        {
+          "prepToDecryptSeconds": 0.14274195398320444,
+          "decryptSeconds": 0.0039022419950924814,
+          "decryptToCommitSeconds": 0.006735991017194465,
+          "commitToConsumerSeconds": 0.21297235498786904,
+          "prepToConsumerSeconds": 0.36245029998826794
+        },
+        {
+          "prepToDecryptSeconds": 0.023397234006552026,
+          "decryptSeconds": 0.00384982000105083,
+          "decryptToCommitSeconds": 0.007429980993038043,
+          "commitToConsumerSeconds": 0.17042545598815195,
+          "prepToConsumerSeconds": 0.20125267098774202
+        },
+        {
+          "prepToDecryptSeconds": 0.05511446399032138,
+          "decryptSeconds": 0.005529629997909069,
+          "decryptToCommitSeconds": 0.016050456993980333,
+          "commitToConsumerSeconds": 0.1300877500034403,
+          "prepToConsumerSeconds": 0.20125267098774202
+        }
+      ],
+      "graphql": {
+        "samples": 9,
+        "errors": [],
+        "latency": {
+          "samples": 9,
+          "medianSeconds": 0.006537382985698059,
+          "p95Seconds": 0.021208274993114173,
+          "minSeconds": 0.003911417996278033,
+          "maxSeconds": 0.021208274993114173
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+        "REVISION_CHANGED": 2
+      },
+      "phaseCounts": {
+        "checking_checkpoint": 6,
+        "fetching": 67,
+        "scanning": 30,
+        "committing": 72,
+        "handlers": 30,
+        "caught_up": 1
+      },
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "baseline",
+      "profile": "batch4",
+      "repeat": 3,
+      "pageSize": 16,
+      "batchSize": 4,
+      "indexedSeconds": 0.15028701999108307,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.04531714300000113,
+      "handlerSeconds": 0.0010290970000050948,
+      "transactionOverheadSeconds": 0.04325042099999518,
+      "requests": 15,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.01700755899946671,
+          "p95Seconds": 0.05298738001147285,
+          "minSeconds": 0.004631260992027819,
+          "maxSeconds": 0.05298738001147285
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.004806517492397688,
+          "p95Seconds": 0.009395631001098081,
+          "minSeconds": 0.0040079600003082305,
+          "maxSeconds": 0.009395631001098081
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.010733831499237567,
+          "p95Seconds": 0.017842125002061948,
+          "minSeconds": 0.007690784987062216,
+          "maxSeconds": 0.017842125002061948
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.07838236400857568,
+          "p95Seconds": 0.12986224898486398,
+          "minSeconds": 0.02377674900344573,
+          "maxSeconds": 0.12986224898486398
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.11158890501246788,
+          "p95Seconds": 0.1679567509854678,
+          "minSeconds": 0.03679662599461153,
+          "maxSeconds": 0.1679567509854678
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.009693535015685484,
+          "decryptSeconds": 0.009395631001098081,
+          "decryptToCommitSeconds": 0.01625970099121332,
+          "commitToConsumerSeconds": 0.08563566900556907,
+          "prepToConsumerSeconds": 0.11158890501246788
+        },
+        {
+          "prepToDecryptSeconds": 0.013762741000391543,
+          "decryptSeconds": 0.0040079600003082305,
+          "decryptToCommitSeconds": 0.012190495006507263,
+          "commitToConsumerSeconds": 0.08563566900556907,
+          "prepToConsumerSeconds": 0.11158890501246788
+        },
+        {
+          "prepToDecryptSeconds": 0.03118267800891772,
+          "decryptSeconds": 0.005202861997531727,
+          "decryptToCommitSeconds": 0.009277167991967872,
+          "commitToConsumerSeconds": 0.07112905901158229,
+          "prepToConsumerSeconds": 0.11158890501246788
+        },
+        {
+          "prepToDecryptSeconds": 0.05298738001147285,
+          "decryptSeconds": 0.0043411439983174205,
+          "decryptToCommitSeconds": 0.007690784987062216,
+          "commitToConsumerSeconds": 0.05091074001393281,
+          "prepToConsumerSeconds": 0.11158890501246788
+        },
+        {
+          "prepToDecryptSeconds": 0.004631260992027819,
+          "decryptSeconds": 0.00441017298726365,
+          "decryptToCommitSeconds": 0.008388615999137983,
+          "commitToConsumerSeconds": 0.02377674900344573,
+          "prepToConsumerSeconds": 0.03679662599461153
+        },
+        {
+          "prepToDecryptSeconds": 0.020252376998541877,
+          "decryptSeconds": 0.007201752014225349,
+          "decryptToCommitSeconds": 0.017842125002061948,
+          "commitToConsumerSeconds": 0.12986224898486398,
+          "prepToConsumerSeconds": 0.1679567509854678
+        }
+      ],
+      "graphql": {
+        "samples": 6,
+        "errors": [],
+        "latency": {
+          "samples": 6,
+          "medianSeconds": 0.01100159648922272,
+          "p95Seconds": 0.021777179004857317,
+          "minSeconds": 0.004765684017911553,
+          "maxSeconds": 0.021777179004857317
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1
+      },
+      "phaseCounts": {},
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    },
+    {
+      "variant": "candidate",
+      "profile": "batch4",
+      "repeat": 3,
+      "pageSize": 16,
+      "batchSize": 4,
+      "indexedSeconds": 0.12729907300672494,
+      "blocks": 24,
+      "transactions": 6,
+      "fetchSeconds": 0.04074163700000099,
+      "handlerSeconds": 0.000845299000002342,
+      "transactionOverheadSeconds": 0.03265505999999641,
+      "requests": 15,
+      "receiptCount": 12,
+      "publishedNotes": 6,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.015375340488390066,
+          "p95Seconds": 0.04917609700351022,
+          "minSeconds": 0.004685604973929003,
+          "maxSeconds": 0.04917609700351022
+        },
+        "decryptSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.004141398007050157,
+          "p95Seconds": 0.009408277022885159,
+          "minSeconds": 0.0038534679915755987,
+          "maxSeconds": 0.009408277022885159
+        },
+        "decryptToCommitSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.008123400999465957,
+          "p95Seconds": 0.016177408979274333,
+          "minSeconds": 0.0068320689897518605,
+          "maxSeconds": 0.016177408979274333
+        },
+        "commitToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.06357221549842507,
+          "p95Seconds": 0.08487804801552556,
+          "minSeconds": 0.01987156001268886,
+          "maxSeconds": 0.08487804801552556
+        },
+        "prepToConsumerSeconds": {
+          "samples": 6,
+          "medianSeconds": 0.11078367999289185,
+          "p95Seconds": 0.11078367999289185,
+          "minSeconds": 0.04342952198931016,
+          "maxSeconds": 0.11078367999289185
+        }
+      },
+      "selectedTiming": [
+        {
+          "prepToDecryptSeconds": 0.009728222998091951,
+          "decryptSeconds": 0.009408277022885159,
+          "decryptToCommitSeconds": 0.016177408979274333,
+          "commitToConsumerSeconds": 0.08487804801552556,
+          "prepToConsumerSeconds": 0.11078367999289185
+        },
+        {
+          "prepToDecryptSeconds": 0.014024787989910692,
+          "decryptSeconds": 0.0042589039949234575,
+          "decryptToCommitSeconds": 0.011880843987455592,
+          "commitToConsumerSeconds": 0.08487804801552556,
+          "prepToConsumerSeconds": 0.11078367999289185
+        },
+        {
+          "prepToDecryptSeconds": 0.02979820399195887,
+          "decryptSeconds": 0.0038534679915755987,
+          "decryptToCommitSeconds": 0.008258710993686691,
+          "commitToConsumerSeconds": 0.07272676500724629,
+          "prepToConsumerSeconds": 0.11078367999289185
+        },
+        {
+          "prepToDecryptSeconds": 0.04917609700351022,
+          "decryptSeconds": 0.004023892019176856,
+          "decryptToCommitSeconds": 0.007189916999777779,
+          "commitToConsumerSeconds": 0.05441766598960385,
+          "prepToConsumerSeconds": 0.11078367999289185
+        },
+        {
+          "prepToDecryptSeconds": 0.004685604973929003,
+          "decryptSeconds": 0.004416896990733221,
+          "decryptToCommitSeconds": 0.007988091005245224,
+          "commitToConsumerSeconds": 0.030755826010135934,
+          "prepToConsumerSeconds": 0.04342952198931016
+        },
+        {
+          "prepToDecryptSeconds": 0.01672589298686944,
+          "decryptSeconds": 0.0040164389938581735,
+          "decryptToCommitSeconds": 0.0068320689897518605,
+          "commitToConsumerSeconds": 0.01987156001268886,
+          "prepToConsumerSeconds": 0.04342952198931016
+        }
+      ],
+      "graphql": {
+        "samples": 4,
+        "errors": [],
+        "latency": {
+          "samples": 4,
+          "medianSeconds": 0.00715845801460091,
+          "p95Seconds": 0.014705967012559995,
+          "minSeconds": 0.003533912997227162,
+          "maxSeconds": 0.014705967012559995
+        }
+      },
+      "consumerWaits": {
+        "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1
+      },
+      "phaseCounts": {
+        "checking_checkpoint": 6,
+        "fetching": 31,
+        "scanning": 12,
+        "committing": 36,
+        "handlers": 30,
+        "caught_up": 1
+      },
+      "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+      "noOpResumeIdentical": true
+    }
+  ],
+  "keysUploaded": false,
+  "newTransactionsBroadcast": false,
+  "unit": "seconds",
+  "verification": {
+    "operatorKeyStayedLocal": true,
+    "temporaryKeyCopyRemoved": true,
+    "sourceBlocksBefore": 4536306,
+    "sourceBlocksAfter": 4536338,
+    "backgroundPublishedBlocks": 32,
+    "scannerSha256": "1a24bcc9f066466ec9dab902b21d8619c8a4a5fffdd1a2c2d8fc099b3fa6b00c",
+    "readerCpuAffinity": [
+      0,
+      1
+    ],
+    "followerCpuAffinity": [
+      4
+    ],
+    "chefScannerPostgresCpuAffinity": [
+      2,
+      3
+    ],
+    "hardMemoryCgroupLimit": false,
+    "cache": "Warm; no drops",
+    "source": "Existing actual testnet archive while local Prep follower ingests through read-only SSH to existing Zebra",
+    "canonicalSourceChecksBeforeAndAfter": 12,
+    "readerBinarySha256": "732605c599fcae2256e0498349daf0b17a4fe07932e544532e00956d92f5c563"
+  },
+  "groups": [
+    {
+      "variant": "baseline",
+      "profile": "default",
+      "medianIndexSeconds": 0.4417716269963421,
+      "querySamples": 28,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.06137433651019819,
+          "p95Seconds": 0.31199369599926285
+        },
+        "decryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.005525505999685265,
+          "p95Seconds": 0.02214103698497638
+        },
+        "decryptToCommitSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.011727008008165285,
+          "p95Seconds": 0.037247708009090275
+        },
+        "commitToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.16787361400201917,
+          "p95Seconds": 0.49720002099638805
+        },
+        "prepToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.37233301100786775,
+          "p95Seconds": 0.5575247160159051
+        }
+      },
+      "medianPrepRequests": 33
+    },
+    {
+      "variant": "baseline",
+      "profile": "batch4",
+      "medianIndexSeconds": 0.15028701999108307,
+      "querySamples": 18,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.015282811989891343,
+          "p95Seconds": 0.053853075980441645
+        },
+        "decryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.004615447498508729,
+          "p95Seconds": 0.009686380013590679
+        },
+        "decryptToCommitSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.010420018501463346,
+          "p95Seconds": 0.02355640899622813
+        },
+        "commitToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.08563566900556907,
+          "p95Seconds": 0.20956000499427319
+        },
+        "prepToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.11509758897591382,
+          "p95Seconds": 0.23384911098401062
+        }
+      },
+      "medianPrepRequests": 15
+    },
+    {
+      "variant": "candidate",
+      "profile": "default",
+      "medianIndexSeconds": 0.28932414698647335,
+      "querySamples": 24,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.04983283148612827,
+          "p95Seconds": 0.18605408299481496
+        },
+        "decryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.004503174495766871,
+          "p95Seconds": 0.011434117011958733
+        },
+        "decryptToCommitSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.008779321011388674,
+          "p95Seconds": 0.016050456993980333
+        },
+        "commitToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.23172813099517953,
+          "p95Seconds": 0.3475862169871107
+        },
+        "prepToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.36245029998826794,
+          "p95Seconds": 0.37410692698904313
+        }
+      },
+      "medianPrepRequests": 33
+    },
+    {
+      "variant": "candidate",
+      "profile": "batch4",
+      "medianIndexSeconds": 0.13299457501852885,
+      "querySamples": 16,
+      "stages": {
+        "prepToDecryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.0164113309874665,
+          "p95Seconds": 0.05675541298114695
+        },
+        "decryptSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.004364524997072294,
+          "p95Seconds": 0.01124075602274388
+        },
+        "decryptToCommitSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.008895002494682558,
+          "p95Seconds": 0.01727968399063684
+        },
+        "commitToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.07669082500797231,
+          "p95Seconds": 0.13464375500916503
+        },
+        "prepToConsumerSeconds": {
+          "samples": 18,
+          "medianSeconds": 0.11078367999289185,
+          "p95Seconds": 0.16360457800328732
+        }
+      },
+      "medianPrepRequests": 15
+    }
+  ],
+  "limitations": [
+    "Same six previously mined transactions repeated over three fresh namespaces per profile/SDK; correlated samples, not future-live latency.",
+    "Private consumer polls at0.100s; successful GraphQL probes pause0.050s; observations include polling bounds.",
+    "Source acquisition/mining/confirmation time excluded; native scan includes child startup on first call.",
+    "Timing compares local WSL paths/affinity, not VPS quotas or public ingress.",
+    "Reader binary built before the additive Prep build-info endpoint; query and operational startup path same measured source delta.",
+    "Profile results do not change published defaults."
+  ],
+  "controlledRecovery": {
+    "passed": true,
+    "entityCount": 1601,
+    "cliProcesses": 8,
+    "checks": {
+      "initial_projection": true,
+      "unready_gate_and_cached_heartbeat": true,
+      "transport_wait_preserves_projection": true,
+      "backlog_above_1024": true,
+      "restart_checkpoint_revision_entities_exact": true,
+      "bounded_sqlite_consumer_reopens_without_duplicates": true,
+      "owned_namespace_removed": true
+    },
+    "scenario": "Synthetic testnet-compatible source interruption and1569-block catch-up; no key or natural reorg."
+  },
+  "linuxAcceptance": {
+    "exitCode": 0,
+    "tests": 204,
+    "pass": 204,
+    "fail": 0,
+    "skipped": 0,
+    "nativeScanner": true,
+    "postgresql": true
+  },
+  "resourceCohort": {
+    "processTree": {
+      "userCpuSeconds": 1.66,
+      "systemCpuSeconds": 0.41,
+      "largestChildMaxRssKiB": 134708,
+      "elapsedSeconds": 3.82
+    },
+    "scope": "Separate6-run candidate resource cohort; usr/bin/time accounts completed Node/native child job, excluding separately running PostgreSQL,Prep and follower. MaxRSS is largest process high-water, not summed concurrent memory.",
+    "reader": {
+      "cpuSeconds": 0.08999999999999986,
+      "rssAtStartBytes": 100761600,
+      "rssAtEndBytes": 100892672
+    },
+    "follower": {
+      "cpuSeconds": 0.3200000000000003,
+      "rssAtStartBytes": 102035456,
+      "rssAtEndBytes": 124198912
+    },
+    "temporaryKeyCopyRemoved": true,
+    "measurements": [
+      {
+        "variant": "candidate",
+        "profile": "default",
+        "repeat": 1,
+        "pageSize": 16,
+        "batchSize": 1,
+        "indexedSeconds": 0.330010770005174,
+        "blocks": 24,
+        "transactions": 6,
+        "fetchSeconds": 0.11029034099999967,
+        "handlerSeconds": 0.002863275999999587,
+        "transactionOverheadSeconds": 0.15453556900000012,
+        "requests": 33,
+        "receiptCount": 12,
+        "publishedNotes": 6,
+        "stages": {
+          "prepToDecryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.05474204299389385,
+            "p95Seconds": 0.1786173339933157,
+            "minSeconds": 0.018774791999021545,
+            "maxSeconds": 0.1786173339933157
+          },
+          "decryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.003608673985581845,
+            "p95Seconds": 0.018115863000275567,
+            "minSeconds": 0.003460165986325592,
+            "maxSeconds": 0.018115863000275567
+          },
+          "decryptToCommitSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.01325482249376364,
+            "p95Seconds": 0.019501711009070277,
+            "minSeconds": 0.008175680006388575,
+            "maxSeconds": 0.019501711009070277
+          },
+          "commitToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.24173638901265804,
+            "p95Seconds": 0.35907407000195235,
+            "minSeconds": 0.11292177400900982,
+            "maxSeconds": 0.35907407000195235
+          },
+          "prepToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.39337388399872,
+            "p95Seconds": 0.39337388399872,
+            "minSeconds": 0.19206321900128387,
+            "maxSeconds": 0.39337388399872
+          }
+        },
+        "selectedTiming": [
+          {
+            "prepToDecryptSeconds": 0.018774791999021545,
+            "decryptSeconds": 0.018115863000275567,
+            "decryptToCommitSeconds": 0.01552502199774608,
+            "commitToConsumerSeconds": 0.35907407000195235,
+            "prepToConsumerSeconds": 0.39337388399872
+          },
+          {
+            "prepToDecryptSeconds": 0.03851832100190222,
+            "decryptSeconds": 0.004049195995321497,
+            "decryptToCommitSeconds": 0.010973452997859567,
+            "commitToConsumerSeconds": 0.3438821099989582,
+            "prepToConsumerSeconds": 0.39337388399872
+          },
+          {
+            "prepToDecryptSeconds": 0.09607129599316977,
+            "decryptSeconds": 0.003460165986325592,
+            "decryptToCommitSeconds": 0.01760173699585721,
+            "commitToConsumerSeconds": 0.279700851009693,
+            "prepToConsumerSeconds": 0.39337388399872
+          },
+          {
+            "prepToDecryptSeconds": 0.1786173339933157,
+            "decryptSeconds": 0.003582181001547724,
+            "decryptToCommitSeconds": 0.010984622989781201,
+            "commitToConsumerSeconds": 0.20377192701562308,
+            "prepToConsumerSeconds": 0.39337388399872
+          },
+          {
+            "prepToDecryptSeconds": 0.022791222989326343,
+            "decryptSeconds": 0.0036128679930698127,
+            "decryptToCommitSeconds": 0.019501711009070277,
+            "commitToConsumerSeconds": 0.14977028500288725,
+            "prepToConsumerSeconds": 0.19206321900128387
+          },
+          {
+            "prepToDecryptSeconds": 0.07096576498588547,
+            "decryptSeconds": 0.0036044799780938774,
+            "decryptToCommitSeconds": 0.008175680006388575,
+            "commitToConsumerSeconds": 0.11292177400900982,
+            "prepToConsumerSeconds": 0.19206321900128387
+          }
+        ],
+        "graphql": {
+          "samples": 7,
+          "errors": [],
+          "latency": {
+            "samples": 7,
+            "medianSeconds": 0.009995930013246834,
+            "p95Seconds": 0.05817050699261017,
+            "minSeconds": 0.006594782025786117,
+            "maxSeconds": 0.05817050699261017
+          }
+        },
+        "consumerWaits": {
+          "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+          "REVISION_CHANGED": 2
+        },
+        "phaseCounts": {
+          "checking_checkpoint": 6,
+          "fetching": 67,
+          "scanning": 30,
+          "committing": 72,
+          "handlers": 30,
+          "caught_up": 1
+        },
+        "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+        "noOpResumeIdentical": true,
+        "resource": {
+          "nodeUserCpuSeconds": 0.343145,
+          "nodeSystemCpuSeconds": 0.07072,
+          "nodeRssAtReportBytes": 114479104,
+          "nodeProcessLifetimeMaxRssKiB": 111796,
+          "scope": "Node process setup,indexing,polling and validation through report; excludes native child,PostgreSQL,Prep and cleanup; maxRSS is process-lifetime high-water"
+        }
+      },
+      {
+        "variant": "candidate",
+        "profile": "batch4",
+        "repeat": 1,
+        "pageSize": 16,
+        "batchSize": 4,
+        "indexedSeconds": 0.11503304599318653,
+        "blocks": 24,
+        "transactions": 6,
+        "fetchSeconds": 0.0351947909999999,
+        "handlerSeconds": 0.0008801619999999274,
+        "transactionOverheadSeconds": 0.03085243500000047,
+        "requests": 15,
+        "receiptCount": 12,
+        "publishedNotes": 6,
+        "stages": {
+          "prepToDecryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.013632270507514477,
+            "p95Seconds": 0.04522205499233678,
+            "minSeconds": 0.0037368530174717307,
+            "maxSeconds": 0.04522205499233678
+          },
+          "decryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.0036979350115871057,
+            "p95Seconds": 0.008944342989707366,
+            "minSeconds": 0.0033247650135308504,
+            "maxSeconds": 0.008944342989707366
+          },
+          "decryptToCommitSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.007740337503491901,
+            "p95Seconds": 0.014007635996676981,
+            "minSeconds": 0.007272464979905635,
+            "maxSeconds": 0.014007635996676981
+          },
+          "commitToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.07177303048956674,
+            "p95Seconds": 0.09243301500100642,
+            "minSeconds": 0.03064788898336701,
+            "maxSeconds": 0.09243301500100642
+          },
+          "prepToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.1156702839944046,
+            "p95Seconds": 0.1156702839944046,
+            "minSeconds": 0.05232106600305997,
+            "maxSeconds": 0.1156702839944046
+          }
+        },
+        "selectedTiming": [
+          {
+            "prepToDecryptSeconds": 0.009229632996721193,
+            "decryptSeconds": 0.008944342989707366,
+            "decryptToCommitSeconds": 0.014007635996676981,
+            "commitToConsumerSeconds": 0.09243301500100642,
+            "prepToConsumerSeconds": 0.1156702839944046
+          },
+          {
+            "prepToDecryptSeconds": 0.012885172007372603,
+            "decryptSeconds": 0.003431104007177055,
+            "decryptToCommitSeconds": 0.010352096986025572,
+            "commitToConsumerSeconds": 0.09243301500100642,
+            "prepToConsumerSeconds": 0.1156702839944046
+          },
+          {
+            "prepToDecryptSeconds": 0.027091777010355145,
+            "decryptSeconds": 0.0038038520142436028,
+            "decryptToCommitSeconds": 0.008147763990564272,
+            "commitToConsumerSeconds": 0.08043074299348518,
+            "prepToConsumerSeconds": 0.1156702839944046
+          },
+          {
+            "prepToDecryptSeconds": 0.04522205499233678,
+            "decryptSeconds": 0.003815871983533725,
+            "decryptToCommitSeconds": 0.00733291101641953,
+            "commitToConsumerSeconds": 0.06311531798564829,
+            "prepToConsumerSeconds": 0.1156702839944046
+          },
+          {
+            "prepToDecryptSeconds": 0.0037368530174717307,
+            "decryptSeconds": 0.0035920180089306086,
+            "decryptToCommitSeconds": 0.007272464979905635,
+            "commitToConsumerSeconds": 0.0413117480056826,
+            "prepToConsumerSeconds": 0.05232106600305997
+          },
+          {
+            "prepToDecryptSeconds": 0.01437936900765635,
+            "decryptSeconds": 0.0033247650135308504,
+            "decryptToCommitSeconds": 0.007293808012036607,
+            "commitToConsumerSeconds": 0.03064788898336701,
+            "prepToConsumerSeconds": 0.05232106600305997
+          }
+        ],
+        "graphql": {
+          "samples": 4,
+          "errors": [],
+          "latency": {
+            "samples": 4,
+            "medianSeconds": 0.006831534512457438,
+            "p95Seconds": 0.01700649698614143,
+            "minSeconds": 0.005388894001953304,
+            "maxSeconds": 0.01700649698614143
+          }
+        },
+        "consumerWaits": {
+          "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1
+        },
+        "phaseCounts": {
+          "checking_checkpoint": 6,
+          "fetching": 31,
+          "scanning": 12,
+          "committing": 36,
+          "handlers": 30,
+          "caught_up": 1
+        },
+        "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+        "noOpResumeIdentical": true,
+        "resource": {
+          "nodeUserCpuSeconds": 0.086476,
+          "nodeSystemCpuSeconds": 0.021528,
+          "nodeRssAtReportBytes": 116838400,
+          "nodeProcessLifetimeMaxRssKiB": 114100,
+          "scope": "Node process setup,indexing,polling and validation through report; excludes native child,PostgreSQL,Prep and cleanup; maxRSS is process-lifetime high-water"
+        }
+      },
+      {
+        "variant": "candidate",
+        "profile": "default",
+        "repeat": 2,
+        "pageSize": 16,
+        "batchSize": 1,
+        "indexedSeconds": 0.300270711974008,
+        "blocks": 24,
+        "transactions": 6,
+        "fetchSeconds": 0.09750989699999923,
+        "handlerSeconds": 0.0009425669999991442,
+        "transactionOverheadSeconds": 0.13635996800000022,
+        "requests": 33,
+        "receiptCount": 12,
+        "publishedNotes": 6,
+        "stages": {
+          "prepToDecryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.044530689003295265,
+            "p95Seconds": 0.1306877940078266,
+            "minSeconds": 0.009058051015017554,
+            "maxSeconds": 0.1306877940078266
+          },
+          "decryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.004395999509142712,
+            "p95Seconds": 0.019972239999333397,
+            "minSeconds": 0.003624859993578866,
+            "maxSeconds": 0.019972239999333397
+          },
+          "decryptToCommitSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.008635635997052304,
+            "p95Seconds": 0.020647619996452704,
+            "minSeconds": 0.0074101150094065815,
+            "maxSeconds": 0.020647619996452704
+          },
+          "commitToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.2664149290067144,
+            "p95Seconds": 0.35309605300426483,
+            "minSeconds": 0.09898812000756152,
+            "maxSeconds": 0.35309605300426483
+          },
+          "prepToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.3710067270149011,
+            "p95Seconds": 0.3710067270149011,
+            "minSeconds": 0.21752161500626244,
+            "maxSeconds": 0.3710067270149011
+          }
+        },
+        "selectedTiming": [
+          {
+            "prepToDecryptSeconds": 0.009058051015017554,
+            "decryptSeconds": 0.008662191015901044,
+            "decryptToCommitSeconds": 0.00885262299561873,
+            "commitToConsumerSeconds": 0.35309605300426483,
+            "prepToConsumerSeconds": 0.3710067270149011
+          },
+          {
+            "prepToDecryptSeconds": 0.021578796004178002,
+            "decryptSeconds": 0.003624859993578866,
+            "decryptToCommitSeconds": 0.007780920015648007,
+            "commitToConsumerSeconds": 0.3416470109950751,
+            "prepToConsumerSeconds": 0.3710067270149011
+          },
+          {
+            "prepToDecryptSeconds": 0.06266703800065443,
+            "decryptSeconds": 0.003772744006710127,
+            "decryptToCommitSeconds": 0.0074101150094065815,
+            "commitToConsumerSeconds": 0.3009295740048401,
+            "prepToConsumerSeconds": 0.3710067270149011
+          },
+          {
+            "prepToDecryptSeconds": 0.1306877940078266,
+            "decryptSeconds": 0.0050192550115752965,
+            "decryptToCommitSeconds": 0.008418648998485878,
+            "commitToConsumerSeconds": 0.23190028400858864,
+            "prepToConsumerSeconds": 0.3710067270149011
+          },
+          {
+            "prepToDecryptSeconds": 0.0263943400059361,
+            "decryptSeconds": 0.0036902150022797287,
+            "decryptToCommitSeconds": 0.009698078007204458,
+            "commitToConsumerSeconds": 0.18142919699312188,
+            "prepToConsumerSeconds": 0.21752161500626244
+          },
+          {
+            "prepToDecryptSeconds": 0.09788587500224821,
+            "decryptSeconds": 0.019972239999333397,
+            "decryptToCommitSeconds": 0.020647619996452704,
+            "commitToConsumerSeconds": 0.09898812000756152,
+            "prepToConsumerSeconds": 0.21752161500626244
+          }
+        ],
+        "graphql": {
+          "samples": 7,
+          "errors": [],
+          "latency": {
+            "samples": 7,
+            "medianSeconds": 0.006742391997249797,
+            "p95Seconds": 0.017315313016297296,
+            "minSeconds": 0.0049977650051005185,
+            "maxSeconds": 0.017315313016297296
+          }
+        },
+        "consumerWaits": {
+          "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+          "REVISION_CHANGED": 2
+        },
+        "phaseCounts": {
+          "checking_checkpoint": 6,
+          "fetching": 67,
+          "scanning": 30,
+          "committing": 72,
+          "handlers": 30,
+          "caught_up": 1
+        },
+        "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+        "noOpResumeIdentical": true,
+        "resource": {
+          "nodeUserCpuSeconds": 0.151305,
+          "nodeSystemCpuSeconds": 0.062221,
+          "nodeRssAtReportBytes": 119590912,
+          "nodeProcessLifetimeMaxRssKiB": 116788,
+          "scope": "Node process setup,indexing,polling and validation through report; excludes native child,PostgreSQL,Prep and cleanup; maxRSS is process-lifetime high-water"
+        }
+      },
+      {
+        "variant": "candidate",
+        "profile": "batch4",
+        "repeat": 2,
+        "pageSize": 16,
+        "batchSize": 4,
+        "indexedSeconds": 0.1588346089993138,
+        "blocks": 24,
+        "transactions": 6,
+        "fetchSeconds": 0.04632837699999846,
+        "handlerSeconds": 0.0011148950000015247,
+        "transactionOverheadSeconds": 0.05564701399999876,
+        "requests": 15,
+        "receiptCount": 12,
+        "publishedNotes": 6,
+        "stages": {
+          "prepToDecryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.018764980006380938,
+            "p95Seconds": 0.0586136769852601,
+            "minSeconds": 0.004176646994892508,
+            "maxSeconds": 0.0586136769852601
+          },
+          "decryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.004161798002314754,
+            "p95Seconds": 0.009872564987745136,
+            "minSeconds": 0.0037456290156114846,
+            "maxSeconds": 0.009872564987745136
+          },
+          "decryptToCommitSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.015442914998857304,
+            "p95Seconds": 0.021602862019790336,
+            "minSeconds": 0.008205785998143256,
+            "maxSeconds": 0.021602862019790336
+          },
+          "commitToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.18451687101332936,
+            "p95Seconds": 0.21005445899209008,
+            "minSeconds": 0.11654040499706753,
+            "maxSeconds": 0.21005445899209008
+          },
+          "prepToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.24183185800211504,
+            "p95Seconds": 0.24183185800211504,
+            "minSeconds": 0.16011250999872573,
+            "maxSeconds": 0.24183185800211504
+          }
+        },
+        "selectedTiming": [
+          {
+            "prepToDecryptSeconds": 0.010174536990234628,
+            "decryptSeconds": 0.009872564987745136,
+            "decryptToCommitSeconds": 0.021602862019790336,
+            "commitToConsumerSeconds": 0.21005445899209008,
+            "prepToConsumerSeconds": 0.24183185800211504
+          },
+          {
+            "prepToDecryptSeconds": 0.01397833600640297,
+            "decryptSeconds": 0.0037456290156114846,
+            "decryptToCommitSeconds": 0.017799063003621995,
+            "commitToConsumerSeconds": 0.21005445899209008,
+            "prepToConsumerSeconds": 0.24183185800211504
+          },
+          {
+            "prepToDecryptSeconds": 0.03622093898593448,
+            "decryptSeconds": 0.00435473199468106,
+            "decryptToCommitSeconds": 0.011589572008233517,
+            "commitToConsumerSeconds": 0.19402134700794704,
+            "prepToConsumerSeconds": 0.24183185800211504
+          },
+          {
+            "prepToDecryptSeconds": 0.0586136769852601,
+            "decryptSeconds": 0.003922114003216848,
+            "decryptToCommitSeconds": 0.008205785998143256,
+            "commitToConsumerSeconds": 0.1750123950187117,
+            "prepToConsumerSeconds": 0.24183185800211504
+          },
+          {
+            "prepToDecryptSeconds": 0.004176646994892508,
+            "decryptSeconds": 0.003968864009948447,
+            "decryptToCommitSeconds": 0.013086766994092613,
+            "commitToConsumerSeconds": 0.1428490960097406,
+            "prepToConsumerSeconds": 0.16011250999872573
+          },
+          {
+            "prepToDecryptSeconds": 0.023551624006358907,
+            "decryptSeconds": 0.006250819016713649,
+            "decryptToCommitSeconds": 0.020020480995299295,
+            "commitToConsumerSeconds": 0.11654040499706753,
+            "prepToConsumerSeconds": 0.16011250999872573
+          }
+        ],
+        "graphql": {
+          "samples": 6,
+          "errors": [],
+          "latency": {
+            "samples": 6,
+            "medianSeconds": 0.006810780498199165,
+            "p95Seconds": 0.022357631009072065,
+            "minSeconds": 0.004980963014531881,
+            "maxSeconds": 0.022357631009072065
+          }
+        },
+        "consumerWaits": {
+          "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+          "REVISION_CHANGED": 1
+        },
+        "phaseCounts": {
+          "checking_checkpoint": 6,
+          "fetching": 31,
+          "scanning": 12,
+          "committing": 36,
+          "handlers": 30,
+          "caught_up": 1
+        },
+        "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+        "noOpResumeIdentical": true,
+        "resource": {
+          "nodeUserCpuSeconds": 0.10054,
+          "nodeSystemCpuSeconds": 0.038309,
+          "nodeRssAtReportBytes": 126406656,
+          "nodeProcessLifetimeMaxRssKiB": 123444,
+          "scope": "Node process setup,indexing,polling and validation through report; excludes native child,PostgreSQL,Prep and cleanup; maxRSS is process-lifetime high-water"
+        }
+      },
+      {
+        "variant": "candidate",
+        "profile": "default",
+        "repeat": 3,
+        "pageSize": 16,
+        "batchSize": 1,
+        "indexedSeconds": 0.2637414600176271,
+        "blocks": 24,
+        "transactions": 6,
+        "fetchSeconds": 0.09223267300000043,
+        "handlerSeconds": 0.0008337020000008125,
+        "transactionOverheadSeconds": 0.11738176799999839,
+        "requests": 33,
+        "receiptCount": 12,
+        "publishedNotes": 6,
+        "stages": {
+          "prepToDecryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.04083284849184565,
+            "p95Seconds": 0.13305878499522805,
+            "minSeconds": 0.00905049400171265,
+            "maxSeconds": 0.13305878499522805
+          },
+          "decryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.0036836064828094095,
+            "p95Seconds": 0.0086412180098705,
+            "minSeconds": 0.0034418839786667377,
+            "maxSeconds": 0.0086412180098705
+          },
+          "decryptToCommitSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.008085351015324704,
+            "p95Seconds": 0.01631903400993906,
+            "minSeconds": 0.006776826019631699,
+            "maxSeconds": 0.01631903400993906
+          },
+          "commitToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.2530427985038841,
+            "p95Seconds": 0.3422994480060879,
+            "minSeconds": 0.13149933100794442,
+            "maxSeconds": 0.3422994480060879
+          },
+          "prepToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.359818085009465,
+            "p95Seconds": 0.359818085009465,
+            "minSeconds": 0.2044865390053019,
+            "maxSeconds": 0.359818085009465
+          }
+        },
+        "selectedTiming": [
+          {
+            "prepToDecryptSeconds": 0.00905049400171265,
+            "decryptSeconds": 0.0086412180098705,
+            "decryptToCommitSeconds": 0.00846814300166443,
+            "commitToConsumerSeconds": 0.3422994480060879,
+            "prepToConsumerSeconds": 0.359818085009465
+          },
+          {
+            "prepToDecryptSeconds": 0.02117261299281381,
+            "decryptSeconds": 0.0036126779741607606,
+            "decryptToCommitSeconds": 0.006776826019631699,
+            "commitToConsumerSeconds": 0.3318686459970195,
+            "prepToConsumerSeconds": 0.359818085009465
+          },
+          {
+            "prepToDecryptSeconds": 0.06482616500579752,
+            "decryptSeconds": 0.003593831992475316,
+            "decryptToCommitSeconds": 0.007541172992205247,
+            "commitToConsumerSeconds": 0.2874507470114622,
+            "prepToConsumerSeconds": 0.359818085009465
+          },
+          {
+            "prepToDecryptSeconds": 0.13305878499522805,
+            "decryptSeconds": 0.0034418839786667377,
+            "decryptToCommitSeconds": 0.00812445001793094,
+            "commitToConsumerSeconds": 0.218634849996306,
+            "prepToConsumerSeconds": 0.359818085009465
+          },
+          {
+            "prepToDecryptSeconds": 0.024997522996272892,
+            "decryptSeconds": 0.0037545349914580584,
+            "decryptToCommitSeconds": 0.008046252012718469,
+            "commitToConsumerSeconds": 0.17144276399631053,
+            "prepToConsumerSeconds": 0.2044865390053019
+          },
+          {
+            "prepToDecryptSeconds": 0.05666817398741841,
+            "decryptSeconds": 0.00394182198215276,
+            "decryptToCommitSeconds": 0.01631903400993906,
+            "commitToConsumerSeconds": 0.13149933100794442,
+            "prepToConsumerSeconds": 0.2044865390053019
+          }
+        ],
+        "graphql": {
+          "samples": 9,
+          "errors": [],
+          "latency": {
+            "samples": 9,
+            "medianSeconds": 0.006167718005599454,
+            "p95Seconds": 0.016605145996436477,
+            "minSeconds": 0.0038494470063596964,
+            "maxSeconds": 0.016605145996436477
+          }
+        },
+        "consumerWaits": {
+          "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1,
+          "REVISION_CHANGED": 2
+        },
+        "phaseCounts": {
+          "checking_checkpoint": 6,
+          "fetching": 67,
+          "scanning": 30,
+          "committing": 72,
+          "handlers": 30,
+          "caught_up": 1
+        },
+        "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+        "noOpResumeIdentical": true,
+        "resource": {
+          "nodeUserCpuSeconds": 0.154949,
+          "nodeSystemCpuSeconds": 0.047544,
+          "nodeRssAtReportBytes": 137023488,
+          "nodeProcessLifetimeMaxRssKiB": 133812,
+          "scope": "Node process setup,indexing,polling and validation through report; excludes native child,PostgreSQL,Prep and cleanup; maxRSS is process-lifetime high-water"
+        }
+      },
+      {
+        "variant": "candidate",
+        "profile": "batch4",
+        "repeat": 3,
+        "pageSize": 16,
+        "batchSize": 4,
+        "indexedSeconds": 0.15125301401712932,
+        "blocks": 24,
+        "transactions": 6,
+        "fetchSeconds": 0.0461176660000001,
+        "handlerSeconds": 0.0012919890000002853,
+        "transactionOverheadSeconds": 0.04655508299999929,
+        "requests": 15,
+        "receiptCount": 12,
+        "publishedNotes": 6,
+        "stages": {
+          "prepToDecryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.018463968503056094,
+            "p95Seconds": 0.0555287960160058,
+            "minSeconds": 0.004801631992449984,
+            "maxSeconds": 0.0555287960160058
+          },
+          "decryptSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.004640024490072392,
+            "p95Seconds": 0.010414751013740897,
+            "minSeconds": 0.003852038993500173,
+            "maxSeconds": 0.010414751013740897
+          },
+          "decryptToCommitSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.01299315900541842,
+            "p95Seconds": 0.019294133002404124,
+            "minSeconds": 0.007789105991832912,
+            "maxSeconds": 0.019294133002404124
+          },
+          "commitToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.07800791699264664,
+            "p95Seconds": 0.1214848669769708,
+            "minSeconds": 0.025383522995980456,
+            "maxSeconds": 0.1214848669769708
+          },
+          "prepToConsumerSeconds": {
+            "samples": 6,
+            "medianSeconds": 0.11568529400392435,
+            "p95Seconds": 0.16140597898629494,
+            "minSeconds": 0.039525731990579516,
+            "maxSeconds": 0.16140597898629494
+          }
+        },
+        "selectedTiming": [
+          {
+            "prepToDecryptSeconds": 0.010729438014095649,
+            "decryptSeconds": 0.010414751013740897,
+            "decryptToCommitSeconds": 0.019294133002404124,
+            "commitToConsumerSeconds": 0.08566172298742458,
+            "prepToConsumerSeconds": 0.11568529400392435
+          },
+          {
+            "prepToDecryptSeconds": 0.015436449000844732,
+            "decryptSeconds": 0.004652326984796673,
+            "decryptToCommitSeconds": 0.01458712201565504,
+            "commitToConsumerSeconds": 0.08566172298742458,
+            "prepToConsumerSeconds": 0.11568529400392435
+          },
+          {
+            "prepToDecryptSeconds": 0.033931987010873854,
+            "decryptSeconds": 0.003852038993500173,
+            "decryptToCommitSeconds": 0.011399195995181799,
+            "commitToConsumerSeconds": 0.0703541109978687,
+            "prepToConsumerSeconds": 0.11568529400392435
+          },
+          {
+            "prepToDecryptSeconds": 0.0555287960160058,
+            "decryptSeconds": 0.003949375997763127,
+            "decryptToCommitSeconds": 0.007789105991832912,
+            "commitToConsumerSeconds": 0.052367391996085644,
+            "prepToConsumerSeconds": 0.11568529400392435
+          },
+          {
+            "prepToDecryptSeconds": 0.004801631992449984,
+            "decryptSeconds": 0.004627721995348111,
+            "decryptToCommitSeconds": 0.009340577002149075,
+            "commitToConsumerSeconds": 0.025383522995980456,
+            "prepToConsumerSeconds": 0.039525731990579516
+          },
+          {
+            "prepToDecryptSeconds": 0.021491488005267456,
+            "decryptSeconds": 0.007313311012694612,
+            "decryptToCommitSeconds": 0.018429624004056677,
+            "commitToConsumerSeconds": 0.1214848669769708,
+            "prepToConsumerSeconds": 0.16140597898629494
+          }
+        ],
+        "graphql": {
+          "samples": 6,
+          "errors": [],
+          "latency": {
+            "samples": 6,
+            "medianSeconds": 0.008253833497292362,
+            "p95Seconds": 0.018081655027344823,
+            "minSeconds": 0.004541027010418475,
+            "maxSeconds": 0.018081655027344823
+          }
+        },
+        "consumerWaits": {
+          "SOURCE_UNKNOWN_OR_UNAVAILABLE": 1
+        },
+        "phaseCounts": {
+          "checking_checkpoint": 6,
+          "fetching": 31,
+          "scanning": 12,
+          "committing": 36,
+          "handlers": 30,
+          "caught_up": 1
+        },
+        "projectionSha256": "b1392192e717ddb5eb10d502f2516463743ae6afa0bd4ba36fbb73b96aac003a",
+        "noOpResumeIdentical": true,
+        "resource": {
+          "nodeUserCpuSeconds": 0.107301,
+          "nodeSystemCpuSeconds": 0.024902,
+          "nodeRssAtReportBytes": 137809920,
+          "nodeProcessLifetimeMaxRssKiB": 134580,
+          "scope": "Node process setup,indexing,polling and validation through report; excludes native child,PostgreSQL,Prep and cleanup; maxRSS is process-lifetime high-water"
+        }
+      }
+    ],
+    "source": {
+      "from": 4526284,
+      "to": 4526307,
+      "before": 4537186,
+      "after": 4537186,
+      "backgroundIngestionProgress": 0
+    },
+    "readerArtifact": {
+      "schemaVersion": 1,
+      "packageName": "prep",
+      "packageVersion": "0.1.0",
+      "buildCommit": "491a860f12f9f0ebf7ca026c62641624cfdef3b0",
+      "sourceState": "modified"
+    }
+  }
+}

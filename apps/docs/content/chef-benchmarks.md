@@ -2,7 +2,28 @@
 
 Chef's benchmark measures the application-indexing pipeline: reading from Prep, running TypeScript handlers, committing entities to PostgreSQL and making committed data readable through GraphQL.
 
-Studies retain their original versions, dates and workloads. The application study below uses Chef 0.6.1; the older backfill and receipt tables retain their historical versions. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) covers the registry install, all three starters and real testnet transaction breakdown; it does not remeasure those older latency tables.
+Studies retain their original versions, dates and workloads. The catch-up study below compares published Chef 0.6.1 with an unpublished 0.7.0 candidate; the application study uses 0.6.1. Older backfill and receipt tables retain their historical versions. The [0.6.0 acceptance record](https://github.com/EndPx/zeer/blob/main/docs/CHEF_060_ACCEPTANCE.md) covers the registry install, all three starters and real testnet transaction breakdown; it does not remeasure those older latency tables.
+
+## Shielded historical catch-up — 25 October 2026
+
+This study replays **24 real testnet blocks, 4,526,284–4,526,307 inclusive**, selecting six previously mined transactions from Zeer's own Ironwood wallet. It compares published **0.6.1** with an **unpublished 0.7.0 candidate**. Each SDK/profile has three fresh project namespaces; the same six selected external notes are reused in every run. These are correlated historical observations, not 72 independent payments or future-live samples.
+
+| SDK | Page / commit blocks | Runs | Median indexing time | Prep response → consumer median | Prep response → consumer p95 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 0.6.1 | 16 / 1 | 3 | 0.441772 s | 0.372333 s | 0.557525 s |
+| 0.7.0 candidate | 16 / 1 | 3 | 0.289324 s | 0.362450 s | 0.374107 s |
+| 0.6.1 | 16 / 4 | 3 | 0.150287 s | 0.115098 s | 0.233849 s |
+| 0.7.0 candidate | 16 / 4 | 3 | 0.132995 s | 0.110784 s | 0.163605 s |
+
+Indexing medians use three run durations; receipt medians/p95 pool the six selected note timings from each of those runs. The Prep-response boundary occurs after the matching HTTP response is received and decoded. It excludes source acquisition, mining and confirmation waiting. Consumer observation includes its 0.100-second polling pause. Scanner child startup on its first call is included.
+
+All 12 runs produced the same **12-receipt projection**, including other authorized notes in the selected transactions, and a no-op resume preserved it. The six selected external notes supply the timing samples. **86 concurrent GraphQL probes completed with zero errors**; a real Prep follower published **32 additional blocks** over the study. Waiting for source freshness or a stable revision was recorded separately by the consumer. The key stayed local and no new transaction was broadcast.
+
+WSL2 used CPU affinity 0–1 for the Prep reader, 4 for the follower, and 2–3 shared by Chef, scanner and PostgreSQL, without hard memory cgroup limits. Caches were warm. SDK order alternated between repetitions; profiles retained a fixed order. This small local catch-up comparison does not establish a production capacity guarantee, change batching/polling defaults or promote a new release. It must remain separate from the older **2.27-second future-live receipt median** below.
+
+A separate six-run candidate resource cohort recorded **1.66 user CPU seconds, 0.41 system CPU seconds** and a **134,708 KiB largest-child RSS high-water mark** for its completed Node/native-child job. That RSS is not summed concurrent memory; PostgreSQL, Prep and the follower are outside the job total. The follower was running in this cohort but published no additional block during its short observation window. Do not substitute these resource samples for the 12-run timing cohort.
+
+[Download samples and verification scope](pathname:///docs/benchmarks/2026-10-25-chef-operations.json), or read the [methodology and reproduction environment](https://github.com/EndPx/zeer/blob/main/benchmarks/chef/receipt-catchup.README.md).
 
 ## Address analytics with Chef 0.6.1
 

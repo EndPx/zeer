@@ -22,6 +22,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Print embedded binary provenance without connecting to a source or archive.
+    BuildInfo,
     /// Backfill complete blocks from a full-node JSON-RPC source; resume an archive.
     Sync {
         #[arg(long)]
@@ -158,6 +160,7 @@ enum Command {
 #[tokio::main]
 async fn main() -> Result<()> {
     match Cli::parse().command {
+        Command::BuildInfo => println!("{}", serde_json::to_string(&prep::artifact::identity())?),
         Command::CompactArchiveAppend {
             archive,
             network,

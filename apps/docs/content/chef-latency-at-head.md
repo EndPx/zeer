@@ -47,6 +47,14 @@ With npm, use `npm run status -- --json`. Read the [CLI reference](/docs/chef/cl
 
 A zero Chef–Prep gap means caught up with the observed Prep data. It does not prove Prep has the newest network block. A historical snapshot has no current source-tip guarantee, and unavailable source metadata must remain unknown rather than zero.
 
+## Observe work before a page finishes
+
+The **0.7.0 source-build candidate is not yet published**; current published installation commands use 0.6.1. Candidate sync/follow emits a best-effort cached heartbeat every five seconds while source reads, local scanning, handlers or commits are still running. It adds no Prep or PostgreSQL requests and does not change follow's polling interval.
+
+Read `progress.phase`, its `phaseSince`, the inclusive pending `processingRange` and `committedHeight` together. `lastProgressAt` changes when a local stage completes; it can advance after a source read or handler without a durable commit. `heartbeatAt` only identifies the diagnostic emission time. A long scanner stage can therefore show repeated heartbeats with the same committed height and last-progress time. A blocked event loop or backpressured output can delay or suppress heartbeats; their absence is not a complete process-health test.
+
+The phases help locate waiting, but do not measure exact stage duration or receipt latency. Use observation timestamps for the whole path above, and the [source interruption recipe](/docs/chef/recovery/#recover-from-a-source-interruption) to verify continuation after a controlled outage. Preserve canonicality/read gates during both measurement and recovery.
+
 ## Tune the delay you measured
 
 Chef polls every **5 seconds** while following by default. You can test a shorter interval:

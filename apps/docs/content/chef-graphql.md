@@ -77,6 +77,8 @@ curl -sS http://127.0.0.1:39370/status \
 
 Status remains readable while entity reads are reconciling or blocked. It uses cached PostgreSQL state and makes **no RPC or Prep request**. The follower updates observations using its existing metadata reads. On transport/source failure, source heights become null and status becomes `unavailable`; before any observation, it is `unknown`. A stopped follower leaves its last observation and timestamp in place: consumers must check its age. `available` describes that observation, not a live health guarantee. Unknown timestamps remain null, including a legacy project's unrecorded commit time after migration.
 
+The **0.7.0 source-build candidate**, not yet published, adds `artifact` to this response: package name/version, build commit and source state. It reads build-produced metadata without consulting Git at runtime. Missing provenance is explicitly `unknown`. This additive field does not change the stored checkpoint, source freshness or read gate. See [operator diagnosis](/docs/chef/recovery/#choose-the-next-action).
+
 `lastCommitAt` is not a storage-flush measurement. Neither this endpoint nor a receipt authorizes payment. Consumers choose their own freshness, confirmation and canonicality policy and recheck before acting.
 
 ## Upgrade an existing project

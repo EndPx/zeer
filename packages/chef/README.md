@@ -4,6 +4,10 @@
 relationships. Runtime code and the API are unchanged from 0.6.0; this patch does
 not require a database migration or replay for an otherwise unchanged project.
 
+This checkout also contains a **0.7.0 source-build candidate**, not yet published.
+The heartbeat and operator diagnostics described below require that candidate;
+the published CLI/SDK installation remains 0.6.1 until release verification.
+
 Chef reads complete public Zcash data from Prep, invokes trusted TypeScript
 handlers, commits application entities to developer-owned PostgreSQL, and serves
 an authenticated read-only GraphQL API. The default profile reads public data. An explicit local
@@ -206,6 +210,49 @@ emit `stopped` and release resources. A handler already executing may finish its
 current block before graceful cancellation; forced process interruption relies on
 PostgreSQL's atomic transaction. With `sync.batchSize > 1`, cancellation or
 failure rolls back the current batch; earlier committed batches remain.
+
+### Candidate operational diagnostics
+
+The 0.7.0 source-build candidate adds a best-effort heartbeat every five seconds
+to sync/follow, without extra Prep or PostgreSQL reads. JSON records use
+`state: "heartbeat"`; `progress` separates an inclusive pending range from
+`committedHeight`, the checkpoint last observed or commit/rollback acknowledged
+by this process. A supported rollback can decrease that height. Counters keep
+their existing `metricsScope: "completed_pages"`; never sum heartbeat rows as
+additional completed work.
+
+`phase` identifies `checking_checkpoint`, `fetching`, `scanning`, `handlers`,
+`committing`, `recovering`, `source_wait` or `caught_up`. `phaseSince` marks the
+current stage, `lastProgressAt` marks a completed local stage, and `heartbeatAt`
+marks snapshot emission. A completed source read or handler can advance
+`lastProgressAt` without committing a block. Heartbeats alone do not prove
+progress, exact scanner duration or source health. They may be delayed by the
+event loop and are skipped when stdout is backpressured or closed. Their timer
+stops on completion, failure and graceful cancellation. Polling remains five
+seconds by default; the heartbeat adds no new flag or environment variable.
+
+Library callers can provide a synchronous `RuntimeOptions.onProgress` observer
+to `syncStep`. It receives advisory stage events, not timer-driven heartbeats or
+a durable event feed. Exceptions and accidentally rejected observer promises are
+isolated from indexing; keep callbacks short because they run on the same event
+loop. Events contain no account identifiers, transaction IDs, receiver, amount,
+memo or viewing key. They cannot replace checkpoint validation or the read gate.
+
+Candidate status and doctor include build-produced artifact identity, coverage,
+timestamped source information and fixed next-action categories. Missing
+provenance is `unknown`; runtime Git HEAD is never substituted for the build.
+The advice distinguishes waiting/retry, authentication/configuration correction,
+identity restoration, reconciliation and rebuild. It changes neither automatic
+retry behavior nor migration and recovery policy. Store-provided last commit,
+generation and revision are separate from transient process progress.
+
+Use the [source interruption recipe](https://zeer.endpx.cloud/docs/chef/recovery/#recover-from-a-source-interruption)
+with your own isolated endpoint: record the checkpoint, run one follow writer,
+have its operator interrupt and restore the same compatible source, then verify
+`caught_up`, a ready checkpoint and unchanged entity identities after restart.
+Do not interrupt the shared public preview or bypass read gates. Authentication
+and identity failures require correction rather than indefinite retries. Payment
+and notification side effects remain the consuming application's responsibility.
 
 For `REBUILD_REQUIRED`, retain the old namespace for inspection, choose a new
 project name, run `migrate`, and replay from a Prep archive covering `startHeight`.

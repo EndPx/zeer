@@ -5,6 +5,7 @@ import { decodeEntity, encodeEntity } from "./schema.js";
 import { CursorInvalidatedError, QueryInputError, consumptionNames, decodeCursor, encodeCursor, orderedInt, queryShape, validateSelection } from "./consumption.js";
 import { StoreNotReadyError } from "./store.js";
 import { AdmissionError, RequestAdmission } from "./admission.js";
+import { artifactIdentity } from "./operator-diagnostics.js";
 import type { ChefStore, Model, ReadView, EntityRange, EntityOrder } from "./types.js";
 
 class InputError extends QueryInputError {}
@@ -188,7 +189,7 @@ export function createChefServer({ store, model, token }: { store: ChefStore; mo
       if (statusRequest) {
         request.resume();
         if (!store.consumptionStatus) { fail(503, "Consumption metadata is unavailable"); return; }
-        send(200, await store.consumptionStatus()); return;
+        send(200, { ...await store.consumptionStatus(), artifact: artifactIdentity() }); return;
       }
       let body: unknown;
       try { body = JSON.parse((await readBody(request, cancellation.signal)).toString("utf8")); } catch (error) { throw error instanceof InputError ? error : new InputError("Invalid JSON body"); }

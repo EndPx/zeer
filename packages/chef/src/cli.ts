@@ -10,6 +10,7 @@ import type { Height } from "@zeer-dev/prep-client";
 import { generateTypes } from "./schema.js";
 import { PostgresStore } from "./store.js";
 import { ChefError, isSourceUnavailable, syncStep } from "./runtime.js";
+import { createProgressTracker, startProgressHeartbeat } from "./progress.js";
 import { createChefServer } from "./graphql.js";
 import { cliFailure, formatOutput, readStatus, sourceObservation } from "./cli-output.js";
 import type { ChefStore } from "./types.js";
@@ -21,6 +22,7 @@ import { validateTemplate } from "./scaffold-templates.js";
 import { CliError } from "./cli-error.js";
 import { loadProject, assertRunnable, projectEnvironment, projectFingerprint, envName } from "./project.js";
 import { inspectProject } from "./doctor.js";
+import { artifactIdentity } from "./operator-diagnostics.js";
 import { prepareProject, preflightDev, superviseDev } from "./dev.js";
 const help = "zeer-chef <codegen|migrate|sync|serve|status|dev|doctor> [--config chef.config.ts] [--json | --human]\nsync: [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nserve: [--listen 127.0.0.1] [--port 39370]\nOutput defaults to readable text on a terminal and JSON elsewhere. status observes Prep with a 5-second timeout without changing the database.\nNode 24.14+ loads TypeScript configs with native type stripping. Use node --env-file for local env files.";
 function integer(value: string | undefined, minimum: number, maximum: number, code: string): number {
@@ -39,7 +41,7 @@ const commandHelp: Record<string, string> = {
   init: "zeer init [--template blank|public|shielded] [--dir NEW_DIRECTORY] [--project NAME] [--start-height latest|HEIGHT] [--prep-url URL]\nGuided setup offers Blank project, Public chain indexer and Shielded payment inbox.\nPublic/blank default to latest indexed, captured once from Prep /height with a 5-second timeout. Shielded requires an explicit numeric wallet birthday.\nSource: --prep-url, then PREP_URL, then the public testnet Prep. PREP_API_TOKEN is sent only to the matching explicitly configured source.\nScripts must provide --dir, --project and --start-height; omitted template retains the public default. Numeric heights work offline.\nBlank has no sample entity/handler. Shielded includes a pinned scanner installer and local receipt consumer.\nCreates new files only; no key contents are collected, no packages installed, no services started and no existing directory overwritten.",
   codegen: "zeer codegen [--config chef.config.ts]\nRead the schema and write chef.generated.ts beside the config. Does not connect to Prep or PostgreSQL. Run typecheck separately.",
   migrate: "zeer migrate [--config chef.config.ts]\nExplicitly initialize/migrate the compatible project namespace and its declared indexes. Stop the follower and API before upgrading an existing namespace. Does not replay blocks or reset an incompatible project.",
-  sync: "zeer sync [--config chef.config.ts] [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nDefault: capture the available Prep tip, index through it and exit. --follow keeps polling; --to is an inclusive finite target.\n--poll-seconds accepts 1..60 and is used while following. Compatible restarts resume the durable checkpoint. Ctrl+C stops with committed progress retained.",
+  sync: "zeer sync [--config chef.config.ts] [--to INCLUSIVE_HEIGHT | --follow] [--poll-seconds 5]\nDefault: capture the available Prep tip, index through it and exit. --follow keeps polling; --to is an inclusive finite target.\n--poll-seconds accepts 1..60 and is used while following. Compatible restarts resume the durable checkpoint. Ctrl+C stops with committed progress retained.\nEvery 5 seconds a cached heartbeat reports phase, pending range and acknowledged committed height. Heartbeat time is not progress; lastProgressAt records completed work. Metrics cover completed pages only. No source or database request is made by the heartbeat.",
   status: "zeer status [--config chef.config.ts]\nRead the durable checkpoint and inspect Prep with a 5-second timeout. Does not take a writer lock or change the database.\nUnavailable, incompatible and unreconciled states return nonzero diagnostics.",
   serve: "zeer serve [--config chef.config.ts] [--listen 127.0.0.1] [--port 39370]\nServe authenticated read-only GraphQL over committed entities and cached freshness at GET /status. Status makes no Prep request. Requires CHEF_API_TOKEN of at least 16 bytes.\nDoes not run the writer; run sync or sync --follow separately. Port accepts 1..65535. Ctrl+C stops this server.",
 };
@@ -179,10 +181,10 @@ export async function main(args = process.argv.slice(2), dependencies: {
   try {
     if (command === "migrate") { await store.migrate(); out({ command, status: "complete", project: config.project, fingerprint }); return; }
     if (command === "status") {
-      const status = await readStatus({ store, client, network: config.network, startHeight: config.startHeight, signal: controller.signal });
+      const status = await readStatus({ store, client, network: config.network, startHeight: config.startHeight, project: config.project, signal: controller.signal });
       out({ command, project: config.project, fingerprint, ...status });
       if (status.state === "blocked") throw new CliError("REBUILD_REQUIRED");
-      if (status.state === "source_unavailable") throw new CliError(status.source.availability === "unavailable" ? status.source.errorCode : "SOURCE_UNAVAILABLE");
+      if (status.state === "source_unavailable") throw new CliError(status.source.availability === "unavailable" ? status.source.errorCode : "SOURCE_UNAVAILABLE", { retryTransient: status.diagnostic.action.category === "retry_transient" });
       if (status.state === "source_mismatch") throw new CliError("SOURCE_NETWORK_OR_KIND_MISMATCH");
       if (status.state === "source_not_ready") throw new CliError(status.source.availability === "available" && !status.source.historyAvailable ? "SOURCE_HISTORY_UNAVAILABLE" : "SOURCE_UNAVAILABLE");
       if (status.state === "reconciliation_needed") throw new CliError("RECONCILIATION_REQUIRED");
@@ -195,7 +197,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
       const host = flags.get("--listen") ?? "127.0.0.1";
       const server = createChefServer({ store, model, token });
       await new Promise<void>((resolveListen, reject) => { server.once("error", reject); server.listen(port, host, () => { server.off("error", reject); resolveListen(); }); });
-      out({ command, status: "listening", host, port, project: config.project });
+      out({ command, status: "listening", host, port, project: config.project, artifact: artifactIdentity() });
       try { if (!controller.signal.aborted) await new Promise<void>((resolveStop) => controller.signal.addEventListener("abort", () => resolveStop(), { once: true })); }
       finally {
         const timer = setTimeout(() => server.closeAllConnections(), 2000);
@@ -213,19 +215,28 @@ export async function main(args = process.argv.slice(2), dependencies: {
         blocksPerSecond: elapsedMs > 0 ? totals.blocks * 1000 / elapsedMs : 0,
         transactionsPerSecond: elapsedMs > 0 ? totals.transactions * 1000 / elapsedMs : 0 };
     };
+    const progress = createProgressTracker(initial.height);
+    const stopHeartbeat = startProgressHeartbeat(() => out({ command, state: "heartbeat", project: config.project, artifact: artifactIdentity(),
+      invocationMode: follow ? "follow" : "backfill", progress: progress.snapshot(), ...metrics() }), 5000,
+      () => !!dependencies.write || !(process.stdout.destroyed || process.stdout.writableEnded || process.stdout.writableNeedDrain));
     const report = async (state: string, details: Record<string, unknown> = {}) => {
       const checkpoint = await store.checkpoint();
       const source = lastMeta ? sourceObservation(lastMeta, checkpoint, config.network, config.startHeight)
         : state === "source_unavailable" ? { availability: "unavailable" } : undefined;
-      out({ command, state, project: config.project, invocationMode: follow ? "follow" : "backfill", checkpoint, ...(source ? { source } : {}), ...metrics(), ...details });
+      out({ command, state, project: config.project, artifact: artifactIdentity(), invocationMode: follow ? "follow" : "backfill", checkpoint, ...(source ? { source } : {}), ...metrics(), ...details });
     };
     try {
       if (!follow) {
         const start = performance.now();
         let meta;
+        progress.update({ phase: "fetching" });
         try { meta = await client.getHeight({ signal: controller.signal }); }
         catch (error) { await store.recordSourceObservation?.({status:"unavailable",prepIndexedHeight:null,sourceObservedHeight:null,sourceObservedAt:null}); await store.markReconciling(); if (!controller.signal.aborted && temporarySourceError(error)) await report("source_unavailable"); throw error; }
         totals.fetchMs += performance.now() - start;
+        progress.update({ phase: "fetching", progressed: true,
+          prepArchiveHeight: meta.network === config.network && meta.payload_kind === "full-v1" ? meta.archive_height : null,
+          prepIndexedHeight: meta.network === config.network && meta.payload_kind === "full-v1" ? meta.indexed_height ?? null : null,
+          prepReady: meta.network === config.network && meta.payload_kind === "full-v1" ? meta.ready : null });
         await store.recordSourceObservation?.({ status: meta.network === config.network && meta.payload_kind === "full-v1" && meta.ready && meta.archive_height !== null && meta.archive_height >= config.startHeight ? "available" : "unavailable",
           prepIndexedHeight: meta.indexed_height ?? null, sourceObservedHeight: meta.source_height ?? null, sourceObservedAt: meta.source_observed_at ?? null });
         if (!meta.ready || meta.archive_height === null || meta.archive_height < config.startHeight) {
@@ -244,9 +255,10 @@ export async function main(args = process.argv.slice(2), dependencies: {
             if (!executable || !keyFile) throw new CliError("SCANNER_EXECUTABLE_AND_KEY_FILE_REQUIRED");
             receiptSource = new NativeReceiptSource({ executable, keyFile, accountId: config.shielded.accountId, keyFingerprint: config.shielded.keyFingerprint, timeoutMs: config.shielded.timeoutMs });
           }
-          result = await syncStep({ ...config.sync, client, store, indexer: config.indexer, ...(receiptSource ? { receiptSource } : {}), network: config.network, startHeight: config.startHeight, reorgWindow, signal: controller.signal }, end);
+          result = await syncStep({ ...config.sync, client, store, indexer: config.indexer, ...(receiptSource ? { receiptSource } : {}), network: config.network, startHeight: config.startHeight, reorgWindow, signal: controller.signal, onProgress: progress.update }, end);
         }
         catch (error) {
+          if (temporarySourceError(error)) progress.update({ phase: "source_wait", processingRange: null });
           if (!controller.signal.aborted && temporarySourceError(error)) await report("source_unavailable");
           if (!follow || !temporarySourceError(error)) throw error;
           await delay(pollSeconds * 1000, undefined, { signal: controller.signal }); continue;
@@ -270,7 +282,7 @@ export async function main(args = process.argv.slice(2), dependencies: {
     } catch (error) {
       if (!controller.signal.aborted) throw error;
       await report("stopped");
-    }
+    } finally { stopHeartbeat(); }
   } finally {
     process.off("SIGINT", abort); process.off("SIGTERM", abort);
     process.off("message", stopMessage);

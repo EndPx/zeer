@@ -32,6 +32,8 @@ Zeer connects those steps through two layers:
 
 Use Prep directly, or let Chef consume it. Your model, database and application policy remain yours.
 
+The current source also contains an **unpublished Chef/CLI 0.7.0 candidate** focused on operational visibility and recovery. Published installation commands below remain pinned to 0.6.1. See the [operational verification report](docs/OPERATIONS_20261025.md) for the implementation, interruption/restart proof and separately scoped historical shielded-receipt measurements. This source milestone does not upgrade hosted projects.
+
 ## Try the working product
 
 The public testnet playground requires **no account, wallet connection or API token**.

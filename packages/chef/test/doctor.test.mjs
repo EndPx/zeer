@@ -14,7 +14,7 @@ const secret='DOCTOR_SECRET_MUST_NOT_APPEAR';
 const checkpoint={height:100,hash:'a'.repeat(64),anchorHash:'b'.repeat(64),status:'ready',undoFloor:0};
 const meta={network:'testnet',payload_kind:'full-v1',ready:true,archive_height:100,indexed_height:100,start_block:0,source_height:101,lag_blocks:1,source_observed_at:1000,source_mode:'follower',epoch:'1'};
 const client={async get(){assert.fail('Doctor must not fetch transactions');},async getHeight(){return meta;}};
-function store(value=checkpoint){return new Proxy({async checkpoint(){return value;}},{get(target,key){if(key in target)return target[key];return()=>assert.fail(`Doctor called mutation/lifecycle method ${String(key)}`);}});}
+function store(value=checkpoint){return new Proxy({consumptionStatus:undefined,async checkpoint(){return value;}},{get(target,key){if(key in target)return target[key];return()=>assert.fail(`Doctor called mutation/lifecycle method ${String(key)}`);}});}
 async function fixture(t,changes={}, text){
   const dir=await mkdtemp(join(tmpdir(),'chef-doctor-'));
   t.after(()=>rm(dir,{recursive:true,force:true}));
@@ -46,6 +46,18 @@ test('Doctor is readonly, omits credentials, and releases its temporary port pro
   assert.equal(report.ready,true);assert.equal(report.status,'ready');assert.equal(report.source.chefPrepLagBlocks,0);safe(report);
   assert.equal(code(report,'scanner'),'SCANNER_NOT_CONFIGURED');assert.deepEqual(await readFile(f.configPath),before);
   const server=createServer();await new Promise((r,j)=>server.once('error',j).listen(f.options.port,f.options.host,r));await new Promise(r=>server.close(r));
+});
+
+test('Doctor combines source freshness with one readonly consumption snapshot and safe actions',async t=>{
+  const f=await fixture(t);
+  const state={checkpoint,generation:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',revision:'42',lastCommitAt:'2026-10-25T00:00:00.000Z'};
+  const report=await inspectProject({...f.options,store:{async consumptionStatus(){return state;},checkpoint(){assert.fail('Use the same consumption snapshot');}}});
+  assert.equal(report.ready,true);assert.equal(report.artifact.packageName,'@zeer-dev/chef');
+  assert.equal(report.diagnostic.lastCommitAt,state.lastCommitAt);assert.equal(report.diagnostic.dataRevision,'42');
+  assert.equal(report.diagnostic.projectGeneration,state.generation);assert.equal(report.diagnostic.sourceObservedAt,meta.source_observed_at);
+  assert.ok(report.diagnostic.sourceObservationAgeSeconds>0);assert.equal(report.diagnostic.action.category,'none');safe(report);
+  const unavailable=await inspectProject({...f.options,client:{async getHeight(){throw {code:'28P01',message:secret};}}});
+  assert.equal(unavailable.checks.find(c=>c.name==='source').action.category,'fix_authentication');safe(unavailable);
 });
 test('invalid or blank project explicitly skips dependent checks without touching services',async t=>{
   const f=await fixture(t,{},'export default {project:"blank",network:"testnet",startHeight:0,schema:"schema.graphql",handlerVersion:"1",indexer:{}};');

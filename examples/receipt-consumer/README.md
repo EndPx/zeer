@@ -174,3 +174,41 @@ prefix through undo floor 70, replace the mutable branch with a shorter head at
 78, re-include an existing output there, then restart and compare all IDs/context.
 The optional phase adds three CLI runs. The default range-mode fixture remains
 the twelve-run check.
+
+## Controlled source interruption with the 0.7.0 candidate
+
+`verify-source-recovery.mjs` exercises actual Chef CLI processes, PostgreSQL,
+authenticated GraphQL and the continuous SQLite consumer against an owned
+loopback Prep-compatible HTTP fixture. It never stops an external service,
+loads a viewing key or executes a payment. All hashes and block data are
+synthetic testnet fixtures; this is recovery acceptance, not live-network or
+shielded latency evidence.
+
+The test starts at height 31, makes its source unready, then interrupts its HTTP
+transport. It checks that the read gate returns 503 and both stored projections
+remain intact. Restoring the same endpoint at height 1600 creates a 1,569-block
+backlog. Follow resumes, and a restart must preserve every entity, checkpoint
+and revision. The consumer catches up using 128-block windows and 25-row pages,
+then reopens its SQLite database without duplicates. The existing range-mode
+budget remains unchanged.
+
+Build the candidate first. From the repository root, with an existing disposable
+PostgreSQL database and Node 24.14+, run:
+
+```sh
+DATABASE_URL=postgres://YOUR_DISPOSABLE_DATABASE node examples/receipt-consumer/verify-source-recovery.mjs
+```
+
+The default SDK root is this checkout's `packages/chef`. To test an independently
+installed candidate, set `CHEF_ACCEPTANCE_SDK_ROOT` to its absolute
+`node_modules/@zeer-dev/chef` directory. The existing example remains pinned to
+published 0.2.0 for its historical consumer workflow; this acceptance requires
+the **unpublished 0.7.0 source-build candidate** for heartbeat and diagnostic
+checks. It does not install or download an SDK itself.
+
+Proof and private CLI logs are retained under `private/src_<random>/proof.json`.
+Set `CHEF_ACCEPTANCE_OUTPUT_DIR` to another protected directory if needed.
+The script counts every CLI child, bounds the run to three minutes, and stops
+only its owned children and HTTP fixture. After success, it verifies and removes
+only the new random marked Chef namespace that it created. A failed namespace
+is retained for inspection; no shared database service is restarted or reset.

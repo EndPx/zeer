@@ -161,6 +161,53 @@ test("SIGTERM during finite sync metadata preflight emits stopped with durable c
   assert.equal(lines.at(-1).blocks, 0);
 });
 
+test("CLI emits cached five-second heartbeats during a stalled source and clears its timer on stop", async t => {
+  const { config } = await fixture(t); await withCliEnvironment(t);
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  const checkpoint = { height: 7, hash: "a".repeat(64), anchorHash: "b".repeat(64), status: "ready" };
+  let reads = 0, checkpointReads = 0, closed = false, started;
+  const waiting = new Promise(resolve => { started = resolve; });
+  const store = { checkpoint: async () => { checkpointReads++; return { ...checkpoint }; }, acquire: async () => {},
+    markReconciling: async () => { checkpoint.status = "reconciling"; }, close: async () => { closed = true; } };
+  const client = { getHeight: ({ signal }) => new Promise((_resolve, reject) => {
+    reads++; signal.addEventListener("abort", () => reject(signal.reason), { once: true }); started();
+  }) };
+  const lines = [];
+  const run = main(["sync", "--config", config, "--json"], { store, client, write: text => lines.push(JSON.parse(text)) });
+  await waiting;
+  t.mock.timers.tick(4999); assert.equal(lines.length, 0);
+  t.mock.timers.tick(1);
+  assert.equal(lines.length, 1); assert.equal(lines[0].state, "heartbeat");
+  assert.equal(lines[0].progress.phase, "fetching"); assert.equal(lines[0].progress.committedHeight, 7);
+  assert.equal(lines[0].progress.processingRange, null); assert.equal(lines[0].progress.lastProgressAt, null);
+  assert.equal(lines[0].blocks, 0); assert.equal(lines[0].metricsScope, "completed_pages");
+  assert.equal(reads, 1); assert.equal(checkpointReads, 1);
+  t.mock.timers.tick(5000); assert.equal(lines.length, 2);
+  assert.equal(lines[1].progress.lastProgressAt, lines[0].progress.lastProgressAt);
+  assert.equal(reads, 1); assert.equal(checkpointReads, 1);
+  process.emit("SIGTERM"); await run;
+  assert.equal(closed, true); assert.equal(lines.at(-1).state, "stopped");
+  const count = lines.length; t.mock.timers.tick(15000); assert.equal(lines.length, count);
+});
+
+test("CLI clears the heartbeat timer when finite sync fails", async t => {
+  const { config } = await fixture(t); await withCliEnvironment(t);
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  let started, fail, closed = false;
+  const waiting = new Promise(resolve => { started = resolve; });
+  const store = { checkpoint: async () => ({ height: 7, hash: "a".repeat(64), anchorHash: null, status: "ready" }),
+    acquire: async () => {}, markReconciling: async () => {}, close: async () => { closed = true; } };
+  const client = { getHeight: () => new Promise((_resolve, reject) => { fail = reject; started(); }) };
+  const lines = [];
+  const run = main(["sync", "--config", config, "--json"], { store, client, write: text => lines.push(JSON.parse(text)) });
+  // Attach before rejecting so there is never an unobserved command rejection.
+  const rejected = assert.rejects(run, error => error instanceof PrepError && error.status === 401);
+  await waiting; t.mock.timers.tick(5000); assert.equal(lines[0].state, "heartbeat");
+  fail(new PrepError("UNAUTHORIZED", 401)); await rejected;
+  assert.equal(closed, true); const count = lines.length;
+  t.mock.timers.tick(15000); assert.equal(lines.length, count);
+});
+
 test("status distinguishes reachable unready Prep from transport/auth failure with nonzero diagnostics", async t => {
   const { config } = await fixture(t); await withCliEnvironment(t);
   const checkpoint = { height: 1, hash: "a".repeat(64), anchorHash: "b".repeat(64), status: "ready" };

@@ -69,6 +69,43 @@ pub struct SyncProgress {
     pub revision: u64,
 }
 
+/// Process diagnostics only: no endpoint, credentials, archive paths or receipt
+/// content. `heartbeat` reports liveness, not advancement of the archive head.
+#[derive(Clone, Debug, Serialize)]
+pub struct SyncEvent {
+    pub event: &'static str,
+    pub phase: &'static str,
+    pub state: &'static str,
+    pub heartbeat: bool,
+    pub observed_at_unix: u64,
+    pub last_progress_at_unix: Option<u64>,
+    pub source_height: Option<u64>,
+    pub committed_height: Option<u64>,
+    pub error_code: Option<&'static str>,
+    pub retry_attempt: Option<u32>,
+    pub retry_limit: Option<u32>,
+    pub retry_delay_seconds: Option<u64>,
+}
+
+impl SyncEvent {
+    pub(crate) fn new(phase: &'static str, state: &'static str) -> Self {
+        Self {
+            event: "prep_operation",
+            phase,
+            state,
+            heartbeat: false,
+            observed_at_unix: unix_seconds(),
+            last_progress_at_unix: None,
+            source_height: None,
+            committed_height: None,
+            error_code: None,
+            retry_attempt: None,
+            retry_limit: None,
+            retry_delay_seconds: None,
+        }
+    }
+}
+
 #[derive(Serialize)]
 struct StatusFile<'a> {
     schema_version: u32,
@@ -204,6 +241,25 @@ fn status_code(error: &anyhow::Error) -> &'static str {
     }
 }
 
+/// A bounded vocabulary, never an upstream exception/body or URL. Authentication
+/// errors are terminal; only the separately typed transport/status errors retry.
+pub(crate) fn source_error_code(error: &anyhow::Error) -> &'static str {
+    match error.to_string().as_str() {
+        "rpc_authentication_failed" => "rpc_authentication_failed",
+        "source_network_mismatch" => "source_network_mismatch",
+        "source_preflight_timeout" => "source_preflight_timeout",
+        "deep_reorg_requires_operator_recovery" => "deep_reorg_requires_operator_recovery",
+        "archive_disk_budget_exhausted" => "archive_disk_budget_exhausted",
+        "source_changed_during_segment" => "source_changed_during_segment",
+        "sync_deadline_exceeded" => "sync_deadline_exceeded",
+        "rpc_transport_failed"
+        | "rpc_http_status_failed"
+        | "rpc_dns_timeout"
+        | "rpc_dns_failed" => "source_unavailable",
+        _ => "source_configuration_or_response_failed",
+    }
+}
+
 /// Keeps the writer lock, validated stores and HTTP connection pool for the
 /// lifetime of one process. Restart validates disk once; each step reuses it.
 pub struct SyncSession {
@@ -214,41 +270,85 @@ pub struct SyncSession {
 }
 
 impl SyncSession {
+    /// Cached admitted catalog state, including a rollback performed by a failed
+    /// step. Does not read disk or contact the source; it is not a ready verdict.
+    pub fn progress_snapshot(&self) -> SyncProgress {
+        progress(&self.writer, self.source_height, false)
+    }
+
     pub async fn new(options: SyncOptions) -> Result<Self> {
+        Self::new_with_observer(options, |_| {}).await
+    }
+
+    /// Source preflight runs before creating the archive directory, writer lock,
+    /// catalog or readiness file. Its observation is diagnostic only: step()
+    /// independently rechecks the source after the full archive integrity pass.
+    pub async fn new_with_observer(
+        options: SyncOptions,
+        observer: impl Fn(SyncEvent),
+    ) -> Result<Self> {
         validate_options(&options)?;
-        let writer = ArchiveWriter::create_or_open_with_kind(
+        observer(SyncEvent::new("checking_source", "started"));
+        let preflight = tokio::time::timeout(
+            Duration::from_secs(options.deadline_seconds.min(30)),
+            async {
+                let source = NodeRpc::new(&options.source, options.allow_insecure).await?;
+                let info = source.chain_info().await?;
+                ensure!(info.network == options.network, "source_network_mismatch");
+                Ok::<_, anyhow::Error>((source, info))
+            },
+        )
+        .await
+        .unwrap_or_else(|_| Err(crate::full_source::TransientSourceError::PreflightTimeout.into()));
+        let (source, info) = match preflight {
+            Ok(result) => result,
+            Err(error) => {
+                let mut event = SyncEvent::new("checking_source", "failed");
+                event.error_code = Some(source_error_code(&error));
+                observer(event);
+                return Err(error);
+            }
+        };
+        let mut event = SyncEvent::new("checking_source", "completed");
+        event.source_height = Some(info.height);
+        observer(event);
+        let mut opening = SyncEvent::new("opening_and_validating_archive", "started");
+        opening.source_height = Some(info.height);
+        observer(opening.clone());
+        // Intentionally synchronous: cancellation must not detach a disk worker
+        // which can later acquire the writer lock and mutate an abandoned root.
+        let writer = match ArchiveWriter::create_or_open_with_kind(
             &options.archive,
             &options.network,
             options.from,
             FULL_KIND,
-        )?;
+        ) {
+            Ok(writer) => writer,
+            Err(error) => {
+                opening.state = "failed";
+                opening.error_code = Some("archive_admission_failed");
+                opening.observed_at_unix = unix_seconds();
+                observer(opening);
+                return Err(error.into());
+            }
+        };
         write_status(
             &options.archive,
             writer.catalog(),
-            0,
+            info.height,
             false,
             Some("synchronizing"),
             options.follow_mode,
         )?;
-        let source = match NodeRpc::new(&options.source, options.allow_insecure).await {
-            Ok(source) => source,
-            Err(error) => {
-                write_status(
-                    &options.archive,
-                    writer.catalog(),
-                    0,
-                    false,
-                    Some(status_code(&error)),
-                    options.follow_mode,
-                )?;
-                return Err(error);
-            }
-        };
+        opening.state = "completed";
+        opening.observed_at_unix = unix_seconds();
+        opening.committed_height = writer.head();
+        observer(opening);
         Ok(Self {
             options,
             writer,
             source,
-            source_height: 0,
+            source_height: info.height,
         })
     }
 
@@ -561,6 +661,7 @@ mod tests {
         blocks: Arc<Mutex<Vec<TestBlock>>>,
         invalid_raw: Arc<std::sync::atomic::AtomicBool>,
         delay_ms: Arc<AtomicU64>,
+        info_delay_ms: Arc<AtomicU64>,
         reorg_after_decoded_height: Arc<AtomicU64>,
     }
 
@@ -577,6 +678,12 @@ mod tests {
     }
 
     async fn rpc(State(state): State<NodeState>, Json(body): Json<Value>) -> Json<Value> {
+        if body["method"] == "getblockchaininfo" {
+            tokio::time::sleep(Duration::from_millis(
+                state.info_delay_ms.load(Ordering::Relaxed),
+            ))
+            .await;
+        }
         if body["method"] == "getblock" {
             tokio::time::sleep(Duration::from_millis(
                 state.delay_ms.load(Ordering::Relaxed),
@@ -641,6 +748,7 @@ mod tests {
             blocks: Arc::new(Mutex::new(blocks)),
             invalid_raw: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             delay_ms: Arc::new(AtomicU64::new(0)),
+            info_delay_ms: Arc::new(AtomicU64::new(0)),
             reorg_after_decoded_height: Arc::new(AtomicU64::new(0)),
         };
         let app = Router::new()
@@ -674,6 +782,160 @@ mod tests {
 
     fn status(path: &Path) -> Value {
         serde_json::from_slice(&fs::read(path.join("status.json")).unwrap()).unwrap()
+    }
+
+    #[tokio::test]
+    async fn source_preflight_fails_before_archive_mutation_and_reports_safe_phases() {
+        use axum::http::StatusCode;
+        for code in [StatusCode::UNAUTHORIZED, StatusCode::SERVICE_UNAVAILABLE] {
+            async fn failure(
+                axum::extract::State(code): axum::extract::State<StatusCode>,
+            ) -> (StatusCode, &'static str) {
+                (
+                    code,
+                    "secret upstream exception must never enter diagnostics",
+                )
+            }
+            let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let endpoint = format!("http://{}", listener.local_addr().unwrap());
+            let app = Router::new().route("/", post(failure)).with_state(code);
+            let task = tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+            let directory = tempfile::tempdir().unwrap();
+            let options = options(endpoint, directory.path());
+            let events = Mutex::new(Vec::new());
+            let result = SyncSession::new_with_observer(options.clone(), |event| {
+                events.lock().unwrap().push(event)
+            })
+            .await;
+            assert!(result.is_err());
+            assert!(
+                !options.archive.exists(),
+                "failed authentication/source availability must not create a writer lock or status"
+            );
+            let events = events.into_inner().unwrap();
+            assert_eq!(events.len(), 2);
+            assert_eq!(events[0].phase, "checking_source");
+            assert_eq!(events[1].state, "failed");
+            assert_eq!(
+                events[1].error_code,
+                Some(if code == StatusCode::UNAUTHORIZED {
+                    "rpc_authentication_failed"
+                } else {
+                    "source_unavailable"
+                })
+            );
+            assert!(!serde_json::to_string(&events).unwrap().contains("secret"));
+
+            // A failed restart must not overwrite an existing archive's previous
+            // status, initialize a catalog, or create an incidental writer lock.
+            fs::create_dir(&options.archive).unwrap();
+            fs::write(
+                options.archive.join("status.json"),
+                b"existing status bytes",
+            )
+            .unwrap();
+            fs::write(
+                options.archive.join("catalog.json"),
+                b"corrupt catalog sentinel",
+            )
+            .unwrap();
+            assert!(SyncSession::new(options.clone()).await.is_err());
+            assert_eq!(
+                fs::read(options.archive.join("status.json")).unwrap(),
+                b"existing status bytes"
+            );
+            assert_eq!(
+                fs::read(options.archive.join("catalog.json")).unwrap(),
+                b"corrupt catalog sentinel"
+            );
+            assert_eq!(fs::read_dir(&options.archive).unwrap().count(), 2);
+            task.abort();
+            let _ = task.await;
+        }
+    }
+
+    #[tokio::test]
+    async fn preflight_checks_network_deadline_and_reobserves_after_admission() {
+        let (node, endpoint, stop) = node(4).await;
+        let directory = tempfile::tempdir().unwrap();
+        let mut options = options(endpoint, directory.path());
+        options.network = "mainnet".into();
+        assert_eq!(
+            SyncSession::new(options.clone())
+                .await
+                .err()
+                .unwrap()
+                .to_string(),
+            "source_network_mismatch"
+        );
+        assert!(!options.archive.exists());
+        options.network = "regtest".into();
+        options.deadline_seconds = 1;
+        node.info_delay_ms.store(1500, Ordering::Relaxed);
+        let start = std::time::Instant::now();
+        assert_eq!(
+            SyncSession::new(options.clone())
+                .await
+                .err()
+                .unwrap()
+                .to_string(),
+            "source_preflight_timeout"
+        );
+        assert!(start.elapsed() < Duration::from_millis(1400));
+        assert!(!options.archive.exists());
+        node.info_delay_ms.store(0, Ordering::Relaxed);
+        options.deadline_seconds = 10;
+        let events = Mutex::new(Vec::new());
+        let mut session = SyncSession::new_with_observer(options.clone(), |event| {
+            events.lock().unwrap().push(event)
+        })
+        .await
+        .unwrap();
+        let events = events.into_inner().unwrap();
+        assert_eq!(
+            events
+                .iter()
+                .map(|event| (event.phase, event.state))
+                .collect::<Vec<_>>(),
+            vec![
+                ("checking_source", "started"),
+                ("checking_source", "completed"),
+                ("opening_and_validating_archive", "started"),
+                ("opening_and_validating_archive", "completed")
+            ]
+        );
+        assert_eq!(events[1].source_height, Some(4));
+        assert_eq!(status(&options.archive)["ready"], false);
+        assert_eq!(status(&options.archive)["source_height"], 4);
+        assert!(events
+            .iter()
+            .all(|event| event.committed_height.is_none() && !event.heartbeat));
+        extend(&mut node.blocks.lock().unwrap(), 6, 1);
+        assert_eq!(
+            session.step().await.unwrap().source_height,
+            6,
+            "step must not reuse preflight source height"
+        );
+        drop(session);
+        fs::write(options.archive.join("catalog.json"), b"corrupt").unwrap();
+        let events = Mutex::new(Vec::new());
+        assert!(SyncSession::new_with_observer(options, |event| events
+            .lock()
+            .unwrap()
+            .push(event))
+        .await
+        .is_err());
+        let events = events.into_inner().unwrap();
+        assert_eq!(
+            events.last().unwrap().phase,
+            "opening_and_validating_archive"
+        );
+        assert_eq!(events.last().unwrap().state, "failed");
+        assert_eq!(
+            events.last().unwrap().error_code,
+            Some("archive_admission_failed")
+        );
+        stop.send(()).unwrap();
     }
 
     #[tokio::test]
@@ -828,6 +1090,42 @@ mod tests {
             .unwrap()
             .read_block(5)
             .is_err());
+        stop.send(()).unwrap();
+    }
+
+    #[tokio::test]
+    async fn diagnostic_checkpoint_clears_after_empty_rollback_even_when_replacement_fetch_fails() {
+        let (node, endpoint, stop) = node(6).await;
+        let directory = tempfile::tempdir().unwrap();
+        let options = options(endpoint, directory.path());
+        let mut session = SyncSession::new(options.clone()).await.unwrap();
+        for _ in 0..3 {
+            session.step().await.unwrap();
+        }
+        assert_eq!(session.progress_snapshot().head, Some(6));
+        // Matching retained predecessor at height 0; all indexed segments leave
+        // the catalog. An empty archive is not a ready/readable prefix.
+        node.blocks.lock().unwrap().truncate(1);
+        assert_eq!(session.step().await.unwrap().head, None);
+        assert_eq!(session.progress_snapshot().head, None);
+        assert_eq!(status(&options.archive)["indexed_height"], Value::Null);
+        assert_eq!(status(&options.archive)["ready"], false);
+        extend(&mut node.blocks.lock().unwrap(), 6, 2);
+        assert_eq!(session.step().await.unwrap().head, Some(2));
+        // Reconcile another fork to the same predecessor, then fail while
+        // checking the first replacement raw block. No success event exists to
+        // update cached diagnostics; the error path must read the session head.
+        {
+            let mut blocks = node.blocks.lock().unwrap();
+            blocks.truncate(1);
+            extend(&mut blocks, 6, 3);
+        }
+        node.invalid_raw.store(true, Ordering::Relaxed);
+        assert!(session.step().await.is_err());
+        assert_eq!(session.progress_snapshot().head, None);
+        assert_eq!(session.progress_snapshot().source_height, 6);
+        assert_eq!(status(&options.archive)["indexed_height"], Value::Null);
+        assert_eq!(status(&options.archive)["ready"], false);
         stop.send(()).unwrap();
     }
 

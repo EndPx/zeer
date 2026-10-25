@@ -4,6 +4,7 @@ use serde_json::{json, Value};
 pub(crate) fn document() -> Value {
     json!({
         "api_version": 1,
+        "artifact": crate::artifact::identity(),
         "routes": ["/health", "/ready", "/height", "/query", "/transactions", "/capabilities", "/transaction", "/mempool"],
         "live":{"source_required":true,"max_response_bytes":crate::live::MAX_LIVE_BYTES,"max_mempool_rows":crate::live::MAX_MEMPOOL_ROWS,"scope":"testnet_node_observations_not_archive_or_finality"},
         "limits": {
@@ -42,6 +43,10 @@ mod tests {
     #[test]
     fn advertised_fields_are_accepted_by_query_validation() {
         let value = document();
+        assert_eq!(
+            value["artifact"],
+            serde_json::to_value(crate::artifact::identity()).unwrap()
+        );
         for name in ["block_fields", "transaction_fields"] {
             for field in value["query"][name].as_array().unwrap() {
                 let request = json!({

@@ -31,6 +31,7 @@ pub const MAX_FULL_ENVELOPE_BYTES: usize = 64 * 1024 * 1024;
 pub(crate) enum TransientSourceError {
     Transport,
     HttpStatus,
+    PreflightTimeout,
 }
 
 impl std::fmt::Display for TransientSourceError {
@@ -38,6 +39,7 @@ impl std::fmt::Display for TransientSourceError {
         formatter.write_str(match self {
             Self::Transport => "rpc_transport_failed",
             Self::HttpStatus => "rpc_http_status_failed",
+            Self::PreflightTimeout => "source_preflight_timeout",
         })
     }
 }
@@ -235,6 +237,10 @@ impl NodeRpc {
             .map_err(|error| transport_error(error, "rpc_transport_failed"))?;
         let lookup_error_status =
             method == "getrawtransaction" && response.status().as_u16() == 500;
+        ensure!(
+            !matches!(response.status().as_u16(), 401 | 403),
+            "rpc_authentication_failed"
+        );
         if (response.status().is_server_error() || response.status().as_u16() == 429)
             && !lookup_error_status
         {

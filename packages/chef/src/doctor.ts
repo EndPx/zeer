@@ -10,11 +10,13 @@ import { ChefError } from "./runtime.js";
 import { cliFailure, sourceObservation } from "./cli-output.js";
 import { assertRunnable, envName, loadProject, projectEnvironment, projectFingerprint, type LoadedProject } from "./project.js";
 import type { Checkpoint, ChefStore } from "./types.js";
+import { artifactIdentity, diagnosticAction, operatorDiagnostic, type DiagnosticAction } from "./operator-diagnostics.js";
 
-export interface DoctorCheck { name: string; status: "pass" | "warn" | "fail" | "skipped"; code: string; help: string }
+export interface DoctorCheck { name: string; status: "pass" | "warn" | "fail" | "skipped"; code: string; help: string; action: DiagnosticAction }
 export interface DoctorReport {
   command: "doctor"; ready: boolean; status: "ready" | "not_ready"; checks: DoctorCheck[];
   project?: string; network?: string; checkpoint?: Checkpoint;
+  artifact: ReturnType<typeof artifactIdentity>; diagnostic?: ReturnType<typeof operatorDiagnostic>;
   source?: ReturnType<typeof sourceObservation> | { availability: "unavailable"; errorCode: string };
 }
 const TIMEOUT = 5000;
@@ -29,16 +31,18 @@ function bounded<T>(operation: Promise<T>, signal?: AbortSignal): Promise<T> {
     operation.then(value => finish(() => resolve(value)), error => finish(() => reject(error)));
   });
 }
-function failure(error: unknown): { code: string; help: string } {
+function failure(error: unknown): { code: string; help: string; action: DiagnosticAction } {
   if (error instanceof CliError && ["DOCTOR_CANCELLED", "DOCTOR_CHECK_TIMEOUT"].includes(error.code)) return {
-    code: error.code, help: error.code === "DOCTOR_CANCELLED" ? "The setup check was cancelled." : "The setup check did not finish within five seconds. Check the local service and retry.",
+    code: error.code, help: error.code === "DOCTOR_CANCELLED" ? "The setup check was cancelled." : "The setup check did not finish within five seconds. Check the local service and retry.", action: diagnosticAction(error.code),
   };
   const result = cliFailure(error, error instanceof CliError || error instanceof ChefError ? error.code : undefined);
-  return { code: result.error.code, help: result.help };
+  return { code: result.error.code, help: result.help, action: result.action };
 }
 
 /** Inspection uses a separate read-only session; it neither locks a writer nor creates a namespace. */
-async function inspectDatabase(project: LoadedProject, databaseUrl: string, fingerprint: string): Promise<Checkpoint> {
+async function inspectDatabase(project: LoadedProject, databaseUrl: string, fingerprint: string): Promise<{
+  checkpoint: Checkpoint; lastCommitAt: string | null; generation: string; revision: string;
+}> {
   const parsed = new URL(databaseUrl);
   if (!["postgres:", "postgresql:"].includes(parsed.protocol)) throw new CliError("INVALID_DATABASE_URL");
   const pool = new pg.Pool({ connectionString: databaseUrl, max: 1, connectionTimeoutMillis: TIMEOUT,
@@ -66,8 +70,10 @@ async function inspectDatabase(project: LoadedProject, databaseUrl: string, fing
         || !row.generation || !/^(0|[1-9][0-9]*)$/.test(row.data_revision ?? "") || !row.source_observation) throw new CliError("MIGRATION_REQUIRED");
       if (!["ready", "reconciling", "blocked"].includes(row.status)) throw new CliError("PROJECT_IDENTITY_MISMATCH");
       await client.query("COMMIT");
-      return { height, hash: row.hash, anchorHash: row.anchor_hash, status: row.status, undoFloor,
-        ...(row.status === "reconciling" ? { reconcileKind: row.reconcile_kind } : {}) };
+      return { checkpoint: { height, hash: row.hash, anchorHash: row.anchor_hash, status: row.status, undoFloor,
+        ...(row.status === "reconciling" ? { reconcileKind: row.reconcile_kind } : {}) },
+        lastCommitAt: row.last_commit_at instanceof Date ? row.last_commit_at.toISOString() : null,
+        generation: row.generation, revision: row.data_revision };
     } finally { client.release(true); }
   } finally { await pool.end(); }
 }
@@ -122,13 +128,14 @@ export async function inspectProject(options: {
   configPath: string; project?: LoadedProject; host: string; port: number; signal?: AbortSignal;
   store?: ChefStore; client?: Pick<PrepClient, "get" | "getHeight">;
 }): Promise<DoctorReport> {
-  const report: DoctorReport = { command: "doctor", ready: false, status: "not_ready", checks: [] };
-  const add = (name: string, status: DoctorCheck["status"], code: string, help: string) => report.checks.push({ name, status, code, help });
+  const report: DoctorReport = { command: "doctor", ready: false, status: "not_ready", checks: [], artifact: artifactIdentity() };
+  const add = (name: string, status: DoctorCheck["status"], code: string, help: string, action?: DiagnosticAction) => report.checks.push({ name, status, code, help,
+    action: action ?? diagnosticAction(status === "pass" || status === "skipped" ? "OK" : code) });
   const check = async (name: string, run: () => Promise<void>, help: string) => {
     try { if (options.signal?.aborted) throw new CliError("DOCTOR_CANCELLED"); await run(); add(name, "pass", "OK", help); }
     catch (error) {
-      const known = error instanceof CliError && Object.hasOwn(doctorHelp, error.code) ? { code: error.code, help: doctorHelp[error.code]! } : failure(error);
-      add(name, "fail", known.code, known.help);
+      const known = error instanceof CliError && Object.hasOwn(doctorHelp, error.code) ? { code: error.code, help: doctorHelp[error.code]!, action: diagnosticAction(error.code) } : failure(error);
+      add(name, "fail", known.code, known.help, known.action);
     }
   };
   let project = options.project;
@@ -138,6 +145,7 @@ export async function inspectProject(options: {
     return report;
   }
   const loaded = project;
+  let committed: { lastCommitAt?: string | null; generation?: string; revision?: string } = {};
   let environment: ReturnType<typeof projectEnvironment> | undefined;
   await check("environment", async () => {
     environment = projectEnvironment(loaded);
@@ -149,7 +157,14 @@ export async function inspectProject(options: {
   if (report.checks.at(-1)?.status === "pass" && environment?.prepUrl && environment.databaseUrl) {
     const env = environment as { prepUrl: string; databaseUrl: string; prepToken?: string };
     await check("database", async () => {
-      report.checkpoint = await bounded(options.store ? options.store.checkpoint() : inspectDatabase(loaded, env.databaseUrl, projectFingerprint(loaded, env.prepUrl)), options.signal);
+      if (options.store?.consumptionStatus) {
+        const state = await bounded(options.store.consumptionStatus(), options.signal);
+        report.checkpoint = state.checkpoint; committed = state;
+      } else if (options.store) report.checkpoint = await bounded(options.store.checkpoint(), options.signal);
+      else {
+        const state = await bounded(inspectDatabase(loaded, env.databaseUrl, projectFingerprint(loaded, env.prepUrl)), options.signal);
+        report.checkpoint = state.checkpoint; committed = state;
+      }
       if (report.checkpoint.status === "blocked") throw new CliError("REBUILD_REQUIRED");
     }, "The existing namespace matches this project.");
     if (report.checkpoint?.status === "reconciling") add("read_gate", "warn", "RECONCILIATION_REQUIRED", "The follower must reconcile retained state before reads reopen. Doctor does not change this gate.");
@@ -172,6 +187,11 @@ export async function inspectProject(options: {
   }
   else add("scanner", "skipped", "SCANNER_NOT_CONFIGURED", "This project reads public chain data and does not require a viewing key.");
   report.ready = !report.checks.some(item => item.status === "fail"); report.status = report.ready ? "ready" : "not_ready";
+  const problem = report.checks.find(item => item.status === "fail") ?? report.checks.find(item => item.status === "warn");
+  report.diagnostic = operatorDiagnostic({ project: loaded.config.project, network: loaded.config.network,
+    startHeight: loaded.config.startHeight, checkpoint: report.checkpoint, source: report.source, code: problem?.code ?? "OK",
+    lastCommitAt: committed.lastCommitAt, projectGeneration: committed.generation, dataRevision: committed.revision });
+  if (problem) report.diagnostic.action = problem.action;
   return report;
 }
 

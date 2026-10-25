@@ -9,6 +9,19 @@ export class ChefError extends Error {
 const hash = (value: unknown): value is string => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
 const uint = (value: unknown): value is number => Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 0xffffffff;
 function requireValue(ok: unknown, code: string): asserts ok { if (!ok) throw new ChefError(code); }
+export type RuntimePhase = "checking_checkpoint" | "fetching" | "scanning" | "handlers" | "committing" | "recovering" | "source_wait" | "caught_up";
+/** Advisory in-process observations; never a substitute for the durable checkpoint or read gate. */
+export interface RuntimeProgressEvent {
+  phase: RuntimePhase;
+  committedHeight?: number | null;
+  processingRange?: { from: number; to: number } | null;
+  prepArchiveHeight?: number | null;
+  prepIndexedHeight?: number | null;
+  prepReady?: boolean | null;
+  sourceObservedHeight?: number | null;
+  sourceObservedAt?: number | null;
+  progressed?: true;
+}
 export interface RuntimeOptions<E extends object> extends SyncOptions {
   client: Pick<PrepClient, "get" | "getHeight">;
   store: ChefStore;
@@ -18,6 +31,8 @@ export interface RuntimeOptions<E extends object> extends SyncOptions {
   startHeight: number;
   reorgWindow: number;
   signal?: AbortSignal;
+  /** Synchronous best-effort observer. Exceptions are isolated from indexing and accounting. */
+  onProgress?: (event: Readonly<RuntimeProgressEvent>) => void;
 }
 export interface SyncResult {
   state: "progress" | "caught_up" | "source_unavailable";
@@ -81,6 +96,15 @@ export function validateSyncOptions(options: SyncOptions): void {
 /** One bounded page; PostgreSQL is the authoritative application checkpoint. */
 export async function syncStep<E extends object>(options: RuntimeOptions<E>, endHeight?: number): Promise<SyncResult> {
   const { client, store, signal } = options;
+  const progress = (event: RuntimeProgressEvent) => {
+    // Diagnostics must not become a failure path for an otherwise valid commit.
+    // Freeze the detached range too: observers cannot alter runtime inputs.
+    try {
+      const returned = options.onProgress?.(Object.freeze({ ...event, ...(event.processingRange ? { processingRange: Object.freeze({ ...event.processingRange }) } : {}) }));
+      // An accidentally async observer must not create an unhandled rejection.
+      if (returned !== undefined) void Promise.resolve(returned).catch(() => {});
+    } catch { /* advisory only */ }
+  };
   requireValue(uint(options.startHeight) && Number.isInteger(options.reorgWindow)
     && options.reorgWindow >= 1 && options.reorgWindow <= 1000, "INVALID_RUNTIME_OPTIONS");
   const limit = options.pageSize ?? 16;
@@ -93,13 +117,17 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   const mode = options.indexer.transaction ? "decoded" : options.indexer.transactionMetadata || privateNotes ? "metadata" : "none";
   const filtered = Object.values(options.transactionFilter ?? {}).some(value => value !== undefined && value !== null);
   requireValue(!filtered || mode !== "none", "FILTER_REQUIRES_TRANSACTION_HANDLER");
+  progress({ phase: "checking_checkpoint", processingRange: null });
   let checkpoint = await store.checkpoint();
+  progress({ phase: "checking_checkpoint", committedHeight: checkpoint.height, progressed: true });
   if (checkpoint.status === "blocked") throw new ChefError("REBUILD_REQUIRED");
   let fetchMs = 0;
   const fetched = async <T>(read: () => Promise<T>): Promise<T> => {
+    progress({ phase: "fetching" });
     const start = performance.now();
-    try { return await read(); }
+    try { const value = await read(); progress({ phase: "fetching", progressed: true }); return value; }
     catch (error) {
+      progress({ phase: "source_wait", prepArchiveHeight: null, prepIndexedHeight: null, prepReady: null, sourceObservedHeight: null, sourceObservedAt: null });
       await store.recordSourceObservation?.({status: "unavailable", prepIndexedHeight: null, sourceObservedHeight: null, sourceObservedAt: null});
       await store.markReconciling(error instanceof ReorgError ? "reorg" : "source"); throw error;
     }
@@ -107,6 +135,12 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   };
   signal?.throwIfAborted();
   const meta: Height = await fetched(() => client.getHeight({ signal }));
+  const matches = meta.network === options.network && meta.payload_kind === "full-v1";
+  const observed = matches && meta.ready && meta.source_mode === "follower"
+    && uint(meta.source_height) && Number.isSafeInteger(meta.source_observed_at) && Number(meta.source_observed_at) >= 0;
+  progress({ phase: "fetching", prepArchiveHeight: matches ? meta.archive_height : null, prepIndexedHeight: matches ? meta.indexed_height ?? null : null,
+    prepReady: matches ? meta.ready : null,
+    sourceObservedHeight: observed ? meta.source_height : null, sourceObservedAt: observed ? meta.source_observed_at : null });
   if (meta.network !== options.network || meta.payload_kind !== "full-v1") {
     await store.recordSourceObservation?.({status: "unavailable", prepIndexedHeight: null, sourceObservedHeight: null, sourceObservedAt: null});
     await store.markReconciling(); throw new ChefError("SOURCE_NETWORK_OR_KIND_MISMATCH");
@@ -117,6 +151,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
     sourceEpoch: meta.epoch, fetchMs, handlerIncludingEntityIoMs: 0, transactionOverheadMs: 0 };
   if (!meta.ready || meta.archive_height === null || meta.archive_height < options.startHeight) {
     await store.markReconciling("source");
+    progress({ phase: "source_wait", processingRange: null });
     return { ...base, state: "source_unavailable" };
   }
   requireValue(meta.start_block <= options.startHeight, "SOURCE_HISTORY_UNAVAILABLE");
@@ -134,6 +169,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   if (checkpoint.height !== null) {
     const current = checkpoint.height <= meta.archive_height ? await header(checkpoint.height) : null;
     if (!current || current.hash !== checkpoint.hash) {
+      progress({ phase: "recovering", processingRange: null });
       await store.markReconciling();
       // Genesis has no predecessor block to roll back to. A changed genesis is
       // a source identity failure, not a reorg across a synthetic height -1.
@@ -143,6 +179,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
       // window; missing published history is not proof of an unrecoverable fork.
       if (meta.source_mode === "follower" && meta.archive_height < floor
         && uint(meta.source_height) && meta.source_height >= floor) {
+        progress({ phase: "source_wait" });
         return { ...base, fetchMs, state: "source_unavailable" };
       }
       let ancestor: { height: number; hash: string } | null = null;
@@ -154,8 +191,10 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
         if (local === canonical) { ancestor = { height, hash: local }; break; }
       }
       if (!ancestor) { await store.markBlocked(); throw new ChefError("REBUILD_REQUIRED"); }
+      progress({ phase: "recovering" });
       await store.rollback(ancestor.height, ancestor.hash);
       checkpoint = await store.checkpoint();
+      progress({ phase: "recovering", committedHeight: checkpoint.height, progressed: true });
     }
   }
   if (checkpoint.height === null && checkpoint.anchorHash !== null) {
@@ -166,8 +205,10 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   const next = checkpoint.height === null ? options.startHeight : checkpoint.height + 1;
   if (next > target) {
     if (checkpoint.status === "reconciling") await store.markReady();
+    progress({ phase: "caught_up", committedHeight: checkpoint.height, processingRange: null, progressed: true });
     return { ...base, height: checkpoint.height, fetchMs, state: "caught_up" };
   }
+  progress({ phase: "fetching", processingRange: { from: next, to: Math.min(target, next + limit - 1) } });
   const page = await fetched(() => client.get({ from_block: next, to_block: target + 1, limit,
     ...(options.adaptiveScan ? { scan_mode: "adaptive" as const } : {}),
     field_selection: { block: ["height", "hash", "previous_hash", "time"],
@@ -188,6 +229,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
   for (let offset = 0; offset < batches.length; offset += batchSize) {
     signal?.throwIfAborted();
     const group = batches.slice(offset, offset + batchSize);
+    progress({ phase: privateNotes ? "scanning" : "committing", processingRange: { from: group[0]!.block.height, to: group.at(-1)!.block.height } });
     // Decrypt before opening the application transaction. The scanner has no durable state;
     // a failed/rolled-back application commit can rescan the same canonical bytes.
     const receipts = new Map<string, ShieldedReceipt[]>();
@@ -197,6 +239,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
           signal?.throwIfAborted();
           const result = await options.receiptSource!.scan({ block, transaction: transaction as TransactionMetadata & { raw: string } }, signal);
           receipts.set(`${block.height}:${transaction.index}`, validateReceipts(result, options.receiptSource!.accountId, options.receiptSource!.keyFingerprint, transaction.txid, block.height));
+          progress({ phase: "scanning", progressed: true });
         }
       } catch {
         await store.markReconciling("source"); throw new ChefError("SHIELDED_SCAN_UNAVAILABLE");
@@ -207,6 +250,7 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
     }
     const applyStart = performance.now();
     const handler = async (block: PublicBlock, entities: EntityAccess) => {
+      progress({ phase: "handlers" });
       signal?.throwIfAborted();
       const transactions = batches[block.height - next]!.transactions;
       const context = { entities: entities as EntityAccess<E> };
@@ -219,12 +263,16 @@ export async function syncStep<E extends object>(options: RuntimeOptions<E>, end
           for (const receipt of receipts.get(`${block.height}:${transaction.index}`) ?? []) {
             await options.indexer.receipt!({ block, transaction, receipt, context });
           }
+          progress({ phase: "handlers", progressed: true });
         }
       } finally { handlerMs += performance.now() - start; }
       signal?.throwIfAborted();
+      progress({ phase: "committing", progressed: true });
     };
+    progress({ phase: "committing" });
     if (batchSize > 1 && store.applyBatch) await store.applyBatch(group.map(item => item.block), handler);
     else for (const { block } of group) await store.apply(block, entities => handler(block, entities));
+    progress({ phase: "committing", committedHeight: group.at(-1)!.block.height, processingRange: null, progressed: true });
     applyMs += performance.now() - applyStart;
     transactionCount += group.reduce((count, item) => count + item.transactions.length, 0);
   }
