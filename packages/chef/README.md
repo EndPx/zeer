@@ -1,12 +1,10 @@
 # Zeer Chef (developer preview)
 
-0.6.1 is a documentation patch: it removes an outdated statement excluding entity
-relationships. Runtime code and the API are unchanged from 0.6.0; this patch does
-not require a database migration or replay for an otherwise unchanged project.
-
-This checkout also contains a **0.7.0 source-build candidate**, not yet published.
-The heartbeat and operator diagnostics described below require that candidate;
-the published CLI/SDK installation remains 0.6.1 until release verification.
+Chef **0.7.0** adds cached sync/follow heartbeats, build-produced artifact identity
+and consistent operator diagnosis. Status and doctor distinguish source waits,
+transient failures, authentication/configuration errors and recovery actions.
+These additive diagnostics preserve the existing indexing, read-gate and database
+contracts. An otherwise unchanged project on 0.6.x needs no new migration or replay.
 
 Chef reads complete public Zcash data from Prep, invokes trusted TypeScript
 handlers, commits application entities to developer-owned PostgreSQL, and serves
@@ -213,7 +211,7 @@ failure rolls back the current batch; earlier committed batches remain.
 
 ### Candidate operational diagnostics
 
-The 0.7.0 source-build candidate adds a best-effort heartbeat every five seconds
+Chef 0.7.0 adds a best-effort heartbeat every five seconds
 to sync/follow, without extra Prep or PostgreSQL reads. JSON records use
 `state: "heartbeat"`; `progress` separates an inclusive pending range from
 `committedHeight`, the checkpoint last observed or commit/rollback acknowledged
@@ -238,7 +236,7 @@ isolated from indexing; keep callbacks short because they run on the same event
 loop. Events contain no account identifiers, transaction IDs, receiver, amount,
 memo or viewing key. They cannot replace checkpoint validation or the read gate.
 
-Candidate status and doctor include build-produced artifact identity, coverage,
+Status and doctor include build-produced artifact identity, coverage,
 timestamped source information and fixed next-action categories. Missing
 provenance is `unknown`; runtime Git HEAD is never substituted for the build.
 The advice distinguishes waiting/retry, authentication/configuration correction,
