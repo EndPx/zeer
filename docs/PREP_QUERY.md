@@ -331,7 +331,9 @@ Continue with the **same original request** plus the returned cursor. Do not cha
 A cursor binds the network, archive start, epoch, original bounds, field/filter/
 limit fingerprint, next height, and captured end-block hash. Appending changes
 revision without invalidating the cursor. A rollback changes epoch and returns
-HTTP 409 `REORG`. A rebuilt archive with a reused epoch but a different captured
+HTTP 409 `REORG`. Lossless consolidation also advances epoch for physical-layout
+invalidation without removing canonical blocks. Re-observe the source rather than
+inferring a chain fork solely from this code. A rebuilt archive with a reused epoch but a different captured
 end-block hash also invalidates the cursor. Cursors are consistency checks, not
 signed capabilities or authorization tokens. Treat them as opaque client state.
 

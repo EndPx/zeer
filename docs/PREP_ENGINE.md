@@ -1,6 +1,6 @@
 # Zeer Prep engine
 
-Updated 2026-10-25. The user requires complete blocks and transactions for the
+Updated 2026-10-27. The user requires complete blocks and transactions for the
 28 October delivery. [Delivery contract](PREP_DELIVERY.md) owns the active scope;
 [query contract](PREP_QUERY.md) owns the HTTP and SDK semantics. Chef's public-data
 pipeline is implemented; optional private scanning is a separate
@@ -62,8 +62,10 @@ choosing a network by difficulty or activation schedule.
   catalog advances only after complete records, hashes and source anchors pass.
 - Restart resumes from the last committed segment. Incomplete/orphan segments
   are ignored by readers but retained and counted against disk capacity.
-- Appending preserves the epoch. Removing history increments the epoch and
-  invalidates old cursors. Readers retain a coherent catalog snapshot.
+- Appending preserves the epoch. Removing history or explicitly invalidating
+  physical layout through lossless consolidation advances epoch and invalidates
+  old cursors. A layout epoch is not proof of a chain fork. Readers retain a
+  coherent catalog snapshot.
 - Reorg recovery checks the existing head and searches a bounded predecessor
   window. It removes catalog references to whole overlapping segments before
   rebuilding. Excessive reorg depth marks the source not ready and stops sync.
@@ -304,9 +306,13 @@ group, and reports all retired directories, exact logical digests and output
 bytes. It does not create a new archive, change source readiness, access RPC or
 delete any segment. Resume follow for a genuine fresh observation. Keep the old
 catalog and all source/orphan files until their classification is complete.
+Check `target_reached` and `stop_reason`: a bounded command can exit successfully
+with partial progress when its group/disk budget or eligible input is exhausted.
 Retired directories must remain while any admitted reader can lazily open them;
 garbage collection requires a separate reader-quiescence procedure. This solves
 catalog-entry growth within finite storage budgets, not unlimited retention.
+The [27 October recovery report](PREP_CATALOG_INCIDENT_20261027.md) records the
+actual 30,000-reference incident, unchanged payload proof and concurrent-read limits.
 
 The optional `prep-store/admission-profile` feature provides diagnostic phase
 timers and reduced-budget counterfactuals through dedicated examples. Ordinary

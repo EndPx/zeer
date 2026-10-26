@@ -58,6 +58,9 @@ Check `coverage.ready` and a non-null indexed height before constructing a query
 `stream()` supports paging through a fixed available range. A response cursor
 means more pages exist; a single page is not full-history completion. A snapshot
 change returns `409` with the `REORG` code so the client can restart safely.
+Lossless physical catalog consolidation also advances the epoch to invalidate
+layout-bound snapshots. That 409 does not by itself establish a chain fork;
+re-observe canonical headers and reconcile before restarting.
 
 ## Playground examples
 

@@ -4,6 +4,14 @@ Prep retrieves selected public chain data from a prepared archive. This benchmar
 
 All durations are in **seconds (s)**. The compact retrieval study below uses the published Zaino/Ztreamer workload. The HTTP comparison with Zebra and full-history startup measure different operations and retain their original dates and environments.
 
+## Catalog recovery under real ingestion
+
+Recorded **27 October 2026 (WIB)** after a live writer reached 30,000 references. The count and 16 MiB byte limits stayed unchanged. Bounded lossless consolidation restored source freshness and let the existing Chef consumer advance without a project/account reset. An independent check covered all **4,544,784 original blocks**; a held snapshot and its refreshed view returned identical data.
+
+The observation retained **178 successful data queries, nine capacity 429 responses and three layout-change 409 responses** across 190 attempts. A further 755 metadata samples included 53 capacity responses. The reader remained under its existing shared resource ceiling; these results do not establish an error-free service SLA or a ten-application capacity limit. The writer's full archive-admission phase took **573 seconds** at a temporary 100% CPU ceiling, then returned to 50%. Caches were not cleared and this was not a comparative startup speed test.
+
+[Download the source pins, integrity proof and all query/metadata samples](pathname:///docs/benchmarks/2026-10-27-prep-catalog-recovery-testnet.json). Recompute the statistics with `node apps/docs/scripts/verify-catalog-recovery.mjs`. The [incident report](https://github.com/EndPx/zeer/blob/main/docs/PREP_CATALOG_INCIDENT_20261027.md) explains retained segments, memory pressure, timestamps and the separate observation scopes.
+
 ## Compact-block retrieval
 
 Recorded **23 October 2026** on Zcash testnet. Prep downloaded **4,102,798 compact blocks** in a median of **32.28 seconds**. The three runs took **31.88, 34.09 and 32.28 seconds**.

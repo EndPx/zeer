@@ -30,3 +30,5 @@ The [client's](/docs/prep/clients/) `stream()` method handles these cursor pages
 - `cursor: null` completes the captured range. Empty transaction results do not end a scan by themselves.
 - Do not change fields, filters or the original start while retaining a cursor.
 - After `REORG`, reconcile persisted results before starting a new scan.
+
+The same 409 code also covers physical-layout invalidation during lossless catalog consolidation. That event can preserve every block and still invalidate a captured cursor. Re-observe the source and canonical headers; do not infer an actual chain fork solely from the error name.
