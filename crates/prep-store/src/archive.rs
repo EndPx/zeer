@@ -8,11 +8,14 @@ const CATALOG_NAME: &str = "catalog.json";
 const CATALOG_PENDING: &str = "catalog.pending";
 const LOCK_NAME: &str = "archive.lock";
 const MAX_CATALOG_BYTES: u64 = 16 * 1024 * 1024;
-// A live follower can publish one immutable segment per new block. Keep room
-// beyond the historical import; catalog bytes and header metadata stay bounded
-// independently, including for unusually long segment directory names.
+// Hard admission bounds, not a lifetime growth strategy. Live followers publish
+// promptly and consolidate historical references below this ceiling; catalog
+// bytes and header metadata remain independently bounded.
 const MAX_SEGMENTS: usize = 30_000;
 const MAX_RANGE_BLOCKS: u64 = 10_000;
+
+mod consolidation;
+pub use consolidation::ConsolidationReport;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -34,7 +37,7 @@ pub struct Catalog {
     pub network: String,
     pub payload_kind: String,
     pub start_height: u64,
-    /// Advances only when published history is removed/invalidated.
+    /// Advances when published history or its segment layout is invalidated.
     pub epoch: u64,
     /// Advances on each append, rollback or explicit epoch invalidation.
     pub revision: u64,

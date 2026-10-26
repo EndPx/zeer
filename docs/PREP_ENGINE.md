@@ -270,6 +270,44 @@ permission to skip canonicality checks.
 
 ## Evidence and remaining limits
 
+### Bounded catalog consolidation
+
+Near the chain head, follow publishes a new block immediately rather than waiting
+for `--segment-blocks` to fill. This can produce one immutable segment per block.
+The hard limits remain **30,000 catalog references and 16 MiB of catalog JSON**.
+Follow now consolidates one bounded historical group after publication when the
+catalog reaches 16,384 references or 8 MiB. A full/near-byte-limit catalog is
+checked before downloading and finalizing another segment.
+
+A group contains at most 256 references and 1,000 blocks, outside the retained
+reorg tail. Selection limits stored input to half the output budget. Output is
+bounded to 64 MiB of segment data plus 8 MiB of manifest. Both disk reservations
+and retained old files count against the configured archive budget. Full
+record/header/hash/payload comparison and ordinary output admission precede an
+atomic catalog replacement. Epoch/revision advances invalidate layout cursors;
+they do not remove or rewind canonical blocks. New source status requires an
+actual RPC observation and head-hash check after maintenance.
+
+For an already exhausted catalog, stop its writer and run one bounded operator
+job, using the **logical `catalog_sha256` field**, not the JSON file's byte hash:
+
+```sh
+prep archive-consolidate --archive /path/to/archive \
+  --target-segments 10000 --max-groups 128 \
+  --protected-tail-blocks 100 --max-disk-gib 24 \
+  --max-segment-bytes 67108864 \
+  --expected-catalog-sha256 CATALOG_FIELD_SHA256
+```
+
+This command locks and fully admits the existing archive once, verifies each
+group, and reports all retired directories, exact logical digests and output
+bytes. It does not create a new archive, change source readiness, access RPC or
+delete any segment. Resume follow for a genuine fresh observation. Keep the old
+catalog and all source/orphan files until their classification is complete.
+Retired directories must remain while any admitted reader can lazily open them;
+garbage collection requires a separate reader-quiescence procedure. This solves
+catalog-entry growth within finite storage budgets, not unlimited retention.
+
 The optional `prep-store/admission-profile` feature provides diagnostic phase
 timers and reduced-budget counterfactuals through dedicated examples. Ordinary
 builds retain the original integrity checks and 64 MiB archive / 16 MiB segment

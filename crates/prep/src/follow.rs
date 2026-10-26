@@ -215,7 +215,7 @@ pub async fn run(
         let result = tokio::select! {
             biased;
             _ = &mut shutdown => break,
-            result = session.step() => result,
+            result = session.step_with_observer(|event| reporter.record(event)) => result,
         };
         let progress = match result {
             Ok(progress) => {

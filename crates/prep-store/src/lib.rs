@@ -39,7 +39,9 @@ mod disk_index;
 pub mod profiling;
 mod raw_refs;
 mod transaction_index;
-pub use archive::{Archive, ArchiveRangeReader, ArchiveWriter, Catalog, SegmentReference};
+pub use archive::{
+    Archive, ArchiveRangeReader, ArchiveWriter, Catalog, ConsolidationReport, SegmentReference,
+};
 pub use disk_index::MAX_DISK_INDEX_BYTES;
 pub use transaction_index::TransactionMetadata;
 use transaction_index::{IndexBuilder, TransactionIndex, SEGMENT_INDEX_BYTES};

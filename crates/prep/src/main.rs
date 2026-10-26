@@ -76,6 +76,25 @@ enum Command {
         #[arg(long)]
         archive: PathBuf,
     },
+    /// Losslessly merge historical full-data segments under one writer lock; retains old files.
+    ArchiveConsolidate {
+        #[arg(long)]
+        archive: PathBuf,
+        #[arg(long, default_value_t = 10_000)]
+        target_segments: usize,
+        #[arg(long, default_value_t = 128)]
+        max_groups: usize,
+        #[arg(long, default_value_t = 100)]
+        protected_tail_blocks: u64,
+        #[arg(long, default_value_t = 4)]
+        max_disk_gib: u64,
+        /// Maximum encoded bytes in one replacement segment, from 1 to 64 MiB.
+        #[arg(long, default_value_t = 64 * 1024 * 1024)]
+        max_segment_bytes: u64,
+        /// Refuse a stale operator plan after acquiring the writer lock.
+        #[arg(long)]
+        expected_catalog_sha256: Option<String>,
+    },
     /// Append checked compact segments to a compact archive, in height order.
     CompactArchiveAppend {
         #[arg(long)]
@@ -273,6 +292,34 @@ async fn main() -> Result<()> {
         Command::ArchiveInspect { archive } => {
             let archive = tokio::task::spawn_blocking(move || Archive::open(archive)).await??;
             println!("{}", serde_json::to_string_pretty(archive.catalog())?);
+        }
+        Command::ArchiveConsolidate {
+            archive,
+            target_segments,
+            max_groups,
+            protected_tail_blocks,
+            max_disk_gib,
+            max_segment_bytes,
+            expected_catalog_sha256,
+        } => {
+            let max_archive_bytes = max_disk_gib
+                .checked_mul(1024 * 1024 * 1024)
+                .ok_or_else(|| anyhow::anyhow!("disk_budget_overflow"))?;
+            let report = tokio::task::spawn_blocking(move || {
+                prep::maintenance::consolidate_archive(
+                    &archive,
+                    prep::maintenance::ConsolidateOptions {
+                        target_segments,
+                        max_groups,
+                        protected_tail_blocks,
+                        max_archive_bytes,
+                        max_segment_bytes,
+                        expected_catalog_sha256,
+                    },
+                )
+            })
+            .await??;
+            println!("{}", serde_json::to_string_pretty(&report)?);
         }
         Command::ServeHttp {
             archive,

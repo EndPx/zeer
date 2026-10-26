@@ -120,7 +120,7 @@ struct StatusFile<'a> {
     mode: &'a str,
 }
 
-fn nonce() -> String {
+pub(crate) fn nonce() -> String {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|time| time.as_nanos())
@@ -235,6 +235,9 @@ fn status_code(error: &anyhow::Error) -> &'static str {
         "deep_reorg_requires_operator_recovery" => "deep_reorg_requires_operator_recovery",
         "source_network_mismatch" => "source_network_mismatch",
         "archive_disk_budget_exhausted" => "archive_disk_budget_exhausted",
+        "catalog_consolidation_required_before_append"
+        | "snapshot bound exceeded: catalog segment count"
+        | "snapshot bound exceeded: catalog bytes" => "catalog_consolidation_required",
         "source_changed_during_segment" => "source_changed_during_segment",
         "sync_deadline_exceeded" => "sync_deadline_exceeded",
         _ => "sync_failed",
@@ -250,6 +253,9 @@ pub(crate) fn source_error_code(error: &anyhow::Error) -> &'static str {
         "source_preflight_timeout" => "source_preflight_timeout",
         "deep_reorg_requires_operator_recovery" => "deep_reorg_requires_operator_recovery",
         "archive_disk_budget_exhausted" => "archive_disk_budget_exhausted",
+        "catalog_consolidation_required_before_append"
+        | "snapshot bound exceeded: catalog segment count"
+        | "snapshot bound exceeded: catalog bytes" => "catalog_consolidation_required",
         "source_changed_during_segment" => "source_changed_during_segment",
         "sync_deadline_exceeded" => "sync_deadline_exceeded",
         "rpc_transport_failed"
@@ -353,6 +359,13 @@ impl SyncSession {
     }
 
     pub async fn step(&mut self) -> Result<SyncProgress> {
+        self.step_with_observer(|_| {}).await
+    }
+
+    pub(crate) async fn step_with_observer(
+        &mut self,
+        observer: impl Fn(SyncEvent) + Sync,
+    ) -> Result<SyncProgress> {
         let options = &self.options;
         let result = tokio::time::timeout(
             Duration::from_secs(options.deadline_seconds),
@@ -361,6 +374,7 @@ impl SyncSession {
                 &self.source,
                 &mut self.writer,
                 &mut self.source_height,
+                &observer,
             ),
         )
         .await
@@ -403,6 +417,7 @@ async fn sync_locked(
     source: &NodeRpc,
     writer: &mut ArchiveWriter,
     source_height: &mut u64,
+    observer: &(impl Fn(SyncEvent) + Sync),
 ) -> Result<SyncProgress> {
     let info = source.chain_info().await?;
     *source_height = info.height;
@@ -426,6 +441,16 @@ async fn sync_locked(
     if next > target {
         return Ok(progress(writer, info.height, changed));
     }
+    // Reclaim catalog entries before downloading/writing when the next append
+    // would have no room. No complete unpublished segment is created at the cap.
+    if options.follow_mode && crate::maintenance::required_before_append(writer)? {
+        maintain_catalog(options, source, writer, source_height, observer).await?;
+    }
+    ensure!(
+        writer.remaining_segment_slots() > 0
+            && !crate::maintenance::required_before_append(writer)?,
+        "catalog_consolidation_required_before_append"
+    );
     let used = archive_disk_bytes(&options.archive)?;
     ensure!(
         used.checked_add(ADMISSION_RESERVE)
@@ -539,7 +564,70 @@ async fn sync_locked(
     );
     writer.append_segment(&relative)?;
     changed = true;
+    if options.follow_mode {
+        // The newest block becomes readable before bounded maintenance starts.
+        // Do not postpone this publication until a large segment fills up.
+        write_status(
+            &options.archive,
+            writer.catalog(),
+            *source_height,
+            true,
+            None,
+            options.follow_mode,
+        )?;
+        maintain_catalog(options, source, writer, source_height, observer).await?;
+    }
     Ok(progress(writer, *source_height, changed))
+}
+
+async fn maintain_catalog(
+    options: &SyncOptions,
+    source: &NodeRpc,
+    writer: &mut ArchiveWriter,
+    source_height: &mut u64,
+    observer: &(impl Fn(SyncEvent) + Sync),
+) -> Result<bool> {
+    if !crate::maintenance::needed(writer)? {
+        return Ok(false);
+    }
+    let mut event = SyncEvent::new("consolidating_archive", "started");
+    event.committed_height = writer.head();
+    event.source_height = Some(*source_height);
+    observer(event.clone());
+    let result = crate::maintenance::maintain_once(
+        &options.archive,
+        writer,
+        options.max_reorg_blocks,
+        options.max_archive_bytes,
+    )?;
+    if result.is_some() {
+        // Consolidation invalidates physical-layout cursors. Its new catalog
+        // must not make an old status timestamp look like a fresh observation.
+        let info = source.chain_info().await?;
+        *source_height = info.height;
+        ensure!(info.network == options.network, "source_network_mismatch");
+        if let Some(head) = writer.head() {
+            ensure!(
+                info.height >= head
+                    && source.block_hash(head).await?.as_str()
+                        == writer.head_hash().unwrap_or_default(),
+                "source_changed_during_segment"
+            );
+        }
+        write_status(
+            &options.archive,
+            writer.catalog(),
+            *source_height,
+            true,
+            None,
+            options.follow_mode,
+        )?;
+    }
+    event.state = "completed";
+    event.observed_at_unix = unix_seconds();
+    event.source_height = Some(*source_height);
+    observer(event);
+    Ok(result.is_some())
 }
 
 fn progress(writer: &ArchiveWriter, source_height: u64, progress: bool) -> SyncProgress {
