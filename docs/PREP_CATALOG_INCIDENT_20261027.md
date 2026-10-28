@@ -137,3 +137,8 @@ The [curated artifact](../apps/docs/static/benchmarks/2026-10-27-prep-catalog-re
 contains the source pins, exact sample outcomes and limitations. Reconstruct its
 statistics with `node apps/docs/scripts/verify-catalog-recovery.mjs`. Private
 operational logs and credentials remain outside the repository.
+
+Follow-up: the [28 October archive-budget incident](PREP_ARCHIVE_BUDGET_INCIDENT_20261028.md)
+classified and reclaimed proven redundant copies after quiescing all archive
+readers. This report describes the earlier state when those source files were
+retained; physical snapshot retention and the later GC are separate operations.

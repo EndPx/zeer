@@ -1,0 +1,5367 @@
+{
+  "schemaVersion": 1,
+  "kind": "operational-recovery",
+  "network": "testnet",
+  "date": "2026-10-28",
+  "scope": "Bounded offline reclamation of proven redundant payload copies, with all known native archive readers quiesced. No consumer reset or financial execution.",
+  "tools": {
+    "sourceCommit": "74e0a5f8498ba2dfb006f59b300c08d3513d3198",
+    "verifierSha256": "72e3e09e0f39875e4bdb77a663a96a888653971581305554473b9aab2ed56b99",
+    "gcToolSha256": "7cb5fd0b5a892b645c31d6a19277d70388a8a34a3b754258b59e28f3e949d3ba"
+  },
+  "productionWriter": {
+    "path": "/opt/zeer-testnet/catalog-incident-20261027/prep",
+    "sha256": "81f34e6c34f7e62f52671fb506c8bbe3c229e96fad0ce5c8ca7d6ffe97550a1d",
+    "buildInfo": {
+      "schemaVersion": 1,
+      "packageName": "prep",
+      "packageVersion": "0.1.0",
+      "buildCommit": "63331816537545f0d059d61a2f453fcabeb6a1b8",
+      "sourceState": "clean"
+    },
+    "changed": false
+  },
+  "productionReader": {
+    "path": "/opt/zeer-testnet/startup-20261021/bin/prep-optimized",
+    "sha256": "d788ea8b25216b4e0fe21b3336bf4955fa670f890a764ca6adab91da6758c414",
+    "changed": false,
+    "commitAttestation": "Historical binary has no new embedded commit attestation; exact executable SHA verified before and after restart."
+  },
+  "before": {
+    "catalog": {
+      "fileSha256": "f6ab4cd11538d1f4add564dc82b78090a9174cbefead1cb513dee5fb4b0a2917",
+      "head": 4550242,
+      "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+      "segments": 16146,
+      "revision": 35533,
+      "epoch": 243,
+      "bytes": 8341755
+    },
+    "storageBytes": {
+      "active": 23296016108,
+      "protected_original_unreferenced": 1939780,
+      "candidate_retired": 2152987836,
+      "unpublished_or_unknown": 0,
+      "other": 81437617
+    },
+    "directoryCounts": {
+      "active": 16146,
+      "protected_original_unreferenced": 79,
+      "candidate_retired": 19197,
+      "unpublished_or_unknown": 0,
+      "other": 0
+    },
+    "archiveBytes": 25532381341,
+    "budgetBytes": 25769803776,
+    "appendReserveBytes": 268435456,
+    "freeAboveAppendReserveBytes": -31013021,
+    "freePhysicalBytes": 37091700736
+  },
+  "proof": {
+    "status": "PASS",
+    "scope": "Read-only full-record equivalence; no deletion, reader-quiescence, source freshness or consensus claim.",
+    "plan_sha256": "c9e6586262120b937daeca45b644128ae68991684cd0bd97d8a04c4963705123",
+    "catalog_file_sha256": "f6ab4cd11538d1f4add564dc82b78090a9174cbefead1cb513dee5fb4b0a2917",
+    "catalog_head": 4550242,
+    "catalog_head_hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+    "catalog_epoch": 243,
+    "catalog_revision": 35533,
+    "candidates": 19197,
+    "records_compared": 59214,
+    "eligible_bytes": 2152532167,
+    "elapsed_seconds": 407.523989674
+  },
+  "proofFileSha256": "273cbe0dedbeaa89987972c6f391d0b7fb016dd493c5755d35e6e74bbaac38e9",
+  "retained": {
+    "originalProtectedDirectories": 79,
+    "originalClassifications": {
+      "noncanonical_branch": 75,
+      "canonical_historical_duplicate": 3,
+      "completed_unpublished_above_old_head": 1
+    },
+    "additionalDirectories": 38,
+    "additionalClassifications": {
+      "noncanonical_branch": 38
+    },
+    "additionalBytes": 455669,
+    "originalManifestsUnchanged": true,
+    "additionalFilesUnchanged": true,
+    "incompleteOrTemporaryDirectories": 0
+  },
+  "gc": {
+    "status": "PASS",
+    "atUnix": 1793184691.5707433,
+    "reclaimedDirectories": 19159,
+    "reclaimedBytes": 2152532167,
+    "archiveBytesBefore": 25532381341,
+    "archiveBytesAfter": 23379849174,
+    "catalogFileSha256Unchanged": "f6ab4cd11538d1f4add564dc82b78090a9174cbefead1cb513dee5fb4b0a2917",
+    "metadataBackupBytes": 14431776,
+    "metadataBackupSha256": "b3ae18e457ec828a6750b748866a50f91b5b3f997489e81ec6ebfea8685f9c33",
+    "quiescedReaderPids": [
+      1079955
+    ],
+    "readerCoordination": "Operator stopped all inventoried readers; no online GC or reader lease guarantee."
+  },
+  "writerEvents": {
+    "initialRecovery": {
+      "processStartAtUnix": 1793184698.177674,
+      "archiveAdmissionStart": {
+        "event": "prep_operation",
+        "phase": "opening_and_validating_archive",
+        "state": "started",
+        "heartbeat": false,
+        "observed_at_unix": 1793184702,
+        "last_progress_at_unix": 1793184702,
+        "source_height": 4550661,
+        "committed_height": null,
+        "error_code": null,
+        "retry_attempt": null,
+        "retry_limit": null,
+        "retry_delay_seconds": null
+      },
+      "archiveAdmissionComplete": {
+        "event": "prep_operation",
+        "phase": "opening_and_validating_archive",
+        "state": "completed",
+        "heartbeat": false,
+        "observed_at_unix": 1793185275,
+        "last_progress_at_unix": 1793185275,
+        "source_height": 4550661,
+        "committed_height": 4550242,
+        "error_code": null,
+        "retry_attempt": null,
+        "retry_limit": null,
+        "retry_delay_seconds": null
+      },
+      "archiveAdmissionSeconds": 573,
+      "firstReadyOperation": {
+        "event": "prep_operation",
+        "phase": "ready",
+        "state": "observed",
+        "heartbeat": false,
+        "observed_at_unix": 1793185279,
+        "last_progress_at_unix": 1793185279,
+        "source_height": 4550681,
+        "committed_height": 4550681,
+        "error_code": null,
+        "retry_attempt": null,
+        "retry_limit": null,
+        "retry_delay_seconds": null
+      },
+      "startToReadyOperationSeconds": 580.8223259449005,
+      "timingResolutionSeconds": 1,
+      "failureEvents": []
+    },
+    "approvedBudgetRestart": {
+      "processStartAtUnix": 1793186641.0,
+      "archiveAdmissionStart": {
+        "event": "prep_operation",
+        "phase": "opening_and_validating_archive",
+        "state": "started",
+        "heartbeat": false,
+        "observed_at_unix": 1793186641,
+        "last_progress_at_unix": 1793186641,
+        "source_height": 4550729,
+        "committed_height": null,
+        "error_code": null,
+        "retry_attempt": null,
+        "retry_limit": null,
+        "retry_delay_seconds": null
+      },
+      "archiveAdmissionComplete": {
+        "event": "prep_operation",
+        "phase": "opening_and_validating_archive",
+        "state": "completed",
+        "heartbeat": false,
+        "observed_at_unix": 1793187147,
+        "last_progress_at_unix": 1793187147,
+        "source_height": 4550729,
+        "committed_height": 4550729,
+        "error_code": null,
+        "retry_attempt": null,
+        "retry_limit": null,
+        "retry_delay_seconds": null
+      },
+      "archiveAdmissionSeconds": 506,
+      "firstReadyOperation": {
+        "event": "prep_operation",
+        "phase": "ready",
+        "state": "observed",
+        "heartbeat": false,
+        "observed_at_unix": 1793187149,
+        "last_progress_at_unix": 1793187149,
+        "source_height": 4550753,
+        "committed_height": 4550753,
+        "error_code": null,
+        "retry_attempt": null,
+        "retry_limit": null,
+        "retry_delay_seconds": null
+      },
+      "startToReadyOperationSeconds": 508.0,
+      "timingResolutionSeconds": 1,
+      "failureEvents": []
+    }
+  },
+  "restart": {
+    "atUnix": 1793184717.6893518,
+    "readerQuiescedAtUnix": 1793184539.3772635,
+    "writerStartAtUnix": 1793184698.177674,
+    "writerBinaryUnchanged": true,
+    "readerBinaryUnchanged": true,
+    "all79OriginalUnreferencedRetained": true,
+    "archiveBudgetUnchanged": 25769803776,
+    "consumerContainersRestarted": false,
+    "temporaryWriterCpuQuota": "100%",
+    "steadyWriterCpuQuota": "50% after first fresh observation"
+  },
+  "quotaRestored": {
+    "atUnix": 1793185347.405063,
+    "status": {
+      "schema_version": 1,
+      "ready": true,
+      "source_height": 4550685,
+      "indexed_height": 4550685,
+      "lag_blocks": 0,
+      "updated_at_unix": 1793185347,
+      "error": null,
+      "epoch": 243,
+      "revision": 35538,
+      "mode": "follow"
+    },
+    "sourceHashVerified": "00000b1398548c6cd85edf52a1d9e7ac303097aab51aad8714f3c72c851a2282",
+    "quota": "50%",
+    "basis": "fresh writer status plus authenticated source hash; reader API admission still in progress"
+  },
+  "approvedBudgetChange": {
+    "status": "BUDGET_APPLIED_WAITING_FOR_FRESH_WRITER",
+    "approvedByUser": true,
+    "atUnix": 1793186770.6160822,
+    "writerStartAtUnix": 1793186641.0,
+    "startTimeResolutionSeconds": 1,
+    "startTimeBasis": "systemd ExecMainStartTimestamp",
+    "auditCollectorRace": "Initial collector read the Python wrapper before exec; this record verifies the actual prep executable and CLI without another restart.",
+    "archiveBudgetGiBBefore": 24,
+    "archiveBudgetGiBAfter": 26,
+    "archiveBudgetBytesBefore": 25769803776,
+    "archiveBudgetBytesAfter": 27917287424,
+    "aggregateBudgetGiBBefore": 60,
+    "aggregateBudgetGiBAfter": 64,
+    "aggregateStopGiBAfter": 63,
+    "minimumHostFreeGiBUnchanged": 25,
+    "appendReserveBytesUnchanged": 268435456,
+    "nodeBudgetGiBUnchanged": 35,
+    "archiveBytesBeforeRestart": 23388923495,
+    "projectedAggregateAtFullPrepPlus512MiB": 65654542331,
+    "guardBytesAtVerification": 60589307490,
+    "physicalFreeBytesAtVerification": 48743215104,
+    "guardSha256Before": "6009174b8487c9b271a8b6633aa811c7eabbe4c85047c9520294e1b7f910cd33",
+    "guardSha256After": "6cd0c32516bb4e0ec80cd4074e5828f0a423705983a13d8d43372e92cd96ce3a",
+    "wrapperSha256Before": "17564922fbbb54329822324769c87b0fe84ff8bec8abbf449dc30467dc6fc4fd",
+    "wrapperSha256After": "bf6faa12dbadfac77a233103606a6bb76feae983d305832a28bc9df490989ed6",
+    "readerPidUnchanged": 1163383,
+    "readerSha256Unchanged": "d788ea8b25216b4e0fe21b3336bf4955fa670f890a764ca6adab91da6758c414",
+    "writerSha256Unchanged": "81f34e6c34f7e62f52671fb506c8bbe3c229e96fad0ce5c8ca7d6ffe97550a1d",
+    "catalogBefore": {
+      "head": 4550729,
+      "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+      "fileSha256": "5e135ccd61b50689bf9fd2ec95e4d2ac91b1ecc8a6b2eeb0a40e5e1b8ab07a64",
+      "epoch": 243,
+      "revision": 35582
+    },
+    "consumerContainersUnchanged": true,
+    "cpuQuotaDuringStartup": "100%",
+    "cpuQuotaAfterFreshObservation": "50%"
+  },
+  "initialRecoveryAcceptance": {
+    "atUnix": 1793185781.7315693,
+    "prep": {
+      "archive_height": 4550700,
+      "canonicality": "historical_snapshot_not_independently_consensus_validated",
+      "epoch": "243",
+      "indexed_height": 4550700,
+      "lag_blocks": 0,
+      "network": "testnet",
+      "payload_kind": "full-v1",
+      "ready": true,
+      "revision": "35553",
+      "source_height": 4550700,
+      "source_mode": "follower",
+      "source_observed_at": 1793185781,
+      "start_block": 0,
+      "state": "READY_SOURCE_OBSERVATION_ONLY"
+    },
+    "consumerCheckpoint": {
+      "height": 4550281,
+      "hash": "0000029bb59fc8f60fbe67707ab9d9f42448f08e99d7debb73f20f79cd547855",
+      "status": "ready",
+      "undoFloor": 4550081
+    },
+    "archiveBytes": 23387962632,
+    "budgetBytes": 25769803776,
+    "freeAboveAppendReserveBytes": 2113405688,
+    "observedNewHeights": {
+      "4550693": {
+        "sourceHash": "00001a6cc80ae09ab9d240aaabd158f1bd1571c52aff4a637a928ae5d84114e8",
+        "archiveHash": "00001a6cc80ae09ab9d240aaabd158f1bd1571c52aff4a637a928ae5d84114e8",
+        "atUnix": 1793185682.1861074
+      },
+      "4550694": {
+        "sourceHash": "00002f47280e83e6aeb438abfcfcb819a3d757eb97032a0e2a3913063d495eec",
+        "archiveHash": "00002f47280e83e6aeb438abfcfcb819a3d757eb97032a0e2a3913063d495eec",
+        "atUnix": 1793185691.3587277
+      },
+      "4550695": {
+        "sourceHash": "000029c112a0be603cb4855918d5e0dae08ccf637eed683fd66297c693c8add5",
+        "archiveHash": "000029c112a0be603cb4855918d5e0dae08ccf637eed683fd66297c693c8add5",
+        "atUnix": 1793185721.3445516
+      },
+      "4550696": {
+        "sourceHash": "00003403fb4fdd74b5b945c0a595bdac1a1aa3ad001170f15acc608d1183647a",
+        "archiveHash": "00003403fb4fdd74b5b945c0a595bdac1a1aa3ad001170f15acc608d1183647a",
+        "atUnix": 1793185731.354611
+      },
+      "4550697": {
+        "sourceHash": "000002db221e7c1311ee0ab658eb2252756854bca5521ef9c0896c2f5edcdfbf",
+        "archiveHash": "000002db221e7c1311ee0ab658eb2252756854bca5521ef9c0896c2f5edcdfbf",
+        "atUnix": 1793185741.5368552
+      },
+      "4550698": {
+        "sourceHash": "00001bd9a8fcf07e8d382bf320ad261d4e0d531fed199a208e6ff7d261677664",
+        "archiveHash": "00001bd9a8fcf07e8d382bf320ad261d4e0d531fed199a208e6ff7d261677664",
+        "atUnix": 1793185751.5705147
+      },
+      "4550699": {
+        "sourceHash": "000015dd400815f9666e71ac646774c23af88bd07453e6d8bf767f4b01e2ca4e",
+        "archiveHash": "000015dd400815f9666e71ac646774c23af88bd07453e6d8bf767f4b01e2ca4e",
+        "atUnix": 1793185771.7285998
+      },
+      "4550700": {
+        "sourceHash": "000001878ea0c2b1145a471df80b5cba8e2d2d5a9893f4acdf604eaac5f9fe6f",
+        "archiveHash": "000001878ea0c2b1145a471df80b5cba8e2d2d5a9893f4acdf604eaac5f9fe6f",
+        "atUnix": 1793185781.7315693
+      }
+    },
+    "queryResults": [
+      {
+        "http": 200,
+        "seconds": 1.7208091750508174,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.2541420409688726,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.6147540239617229,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 1.1190008700359613,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.49973782198503613,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.738976527005434,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      }
+    ]
+  },
+  "acceptance": {
+    "atUnix": 1793187251.63856,
+    "prep": {
+      "archive_height": 4550757,
+      "canonicality": "historical_snapshot_not_independently_consensus_validated",
+      "epoch": "243",
+      "indexed_height": 4550757,
+      "lag_blocks": 0,
+      "network": "testnet",
+      "payload_kind": "full-v1",
+      "ready": true,
+      "revision": "35587",
+      "source_height": 4550757,
+      "source_mode": "follower",
+      "source_observed_at": 1793187249,
+      "start_block": 0,
+      "state": "READY_SOURCE_OBSERVATION_ONLY"
+    },
+    "graphQL": {
+      "height": 4550712,
+      "hash": "0000194297299efd2e0937f833367633884d7ff42918a9e7b7c2586bc2de39f9",
+      "status": "ready"
+    },
+    "consumerCheckpoint": {
+      "height": 4550711,
+      "hash": "00002af58bd2d68bc4a5b75d37fc268f417169c8a0b02f8d3f6179b48a67f7f7",
+      "status": "ready",
+      "undoFloor": 4550511
+    },
+    "consumerSource": {
+      "status": "available",
+      "checkedAt": "2026-10-28T11:34:09.717464+00:00",
+      "sourceObservedAt": 1793187247,
+      "prepIndexedHeight": 4550757,
+      "sourceObservedHeight": 4550757
+    },
+    "consumerProjectGenerationAnchorAndContainersUnchanged": true,
+    "previousHeadHashUnchanged": true,
+    "observedNewHeights": {
+      "4550753": {
+        "sourceHash": "00001f25d3eefe51e8c45fd0f53a3b6c19512d3b6f926e658e1290a4b91b0311",
+        "archiveHash": "00001f25d3eefe51e8c45fd0f53a3b6c19512d3b6f926e658e1290a4b91b0311",
+        "atUnix": 1793187151.6120403
+      },
+      "4550754": {
+        "sourceHash": "000008b637e05c96885785311bd739a1911b6c5cf4062a964e73db4b60a8a35c",
+        "archiveHash": "000008b637e05c96885785311bd739a1911b6c5cf4062a964e73db4b60a8a35c",
+        "atUnix": 1793187161.5276277
+      },
+      "4550755": {
+        "sourceHash": "00002ad909454c21cbf0892b455034d61184dc7a7d62c90f60778b4a0cedfbf5",
+        "archiveHash": "00002ad909454c21cbf0892b455034d61184dc7a7d62c90f60778b4a0cedfbf5",
+        "atUnix": 1793187181.8399127
+      },
+      "4550756": {
+        "sourceHash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "archiveHash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "atUnix": 1793187191.64497
+      },
+      "4550757": {
+        "sourceHash": "00000a1c2253b479181ff0c6ac8645118d942f9bee993e8a636637f7fd00fc58",
+        "archiveHash": "00000a1c2253b479181ff0c6ac8645118d942f9bee993e8a636637f7fd00fc58",
+        "atUnix": 1793187251.63856
+      }
+    },
+    "firstConsumerReady": {
+      "atUnix": 1793187151.6120403,
+      "height": 4550672,
+      "secondsAfterWriterStart": 510.6120402812958
+    },
+    "queryResults": [
+      {
+        "http": 200,
+        "seconds": 0.8932542660040781,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.4573245160281658,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.6044349009171128,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.4945626090047881,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.5716633759438992,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      },
+      {
+        "http": 200,
+        "seconds": 0.500691851018928,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      }
+    ],
+    "archiveBytes": 23389332709,
+    "budgetBytes": 27917287424,
+    "reserveBytes": 268435456,
+    "freeAboveAppendReserveBytes": 4259519259,
+    "catalog": {
+      "segments": 16200,
+      "bytes": 8369672,
+      "head": 4550757,
+      "hash": "00000a1c2253b479181ff0c6ac8645118d942f9bee993e8a636637f7fd00fc58",
+      "epoch": 243,
+      "revision": 35587
+    },
+    "actualExecutables": {
+      "zeer-testnet-prep-follow.service": {
+        "pid": 1197451,
+        "executable": "/opt/zeer-testnet/catalog-incident-20261027/prep",
+        "sha256": "81f34e6c34f7e62f52671fb506c8bbe3c229e96fad0ce5c8ca7d6ffe97550a1d"
+      },
+      "zeer-testnet-prep-optimized-native.service": {
+        "pid": 1163383,
+        "executable": "/opt/zeer-testnet/startup-20261021/bin/prep-optimized",
+        "sha256": "d788ea8b25216b4e0fe21b3336bf4955fa670f890a764ca6adab91da6758c414"
+      }
+    },
+    "resources": {
+      "zeer-testnet-prep-follow.service": {
+        "memory.current": "1064898560",
+        "memory.peak": "1073856512",
+        "memory.events": "low 0\nhigh 0\nmax 87846\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 463744905\nuser_usec 407210583\nsystem_usec 56534322\ncore_sched.force_idle_usec 0\nnr_periods 5347\nnr_throttled 132\nthrottled_usec 5292552\nnr_bursts 1\nburst_usec 13999"
+      },
+      "zeer-testnet-prep-optimized-native.service": {
+        "memory.current": "855007232",
+        "memory.peak": "1073741824",
+        "memory.events": "low 0\nhigh 0\nmax 83511\noom 0\noom_kill 0\noom_group_kill 0",
+        "cpu.stat": "usage_usec 827546968\nuser_usec 754355903\nsystem_usec 73191065\ncore_sched.force_idle_usec 0\nnr_periods 17337\nnr_throttled 15848\nthrottled_usec 694691716\nnr_bursts 0\nburst_usec 0"
+      }
+    }
+  },
+  "closing": {
+    "status": "PASS",
+    "atUnix": 1793187403.7148404,
+    "prep": {
+      "archive_height": 4550764,
+      "canonicality": "historical_snapshot_not_independently_consensus_validated",
+      "epoch": "243",
+      "indexed_height": 4550764,
+      "lag_blocks": 0,
+      "network": "testnet",
+      "payload_kind": "full-v1",
+      "ready": true,
+      "revision": "35594",
+      "source_height": 4550764,
+      "source_mode": "follower",
+      "source_observed_at": 1793187403,
+      "start_block": 0,
+      "state": "READY_SOURCE_OBSERVATION_ONLY"
+    },
+    "sourceAgeSeconds": 0.7148423194885254,
+    "consumerHeight": 4550762,
+    "sourceGapBlocks": 0,
+    "consumerGapBlocks": 2,
+    "consumerCaughtUp": true,
+    "consumerCatchupScope": "A ready checkpoint is a readable canonical prefix, not a claim of zero chain lag. Remaining application catch-up stays with ZeeSwap.",
+    "consumerIdentityAndContainersUnchanged": true,
+    "graphQL": {
+      "height": 4550762,
+      "hash": "00000ac74c1e5ccb389db5524944a54737b21d207b3011dee6d36efba1e5c757",
+      "status": "ready"
+    },
+    "archiveBudgetBytes": 27917287424,
+    "archiveBytes": 23389403740,
+    "freeAboveAppendReserveBytes": 4259448228,
+    "catalog": {
+      "segments": 16207,
+      "bytes": 8373291,
+      "head": 4550764,
+      "epoch": 243,
+      "revision": 35594
+    },
+    "resources": {
+      "zeer-testnet-prep-follow.service": {
+        "cpuQuota": "500ms",
+        "memoryMaxBytes": 1073741824,
+        "memoryEvents": {
+          "low": "0",
+          "high": "0",
+          "max": "87847",
+          "oom": "0",
+          "oom_kill": "0",
+          "oom_group_kill": "0"
+        },
+        "memoryCurrentBytes": 1064947712,
+        "memoryPeakBytes": 1073856512,
+        "processRss": {
+          "VmHWM": 783638528,
+          "VmRSS": 783638528
+        },
+        "sha256": "81f34e6c34f7e62f52671fb506c8bbe3c229e96fad0ce5c8ca7d6ffe97550a1d"
+      },
+      "zeer-testnet-prep-optimized-native.service": {
+        "cpuQuota": "500ms",
+        "memoryMaxBytes": 1073741824,
+        "memoryEvents": {
+          "low": "0",
+          "high": "0",
+          "max": "83511",
+          "oom": "0",
+          "oom_kill": "0",
+          "oom_group_kill": "0"
+        },
+        "memoryCurrentBytes": 854966272,
+        "memoryPeakBytes": 1073741824,
+        "processRss": {
+          "VmHWM": 859025408,
+          "VmRSS": 859025408
+        },
+        "sha256": "d788ea8b25216b4e0fe21b3336bf4955fa670f890a764ca6adab91da6758c414"
+      }
+    },
+    "guard": {
+      "status": "PASS",
+      "zeer_bytes": 60590732898,
+      "free_bytes": 48733450240,
+      "available_memory_bytes": 8514359296,
+      "combined_cpu_limit": 3,
+      "combined_memory_mib": 8192,
+      "limits": {
+        "node_budget_gib": 35,
+        "node_stop_gib": 34,
+        "aggregate_budget_gib": 64,
+        "aggregate_stop_gib": 63,
+        "minimum_host_free_gib": 25,
+        "minimum_available_memory_gib": 3
+      }
+    },
+    "operatorUnitsInactive": true,
+    "publicDemoUnitsRestored": true,
+    "all117RetainedDirectoriesStillPresentAndPinned": true,
+    "readerPidUnchangedDuringBudgetRestart": 1163383,
+    "writerRuntimeMaxDiskGiB": 26
+  },
+  "observations": [
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184761.5928473,
+      "elapsedSeconds": 63.415173292160034,
+      "prep": {
+        "http": null,
+        "seconds": 0.2935016950359568,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184771.2337642,
+      "elapsedSeconds": 73.05609011650085,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004058200865983963,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184781.2367904,
+      "elapsedSeconds": 83.05911636352539,
+      "prep": {
+        "http": null,
+        "seconds": 0.00047799001913517714,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184791.2404091,
+      "elapsedSeconds": 93.062735080719,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003817130345851183,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184801.2336502,
+      "elapsedSeconds": 103.05597615242004,
+      "prep": {
+        "http": null,
+        "seconds": 0.00043784105218946934,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184811.2294738,
+      "elapsedSeconds": 113.05179977416992,
+      "prep": {
+        "http": null,
+        "seconds": 0.00036833505146205425,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184821.2323976,
+      "elapsedSeconds": 123.05472350120544,
+      "prep": {
+        "http": null,
+        "seconds": 0.0005319810006767511,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184831.2316906,
+      "elapsedSeconds": 133.0540165901184,
+      "prep": {
+        "http": null,
+        "seconds": 0.00041264109313488007,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184841.2477987,
+      "elapsedSeconds": 143.07012462615967,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004889670526608825,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184851.2338393,
+      "elapsedSeconds": 153.05616521835327,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003957559820264578,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184861.2349167,
+      "elapsedSeconds": 163.05724263191223,
+      "prep": {
+        "http": null,
+        "seconds": 0.00040720298420637846,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184871.2382197,
+      "elapsedSeconds": 173.0605456829071,
+      "prep": {
+        "http": null,
+        "seconds": 0.00037846993654966354,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184881.2377687,
+      "elapsedSeconds": 183.06009459495544,
+      "prep": {
+        "http": null,
+        "seconds": 0.00040007196366786957,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184891.2350886,
+      "elapsedSeconds": 193.05741453170776,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003311790060251951,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184901.2416482,
+      "elapsedSeconds": 203.06397414207458,
+      "prep": {
+        "http": null,
+        "seconds": 0.00037038803566247225,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184911.2404885,
+      "elapsedSeconds": 213.06281447410583,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004270430654287338,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184921.2337854,
+      "elapsedSeconds": 223.0561113357544,
+      "prep": {
+        "http": null,
+        "seconds": 0.00044878595508635044,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184931.2319276,
+      "elapsedSeconds": 233.05425357818604,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003787209279835224,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184941.2371767,
+      "elapsedSeconds": 243.05950260162354,
+      "prep": {
+        "http": null,
+        "seconds": 0.00039349310100078583,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184951.2341437,
+      "elapsedSeconds": 253.05646967887878,
+      "prep": {
+        "http": null,
+        "seconds": 0.000374543946236372,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184961.2430353,
+      "elapsedSeconds": 263.0653612613678,
+      "prep": {
+        "http": null,
+        "seconds": 0.00041603599674999714,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184971.248522,
+      "elapsedSeconds": 273.07084798812866,
+      "prep": {
+        "http": null,
+        "seconds": 0.00036978605203330517,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184981.236685,
+      "elapsedSeconds": 283.0590109825134,
+      "prep": {
+        "http": null,
+        "seconds": 0.00040896597784012556,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793184991.2400107,
+      "elapsedSeconds": 293.0623366832733,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003985300427302718,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185001.2394793,
+      "elapsedSeconds": 303.0618052482605,
+      "prep": {
+        "http": null,
+        "seconds": 0.0011313339928165078,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185011.238357,
+      "elapsedSeconds": 313.06068301200867,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004281039582565427,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185021.249159,
+      "elapsedSeconds": 323.071485042572,
+      "prep": {
+        "http": null,
+        "seconds": 0.0014624010073021054,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185031.2417474,
+      "elapsedSeconds": 333.0640733242035,
+      "prep": {
+        "http": null,
+        "seconds": 0.000445361016318202,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185041.243217,
+      "elapsedSeconds": 343.0655429363251,
+      "prep": {
+        "http": null,
+        "seconds": 0.00038532004691660404,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185051.2417548,
+      "elapsedSeconds": 353.06408071517944,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004885459784418344,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185061.2412229,
+      "elapsedSeconds": 363.06354880332947,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003965570358559489,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185071.241763,
+      "elapsedSeconds": 373.0640890598297,
+      "prep": {
+        "http": null,
+        "seconds": 0.00033539498690515757,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185081.2536907,
+      "elapsedSeconds": 383.076016664505,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004275740357115865,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185091.2433982,
+      "elapsedSeconds": 393.0657241344452,
+      "prep": {
+        "http": null,
+        "seconds": 0.0005757180042564869,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185101.2412252,
+      "elapsedSeconds": 403.06355118751526,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003983289934694767,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185111.2414122,
+      "elapsedSeconds": 413.0637381076813,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004285949980840087,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185121.2408895,
+      "elapsedSeconds": 423.0632154941559,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003378279507160187,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185131.2432876,
+      "elapsedSeconds": 433.0656135082245,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004362269537523389,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185141.252918,
+      "elapsedSeconds": 443.07524394989014,
+      "prep": {
+        "http": null,
+        "seconds": 0.0014665380585938692,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185151.2518444,
+      "elapsedSeconds": 453.07417035102844,
+      "prep": {
+        "http": null,
+        "seconds": 0.00044604192953556776,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185161.248988,
+      "elapsedSeconds": 463.0713138580322,
+      "prep": {
+        "http": null,
+        "seconds": 0.00041768793016672134,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185171.2472942,
+      "elapsedSeconds": 473.0696201324463,
+      "prep": {
+        "http": null,
+        "seconds": 0.00034543999936431646,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185181.2511342,
+      "elapsedSeconds": 483.0734601020813,
+      "prep": {
+        "http": null,
+        "seconds": 0.00040083297062665224,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185191.2507167,
+      "elapsedSeconds": 493.0730426311493,
+      "prep": {
+        "http": null,
+        "seconds": 0.0010446730302646756,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185201.2717922,
+      "elapsedSeconds": 503.09411811828613,
+      "prep": {
+        "http": null,
+        "seconds": 0.0009488280629739165,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185211.319691,
+      "elapsedSeconds": 513.1420168876648,
+      "prep": {
+        "http": null,
+        "seconds": 0.008081343956291676,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185221.2650907,
+      "elapsedSeconds": 523.0874166488647,
+      "prep": {
+        "http": null,
+        "seconds": 0.00038232607766985893,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185231.2626047,
+      "elapsedSeconds": 533.0849306583405,
+      "prep": {
+        "http": null,
+        "seconds": 0.004488817066885531,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185241.262837,
+      "elapsedSeconds": 543.0851628780365,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004497980698943138,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185251.2595346,
+      "elapsedSeconds": 553.0818605422974,
+      "prep": {
+        "http": null,
+        "seconds": 0.0005272038979455829,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185261.275649,
+      "elapsedSeconds": 563.0979750156403,
+      "prep": {
+        "http": null,
+        "seconds": 0.0011191049125045538,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185271.2594683,
+      "elapsedSeconds": 573.0817942619324,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003954349085688591,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16146,
+        "bytes": 8341755,
+        "head": 4550242,
+        "hash": "000003e188f7e8a173f84c9cc39462ffa5d84740263f39344551d636b4ef3a58",
+        "epoch": 243,
+        "revision": 35533
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185281.256691,
+      "elapsedSeconds": 583.0790169239044,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003894560504704714,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16147,
+        "bytes": 8342270,
+        "head": 4550681,
+        "hash": "00001993c3591e01c9dee92acd3104e6a18ca6ed06b9fb7bd4d2f99f90dd130e",
+        "epoch": 243,
+        "revision": 35534
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185291.2592204,
+      "elapsedSeconds": 593.0815463066101,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004085949622094631,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16148,
+        "bytes": 8342786,
+        "head": 4550682,
+        "hash": "00001602a2b3e9a77d939a5066764ad2fb310d4453301b8d0eb4f4fda15534d0",
+        "epoch": 243,
+        "revision": 35535
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185301.2598572,
+      "elapsedSeconds": 603.0821831226349,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004123200196772814,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16148,
+        "bytes": 8342786,
+        "head": 4550682,
+        "hash": "00001602a2b3e9a77d939a5066764ad2fb310d4453301b8d0eb4f4fda15534d0",
+        "epoch": 243,
+        "revision": 35535
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185311.2583487,
+      "elapsedSeconds": 613.0806746482849,
+      "prep": {
+        "http": null,
+        "seconds": 0.00040655198972672224,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16148,
+        "bytes": 8342786,
+        "head": 4550682,
+        "hash": "00001602a2b3e9a77d939a5066764ad2fb310d4453301b8d0eb4f4fda15534d0",
+        "epoch": 243,
+        "revision": 35535
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185321.2625966,
+      "elapsedSeconds": 623.0849225521088,
+      "prep": {
+        "http": null,
+        "seconds": 0.00045379402581602335,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16148,
+        "bytes": 8342786,
+        "head": 4550682,
+        "hash": "00001602a2b3e9a77d939a5066764ad2fb310d4453301b8d0eb4f4fda15534d0",
+        "epoch": 243,
+        "revision": 35535
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185331.26769,
+      "elapsedSeconds": 633.0900158882141,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004143939586356282,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16150,
+        "bytes": 8343818,
+        "head": 4550684,
+        "hash": "00000326e3bc341b7d670289f3d3577f8e198d0ebf9245cdd35f21e9867cc147",
+        "epoch": 243,
+        "revision": 35537
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185341.260636,
+      "elapsedSeconds": 643.0829620361328,
+      "prep": {
+        "http": null,
+        "seconds": 0.00041194993536919355,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16151,
+        "bytes": 8344334,
+        "head": 4550685,
+        "hash": "00000b1398548c6cd85edf52a1d9e7ac303097aab51aad8714f3c72c851a2282",
+        "epoch": 243,
+        "revision": 35538
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185351.2595909,
+      "elapsedSeconds": 653.081916809082,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003698959480971098,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16151,
+        "bytes": 8344334,
+        "head": 4550685,
+        "hash": "00000b1398548c6cd85edf52a1d9e7ac303097aab51aad8714f3c72c851a2282",
+        "epoch": 243,
+        "revision": 35538
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185361.2648175,
+      "elapsedSeconds": 663.0871434211731,
+      "prep": {
+        "http": null,
+        "seconds": 0.0005491669289767742,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16152,
+        "bytes": 8344850,
+        "head": 4550686,
+        "hash": "00001fd01fb7f25d838702166b12392417e9d8c1f8e9351cc86a2e1946300c19",
+        "epoch": 243,
+        "revision": 35539
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185371.2600853,
+      "elapsedSeconds": 673.0824112892151,
+      "prep": {
+        "http": null,
+        "seconds": 0.00041585590224713087,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16152,
+        "bytes": 8344850,
+        "head": 4550686,
+        "hash": "00001fd01fb7f25d838702166b12392417e9d8c1f8e9351cc86a2e1946300c19",
+        "epoch": 243,
+        "revision": 35539
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185381.26454,
+      "elapsedSeconds": 683.086865901947,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004455510061234236,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16152,
+        "bytes": 8344850,
+        "head": 4550686,
+        "hash": "00001fd01fb7f25d838702166b12392417e9d8c1f8e9351cc86a2e1946300c19",
+        "epoch": 243,
+        "revision": 35539
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185391.2647915,
+      "elapsedSeconds": 693.087117433548,
+      "prep": {
+        "http": null,
+        "seconds": 0.00041781901381909847,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185401.2611482,
+      "elapsedSeconds": 703.0834741592407,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004320199368521571,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185411.2605095,
+      "elapsedSeconds": 713.0828354358673,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003859209828078747,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185421.264487,
+      "elapsedSeconds": 723.0868129730225,
+      "prep": {
+        "http": null,
+        "seconds": 0.00046761403791606426,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185431.262771,
+      "elapsedSeconds": 733.0850968360901,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004205330042168498,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185441.27606,
+      "elapsedSeconds": 743.0983860492706,
+      "prep": {
+        "http": null,
+        "seconds": 0.00035476498305797577,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185451.2621205,
+      "elapsedSeconds": 753.0844464302063,
+      "prep": {
+        "http": null,
+        "seconds": 0.00044885592069476843,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185461.2608573,
+      "elapsedSeconds": 763.0831832885742,
+      "prep": {
+        "http": null,
+        "seconds": 0.00038256600964814425,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185471.2608767,
+      "elapsedSeconds": 773.0832026004791,
+      "prep": {
+        "http": null,
+        "seconds": 0.00044239696580916643,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185481.263703,
+      "elapsedSeconds": 783.0860290527344,
+      "prep": {
+        "http": null,
+        "seconds": 0.0006258620414882898,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185491.260066,
+      "elapsedSeconds": 793.0823919773102,
+      "prep": {
+        "http": null,
+        "seconds": 0.00044852495193481445,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185501.2740736,
+      "elapsedSeconds": 803.0963995456696,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004349139053374529,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185511.265306,
+      "elapsedSeconds": 813.0876319408417,
+      "prep": {
+        "http": null,
+        "seconds": 0.00043555593583732843,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185521.2638013,
+      "elapsedSeconds": 823.086127281189,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004060911014676094,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185531.2629507,
+      "elapsedSeconds": 833.0852766036987,
+      "prep": {
+        "http": null,
+        "seconds": 0.000402425997890532,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185541.2628028,
+      "elapsedSeconds": 843.0851287841797,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004300869768485427,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185551.2638545,
+      "elapsedSeconds": 853.0861804485321,
+      "prep": {
+        "http": null,
+        "seconds": 0.0006351160118356347,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185561.297956,
+      "elapsedSeconds": 863.1202819347382,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003831359790638089,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16154,
+        "bytes": 8345884,
+        "head": 4550688,
+        "hash": "000021aa953176362960e84c8667b9a231e27822f39d8c97f54f7238a97384cb",
+        "epoch": 243,
+        "revision": 35541
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185571.272606,
+      "elapsedSeconds": 873.0949318408966,
+      "prep": {
+        "http": null,
+        "seconds": 0.00037649692967534065,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16155,
+        "bytes": 8346401,
+        "head": 4550689,
+        "hash": "000028ea0a3d7195b7f826d28063a123bba961019f981b1fa8d15cce8ee94753",
+        "epoch": 243,
+        "revision": 35542
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185581.2713268,
+      "elapsedSeconds": 883.0936527252197,
+      "prep": {
+        "http": null,
+        "seconds": 0.00038420804776251316,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16155,
+        "bytes": 8346401,
+        "head": 4550689,
+        "hash": "000028ea0a3d7195b7f826d28063a123bba961019f981b1fa8d15cce8ee94753",
+        "epoch": 243,
+        "revision": 35542
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185591.2710488,
+      "elapsedSeconds": 893.0933747291565,
+      "prep": {
+        "http": null,
+        "seconds": 0.00035545509308576584,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16155,
+        "bytes": 8346401,
+        "head": 4550689,
+        "hash": "000028ea0a3d7195b7f826d28063a123bba961019f981b1fa8d15cce8ee94753",
+        "epoch": 243,
+        "revision": 35542
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185601.2709668,
+      "elapsedSeconds": 903.0932927131653,
+      "prep": {
+        "http": null,
+        "seconds": 0.00034374697133898735,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16155,
+        "bytes": 8346401,
+        "head": 4550689,
+        "hash": "000028ea0a3d7195b7f826d28063a123bba961019f981b1fa8d15cce8ee94753",
+        "epoch": 243,
+        "revision": 35542
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185611.2709546,
+      "elapsedSeconds": 913.0932805538177,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004101269878447056,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16156,
+        "bytes": 8346918,
+        "head": 4550690,
+        "hash": "0000088c3273fdf603c4b1ed9e3dd43fe3d203d2c070d8e185afc5bfd1e6aca3",
+        "epoch": 243,
+        "revision": 35543
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185621.278574,
+      "elapsedSeconds": 923.1008999347687,
+      "prep": {
+        "http": null,
+        "seconds": 0.0007011849666014314,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16156,
+        "bytes": 8346918,
+        "head": 4550690,
+        "hash": "0000088c3273fdf603c4b1ed9e3dd43fe3d203d2c070d8e185afc5bfd1e6aca3",
+        "epoch": 243,
+        "revision": 35543
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185631.272789,
+      "elapsedSeconds": 933.0951149463654,
+      "prep": {
+        "http": null,
+        "seconds": 0.00047058891505002975,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16157,
+        "bytes": 8347435,
+        "head": 4550691,
+        "hash": "000018f8d9e32c037418a807afcc859dd1f4a7ecc8d0a823881361a0f09471b4",
+        "epoch": 243,
+        "revision": 35544
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185641.271677,
+      "elapsedSeconds": 943.0940029621124,
+      "prep": {
+        "http": null,
+        "seconds": 0.0004232870414853096,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16158,
+        "bytes": 8347952,
+        "head": 4550692,
+        "hash": "0000154024e4543225c65c5aa52bfe3eaabea5e68e6bfb1967a8d7618cf9d085",
+        "epoch": 243,
+        "revision": 35545
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185651.2710552,
+      "elapsedSeconds": 953.0933811664581,
+      "prep": {
+        "http": null,
+        "seconds": 0.0003959560999646783,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16159,
+        "bytes": 8348469,
+        "head": 4550693,
+        "hash": "00001a6cc80ae09ab9d240aaabd158f1bd1571c52aff4a637a928ae5d84114e8",
+        "epoch": 243,
+        "revision": 35546
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185661.271034,
+      "elapsedSeconds": 963.0933599472046,
+      "prep": {
+        "http": null,
+        "seconds": 0.00038660201244056225,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16159,
+        "bytes": 8348469,
+        "head": 4550693,
+        "hash": "00001a6cc80ae09ab9d240aaabd158f1bd1571c52aff4a637a928ae5d84114e8",
+        "epoch": 243,
+        "revision": 35546
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185671.2732863,
+      "elapsedSeconds": 973.0956122875214,
+      "prep": {
+        "http": null,
+        "seconds": 0.00035980099346488714,
+        "errorType": "URLError",
+        "ready": null,
+        "indexed_height": null,
+        "source_height": null,
+        "source_observed_at": null,
+        "epoch": null,
+        "revision": null,
+        "state": null,
+        "sourceAgeSeconds": null
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16159,
+        "bytes": 8348469,
+        "head": 4550693,
+        "hash": "00001a6cc80ae09ab9d240aaabd158f1bd1571c52aff4a637a928ae5d84114e8",
+        "epoch": 243,
+        "revision": 35546
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185682.1861074,
+      "elapsedSeconds": 984.00843334198,
+      "prep": {
+        "http": 200,
+        "seconds": 0.7630892160814255,
+        "ready": true,
+        "indexed_height": 4550693,
+        "source_height": 4550694,
+        "source_observed_at": 1793185678,
+        "epoch": "243",
+        "revision": "35546",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 4.186107397079468
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550242,
+        "status": "reconciling",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16159,
+        "bytes": 8348469,
+        "head": 4550693,
+        "hash": "00001a6cc80ae09ab9d240aaabd158f1bd1571c52aff4a637a928ae5d84114e8",
+        "epoch": 243,
+        "revision": 35546
+      },
+      "query": {
+        "http": 200,
+        "seconds": 1.7208091750508174,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185691.3587277,
+      "elapsedSeconds": 993.1810536384583,
+      "prep": {
+        "http": 200,
+        "seconds": 0.07868659892119467,
+        "ready": true,
+        "indexed_height": 4550694,
+        "source_height": 4550694,
+        "source_observed_at": 1793185689,
+        "epoch": "243",
+        "revision": "35547",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 2.3587276935577393
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550247,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16160,
+        "bytes": 8348986,
+        "head": 4550694,
+        "hash": "00002f47280e83e6aeb438abfcfcb819a3d757eb97032a0e2a3913063d495eec",
+        "epoch": 243,
+        "revision": 35547
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185701.3392577,
+      "elapsedSeconds": 1003.1615836620331,
+      "prep": {
+        "http": 200,
+        "seconds": 0.06329230894334614,
+        "ready": true,
+        "indexed_height": 4550694,
+        "source_height": 4550694,
+        "source_observed_at": 1793185699,
+        "epoch": "243",
+        "revision": "35547",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 2.3392577171325684
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550250,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16160,
+        "bytes": 8348986,
+        "head": 4550694,
+        "hash": "00002f47280e83e6aeb438abfcfcb819a3d757eb97032a0e2a3913063d495eec",
+        "epoch": 243,
+        "revision": 35547
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.2541420409688726,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185711.3526633,
+      "elapsedSeconds": 1013.1749892234802,
+      "prep": {
+        "http": 200,
+        "seconds": 0.07605396502185613,
+        "ready": true,
+        "indexed_height": 4550694,
+        "source_height": 4550694,
+        "source_observed_at": 1793185709,
+        "epoch": "243",
+        "revision": "35547",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 2.352663278579712
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550254,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16160,
+        "bytes": 8348986,
+        "head": 4550694,
+        "hash": "00002f47280e83e6aeb438abfcfcb819a3d757eb97032a0e2a3913063d495eec",
+        "epoch": 243,
+        "revision": 35547
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185721.3445516,
+      "elapsedSeconds": 1023.1668775081635,
+      "prep": {
+        "http": 200,
+        "seconds": 0.06640738702844828,
+        "ready": true,
+        "indexed_height": 4550695,
+        "source_height": 4550696,
+        "source_observed_at": 1793185719,
+        "epoch": "243",
+        "revision": "35548",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 2.3445515632629395
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550258,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16161,
+        "bytes": 8349503,
+        "head": 4550695,
+        "hash": "000029c112a0be603cb4855918d5e0dae08ccf637eed683fd66297c693c8add5",
+        "epoch": 243,
+        "revision": 35548
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.6147540239617229,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185731.354611,
+      "elapsedSeconds": 1033.176936864853,
+      "prep": {
+        "http": 200,
+        "seconds": 0.07620078709442168,
+        "ready": true,
+        "indexed_height": 4550696,
+        "source_height": 4550697,
+        "source_observed_at": 1793185730,
+        "epoch": "243",
+        "revision": "35549",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.3546109199523926
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550261,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16162,
+        "bytes": 8350020,
+        "head": 4550696,
+        "hash": "00003403fb4fdd74b5b945c0a595bdac1a1aa3ad001170f15acc608d1183647a",
+        "epoch": 243,
+        "revision": 35549
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185741.5368552,
+      "elapsedSeconds": 1043.3591811656952,
+      "prep": {
+        "http": 200,
+        "seconds": 0.16273271199315786,
+        "ready": true,
+        "indexed_height": 4550697,
+        "source_height": 4550698,
+        "source_observed_at": 1793185739,
+        "epoch": "243",
+        "revision": "35550",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 2.5368552207946777
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550265,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16163,
+        "bytes": 8350537,
+        "head": 4550697,
+        "hash": "000002db221e7c1311ee0ab658eb2252756854bca5521ef9c0896c2f5edcdfbf",
+        "epoch": 243,
+        "revision": 35550
+      },
+      "query": {
+        "http": 200,
+        "seconds": 1.1190008700359613,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185751.5705147,
+      "elapsedSeconds": 1053.3928406238556,
+      "prep": {
+        "http": 200,
+        "seconds": 0.2882237830199301,
+        "ready": true,
+        "indexed_height": 4550698,
+        "source_height": 4550698,
+        "source_observed_at": 1793185751,
+        "epoch": "243",
+        "revision": "35551",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 0.5705146789550781
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550270,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16164,
+        "bytes": 8351054,
+        "head": 4550698,
+        "hash": "00001bd9a8fcf07e8d382bf320ad261d4e0d531fed199a208e6ff7d261677664",
+        "epoch": 243,
+        "revision": 35551
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185761.711051,
+      "elapsedSeconds": 1063.5333769321442,
+      "prep": {
+        "http": 200,
+        "seconds": 0.3670884380117059,
+        "ready": true,
+        "indexed_height": 4550698,
+        "source_height": 4550698,
+        "source_observed_at": 1793185761,
+        "epoch": "243",
+        "revision": "35551",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 0.7110509872436523
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550272,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16164,
+        "bytes": 8351054,
+        "head": 4550698,
+        "hash": "00001bd9a8fcf07e8d382bf320ad261d4e0d531fed199a208e6ff7d261677664",
+        "epoch": 243,
+        "revision": 35551
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.49973782198503613,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185771.7285998,
+      "elapsedSeconds": 1073.550925731659,
+      "prep": {
+        "http": 200,
+        "seconds": 0.451601023087278,
+        "ready": true,
+        "indexed_height": 4550699,
+        "source_height": 4550699,
+        "source_observed_at": 1793185770,
+        "epoch": "243",
+        "revision": "35552",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.7285997867584229
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550277,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16165,
+        "bytes": 8351571,
+        "head": 4550699,
+        "hash": "000015dd400815f9666e71ac646774c23af88bd07453e6d8bf767f4b01e2ca4e",
+        "epoch": 243,
+        "revision": 35552
+      }
+    },
+    {
+      "phase": "initial-recovery",
+      "atUnix": 1793185781.7315693,
+      "elapsedSeconds": 1083.5538952350616,
+      "prep": {
+        "http": 200,
+        "seconds": 0.45153699605725706,
+        "ready": true,
+        "indexed_height": 4550700,
+        "source_height": 4550700,
+        "source_observed_at": 1793185781,
+        "epoch": "243",
+        "revision": "35553",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 0.7315692901611328
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550281,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16166,
+        "bytes": 8352088,
+        "head": 4550700,
+        "hash": "000001878ea0c2b1145a471df80b5cba8e2d2d5a9893f4acdf604eaac5f9fe6f",
+        "epoch": 243,
+        "revision": 35553
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.738976527005434,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186831.8106499,
+      "elapsedSeconds": 190.81064987182617,
+      "prep": {
+        "http": 200,
+        "seconds": 0.4003802629886195,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 199.81064987182617
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186841.4634025,
+      "elapsedSeconds": 200.46340250968933,
+      "prep": {
+        "http": 200,
+        "seconds": 0.1149860080331564,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 209.46340250968933
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186851.4329524,
+      "elapsedSeconds": 210.43295240402222,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08583086403086782,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 219.43295240402222
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186861.4468303,
+      "elapsedSeconds": 220.44683027267456,
+      "prep": {
+        "http": 200,
+        "seconds": 0.09656970598734915,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 229.44683027267456
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186871.4329126,
+      "elapsedSeconds": 230.4329125881195,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08477630594279617,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 239.4329125881195
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186881.4769266,
+      "elapsedSeconds": 240.4769265651703,
+      "prep": {
+        "http": 200,
+        "seconds": 0.11562868091277778,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 249.4769265651703
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186891.4488213,
+      "elapsedSeconds": 250.44882130622864,
+      "prep": {
+        "http": 200,
+        "seconds": 0.09960374108050019,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 259.44882130622864
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186901.4341502,
+      "elapsedSeconds": 260.4341502189636,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08538956905249506,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 269.4341502189636
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186911.4370859,
+      "elapsedSeconds": 270.4370858669281,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08737766102422029,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 279.4370858669281
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186921.4447494,
+      "elapsedSeconds": 280.44474935531616,
+      "prep": {
+        "http": 200,
+        "seconds": 0.09601668093819171,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 289.44474935531616
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186931.4304962,
+      "elapsedSeconds": 290.4304962158203,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08162008493673056,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 299.4304962158203
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186941.4494734,
+      "elapsedSeconds": 300.4494733810425,
+      "prep": {
+        "http": 200,
+        "seconds": 0.09680373698938638,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 309.4494733810425
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186951.4312947,
+      "elapsedSeconds": 310.4312946796417,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08226558601018041,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 319.4312946796417
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186961.4363995,
+      "elapsedSeconds": 320.43639945983887,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08420274197123945,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 329.43639945983887
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186971.445311,
+      "elapsedSeconds": 330.4453110694885,
+      "prep": {
+        "http": 200,
+        "seconds": 0.09510149294510484,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 339.4453110694885
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186981.51758,
+      "elapsedSeconds": 340.51758003234863,
+      "prep": {
+        "http": 200,
+        "seconds": 0.11140053509734571,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 349.51758003234863
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793186991.4607441,
+      "elapsedSeconds": 350.46074414253235,
+      "prep": {
+        "http": 200,
+        "seconds": 0.10122370801400393,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 359.46074414253235
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187001.8138618,
+      "elapsedSeconds": 360.8138618469238,
+      "prep": {
+        "http": 200,
+        "seconds": 0.3146956249838695,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 369.8138618469238
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187011.5357018,
+      "elapsedSeconds": 370.535701751709,
+      "prep": {
+        "http": 200,
+        "seconds": 0.1847131629474461,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 379.535701751709
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187021.4485679,
+      "elapsedSeconds": 380.44856786727905,
+      "prep": {
+        "http": 200,
+        "seconds": 0.1016556869726628,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 389.44856786727905
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187031.4695554,
+      "elapsedSeconds": 390.4695553779602,
+      "prep": {
+        "http": 200,
+        "seconds": 0.12024729803670198,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 399.4695553779602
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187041.4630723,
+      "elapsedSeconds": 400.4630722999573,
+      "prep": {
+        "http": 200,
+        "seconds": 0.11385395599063486,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 409.4630722999573
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187051.468646,
+      "elapsedSeconds": 410.4686460494995,
+      "prep": {
+        "http": 200,
+        "seconds": 0.11458221194334328,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 419.4686460494995
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187061.6530066,
+      "elapsedSeconds": 420.6530065536499,
+      "prep": {
+        "http": 200,
+        "seconds": 0.20523311605211347,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 429.6530065536499
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187071.4630861,
+      "elapsedSeconds": 430.46308612823486,
+      "prep": {
+        "http": 200,
+        "seconds": 0.11177617905195802,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 439.46308612823486
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187081.4648542,
+      "elapsedSeconds": 440.4648542404175,
+      "prep": {
+        "http": 200,
+        "seconds": 0.11391485692001879,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 449.4648542404175
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187091.4536073,
+      "elapsedSeconds": 450.4536073207855,
+      "prep": {
+        "http": 200,
+        "seconds": 0.10254116903524846,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 459.4536073207855
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187101.467057,
+      "elapsedSeconds": 460.4670569896698,
+      "prep": {
+        "http": 200,
+        "seconds": 0.11566881602630019,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 469.4670569896698
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187111.5960877,
+      "elapsedSeconds": 470.5960876941681,
+      "prep": {
+        "http": 200,
+        "seconds": 0.17665855796076357,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 479.5960876941681
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187121.5349085,
+      "elapsedSeconds": 480.5349085330963,
+      "prep": {
+        "http": 200,
+        "seconds": 0.1700196450110525,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 489.5349085330963
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187131.4562354,
+      "elapsedSeconds": 490.45623540878296,
+      "prep": {
+        "http": 200,
+        "seconds": 0.0922909319633618,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 499.45623540878296
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187141.4413645,
+      "elapsedSeconds": 500.44136452674866,
+      "prep": {
+        "http": 200,
+        "seconds": 0.08392167394049466,
+        "ready": false,
+        "indexed_height": 4550729,
+        "source_height": 4550729,
+        "source_observed_at": 1793186632,
+        "epoch": "243",
+        "revision": "35582",
+        "state": "STATUS_STALE",
+        "sourceAgeSeconds": 509.44136452674866
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550670,
+        "status": "reconciling",
+        "sourceStatus": "unavailable"
+      },
+      "catalog": {
+        "segments": 16195,
+        "bytes": 8367093,
+        "head": 4550729,
+        "hash": "00001ec91af4d60edb895e66817a7f28040af49bbf4278d8bc68c494efc5c2f4",
+        "epoch": 243,
+        "revision": 35582
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187151.6120403,
+      "elapsedSeconds": 510.6120402812958,
+      "prep": {
+        "http": 200,
+        "seconds": 0.1883861570386216,
+        "ready": true,
+        "indexed_height": 4550753,
+        "source_height": 4550754,
+        "source_observed_at": 1793187151,
+        "epoch": "243",
+        "revision": "35583",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 0.6120402812957764
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550672,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16196,
+        "bytes": 8367608,
+        "head": 4550753,
+        "hash": "00001f25d3eefe51e8c45fd0f53a3b6c19512d3b6f926e658e1290a4b91b0311",
+        "epoch": 243,
+        "revision": 35583
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.8932542660040781,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187161.5276277,
+      "elapsedSeconds": 520.5276277065277,
+      "prep": {
+        "http": 200,
+        "seconds": 0.1695969880092889,
+        "ready": true,
+        "indexed_height": 4550754,
+        "source_height": 4550754,
+        "source_observed_at": 1793187161,
+        "epoch": "243",
+        "revision": "35584",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 0.52762770652771
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550675,
+        "status": "reconciling",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16197,
+        "bytes": 8368123,
+        "head": 4550754,
+        "hash": "000008b637e05c96885785311bd739a1911b6c5cf4062a964e73db4b60a8a35c",
+        "epoch": 243,
+        "revision": 35584
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187171.642092,
+      "elapsedSeconds": 530.6420919895172,
+      "prep": {
+        "http": 200,
+        "seconds": 0.20261113694868982,
+        "ready": true,
+        "indexed_height": 4550754,
+        "source_height": 4550754,
+        "source_observed_at": 1793187171,
+        "epoch": "243",
+        "revision": "35584",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 0.6420919895172119
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550678,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16197,
+        "bytes": 8368123,
+        "head": 4550754,
+        "hash": "000008b637e05c96885785311bd739a1911b6c5cf4062a964e73db4b60a8a35c",
+        "epoch": 243,
+        "revision": 35584
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.4573245160281658,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187181.8399127,
+      "elapsedSeconds": 540.8399126529694,
+      "prep": {
+        "http": 200,
+        "seconds": 0.4768756109988317,
+        "ready": true,
+        "indexed_height": 4550755,
+        "source_height": 4550755,
+        "source_observed_at": 1793187180,
+        "epoch": "243",
+        "revision": "35585",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.8399126529693604
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550681,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16198,
+        "bytes": 8368639,
+        "head": 4550755,
+        "hash": "00002ad909454c21cbf0892b455034d61184dc7a7d62c90f60778b4a0cedfbf5",
+        "epoch": 243,
+        "revision": 35585
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187191.64497,
+      "elapsedSeconds": 550.6449699401855,
+      "prep": {
+        "http": 200,
+        "seconds": 0.28530570201110095,
+        "ready": true,
+        "indexed_height": 4550756,
+        "source_height": 4550756,
+        "source_observed_at": 1793187190,
+        "epoch": "243",
+        "revision": "35586",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.6449699401855469
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550686,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16199,
+        "bytes": 8369155,
+        "head": 4550756,
+        "hash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "epoch": 243,
+        "revision": 35586
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.6044349009171128,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187201.6305733,
+      "elapsedSeconds": 560.6305732727051,
+      "prep": {
+        "http": 200,
+        "seconds": 0.27190155908465385,
+        "ready": true,
+        "indexed_height": 4550756,
+        "source_height": 4550756,
+        "source_observed_at": 1793187200,
+        "epoch": "243",
+        "revision": "35586",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.6305732727050781
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550690,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16199,
+        "bytes": 8369155,
+        "head": 4550756,
+        "hash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "epoch": 243,
+        "revision": 35586
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187211.6335952,
+      "elapsedSeconds": 570.6335952281952,
+      "prep": {
+        "http": 200,
+        "seconds": 0.27534520102199167,
+        "ready": true,
+        "indexed_height": 4550756,
+        "source_height": 4550756,
+        "source_observed_at": 1793187210,
+        "epoch": "243",
+        "revision": "35586",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.6335952281951904
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550693,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16199,
+        "bytes": 8369155,
+        "head": 4550756,
+        "hash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "epoch": 243,
+        "revision": 35586
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.4945626090047881,
+        "case": "genesis",
+        "dataSha256": "1dd2d4780958db37a32aff6da9743baf0ff4b318061a0235e237e2513ff385cf",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187221.66115,
+      "elapsedSeconds": 580.6611499786377,
+      "prep": {
+        "http": 200,
+        "seconds": 0.3027115879813209,
+        "ready": true,
+        "indexed_height": 4550756,
+        "source_height": 4550756,
+        "source_observed_at": 1793187220,
+        "epoch": "243",
+        "revision": "35586",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.6611499786376953
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550698,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16199,
+        "bytes": 8369155,
+        "head": 4550756,
+        "hash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "epoch": 243,
+        "revision": 35586
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187231.5442622,
+      "elapsedSeconds": 590.5442621707916,
+      "prep": {
+        "http": 200,
+        "seconds": 0.1856806940631941,
+        "ready": true,
+        "indexed_height": 4550756,
+        "source_height": 4550756,
+        "source_observed_at": 1793187230,
+        "epoch": "243",
+        "revision": "35586",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.544262170791626
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550702,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16199,
+        "bytes": 8369155,
+        "head": 4550756,
+        "hash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "epoch": 243,
+        "revision": 35586
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.5716633759438992,
+        "case": "pre_failure",
+        "dataSha256": "f3daed027b0b09c57576506690d2e372cd1081e5f38b1f7900eb59ff1840da60",
+        "blocks": 3
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187242.1387765,
+      "elapsedSeconds": 601.1387765407562,
+      "prep": {
+        "http": 200,
+        "seconds": 0.6763419390190393,
+        "ready": true,
+        "indexed_height": 4550756,
+        "source_height": 4550757,
+        "source_observed_at": 1793187241,
+        "epoch": "243",
+        "revision": "35586",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 1.1387765407562256
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550705,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16199,
+        "bytes": 8369155,
+        "head": 4550756,
+        "hash": "00002d7c81db6342e810e2e989b13dc274b1c00c1819f7c78bbac1f084c8cf42",
+        "epoch": 243,
+        "revision": 35586
+      }
+    },
+    {
+      "phase": "approved-budget-restart",
+      "atUnix": 1793187251.63856,
+      "elapsedSeconds": 610.6385600566864,
+      "prep": {
+        "http": 200,
+        "seconds": 0.2784636840224266,
+        "ready": true,
+        "indexed_height": 4550757,
+        "source_height": 4550757,
+        "source_observed_at": 1793187249,
+        "epoch": "243",
+        "revision": "35587",
+        "state": "READY_SOURCE_OBSERVATION_ONLY",
+        "sourceAgeSeconds": 2.6385600566864014
+      },
+      "consumer": {
+        "http": 200,
+        "height": 4550711,
+        "status": "ready",
+        "sourceStatus": "available"
+      },
+      "catalog": {
+        "segments": 16200,
+        "bytes": 8369672,
+        "head": 4550757,
+        "hash": "00000a1c2253b479181ff0c6ac8645118d942f9bee993e8a636637f7fd00fc58",
+        "epoch": 243,
+        "revision": 35587
+      },
+      "query": {
+        "http": 200,
+        "seconds": 0.500691851018928,
+        "case": "recovered",
+        "dataSha256": "57969c59d31156275a01ad788c88b1574467676d352c0eeda2e57e1462323276",
+        "blocks": 3
+      }
+    }
+  ],
+  "checks": {
+    "prepStoreTestsPassed": 69,
+    "verifierTestsPassed": 4,
+    "offlineGcSafetyTestsPassed": 6,
+    "clippyWarningsDenied": true,
+    "rustfmt": true,
+    "staticDocsPagesBuilt": 45
+  },
+  "limits": [
+    "This is incident recovery, not a benchmark, uptime promise or multi-tenant capacity test.",
+    "Old catalogs pointing at reclaimed copies are no longer independent restorable snapshots. Current logical history remains intact.",
+    "Offline GC requires explicit reader coordination. No online reader-lease protocol is implemented.",
+    "Reclamation recovered space before the user approved a separate allocation change from 24 to 26 GiB. Archive headroom remains finite.",
+    "One-GiB service cgroups experienced file-cache pressure without observed OOM. Restart timings depend on concurrent work and cache state.",
+    "A ready consumer checkpoint is a readable canonical prefix, not proof that application indexing has caught up to source head.",
+    "Physical free-space measurements also include separate user-authorized cleanup outside Zeer; that space is not counted as archive reclamation."
+  ]
+}

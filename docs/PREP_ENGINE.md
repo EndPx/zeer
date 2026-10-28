@@ -209,8 +209,9 @@ gRPC retrieval profile is described below.
 - HTTP defaults to loopback. Non-loopback serving requires explicit opt-in plus
   PREP_API_TOKEN with at least 16 bytes. Use a TLS proxy for network deployments;
   the private prototype is not an audited public service.
-- Current shared-VPS operations stay within 3 aggregate CPU / 8 GiB / 60 GiB, without paid
-  upgrades or changes to existing applications.
+- The shared-VPS deployment envelope is 3 aggregate CPU / 8 GiB / 64 GiB.
+  The operator-approved archive allocation is 26 GiB, with at least 25 GiB of
+  physical free disk retained. These deployment caps are not capacity guarantees.
 
 ## Commands
 
