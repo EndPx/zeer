@@ -19,6 +19,8 @@ use std::{
 };
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
+#[path = "support/retired_segments.rs"]
+mod retired_segments;
 const MAX_CATALOG_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_SEGMENTS: usize = 30_000;
 
@@ -459,6 +461,19 @@ fn verify(root: &Path, initial_copy: &Path, expected_initial_hash: &str) -> Resu
 
 fn main() -> Result<()> {
     let args: Vec<_> = std::env::args_os().collect();
+    if args.get(1).is_some_and(|arg| arg == "--retired") {
+        check(
+            args.len() == 5,
+            "Usage: verify_catalog_prefix --retired ARCHIVE PLAN PLAN_SHA256",
+        )?;
+        let proof = retired_segments::verify(
+            Path::new(&args[2]),
+            Path::new(&args[3]),
+            args[4].to_str().ok_or("PLAN_PIN_INVALID")?,
+        )?;
+        println!("{}", serde_json::to_string(&proof)?);
+        return Ok(());
+    }
     check(
         args.len() == 4,
         "Usage: verify_catalog_prefix ARCHIVE INITIAL_CATALOG_COPY EXPECTED_INITIAL_FILE_SHA256",
@@ -515,6 +530,95 @@ mod tests {
             max_manifest_bytes: 1024 * 1024,
             ..StoreLimits::default()
         }
+    }
+
+    fn retirement_plan(root: &Path, names: &[String], destination: &Path) -> String {
+        let candidates: Vec<_> = names
+            .iter()
+            .map(|name| {
+                let files: Vec<_> = fs::read_dir(root.join(name))
+                    .unwrap()
+                    .map(|f| {
+                        let path = f.unwrap().path();
+                        let bytes = fs::read(&path).unwrap();
+                        serde_json::json!({"name":path.file_name().unwrap().to_str().unwrap(),
+                    "bytes":bytes.len(),"sha256":hash(&bytes)})
+                    })
+                    .collect();
+                serde_json::json!({"directory":name,"files":files})
+            })
+            .collect();
+        let bytes = serde_json::to_vec(&serde_json::json!({
+            "catalog_file_sha256":hash(&fs::read(root.join("catalog.json")).unwrap()),"candidates":candidates
+        })).unwrap();
+        fs::write(destination, &bytes).unwrap();
+        hash(&bytes)
+    }
+
+    #[test]
+    fn retired_proof_requires_writer_lock_and_matches_full_records() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 0, FULL_KIND).unwrap();
+        let mut names = Vec::new();
+        for height in 0..=3 {
+            let name = part(&root, height, "old");
+            writer.append_segment(&name).unwrap();
+            if height < 3 {
+                names.push(name);
+            }
+        }
+        writer
+            .consolidate_segments(0, 3, "segments/merged", limits())
+            .unwrap();
+        let plan = temp.path().join("plan.json");
+        let pin = retirement_plan(&root, &names, &plan);
+        assert!(retired_segments::verify(&root, &plan, &pin).is_err());
+        drop(writer);
+        let before = fs::read(root.join("catalog.json")).unwrap();
+        let proof =
+            serde_json::to_value(retired_segments::verify(&root, &plan, &pin).unwrap()).unwrap();
+        assert_eq!(proof["eligible"].as_array().unwrap().len(), 3);
+        assert_eq!(proof["records_compared"], 3);
+        assert!(proof["retained"].as_array().unwrap().is_empty());
+        assert_eq!(fs::read(root.join("catalog.json")).unwrap(), before);
+        assert!(names.iter().all(|name| root.join(name).exists()));
+        fs::write(root.join(&names[0]).join("source.json"), b"extra").unwrap();
+        assert!(retired_segments::verify(&root, &plan, &pin).is_err());
+    }
+
+    #[test]
+    fn retired_proof_retains_different_payload_and_rejects_active_or_changed_catalog() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("archive");
+        let mut writer =
+            ArchiveWriter::create_or_open_with_kind(&root, "regtest", 0, FULL_KIND).unwrap();
+        for height in 0..=1 {
+            let name = part(&root, height, "canonical");
+            writer.append_segment(&name).unwrap();
+        }
+        let active = "segments/source-0".to_owned();
+        // Same block hash but different capture payload is not a deletable copy.
+        fs::rename(root.join(&active), root.join("segments/canonical-0")).unwrap();
+        let alternate = part(&root, 0, "different");
+        fs::rename(root.join(&alternate), root.join("segments/alternate-0")).unwrap();
+        fs::rename(root.join("segments/canonical-0"), root.join(&active)).unwrap();
+        let plan = temp.path().join("plan.json");
+        let pin = retirement_plan(&root, &["segments/alternate-0".to_owned()], &plan);
+        drop(writer);
+        let proof =
+            serde_json::to_value(retired_segments::verify(&root, &plan, &pin).unwrap()).unwrap();
+        assert!(proof["eligible"].as_array().unwrap().is_empty());
+        assert_eq!(proof["retained"].as_array().unwrap().len(), 1);
+        let pin = retirement_plan(&root, &[active], &plan);
+        assert!(retired_segments::verify(&root, &plan, &pin).is_err());
+        let pin = retirement_plan(&root, &[], &plan);
+        let catalog_path = root.join("catalog.json");
+        let mut bytes = fs::read(&catalog_path).unwrap();
+        bytes.push(b' ');
+        fs::write(catalog_path, bytes).unwrap();
+        assert!(retired_segments::verify(&root, &plan, &pin).is_err());
     }
 
     #[test]

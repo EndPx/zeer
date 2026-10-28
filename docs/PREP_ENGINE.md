@@ -314,6 +314,14 @@ catalog-entry growth within finite storage budgets, not unlimited retention.
 The [27 October recovery report](PREP_CATALOG_INCIDENT_20261027.md) records the
 actual 30,000-reference incident, unchanged payload proof and concurrent-read limits.
 
+Retaining replaced files consumes real archive budget even after catalog reduction.
+`archive_disk_budget_exhausted` can occur while the VPS still has free disk:
+append requires another 268,435,456 bytes inside the configured archive budget.
+Inventory active, retired, unpublished and temporary files before changing limits.
+The [offline reclamation procedure](PREP_OFFLINE_GC.md) proves full-record equivalence
+and requires all archive readers to stop before deleting redundant copies. It
+does not change source status or consumer identity.
+
 The optional `prep-store/admission-profile` feature provides diagnostic phase
 timers and reduced-budget counterfactuals through dedicated examples. Ordinary
 builds retain the original integrity checks and 64 MiB archive / 16 MiB segment
