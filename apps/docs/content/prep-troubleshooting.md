@@ -10,6 +10,7 @@
 | Source unavailable | Check `/ready` and `/height`; process liveness alone is insufficient. |
 | `catalog segment count` / `catalog_consolidation_required` | Run `build-info` on the exact writer executable used by the service. Use bounded lossless consolidation; preserve history and existing Chef projects. |
 | `archive_disk_budget_exhausted` | Measure all archive files against `--max-disk-gib`, including retired copies and the 268,435,456-byte append reserve. Physical free disk alone does not prove headroom. Use verified offline reclamation with all archive readers quiesced. |
+| Kernel/cgroup OOM | Compare the actual process limit with the aggregate envelope and host headroom. An active API process is not a fresh-source guarantee. Preserve the archive and consumer identity while correcting allocation. |
 | Authentication rejected | Verify the intended endpoint and its bearer-token policy. |
 | SDK timeout | Check request/stream deadlines and the caller's cancellation signal. |
 | Transaction not found | Check the queried range; an archive miss does not imply pending. |
@@ -20,5 +21,7 @@ Keep the HTTP status, error code and public request parameters when debugging. R
 The [offline reclamation guide](https://github.com/EndPx/zeer/blob/main/docs/PREP_OFFLINE_GC.md) separates active history from redundant retired files. Unknown, branch and unpublished outputs require classification; they are not automatic deletion targets. Reclamation does not change consumer identity or source timestamps.
 
 The [28 October budget recovery](https://github.com/EndPx/zeer/blob/main/docs/PREP_ARCHIVE_BUDGET_INCIDENT_20261028.md) reclaimed 2,152,532,167 bytes of proven copies before an operator-approved increase to a 26 GiB archive allocation. It records fresh source/consumer checks and startup cost; additional capacity is finite and is not an uptime guarantee.
+
+The [16 November resource report](https://github.com/EndPx/zeer/blob/main/docs/PREP_RESOURCE_CAPACITY_20261116.md) records the later 10 GiB RAM envelope, 40 GiB archive allocation, 84 GiB aggregate storage budget and 30-day growth model. Its local capacity monitor warns without rewriting source timestamps or changing financial state. Historical reports retain their original resource limits.
 
 The [27 October catalog recovery report](https://github.com/EndPx/zeer/blob/main/docs/PREP_CATALOG_INCIDENT_20261027.md) records the 30,000-reference incident and its verification. Follow now publishes new blocks promptly and consolidates bounded historical groups. All replacement records are compared before atomic publication; retired source files remain for old reader snapshots. Compression-only repack does not reduce reference count. The [operator command](https://github.com/EndPx/zeer/blob/main/docs/PREP_ENGINE.md#bounded-catalog-consolidation) preserves history and performs no RPC; resume follow for genuine fresh readiness rather than editing timestamps.

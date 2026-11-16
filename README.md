@@ -140,6 +140,7 @@ Invoices, campaigns, notification delivery, wallet state and settlement rules be
 | Evidence | What it establishes |
 | --- | --- |
 | **[0.7.0 release verification](docs/CHEF_070_ACCEPTANCE.md)** | Registry integrity, matching launcher, three starters and source-interruption recovery |
+| **[16 November resource recovery](docs/PREP_RESOURCE_CAPACITY_20261116.md)** | Applied 10 GiB RAM / 40 GiB Prep archive allocation, 30-day capacity model, and a 15-minute paced consumer observation with 225 committed blocks; catch-up and financial readiness remain separate |
 | **[0.6.1 release verification](docs/CHEF_061_ACCEPTANCE.md)** | Registry integrity, corrected README, exact launcher dependency and three registry-installed starters |
 | **[0.6.0 functional acceptance](docs/CHEF_060_ACCEPTANCE.md)** | 187 Linux SDK tests without skips, native/PostgreSQL checks, and real testnet breakdown with restart; 0.6.1 runtime files are byte-identical |
 | **[Six live shielded receipts](https://zeer.endpx.cloud/docs/chef/benchmarks/#shielded-receipts-six-uninterrupted-live-samples)** | Six future mined Ironwood notes in one observer, with values/memos, source rechecks and consumer recovery; recorded with Chef 0.2.0 |

@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUnix": 1794825889.4299219,
+  "scope": "30-day capacity planning and bounded live recovery qualification; not a month-long soak, SLA, network-global tip attestation or financial readiness.",
+  "allocation": {
+    "prepArchiveGiB": 40,
+    "aggregateDiskGiB": 84,
+    "aggregateStopGiB": 83,
+    "nodeStorageBudgetGiBUnchanged": 35,
+    "minimumPhysicalFreeGiBUnchanged": 25,
+    "aggregateMemoryGiB": 10,
+    "zebraMemoryGiB": 7,
+    "prepApiMemoryMiB": 1536,
+    "prepWriterMemoryMiB": 1024,
+    "aggregateCpuUnchanged": 3,
+    "minimumHostAvailableMemoryGiBUnchanged": 3
+  },
+  "forecast": {
+    "forecastDays": 30,
+    "safetyFactor": 2,
+    "basis": {
+      "archiveStartAtUnix": 1793184691.5707433,
+      "archiveStartBytes": 23379849174,
+      "archiveFrozenAtUnix": 1793908757,
+      "archiveFrozenBytes": 25239587022,
+      "archiveFrozenHead": 4586602,
+      "archiveFrozenPointEvidence": "Direct first inspection 16 November showed status updated_at_unix 1793908757 at unchanged archived head; source stayed stopped until recovery.",
+      "activeIntervalDays": 8.380386912693028,
+      "excludedIdleDays": 9.9,
+      "nodeStartAtUnix": 1793185781.7315693,
+      "nodeStartBytes": 15179268096,
+      "nodeFrozenBytes": 15986774016
+    },
+    "dailyGrowthBytes": {
+      "archiveIncludingRetiredCopies": 221915511.4644194,
+      "nodeAllocated": 96501933.79289381
+    },
+    "forecastGrowthBytes": {
+      "archive": 13314930688,
+      "node": 5790116028,
+      "databaseLogOtherAllowance": 2415919104,
+      "total": 23131578556,
+      "oneTimeCatchupAllowance": 1610612736,
+      "oneTimeCatchupArchiveShare": 1073741824,
+      "oneTimeCatchupNodeShare": 536870912
+    },
+    "projected": {
+      "archiveBytesIncludingAppendReserve": 40327002156,
+      "aggregateBytes": 87214270238,
+      "physicalFreeBytes": 29976575812
+    },
+    "current": {
+      "atUnix": 1794820101.6766183,
+      "aggregateBytes": 64082691682,
+      "physicalFreeBytes": 53108154368,
+      "nodeBytes": 15729057792,
+      "availableMemoryBytes": 10393411584,
+      "archiveBytes": 25669894188,
+      "guardLimits": {
+        "node_budget_gib": 35,
+        "node_stop_gib": 34,
+        "aggregate_budget_gib": 64,
+        "aggregate_stop_gib": 63,
+        "minimum_host_free_gib": 25,
+        "minimum_available_memory_gib": 3
+      }
+    },
+    "limitations": [
+      "One active historical interval, not daily p95 data. Network activity or other apps can grow faster.",
+      "Two-times observed growth is a capacity allowance, not a one-month uptime promise.",
+      "Retired archive copies remain counted; no history or key reset and no automatic online GC.",
+      "Resource warnings and ordinary source retries remain necessary; hard safety limits stay fail-closed.",
+      "A separate 1.5 GiB one-time allowance covers already queued history at the sizing point; it is not a measured receipt/transaction count."
+    ]
+  },
+  "cohorts": {
+    "apiHalfCoreWithoutPacing": {
+      "samples": 93,
+      "nativeHttpCounts": {
+        "200": 64,
+        "429": 29
+      },
+      "sourceReadyFraction": 0.6881720430107527,
+      "consumerReadyFraction": 0.5053763440860215,
+      "durationSeconds": 920.0190627574921,
+      "consumerBlocksAdvanced": 377,
+      "nativeHeightSuccessfulProbeMedianSeconds": 0.39558237907476723,
+      "nativeHeightSuccessfulProbeP95Seconds": 0.5819985410198569,
+      "graphqlProbeCount": 16,
+      "graphqlReadyCount": 12,
+      "sampledAggregateMemoryPeakBytes": 8108593152
+    },
+    "apiOneCoreWithoutPacing": {
+      "samples": 86,
+      "nativeHttpCounts": {
+        "200": 85,
+        "429": 1
+      },
+      "sourceReadyFraction": 0.9883720930232558,
+      "consumerReadyFraction": 0.23255813953488372,
+      "durationSeconds": 850.0465369224548,
+      "consumerBlocksAdvanced": 307,
+      "nativeHeightSuccessfulProbeMedianSeconds": 0.13003388000652194,
+      "nativeHeightSuccessfulProbeP95Seconds": 0.5006140228360891,
+      "graphqlProbeCount": 15,
+      "graphqlReadyCount": 5,
+      "sampledAggregateMemoryPeakBytes": 8251662336
+    },
+    "apiOneCoreWith1000msPacing": {
+      "samples": 91,
+      "nativeHttpCounts": {
+        "200": 91
+      },
+      "sourceReadyFraction": 1.0,
+      "consumerReadyFraction": 1.0,
+      "durationSeconds": 900.0205929279327,
+      "consumerBlocksAdvanced": 225,
+      "nativeHeightSuccessfulProbeMedianSeconds": 0.08704799693077803,
+      "nativeHeightSuccessfulProbeP95Seconds": 0.24335446301847696,
+      "graphqlProbeCount": 16,
+      "graphqlReadyCount": 16,
+      "sampledAggregateMemoryPeakBytes": 8688291840
+    }
+  },
+  "boundedAcceptance": {
+    "status": "BOUNDED_STABILITY_PASS",
+    "atUnix": 1794825869.0803163,
+    "nodeUptimeSeconds": 6010.01206111908,
+    "totalObservationSeconds": 900.0209321975708,
+    "evaluationWindowSeconds": 900.0205929279327,
+    "sourceReadyFraction": 1.0,
+    "consumerReadyFraction": 1.0,
+    "consumerStartHeight": 4587611,
+    "consumerEndHeight": 4587836,
+    "blocksAdvancedInWindow": 225,
+    "nodeRssPeakBytes": 3865165824,
+    "nodeMemoryLimitBytes": 7516192768,
+    "aggregateMemoryLimitMiB": 10240,
+    "followerRestarts": 0,
+    "prepOomKills": 0,
+    "followerContainerRecreatedForReviewedTransport": true,
+    "apiContainerNotRestarted": true,
+    "writerSteadyCpuPercent": 100
+  },
+  "finalChecks": {
+    "status": "INDEPENDENT_FINAL_CHECKS_PASS",
+    "atUnix": 1794825889.3665874,
+    "identityAndKeyHashesUnchanged": true,
+    "projectGenerationAndAnchorUnchanged": true,
+    "originalEntityRowsPreserved": 5,
+    "totalEntityRows": 5,
+    "soleNormalWriterLockHeld": true,
+    "checkpointHashMatchesPrep": true,
+    "apiIdentityAndStartUnchanged": true,
+    "normalRecoveryDisabled": true,
+    "sourceObservedAt": 1794825883,
+    "sourceIndexedHeight": 4626029,
+    "sourceObservedHeight": 4626030,
+    "consumerHeight": 4587840,
+    "consumerStatus": "ready",
+    "consumerSourceStatus": "available",
+    "backlogBlocks": 38189,
+    "financialBaselineUnchanged": true,
+    "financialSupervisorPaused": true,
+    "financialActions": false,
+    "nodeImage": "zfnd/zebra@sha256:4496df7553bd5449eb40e4d1d7537356ae765105a8447ad0bdec1f365197e905",
+    "nodeMemoryBytes": 7516192768,
+    "followerImage": "sha256:c7b734a08e3faa0ee73d2cac71047daa2bbf0931881cb16a6b41b6529bc1ae7f",
+    "followerRestarts": 0,
+    "units": {
+      "zeertestnet.slice": {
+        "MemoryMax": "10536091648",
+        "CPUQuotaPerSecUSec": "2.750000s",
+        "NRestarts": "",
+        "ActiveState": "active"
+      },
+      "zeer-testnet-prep-follow.service": {
+        "MemoryMax": "1073741824",
+        "CPUQuotaPerSecUSec": "1s",
+        "NRestarts": "0",
+        "ActiveState": "active"
+      },
+      "zeer-testnet-prep-optimized-native.service": {
+        "MemoryMax": "1610612736",
+        "CPUQuotaPerSecUSec": "1s",
+        "NRestarts": "0",
+        "ActiveState": "active"
+      },
+      "zeer-testnet-zebra.service": {
+        "MemoryMax": "infinity",
+        "CPUQuotaPerSecUSec": "infinity",
+        "NRestarts": "0",
+        "ActiveState": "active"
+      }
+    },
+    "sourceMainExecutables": {
+      "zeer-testnet-prep-follow.service": {
+        "path": "/opt/zeer-testnet/catalog-incident-20261027/prep",
+        "sha256": "81f34e6c34f7e62f52671fb506c8bbe3c229e96fad0ce5c8ca7d6ffe97550a1d"
+      },
+      "zeer-testnet-prep-optimized-native.service": {
+        "path": "/opt/zeer-testnet/startup-20261021/bin/prep-optimized",
+        "sha256": "d788ea8b25216b4e0fe21b3336bf4955fa670f890a764ca6adab91da6758c414"
+      }
+    },
+    "verifiedRustWriterRunning": true,
+    "guard": "PASS",
+    "capacityMonitorTimer": "active",
+    "capacity": {
+      "atUnix": 1794825825.0114663,
+      "physicalFreeBytes": 50887094272,
+      "availableMemoryBytes": 7789191168,
+      "aggregateBytes": 66271082082,
+      "archiveBytes": 26501463405,
+      "nodeRunning": true,
+      "nodeOomKilled": false,
+      "nodeRssBytes": 3865161728,
+      "followerRunning": true,
+      "followerRestartCount": 0,
+      "writerState": "active",
+      "writerReady": true,
+      "writerStatusUpdatedAt": 1794825821,
+      "writerIndexedHeight": 4626026,
+      "writerSourceHeight": 4626027,
+      "writerSourceObservedAt": 1794825821,
+      "writerObservationAgeSeconds": 4.0114662647247314,
+      "guardAgeSeconds": 13.520845174789429,
+      "halted": false,
+      "warnings": [],
+      "status": "WITHIN_PLANNED_ENVELOPE",
+      "scope": "Capacity observation only; not source, consensus, settlement or uptime authority."
+    }
+  },
+  "provenance": {
+    "writerVersion": "prep 0.1.0",
+    "writerBuildCommit": "63331816537545f0d059d61a2f453fcabeb6a1b8",
+    "writerBuildDirty": false,
+    "consumerWrapperCommit": "6cd5a59",
+    "consumerRuntimeSha256": "292100112e1fcf650d62222a24e1fd0e2088d3329f9aa6afd9ae3850403b63fa",
+    "chefSdkVersionUnchanged": "0.7.0"
+  },
+  "verification": {
+    "capacityMonitorUnitTestsPassed": 8,
+    "consumerRuntimeTestsPassed": 39,
+    "injectedCrashOrRebootTest": false,
+    "monthLongExecutionTest": false,
+    "financialExecution": false
+  },
+  "restartPolicy": {
+    "sourceUnitsOnly": true,
+    "onFailureDelaySeconds": 60,
+    "maximumStartsPerHour": 3,
+    "intentionalStopOrGuardLatchAutomaticallyCleared": false
+  },
+  "diagnostics": {
+    "intervalAfterCompletionSeconds": 300,
+    "boundedHistoryBytes": 12582912,
+    "externalNotifications": false,
+    "writesSourceReadiness": false,
+    "warningBefore14DaysProjectedMargin": true
+  }
+}

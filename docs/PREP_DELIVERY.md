@@ -41,8 +41,10 @@ brand products remain outside Prep. The original 13 October scope excluded
 public deployment and npm publication; later authorization delivered the
 [public testnet API](PUBLIC_API.md) and [published client](PACKAGING.md).
 Full production readiness and "millions of blocks instantly" remain unproven
-claims. Preserve unrelated shared-VPS services. The authorized aggregate envelope
-is now 3 CPU / 8 GiB / 60 GiB, superseding the initial 40 GiB allowance.
+claims. Preserve unrelated shared-VPS services. The deployment allocation was
+subsequently revised: the [16 November resource report](PREP_RESOURCE_CAPACITY_20261116.md)
+records the current 3 CPU / 10 GiB / 84 GiB aggregate envelope and 40 GiB Prep
+archive budget. Historical verification results retain their original limits.
 
 ## Architecture and verification order
 
