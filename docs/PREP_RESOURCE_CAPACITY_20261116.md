@@ -208,3 +208,62 @@ No archive history, project, birthday, key or account was reset. Financial
 supervision remains paused for the application's separate catch-up and
 qualification. A 15-minute observation and a 30-day capacity estimate do not
 prove month-long execution, a recovery-time guarantee, or a production SLA.
+
+## Later canonical replay and full Chef catch-up
+
+The private ZeeSwap Chef follower completed its archived backlog and then passed
+a separate live-follow observation at **14:43 UTC (21:43 WIB) on 16 November**.
+The earlier 15-minute resource observation above remains a historical result;
+the later convergence evidence is a separate cohort.
+
+| Final observation | Verified result |
+| --- | ---: |
+| First actual caught-up checkpoint | 4,627,146 |
+| Checkpoint after live following | 4,627,177 |
+| Prep indexed height at that observation | 4,627,177 |
+| Live-follow window | 305.02 seconds |
+| Blocks processed after first caught-up observation | 31 |
+| Ready sample fraction during qualification | 100.00% |
+| Sample fraction within zero or one Prep block | 95.16% |
+| Follower peak memory in the final cohort | 147,451,904 bytes |
+| Follower memory ceiling | 536,870,912 bytes |
+| Unplanned follower restarts / OOM kills | 0 / 0 |
+
+An epoch conflict had latched the reorg read gate while the original follower
+was far behind the archive. Its retained checkpoint and 201 retained headers
+already matched Prep. The operator captured a namespace backup, verified that
+history, and used the original SDK's finite replay to clear the reconciliation
+gate. Readiness was never changed through a direct SQL update. Brief burst gaps
+of two or three blocks occurred before the qualifying window met its original
+near-head threshold; the full observation history is retained.
+
+The private wrapper now uses an explicitly pinned execution profile with maximum
+page, batch and payload bounds of 64 and 0.6-second request spacing. This changes
+effective execution while retaining the original config bytes, schema, handlers,
+project identity, birthday, account and viewing key. Actual typed HTTP 413 responses
+reduce a request-bound hint; eight full successful raw pages permit one cautious
+growth trial. Header and source-height data are never cached by this policy.
+The server's deployed 8-MiB response ceiling and the client's 32-MiB body guard
+remain unchanged. Chef SDK version 0.7.0 and the API process remain unchanged.
+
+Before promotion, 53 deployment tests, 12 existing indexer tests and TypeScript
+checking passed. Eight actual PostgreSQL checks in a disposable database verified
+atomic failure/interruption rollback, batch-one/64 equivalence, per-block undo,
+replacement replay and writer exclusion. The test database, restricted role and
+temporary credentials were removed. Native scanner canaries then processed real
+testnet transactions under the existing 512-MiB / 0.5-CPU follower envelope.
+
+The final independent check compared **201 retained headers**
+with Prep and checked the checkpoint hash through the actual Zebra RPC. All
+5 original entity rows were preserved; the original
+generation, namespace, key/account material, anchor, source URL and scanner were
+unchanged. One normal writer held the advisory lock. Financial books remained
+unchanged and supervision stayed paused for the application's separate
+qualification. This is a bounded testnet operational result, with local-node
+trust and future-reorg limits; it is not a month-long uptime or mainnet claim.
+
+The [canonical catch-up artifact](https://zeer.endpx.cloud/docs/operations/2026-11-16-chef-caught-up.json)
+records the separate cohorts, real canaries, preservation checks and hashes.
+The [consumer implementation and operator evidence](https://github.com/EndPx/ZeeSwap/blob/main/docs/evidence/chef-canonical-reorg-catchup.md)
+describe the private wrapper and its canonical-replay boundaries. Installing
+the published Chef package does not enable this private deployment profile.

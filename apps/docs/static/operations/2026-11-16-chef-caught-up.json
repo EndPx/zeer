@@ -1,0 +1,460 @@
+{
+  "schemaVersion": 1,
+  "status": "ACTUAL_READY_CAUGHT_UP_AND_LIVE_FOLLOW_PASS",
+  "recordedAtUnix": 1794840387.3681252,
+  "scope": "Observed private Chef 0.7.0 canonical reconciliation, complete catch-up and bounded live following. Not financial activation, a month-long soak, mainnet acceptance or an independent global consensus attestation.",
+  "cause": {
+    "normalInitialPayloadBlocks": 1,
+    "normalInitialDispatchIntervalMs": 1000,
+    "epochChangeLatchesObserved": 4,
+    "checkpointAndRetainedCanonicalHeadersMatchedBeforeReplay": 201,
+    "actualOriginalCheckpointForkProven": false,
+    "explanation": "An epoch conflict set the reorg read gate while the canonical checkpoint remained far behind the current archive. The SDK keeps that gate until its replay target is reached."
+  },
+  "unchanged": {
+    "chefSdkVersion": "0.7.0",
+    "projectConfigBytes": true,
+    "schemaAndHandlers": true,
+    "projectGenerationFingerprintBirthdayAndAnchor": true,
+    "sourceUrl": true,
+    "accountAndViewingKey": true,
+    "scannerBinary": true,
+    "databaseAndNamespace": true,
+    "apiContainerIdentityAndStart": true,
+    "financialBaseline": true
+  },
+  "execution": {
+    "wrapperCommit": "d9671d79e524d88f4fdcd5624d838062f1efd76e",
+    "runtimeSha256": "aa560ce0952bfa99b82f45faa067cffff7de349b08b94e9b75353b22911e8d47",
+    "boundedClientSha256": "746f7c14908684a4c2653ce8431304494bc05f973dc204ee731527bec47b4205",
+    "imageId": "sha256:fa90c6140e72d72b9f81cfb220b95e60e66f0c971c59ead6ca8516e966c8f003",
+    "effectiveMaximumPageBatchAndPayloadBlocks": 64,
+    "dispatchIntervalMs": 600,
+    "serverResponseLimitBytes": 8388608,
+    "clientBodyLimitBytes": 33554432,
+    "followerMemoryLimitBytes": 536870912,
+    "followerCpuCores": 0.5,
+    "explicitOperationalOverrideChangesExecutionNotIdentity": true,
+    "payloadHint": "Only actual typed HTTP 413 reduces raw-payload request bounds; eight full successful raw pages permit one bounded growth trial. Header/height data is never cached.",
+    "normalRecoveryDisabled": true,
+    "normalPinsContainRecoveryAuthority": false
+  },
+  "checks": {
+    "localDeploymentTests": 53,
+    "existingIndexerTests": 12,
+    "typescript": "PASS",
+    "actualPostgres": {
+      "status": "ACTUAL_POSTGRES_QUALIFICATION_PASS",
+      "transport": "private-network-TLS-verify-full",
+      "privateKeysMounted": false,
+      "applicationDatabaseCredentialsUsed": false,
+      "checks": [
+        {
+          "test": "database-scope",
+          "status": "PASS"
+        },
+        {
+          "test": "middle-handler-rollback",
+          "status": "PASS",
+          "attemptedBlocks": 64,
+          "committedBlocks": 0
+        },
+        {
+          "test": "interrupted-group-rollback",
+          "status": "PASS",
+          "attemptedBlocks": 64,
+          "committedBlocks": 0
+        },
+        {
+          "test": "retry-atomic-batch",
+          "status": "PASS",
+          "committedBlocks": 64
+        },
+        {
+          "test": "batch-one-versus-64",
+          "status": "PASS",
+          "entityRows": 8,
+          "undoRows": 64,
+          "blockRows": 64
+        },
+        {
+          "test": "retained-ancestor-rollback-replay",
+          "status": "PASS",
+          "replayedBlocks": 32,
+          "entityRows": 8
+        },
+        {
+          "test": "replacement-branch-per-block-undo",
+          "status": "PASS",
+          "replacementBlocks": 32,
+          "replayedBlocks": 16,
+          "entityRows": 8
+        },
+        {
+          "test": "exclusive-writer-and-clean-release",
+          "status": "PASS",
+          "projects": 2
+        },
+        {
+          "test": "postgres-catchup-qualification",
+          "status": "PASS",
+          "checks": 8
+        }
+      ],
+      "exitCode": 0,
+      "oomKilled": false
+    },
+    "disposablePostgresCleanup": {
+      "status": "OWN_TEST_DATABASE_AND_ROLE_REMOVED",
+      "atUnix": 1794836879.118016,
+      "testDatabase": "zeer_catchup_verify_20261116",
+      "testRole": "zeer_catchup_verify_20261116",
+      "remainingConnectionsBeforeDrop": 0,
+      "applicationDatabaseChanged": false,
+      "temporaryCredentialsDeleted": true,
+      "temporarySocketMountPresent": false
+    }
+  },
+  "payloadProbes": {
+    "atUnix": 1794835526.2830408,
+    "scope": "Read-only exact original shielded field/filter requests; range samples, not exhaustive history or SDK/scanner qualification.",
+    "backendFixedResponseLimitBytes": 8388608,
+    "samples": [
+      {
+        "fromHeight": 4590186,
+        "requestedBlocks": 16,
+        "http": 200,
+        "seconds": 0.31209249375388026,
+        "responseBytes": 338480,
+        "epoch": "622",
+        "blocks": 16,
+        "transactions": 18,
+        "totalRawTransactionBytes": 166268,
+        "largestRawTransactionBytes": 9246,
+        "responseSha256": "cf4871f5a16eeaaf169f329b6328252f100cfd95df5a3b010ee9bf5cd5ed1679"
+      },
+      {
+        "fromHeight": 4590186,
+        "requestedBlocks": 64,
+        "http": 200,
+        "seconds": 0.4119162317365408,
+        "responseBytes": 1427022,
+        "epoch": "622",
+        "blocks": 64,
+        "transactions": 76,
+        "totalRawTransactionBytes": 701736,
+        "largestRawTransactionBytes": 9246,
+        "responseSha256": "86758d98d515e6aa0cdfb4c516ffd08fc12fe7daf97e739965ea948748161ebd"
+      },
+      {
+        "fromHeight": 4595186,
+        "requestedBlocks": 16,
+        "http": 200,
+        "seconds": 0.21387001173570752,
+        "responseBytes": 207978,
+        "epoch": "622",
+        "blocks": 16,
+        "transactions": 8,
+        "totalRawTransactionBytes": 101732,
+        "largestRawTransactionBytes": 34414,
+        "responseSha256": "ce5dd14b59fc1bff4079633ec3c9fc96067dba0fc486ee38c9f0e00f6e273c09"
+      },
+      {
+        "fromHeight": 4595186,
+        "requestedBlocks": 64,
+        "http": 200,
+        "seconds": 0.4084212202578783,
+        "responseBytes": 1379246,
+        "epoch": "622",
+        "blocks": 64,
+        "transactions": 64,
+        "totalRawTransactionBytes": 678706,
+        "largestRawTransactionBytes": 34414,
+        "responseSha256": "36bd3cb255418f59119cba2188fafa2fae35c9447cbd859c807e5e3169c3bd22"
+      },
+      {
+        "fromHeight": 4606186,
+        "requestedBlocks": 16,
+        "http": 200,
+        "seconds": 0.22131613083183765,
+        "responseBytes": 58795,
+        "epoch": "622",
+        "blocks": 16,
+        "transactions": 3,
+        "totalRawTransactionBytes": 27498,
+        "largestRawTransactionBytes": 9166,
+        "responseSha256": "b7cf37bd166b77ec969769660edd022582a1bda702cd4e45d52770c0a519934a"
+      },
+      {
+        "fromHeight": 4606186,
+        "requestedBlocks": 64,
+        "http": 200,
+        "seconds": 0.21753893699496984,
+        "responseBytes": 234843,
+        "epoch": "622",
+        "blocks": 64,
+        "transactions": 11,
+        "totalRawTransactionBytes": 110294,
+        "largestRawTransactionBytes": 15478,
+        "responseSha256": "c67bd18bb1f3f91f54172277425e8e3ab0d47a6d72d4a3dbd3a7288ddf8a4f31"
+      },
+      {
+        "fromHeight": 4625950,
+        "requestedBlocks": 16,
+        "http": 200,
+        "seconds": 0.1844802782870829,
+        "responseBytes": 169289,
+        "epoch": "622",
+        "blocks": 16,
+        "transactions": 13,
+        "totalRawTransactionBytes": 82030,
+        "largestRawTransactionBytes": 9166,
+        "responseSha256": "5469e27886986e5aeea60d88986cf80ed2673d7a553ef1cd45d95acc856d8485"
+      },
+      {
+        "fromHeight": 4625950,
+        "requestedBlocks": 64,
+        "http": 200,
+        "seconds": 0.2745541404001415,
+        "responseBytes": 738769,
+        "epoch": "622",
+        "blocks": 64,
+        "transactions": 53,
+        "totalRawTransactionBytes": 359254,
+        "largestRawTransactionBytes": 18634,
+        "responseSha256": "400ba66bb823fafd3cb71817f167bf74a570a66b57deb9ebb850e0140a5072df"
+      },
+      {
+        "fromHeight": 4626846,
+        "requestedBlocks": 16,
+        "http": 200,
+        "seconds": 0.16192358219996095,
+        "responseBytes": 460621,
+        "epoch": "622",
+        "blocks": 16,
+        "transactions": 25,
+        "totalRawTransactionBytes": 226838,
+        "largestRawTransactionBytes": 9200,
+        "responseSha256": "01fac2e60c8448e4c0df7452874213b6542b5ae7eb2d4e09a2444d909fc22841"
+      },
+      {
+        "fromHeight": 4626846,
+        "requestedBlocks": 64,
+        "http": 200,
+        "seconds": 0.1997322291135788,
+        "responseBytes": 1281083,
+        "epoch": "622",
+        "blocks": 64,
+        "transactions": 67,
+        "totalRawTransactionBytes": 629410,
+        "largestRawTransactionBytes": 17280,
+        "responseSha256": "55d9c4edaa081c78a58e71192bce1b89373f68b73326b92a222fbe14bcc05ca0"
+      }
+    ]
+  },
+  "densityProbes": {
+    "atUnix": 1794837878.1808364,
+    "scope": "Public transaction metadata density only, no raw/key/receipt data.",
+    "samples": [
+      {
+        "fromHeight": 4602500,
+        "nextBlock": 4603500,
+        "blocks": 1000,
+        "transactions": 1295,
+        "totalRawBytes": 115407219,
+        "blocksAbove1MiBRaw": 36,
+        "largestRawBlockBytes": 1982396,
+        "heaviestHeight": 4602666,
+        "seconds": 17.927183208987117
+      },
+      {
+        "fromHeight": 4603500,
+        "nextBlock": 4604500,
+        "blocks": 1000,
+        "transactions": 809,
+        "totalRawBytes": 35388829,
+        "blocksAbove1MiBRaw": 15,
+        "largestRawBlockBytes": 1976386,
+        "heaviestHeight": 4603945,
+        "seconds": 5.247466222848743
+      },
+      {
+        "fromHeight": 4604500,
+        "nextBlock": 4605500,
+        "blocks": 1000,
+        "transactions": 689,
+        "totalRawBytes": 76908765,
+        "blocksAbove1MiBRaw": 0,
+        "largestRawBlockBytes": 979446,
+        "heaviestHeight": 4604808,
+        "seconds": 5.246266179718077
+      }
+    ]
+  },
+  "canaries": {
+    "firstCanonicalReorg16": {
+      "originalCheckpointHeight": 4590537,
+      "targetHeight": 4590553,
+      "retainedCanonicalHeadersCompared": 201,
+      "backupBytes": 19533,
+      "writerLockReleased": true,
+      "generationAnchorFingerprintAndIdentityFilesUnchanged": true,
+      "financialBaselineUnchanged": true
+    },
+    "first64": {
+      "status": "CANARY64_OFFICIAL_SDK_COMPLETE",
+      "initialHeight": 4590553,
+      "targetHeight": 4590617,
+      "blocks": 64,
+      "transactions": 69,
+      "elapsedSeconds": 4.169740416,
+      "fetchSeconds": 3.814350775000001,
+      "memoryPeakBytes": 64368640,
+      "memorySamples": 24,
+      "memoryLimitBytes": 536870912,
+      "cpuLimitCores": 0.5,
+      "exitCode": 0,
+      "oomKilled": false
+    },
+    "hintedDense64": {
+      "status": "HINTS_CANARY64_OFFICIAL_SDK_COMPLETE",
+      "originalCheckpointHeight": 4604789,
+      "targetHeight": 4604853,
+      "blocks": 64,
+      "transactions": 151,
+      "elapsedSeconds": 42.425129633999994,
+      "fetchSeconds": 34.644501176999995,
+      "memoryPeakBytes": 112750592,
+      "memorySamples": 85,
+      "memoryLimitBytes": 536870912,
+      "cpuLimitCores": 0.5,
+      "exitCode": 0,
+      "oomKilled": false
+    }
+  },
+  "cohorts": {
+    "initial64WithoutPersistentPayloadHint": {
+      "sampleCount": 208,
+      "durationSeconds": 1035.1595277786255,
+      "initialHeight": 4593689,
+      "finalHeight": 4604789,
+      "durableCheckpointAdvance": 11100,
+      "readySampleFraction": 0.5865384615384616,
+      "nativeProbeHttpCounts": {
+        "200": 204,
+        "429": 4
+      },
+      "memoryPeakBytes": 130273280,
+      "scope": "Distinct live operational cohort, including reconciliation and source probes; not a controlled performance benchmark."
+    },
+    "hinted64": {
+      "sampleCount": 353,
+      "durationSeconds": 1760.1135647296906,
+      "initialHeight": 4605301,
+      "finalHeight": 4627177,
+      "durableCheckpointAdvance": 21876,
+      "readySampleFraction": 1.0,
+      "nativeProbeHttpCounts": {
+        "200": 353
+      },
+      "memoryPeakBytes": 147451904,
+      "scope": "Distinct live operational cohort, including reconciliation and source probes; not a controlled performance benchmark."
+    }
+  },
+  "acceptance": {
+    "status": "ACTUAL_READY_CAUGHT_UP_AND_LIVE_FOLLOW_PASS",
+    "atUnix": 1794840202.269431,
+    "totalObservationSeconds": 1760.1138997077942,
+    "firstCaughtAtUnix": 1794839766.150138,
+    "firstCaughtHeight": 4627146,
+    "finalHeight": 4627177,
+    "prepIndexedHeight": 4627177,
+    "sourceObservedHeight": 4627177,
+    "sourceObservedAt": 1794840200,
+    "sourceObservationAgeSeconds": 1.9367270469665527,
+    "actualSdkCaughtUpObserved": true,
+    "fiveMinuteReadyFraction": 1.0,
+    "fiveMinuteNearHeadFraction": 0.9516129032258065,
+    "liveFollowingWindowSeconds": 305.02459192276,
+    "blocksAdvancedAfterFirstCaughtUp": 31,
+    "memoryPeakBytes": 147451904,
+    "memoryLimitBytes": 536870912,
+    "nodeMemoryLimitBytes": 7516192768,
+    "nodeOomKilled": false,
+    "followerRestarts": 0,
+    "guard": "PASS",
+    "projectGenerationAndAnchorUnchanged": true,
+    "financialActivation": false
+  },
+  "independentFinalChecks": {
+    "status": "INDEPENDENT_READY_CAUGHT_UP_CANONICAL_AND_PRESERVATION_PASS",
+    "atUnix": 1794840294.175321,
+    "checkpointHeight": 4627183,
+    "checkpointHash": "00158acfba33c73f7922699cbf81bbef4d8e7f60df8b5429726be5ab4308aaf1",
+    "prepArchiveHeight": 4627183,
+    "sourceObservedHeight": 4627184,
+    "sourceObservedAt": 1794840287,
+    "sampleGapBlocks": 0,
+    "retainedCanonicalHeadersCompared": 201,
+    "checkpointMatchesIndependentZebraRpc": true,
+    "nodeHeight": 4627184,
+    "nodeEstimatedHeight": 4627184,
+    "nodeIsNotIndependentGlobalConsensusAttestation": true,
+    "originalEntityRowsPreserved": 5,
+    "entityRowsAfterCatchup": 5,
+    "generationProjectFingerprintBirthdayKeyAccountMetadataScannerDatabaseAndAnchorUnchanged": true,
+    "soleNormalWriterLockHeld": true,
+    "apiIdentityAndStartUnchanged": true,
+    "normalRecoveryDisabled": true,
+    "normalProfile": {
+      "pageSize": 64,
+      "batchSize": 64,
+      "maxPayloadBlocks": 64,
+      "dispatchIntervalMs": 600
+    },
+    "followerRestarts": 0,
+    "followerOomKilled": false,
+    "nodeOomKilled": false,
+    "graphqlReady": true,
+    "financialBaselineUnchanged": true,
+    "financialSupervisorPaused": true,
+    "financialExecution": false,
+    "sourceExecutablesUnchanged": true,
+    "guard": "PASS",
+    "capacity": {
+      "atUnix": 1794839950.6156747,
+      "physicalFreeBytes": 67707891712,
+      "availableMemoryBytes": 6316310528,
+      "aggregateBytes": 66404984418,
+      "archiveBytes": 26573115882,
+      "nodeRunning": true,
+      "nodeOomKilled": false,
+      "nodeRssBytes": 4676235264,
+      "followerRunning": true,
+      "followerRestartCount": 0,
+      "writerState": "active",
+      "writerReady": true,
+      "writerStatusUpdatedAt": 1794839947,
+      "writerIndexedHeight": 4627158,
+      "writerSourceHeight": 4627159,
+      "writerSourceObservedAt": 1794839947,
+      "writerObservationAgeSeconds": 3.6156747341156006,
+      "guardAgeSeconds": 44.104320764541626,
+      "halted": false,
+      "warnings": [],
+      "status": "WITHIN_PLANNED_ENVELOPE",
+      "scope": "Capacity observation only; not source, consensus, settlement or uptime authority."
+    }
+  },
+  "financialSupervisor": "paused; application qualification and financial execution remain separate",
+  "naturalReorgRollbackClaim": false,
+  "monthLongUptimeClaim": false,
+  "ownHelperCleanup": {
+    "status": "OWN_STOPPED_HELPERS_REMOVED",
+    "removedCount": 9,
+    "remainingProtectedContainers": 14,
+    "liveContainerIdentityAndStateUnchanged": true,
+    "volumesOrHostProjectFilesRemoved": false,
+    "rollbackImagesRemoved": false
+  }
+}
